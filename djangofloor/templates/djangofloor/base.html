@@ -13,8 +13,7 @@
     <!--[if lt IE 9 ]>
       <script src="{% static 'js/html5shiv.js' %}"></script>
       <script src="{% static 'js/respond.min.js' %}"></script>
-<![endif]-->
-
+    <![endif]-->
 </head>
 <body>
 {% block body %}
@@ -32,11 +31,10 @@
                 </div>
                 <div class="navbar-collapse collapse">
                     {% if user.is_authenticated and not df_remote_authenticated %}
-                        <a class="navbar-brand" href="{% url 'account_email' %}">Change E-mail</a>
-                        <a class="navbar-brand" href="{% url 'account_logout' %}">Sign Out</a>
+                        <a class="navbar-brand" href="{% url 'account_email' %}">{% fontawesome_icon 'wrench' %}</a>
+                        <a class="navbar-brand" href="{% url 'account_logout' %}">{% fontawesome_icon 'sign-out' %}</a>
                     {% elif user.is_anonymous %}
                         <a class="navbar-brand" href="{% url 'account_login' %}">{% fontawesome_icon 'user' %}</a>
-                        <a class="navbar-brand" href="{% url 'account_signup' %}">Sign Up</a>
                     {% endif %}
                     <form class="navbar-form navbar-right" role="form">
                         <div class="form-group">
@@ -55,9 +53,9 @@
     {% block messages %}{% bootstrap_messages %}{% endblock messages %}
     {% block breadcrumbs %}{% endblock %}
 
-    {% block content %}
+<div class="container">    {% block content %}
     {% endblock %}
-    {% block footer %}
+</div>    {% block footer %}
         <hr>
         <footer></footer>{% endblock %}
 {% endblock %}

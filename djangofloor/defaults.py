@@ -88,7 +88,7 @@ AUTHENTICATION_HEADER = 'REMOTE_USER'
 AUTHENTICATION_HEADER_help = 'Name of the header set by your reverse-proxy server.'
 CACHES = {'default': {'BACKEND': 'django.core.cache.backends.dummy.DummyCache', }, }
 CACHES_help = 'A dictionary containing the settings for all caches to be used with Django.'
-
+ACCOUNT_EMAIL_VERIFICATION = None
 
 # iterable of URL of your application. 'my_app.root_urls.urls'
 FLOOR_URLCONF = None
@@ -364,6 +364,6 @@ FAKE_AUTHENTICATION_USERNAME = None
 MAX_REQUESTS = 10000
 MAX_REQUESTS_help = 'The maximum number of requests a worker will process before restarting.'
 
-LOGIN_URL = ''
+LOGIN_URL = '/accounts/login/'
 LOGOUT_URL = ''
 LOGIN_REDIRECT_URL = '/'
