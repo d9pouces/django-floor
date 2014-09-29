@@ -1,4 +1,11 @@
 django-floor
 ============
 
-An empty Django project for modern websites
+A common base for modern and complete Django websites, with many tools integrated.
+
+
+  * django-celery
+  * supervisor
+  * login/logout
+
+  * backup command

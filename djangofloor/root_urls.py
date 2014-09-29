@@ -26,5 +26,5 @@ urlpatterns = patterns('',
                        (r'^' + settings.STATIC_URL[1:] + '(?P<path>.*)$', 'django.views.static.serve',
                         {'document_root': settings.STATIC_ROOT}),
                        (r'^robots\.txt$', 'djangofloor.views.robots'),
-                       *extra_urls,
-                       )
+                       (r'^$', 'djangofloor.views.index'),
+                       *extra_urls)

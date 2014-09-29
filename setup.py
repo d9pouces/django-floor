@@ -35,8 +35,8 @@ setup(
     zip_safe=False,
     test_suite='djangofloor.tests',
     install_requires=['django>=1.7', 'django-allauth', 'gunicorn', 'django-bootstrap3', 'django-pipeline',
-                      'django-debug-toolbar'],
+                      'django-debug-toolbar', 'django-fontawesome', 'django-admin-bootstrapped', ],
     setup_requires=['django>=1.7', 'django-allauth', 'gunicorn', 'django-bootstrap3', 'django-pipeline',
-                    'django-debug-toolbar'],
+                    'django-debug-toolbar', 'django-fontawesome', 'django-admin-bootstrapped', ],
     classifiers=[],
 )

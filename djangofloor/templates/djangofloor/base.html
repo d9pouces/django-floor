@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+{% load bootstrap3 staticfiles compressed i18n fontawesome %}
+<html lang="en-US">
+<head>
+    <title>{% block head_title %}{{ df_project_name }}{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content=""/>
+    <meta name="robots" content="index, follow"/>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+    {% block pipelineheaders %}{% compressed_css 'base' %}{% compressed_js 'base' %}{% endblock %}
+    {% block extra_head %}{% endblock %}
+    <link rel="shortcut icon" href="{% static 'images/favicon.png' %}">
+    <!--[if lt IE 9 ]>
+      <script src="{% static 'js/html5shiv.js' %}"></script>
+      <script src="{% static 'js/respond.min.js' %}"></script>
+<![endif]-->
+
+</head>
+<body>
+{% block body %}
+    {% block bootstrap3_nav %}
+        <div class="navbar navbar-inverse" role="navigation">
+            <div class="container">
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                        <span class="sr-only">{% trans 'Toggle navigation' %}</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <a class="navbar-brand" href="{% url 'djangofloor.views.index' %}">{{ df_project_name }}</a>
+                </div>
+                <div class="navbar-collapse collapse">
+                    {% if user.is_authenticated and not df_remote_authenticated %}
+                        <a class="navbar-brand" href="{% url 'account_email' %}">Change E-mail</a>
+                        <a class="navbar-brand" href="{% url 'account_logout' %}">Sign Out</a>
+                    {% elif user.is_anonymous %}
+                        <a class="navbar-brand" href="{% url 'account_login' %}">{% fontawesome_icon 'user' %}</a>
+                        <a class="navbar-brand" href="{% url 'account_signup' %}">Sign Up</a>
+                    {% endif %}
+                    <form class="navbar-form navbar-right" role="form">
+                        <div class="form-group">
+                            <input type="text" placeholder="{% trans 'Email' %}" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <input type="password" placeholder="{% trans 'Password' %}" class="form-control">
+                        </div>
+                        <button type="submit" class="btn btn-success">{% trans 'Sign in' %}</button>
+                    </form>
+                </div>
+                <!--/.navbar-collapse -->
+            </div>
+        </div>
+    {% endblock %}
+    {% block messages %}{% bootstrap_messages %}{% endblock messages %}
+    {% block breadcrumbs %}{% endblock %}
+
+    {% block content %}
+    {% endblock %}
+    {% block footer %}
+        <hr>
+        <footer></footer>{% endblock %}
+{% endblock %}
+{% block extra_body %}
+{% endblock %}
+
+</body>
+</html>

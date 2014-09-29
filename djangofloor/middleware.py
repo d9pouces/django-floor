@@ -22,8 +22,11 @@ class RemoteUserMiddleware(BaseRemoteUserMiddleware):
     header = settings.AUTHENTICATION_HEADER
 
     def process_request(self, request):
-        if request.META['REMOTE_ADDR    '] in settings.REVERSE_PROXY_IPS:
-            return super(RemoteUserMiddleware, self).process_request(request)
+        request.df_remote_authenticated = False
+        if request.META['REMOTE_ADDR'] in settings.REVERSE_PROXY_IPS:
+            if not request.user.is_authenticated():
+                super(RemoteUserMiddleware, self).process_request(request)
+                request.df_remote_authenticated = request.user.is_authenticated()
 
 
 class FakeAuthenticationMiddleware(object):
@@ -39,6 +42,7 @@ class FakeAuthenticationMiddleware(object):
         if user:
             request.user = user
             auth.login(request, user)
+            request.df_remote_authenticated = True
 
 
 class BasicAuthMiddleware(object):

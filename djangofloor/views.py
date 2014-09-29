@@ -2,7 +2,9 @@
 import os
 
 from django.conf import settings
-from django.http import HttpResponse, StreamingHttpResponse
+from django.contrib import messages
+from django.core.urlresolvers import reverse
+from django.http import HttpResponse, StreamingHttpResponse, HttpResponsePermanentRedirect
 from django.contrib.sites.models import get_current_site
 from django.contrib.syndication.views import add_domain
 from django.shortcuts import render_to_response
@@ -49,5 +51,8 @@ def robots(request):
 
 
 def index(request):
+    if settings.FLOOR_INDEX is not None:
+        return HttpResponsePermanentRedirect(reverse(settings.FLOOR_INDEX), permanent=True)
+    messages.info(request, 'Test de message')
     template_values = {}
     return render_to_response('djangofloor/index.html', template_values, RequestContext(request))

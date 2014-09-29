@@ -93,14 +93,19 @@ CACHES_help = 'A dictionary containing the settings for all caches to be used wi
 # iterable of URL of your application. 'my_app.root_urls.urls'
 FLOOR_URLCONF = None
 FLOOR_INSTALLED_APPS = []
+FLOOR_INDEX = None
+FLOOR_PROJECT_NAME = _('DjangoFloor')
+FLOOR_ = ''
 DEFAULT_GROUP_NAME = _('Users')
 DEFAULT_GROUP_NAME_help = 'Name of the default group of newly-created users.'
 PIPELINE_JS = {
-    'base': {'source_filenames': ['js/jquery.min.js', 'bootstrap3/js/bootstrap.min.js', ],
+    'base': {'source_filenames': ['js/jquery.min.js', 'bootstrap3/js/bootstrap.min.js',
+                                  'js/django_fontawesome.js', 'select2/select2.min.js', ],
              'output_filename': 'js/base.js', },
 }
 PIPELINE_CSS = {
-    'base': {'source_filenames': ['bootstrap3/css/bootstrap.min.css', ],
+    'base': {'source_filenames': ['bootstrap3/css/bootstrap.min.css', 'select2/select2.css',
+                                  'select2-bootstrap.css', 'css/font-awesome.min.css', ],
              'output_filename': 'css/base.css', 'extra_context': {'media': 'all'}, }, }
 
 
@@ -199,7 +204,6 @@ TEMPLATE_LOADERS = [
     # 'django.template.loaders.eggs.Loader',
 ]
 
-# noinspection PyUnresolvedReferences
 MIDDLEWARE_CLASSES = ['django.middleware.cache.UpdateCacheMiddleware',
                       'django.middleware.common.CommonMiddleware',
                       'django.contrib.sessions.middleware.SessionMiddleware',
@@ -240,7 +244,6 @@ AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
 ]
 
-# noinspection PyUnresolvedReferences
 TEMPLATE_CONTEXT_PROCESSORS = (
     'django.contrib.auth.context_processors.auth',
     'django.core.context_processors.debug',
@@ -273,9 +276,12 @@ INSTALLED_APPS = [
     'django.contrib.humanize',
     'django.contrib.sites',
     'django.contrib.sitemaps',
+    'django_admin_bootstrapped.bootstrap3',
+    'django_admin_bootstrapped',
     'django.contrib.admin',
     'pipeline',
     'bootstrap3',
+    'fontawesome',
     'djangofloor',
     'allauth',
     'allauth.account',
@@ -294,7 +300,7 @@ BOOTSTRAP3 = {
     'horizontal_label_class': 'col-md-2',
     'horizontal_field_class': 'col-md-4',
 }
-
+FONTAWESOME_CSS_URL = 'css/font-awesome.min.css'
 TEST_RUNNER = 'django.test.runner.DiscoverRunner'
 # Pipeline configuration
 
@@ -308,7 +314,7 @@ PIPELINE_MIMETYPES = (
 PIPELINE_DISABLE_WRAPPER = True
 STATICFILES_STORAGE = 'pipeline.storage.PipelineCachedStorage'
 
-
+ACCOUNT_AUTHENTICATION_METHOD = 'username_email'
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to
 # the site admins on every HTTP 500 error when DEBUG=False.
@@ -357,3 +363,7 @@ FAKE_AUTHENTICATION_USERNAME = None
 
 MAX_REQUESTS = 10000
 MAX_REQUESTS_help = 'The maximum number of requests a worker will process before restarting.'
+
+LOGIN_URL = ''
+LOGOUT_URL = ''
+LOGIN_REDIRECT_URL = '/'
