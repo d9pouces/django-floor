@@ -214,7 +214,7 @@ MIDDLEWARE_CLASSES = ['django.middleware.cache.UpdateCacheMiddleware',
                       'djangofloor.middleware.IEMiddleware',
                       'djangofloor.middleware.RemoteUserMiddleware',
                       'djangofloor.middleware.BasicAuthMiddleware',
-                      # 'djangofloor.middleware.FakeAuthenticationMiddleware',
+                      'djangofloor.middleware.FakeAuthenticationMiddleware',
                       'pipeline.middleware.MinifyHTMLMiddleware',
                       'django.middleware.cache.FetchFromCacheMiddleware', ]
 INTERNAL_IPS = ('127.0.0.1', )
@@ -358,12 +358,61 @@ LOGGING_help = 'A data structure containing configuration information.' \
                ' The contents of this data structure will be passed as the argument to the configuration method' \
                ' described in LOGGING_CONFIG.'
 
-FAKE_AUTHENTICATION_USERNAME = None
+FAKE_AUTHENTICATION_USERNAME = 'test'
 # used to fake a reverse proxy authentication for development purpose
+FAKE_AUTHENTICATION_GROUPS = ['group1', 'group2']
+# used to fake LDAP groups, added to the remotely-authenticated user
 
 MAX_REQUESTS = 10000
 MAX_REQUESTS_help = 'The maximum number of requests a worker will process before restarting.'
 
 LOGIN_URL = '/accounts/login/'
-LOGOUT_URL = ''
+LOGOUT_URL = '/accounts/logout/'
 LOGIN_REDIRECT_URL = '/'
+
+########################################################################################################################
+# django-redis-websocket
+########################################################################################################################
+WEBSOCKET_URL = '/ws/'
+WS4REDIS_CONNECTION = {}
+WS4REDIS_CONNECTION_help = 'If the Redis datastore uses connection settings other than the defaults ' \
+                           '(keys are "host"/"port"/"db"/"password").'
+
+########################################################################################################################
+# ldap_groups
+########################################################################################################################
+LDAP_GROUPS_URL = None
+LDAP_GROUPS_URL_help = 'the complete url in the scheme://hostname:hostport format of the server. ' \
+                       'Can use several servers, separated by commas.'
+LDAP_GROUPS_TLS = None
+LDAP_GROUPS_TLS_help = 'Tls object that contains information about the certificates and the trusted roots needed to' \
+                       'establish a secure connection (defaults to None). If None any server certificate will be ' \
+                       'accepted.'
+LDAP_GROUPS_BIND_DN = ''
+LDAP_GROUPS_BIND_DN_help = 'The distinguished name to use when binding to the LDAP server. ' \
+                           'Use the empty string (the default) for an anonymous bind.'
+LDAP_GROUPS_BIND_PASSWORD = ''
+LDAP_GROUPS_BIND_PASSWORD_help = 'The password to use with LDAP_GROUPS_BIND_DN.'
+LDAP_GROUPS_CACHE_GROUPS_TIME = 0
+LDAP_GROUPS_CACHE_GROUPS_TIME_help = 'If non-zero, LDAP group membership will be cached using Django’s cache framework. ' \
+                                     'Otherwhise, this is the cache timeout (in seconds).'
+LDAP_GROUPS_SEARCH_BASE = 'CN=Users,DC=example,DC=org'
+LDAP_GROUPS_SEARCH_BASE_help = 'The base DN for the search'
+LDAP_GROUPS_SEARCH_FILTER = '(cn=%(username)s)'
+LDAP_GROUPS_SEARCH_FILTER_help = 'Filter to use for the search. %(username)s and %(email)s are available.'
+LDAP_GROUPS_SEARCH_SCOPE = 'SUBTREE'
+LDAP_GROUPS_SEARCH_SCOPE_help = 'Either SUBTREE (default), BASE or SINGLE_LEVEL'
+LDAP_GROUPS_SEARCH_GROUP_ATTRIBUTE = 'memberOf'
+LDAP_GROUPS_SEARCH_GROUP_ATTRIBUTE_help = 'Name of the attribute with the list of the user groups.'
+LDAP_GROUPS_FORMAT_GROUP_NAME = None
+LDAP_GROUPS_FORMAT_GROUP_NAME_help = 'If not None, the name of a Python function ("package.module.function"), ' \
+                                     'my_function(request, LDAP_group_name) must return a nicely-formatted name.'
+
+########################################################################################################################
+# celery
+########################################################################################################################
+USE_CELERY = True
+CELERY_TIMEZONE = '{TIME_ZONE}'
+CELERY_RESULT_EXCHANGE = '{PROJECT_NAME}_results'
+CELERY_ACCEPT_CONTENT = ['json', 'yaml', 'msgpack']
+BROKER_URL = 'redis://localhost:6379/0'

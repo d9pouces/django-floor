@@ -9,6 +9,8 @@ from django.contrib.sites.models import get_current_site
 from django.contrib.syndication.views import add_domain
 from django.shortcuts import render_to_response
 from django.template import RequestContext
+from django.utils.translation import ugettext_lazy as _
+from djangofloor.tasks import add
 
 
 __author__ = 'flanker'
@@ -53,6 +55,12 @@ def robots(request):
 def index(request):
     if settings.FLOOR_INDEX is not None:
         return HttpResponsePermanentRedirect(reverse(settings.FLOOR_INDEX), permanent=True)
-    messages.info(request, 'Test de message')
     template_values = {}
+    return render_to_response('djangofloor/index.html', template_values, RequestContext(request))
+
+
+def test(request):
+    messages.info(request, _('Message test'))
+    template_values = {}
+    add.delay(4, 5)
     return render_to_response('djangofloor/index.html', template_values, RequestContext(request))

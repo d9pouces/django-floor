@@ -26,19 +26,20 @@ __author__ = 'flanker'
 
 PROJECT_SETTINGS_PATH = os.environ.get('DJANGOFLOOR_PROJECT_SETTINGS', '')
 USER_SETTINGS_PATH = os.environ.get('DJANGOFLOOR_USER_SETTINGS', '')
+PROJECT_NAME = os.environ.get('DJANGOFLOOR_PROJECT_NAME', 'djangofloor')
 
 
-def import_file(path):
-    """import the Python source file.
+def import_file(filepath):
+    """import the Python source file as a Python module.
 
-    :param path:
+    :param filepath:
     :return:
     """
-    if path and os.path.isfile(path):
-        dirname = os.path.dirname(path)
+    if filepath and os.path.isfile(filepath):
+        dirname = os.path.dirname(filepath)
         if dirname not in sys.path:
             sys.path.insert(0, dirname)
-        conf_module = os.path.splitext(path)[0]
+        conf_module = os.path.splitext(filepath)[0]
         module = import_module(conf_module)
     else:
         import djangofloor.empty
@@ -55,7 +56,7 @@ __formatter = string.Formatter()
 
 def __parse_setting(obj):
     if isinstance(obj, str):
-        values = {}
+        values = {'PROJECT_NAME': PROJECT_NAME}
         for (literal_text, field_name, format_spec, conversion) in __formatter.parse(obj):
             if field_name is not None:
                 values[field_name] = __setting_value(field_name)
@@ -98,6 +99,10 @@ for setting_name in floor_settings.__dict__:
         __setting_value(setting_name)
 
 for setting_name in project_settings.__dict__:
+    if setting_name == setting_name.upper():
+        __setting_value(setting_name)
+
+for setting_name in user_settings.__dict__:
     if setting_name == setting_name.upper():
         __setting_value(setting_name)
 

@@ -20,6 +20,8 @@ from django.core.management import LaxOptionParser
 def set_env():
     """
     Determine project-specific and user-specific settings.
+    Set several environment variable, update sys.argv and return the name of current djangofloor project.
+
 
     1) determine the project name
 
@@ -47,16 +49,19 @@ def set_env():
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "djangofloor.settings")
 
     # project name
-    script_re = re.match('^(\w+)-(manage|gunicorn)(\.py|\.pyc|)$', sys.argv[0])
-    if script_re:
+    script_re = re.match('^(\w+)-(manage|gunicorn|celery)(\.py|\.pyc|)$', sys.argv[0])
+    if 'DJANGOFLOOR_PROJECT_NAME' in os.environ:
+        project_name = os.environ['DJANGOFLOOR_PROJECT_NAME']
+    elif script_re:
         project_name = script_re.group(1)
     else:
         project_name = 'djangofloor'
     parser = LaxOptionParser(usage="%prog subcommand [options] [args]", option_list=[])
-    parser.add_option('--project', action='store', default=project_name, help='DjangoFloor project name')
+    parser.add_option('--dfproject', action='store', default=project_name, help='DjangoFloor project name')
     options, args = parser.parse_args(sys.argv)
-    project_name = options.project
+    project_name = options.dfproject
     os.environ.setdefault('DJANGOFLOOR_PROJECT_SETTINGS', '%s.defaults' % project_name)
+    os.environ['DJANGOFLOOR_PROJECT_NAME'] = project_name
     sys.argv = args
 
     conf_path = os.path.abspath(os.path.join('.', '%s_configuration.py' % project_name))
@@ -69,18 +74,18 @@ def set_env():
                 conf_path = ''
 
     parser = LaxOptionParser(usage="%prog subcommand [options] [args]", option_list=[])
-    parser.add_option('--conf_file', action='store', default=conf_path, help='configuration file')
+    parser.add_option('--dfconf', action='store', default=conf_path, help='configuration file')
     options, args = parser.parse_args(sys.argv)
-    os.environ.setdefault("DJANGOFLOOR_USER_SETTINGS", options.conf_file)
+    os.environ.setdefault("DJANGOFLOOR_USER_SETTINGS", options.dfconf)
     sys.argv = args
-    return args
+    return project_name
 
 
 def manage():
     """
     Main function, calling Django code for management commands. Retrieve some default values from Django settings.
     """
-    args = set_env()
+    set_env()
     from django.core.management import execute_from_command_line
     parser = LaxOptionParser(usage="%prog subcommand [options] [args]", option_list=[])
     parser.add_option('-v', '--verbosity', action='store')
@@ -94,11 +99,19 @@ def manage():
     parser.add_option('--noreload', action='store_true')
     parser.add_option('--insecure', action='store_true')
     parser.add_option('--version', action='store_true')
-    options, sub_args = parser.parse_args(args)
+    options, sub_args = parser.parse_args(sys.argv)
     if len(sub_args) >= 2 and sub_args[1] == 'runserver':
         if len(sub_args) == 2:
-            args += [settings.BIND_ADDRESS]
-    return execute_from_command_line(args)
+            sys.argv += [settings.BIND_ADDRESS]
+    return execute_from_command_line(sys.argv)
+
+
+def load_celery():
+    from django.conf import settings
+    if not settings.USE_CELERY:
+        return
+    from djangofloor.celery import app
+    return app
 
 
 def gunicorn():
@@ -144,3 +157,14 @@ def gunicorn():
     if application not in sys.argv:
         sys.argv.append(application)
     return run()
+
+
+def celery():
+    from celery.bin.celery import main as celery_main
+    set_env()
+    parser = LaxOptionParser(usage="%prog subcommand [options] [args]", version=get_version(), option_list=[])
+    parser.add_option('-A', '--app', action='store', default=None, help=defaults.BIND_ADDRESS_help)
+    options, args = parser.parse_args(sys.argv)
+    if options.app is None:
+        sys.argv += ['--app', 'djangofloor']
+    celery_main(sys.argv)

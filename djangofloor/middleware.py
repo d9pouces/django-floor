@@ -4,6 +4,7 @@ import base64
 from django.conf import settings
 from django.contrib import auth
 from django.contrib.auth.middleware import RemoteUserMiddleware as BaseRemoteUserMiddleware
+from django.contrib.auth.models import Group
 
 __author__ = 'flanker'
 
@@ -32,6 +33,7 @@ class RemoteUserMiddleware(BaseRemoteUserMiddleware):
 class FakeAuthenticationMiddleware(object):
     """ Only for debugging purpose: emulate a user authenticated by the remote proxy
     """
+    group_cache = {}
 
     # noinspection PyMethodMayBeStatic
     def process_request(self, request):
@@ -43,6 +45,14 @@ class FakeAuthenticationMiddleware(object):
             request.user = user
             auth.login(request, user)
             request.df_remote_authenticated = True
+            if settings.FAKE_AUTHENTICATION_GROUPS:
+                for group_name in settings.FAKE_AUTHENTICATION_GROUPS:
+                    if group_name not in self.group_cache:
+                        group, created = Group.objects.get_or_create(name=group_name)
+                        self.group_cache[group_name] = group
+                    else:
+                        group = self.group_cache[group_name]
+                    user.groups.add(group)
 
 
 class BasicAuthMiddleware(object):

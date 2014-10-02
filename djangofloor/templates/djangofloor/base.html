@@ -31,20 +31,21 @@
                 </div>
                 <div class="navbar-collapse collapse">
                     {% if user.is_authenticated and not df_remote_authenticated %}
-                        <a class="navbar-brand" href="{% url 'account_email' %}">{% fontawesome_icon 'wrench' %}</a>
+                        <a class="navbar-brand" href="{% url 'account_email' %}">{% fontawesome_icon 'pencil' %}</a>
                         <a class="navbar-brand" href="{% url 'account_logout' %}">{% fontawesome_icon 'sign-out' %}</a>
+                    {% elif user.is_authenticated %}
+                        <a class="navbar-brand">{{ user.username }}</a>
                     {% elif user.is_anonymous %}
-                        <a class="navbar-brand" href="{% url 'account_login' %}">{% fontawesome_icon 'user' %}</a>
+                        <a class="navbar-brand" href="{% url 'account_login' %}">{% fontawesome_icon 'sign-in' %}</a>
                     {% endif %}
+                    {% if user.is_staff %}
+                        <a class="navbar-brand" href="{% url 'admin:index' %}">{% fontawesome_icon 'wrench' %}</a>
+                    {% endif %}
+                {% block navbar %}
                     <form class="navbar-form navbar-right" role="form">
-                        <div class="form-group">
-                            <input type="text" placeholder="{% trans 'Email' %}" class="form-control">
-                        </div>
-                        <div class="form-group">
-                            <input type="password" placeholder="{% trans 'Password' %}" class="form-control">
-                        </div>
-                        <button type="submit" class="btn btn-success">{% trans 'Sign in' %}</button>
                     </form>
+                {% endblock %}
+
                 </div>
                 <!--/.navbar-collapse -->
             </div>
