@@ -3,11 +3,14 @@ django-floor
 
 A common base for modern and complete Django websites, with many tools integrated.
 
+  * gestion des crontab
+  * supervisor -> en attente de supervisor 4
+  * websockets -> en attente de django-redis pour Python 3
+  * configurations pour Apache / NGinx
 
-  * django-celery
-  * supervisor
-  * backup command
-  * websockets
+  * backup command: media files, database
+  * fichiers de conf pour launchd, upstart ou systemd
+  * génération des commandes pour créer un utilisateur système, la base de données
 
 
 Conventions :

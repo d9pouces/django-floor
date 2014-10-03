@@ -5,7 +5,7 @@ from celery import shared_task
 
 @shared_task(serializer='json')
 def add(x, y):
-    print(x, y)
+    print((x, y))
     return x + y
 
 if __name__ == '__main__':

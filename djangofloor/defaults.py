@@ -64,11 +64,11 @@ REVERSE_PROXY_ERROR_LOG_FILE_help = 'Error log file to write to (Reverse proxy).
 REVERSE_PROXY_ACCESS_LOG_FILE = '{LOG_PATH}/access.log'
 REVERSE_PROXY_ACCESS_LOG_FILE_help = 'The Access log file to write to (reverse_proxy).'
 REVERSE_PROXY_SSL_KEY_FILE = None
-REVERSE_PROXY_SSL_KEY_FILE_help = 'SSL key file of reverse proxy'
+REVERSE_PROXY_SSL_KEY_FILE_help = 'Key file of reverse proxy. Can be set to None if the key is with the certificate.'
 REVERSE_PROXY_SSK_CERT_FILE = None
-REVERSE_PROXY_SSK_CERT_FILE_hep = 'SSL certificate file of reverse proxy'
-REVERSE_PROXY_PORT = 80
-REVERSE_PROXY_PORT_help = 'Reverse proxy port'
+REVERSE_PROXY_SSK_CERT_FILE_hep = 'SSL certificate file of reverse proxy. Required if you use SSL'
+REVERSE_PROXY_PORT = None  #
+REVERSE_PROXY_PORT_help = 'Reverse proxy port (if None, defaults to 80 or 443 if you use SSL)'
 
 # Language code for this installation. All choices can be found here:
 # http://www.i18nguy.com/unicode/language-identifiers.html
@@ -394,8 +394,8 @@ LDAP_GROUPS_BIND_DN_help = 'The distinguished name to use when binding to the LD
 LDAP_GROUPS_BIND_PASSWORD = ''
 LDAP_GROUPS_BIND_PASSWORD_help = 'The password to use with LDAP_GROUPS_BIND_DN.'
 LDAP_GROUPS_CACHE_GROUPS_TIME = 0
-LDAP_GROUPS_CACHE_GROUPS_TIME_help = 'If non-zero, LDAP group membership will be cached using Django’s cache framework. ' \
-                                     'Otherwhise, this is the cache timeout (in seconds).'
+LDAP_GROUPS_CACHE_GROUPS_TIME_help = 'If non-zero, LDAP group membership will be cached using Django’s cache ' \
+                                     'framework. Otherwhise, this is the cache timeout (in seconds).'
 LDAP_GROUPS_SEARCH_BASE = 'CN=Users,DC=example,DC=org'
 LDAP_GROUPS_SEARCH_BASE_help = 'The base DN for the search'
 LDAP_GROUPS_SEARCH_FILTER = '(cn=%(username)s)'
