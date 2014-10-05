@@ -18,7 +18,9 @@ with codecs.open(os.path.join(os.path.dirname(__file__), 'README.md'), encoding=
 with codecs.open(os.path.join(os.path.dirname(__file__), 'VERSION'), encoding='utf-8') as fd:
     version = fd.read().strip()
 entry_points = {'console_scripts': ['djangofloor-manage = djangofloor.scripts:manage',
-                                    'djangofloor-gunicorn = djangofloor.scripts:gunicorn']}
+                                    'djangofloor-gunicorn = djangofloor.scripts:gunicorn',
+                                    'djangofloor-celery = djangofloor.scripts:celery',
+                                    ]}
 
 setup(
     name='djangofloor',
@@ -36,7 +38,7 @@ setup(
     test_suite='djangofloor.tests',
     install_requires=['django>=1.7', 'django-allauth', 'gunicorn', 'django-bootstrap3', 'django-pipeline',
                       'django-debug-toolbar', 'django-fontawesome', 'django-admin-bootstrapped',
-                      'django-websocket-redis', 'celery'],
+                      'celery', 'slimit', 'jsmin'],
     setup_requires=['django>=1.7', 'django-allauth', 'gunicorn', 'django-bootstrap3', 'django-pipeline',
                     'django-debug-toolbar', 'django-fontawesome', 'django-admin-bootstrapped', ],
     classifiers=[],

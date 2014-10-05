@@ -112,17 +112,23 @@ INSTALLED_APPS += OTHER_ALLAUTH
 # noinspection PyUnresolvedReferences
 INSTALLED_APPS += FLOOR_INSTALLED_APPS
 
+# noinspection PyUnresolvedReferences
 for db_dict in DATABASES.values():
     if db_dict['ENGINE'] == 'django.db.backends.sqlite3':
         __ensure_dir(db_dict['NAME'])
+# noinspection PyUnresolvedReferences
 for db_dict in CACHES.values():
     if db_dict['BACKEND'] == 'django.core.cache.backends.filebased.FileBasedCache':
         __ensure_dir(db_dict['LOCATION'], False)
+# noinspection PyUnresolvedReferences
 for db_dict in LOGGING['handlers'].values():
     if 'RotatingFileHandler' in db_dict['class']:
         __ensure_dir(db_dict['filename'])
+# noinspection PyUnresolvedReferences
 __ensure_dir(MEDIA_ROOT, False)
+# noinspection PyUnresolvedReferences
 __ensure_dir(STATIC_ROOT, False)
+# noinspection PyUnresolvedReferences
 for path in (PID_FILE, GUNICORN_ERROR_LOG_FILE, GUNICORN_ACCESS_LOG_FILE, REVERSE_PROXY_ERROR_LOG_FILE,
              REVERSE_PROXY_ACCESS_LOG_FILE, ):
     __ensure_dir(path)

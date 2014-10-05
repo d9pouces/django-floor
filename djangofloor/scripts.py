@@ -2,7 +2,6 @@
 """
 Define a main() function, allowing you to manage your Django project.
 """
-from django.conf import settings
 import re
 
 from djangofloor import defaults
@@ -15,6 +14,22 @@ import os
 import sys
 from django import get_version
 from django.core.management import LaxOptionParser
+
+
+# noinspection PyShadowingBuiltins
+def check_extra_option(name, default, *argnames):
+    parser = LaxOptionParser(usage="%prog subcommand [options] [args]", option_list=[])
+    parser.add_option(*argnames, action='store', default=None)
+    options, args = parser.parse_args(sys.argv)
+    value = getattr(options, name)
+    if value is not None:
+        for arg in argnames:
+            dfindex = sys.argv.index(arg)
+            del sys.argv[dfindex]
+            del sys.argv[dfindex]
+            break
+        return value
+    return default
 
 
 def set_env():
@@ -56,13 +71,9 @@ def set_env():
         project_name = script_re.group(1)
     else:
         project_name = 'djangofloor'
-    parser = LaxOptionParser(usage="%prog subcommand [options] [args]", option_list=[])
-    parser.add_option('--dfproject', action='store', default=project_name, help='DjangoFloor project name')
-    options, args = parser.parse_args(sys.argv)
-    project_name = options.dfproject
+    project_name = check_extra_option('dfproject', project_name, '--dfproject')
     os.environ.setdefault('DJANGOFLOOR_PROJECT_SETTINGS', '%s.defaults' % project_name)
-    os.environ['DJANGOFLOOR_PROJECT_NAME'] = project_name
-    sys.argv = args
+    os.environ.setdefault('DJANGOFLOOR_PROJECT_NAME', project_name)
 
     conf_path = os.path.abspath(os.path.join('.', '%s_configuration.py' % project_name))
     if not os.path.isfile(conf_path):
@@ -73,11 +84,8 @@ def set_env():
             if not os.path.isfile(conf_path):
                 conf_path = ''
 
-    parser = LaxOptionParser(usage="%prog subcommand [options] [args]", option_list=[])
-    parser.add_option('--dfconf', action='store', default=conf_path, help='configuration file')
-    options, args = parser.parse_args(sys.argv)
-    os.environ.setdefault("DJANGOFLOOR_USER_SETTINGS", options.dfconf)
-    sys.argv = args
+    conf_path = check_extra_option('dfconf', conf_path, '--dfconf')
+    os.environ.setdefault("DJANGOFLOOR_USER_SETTINGS", conf_path)
     return project_name
 
 
@@ -88,18 +96,8 @@ def manage():
     set_env()
     from django.core.management import execute_from_command_line
     parser = LaxOptionParser(usage="%prog subcommand [options] [args]", option_list=[])
-    parser.add_option('-v', '--verbosity', action='store')
-    parser.add_option('--settings', action='store')
-    parser.add_option('--pythonpath', action='store')
-    parser.add_option('--traceback', action='store_true')
-    parser.add_option('--no-color', action='store_true')
-    parser.add_option('-6', '--ipv6', action='store_true')
-    parser.add_option('--nothreading', action='store_true')
-    parser.add_option('--nostatic', action='store_true')
-    parser.add_option('--noreload', action='store_true')
-    parser.add_option('--insecure', action='store_true')
-    parser.add_option('--version', action='store_true')
     options, sub_args = parser.parse_args(sys.argv)
+    from django.conf import settings
     if len(sub_args) >= 2 and sub_args[1] == 'runserver':
         if len(sub_args) == 2:
             sys.argv += [settings.BIND_ADDRESS]
@@ -133,6 +131,7 @@ def gunicorn():
     parser.add_option('--error-logfile', action='store', default=None, help=defaults.GUNICORN_ERROR_LOG_FILE_help)
     parser.add_option('--access-logfile', action='store', default=None, help=defaults.GUNICORN_ACCESS_LOG_FILE_help)
     parser.add_option('--log-level', action='store', default=None, help=defaults.GUNICORN_LOG_LEVEL_help)
+    from django.conf import settings
     options, args = parser.parse_args(sys.argv)
     if options.bind is None:
         sys.argv += ['--bind', settings.BIND_ADDRESS]
@@ -147,15 +146,16 @@ def gunicorn():
     if options.proxy_allow_from is None:
         sys.argv += ['--proxy-allow-from', ','.join(settings.REVERSE_PROXY_IPS)]
     if options.error_logfile is None:
-        sys.argv += ['--error-logfile', settings.ERROR_LOG_FILE]
+        sys.argv += ['--error-logfile', settings.GUNICORN_ERROR_LOG_FILE]
     if options.access_logfile is None:
-        sys.argv += ['--access-logfile', settings.ACCESS_LOG_FILE]
+        sys.argv += ['--access-logfile', settings.GUNICORN_ACCESS_LOG_FILE]
     if options.log_level is None:
         sys.argv += ['--log-level', settings.GUNICORN_LOG_LEVEL]
 
     application = 'djangofloor.wsgi:application'
     if application not in sys.argv:
         sys.argv.append(application)
+    print(sys.argv)
     return run()
 
 
