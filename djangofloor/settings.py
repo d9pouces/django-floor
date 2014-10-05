@@ -129,7 +129,7 @@ __ensure_dir(MEDIA_ROOT, False)
 # noinspection PyUnresolvedReferences
 __ensure_dir(STATIC_ROOT, False)
 # noinspection PyUnresolvedReferences
-for path in (PID_FILE, GUNICORN_ERROR_LOG_FILE, GUNICORN_ACCESS_LOG_FILE, REVERSE_PROXY_ERROR_LOG_FILE,
+for path in (GUNICORN_PID_FILE, GUNICORN_ERROR_LOG_FILE, GUNICORN_ACCESS_LOG_FILE, REVERSE_PROXY_ERROR_LOG_FILE,
              REVERSE_PROXY_ACCESS_LOG_FILE, ):
     __ensure_dir(path)
 

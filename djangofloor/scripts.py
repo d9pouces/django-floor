@@ -32,6 +32,12 @@ def check_extra_option(name, default, *argnames):
     return default
 
 
+def set_default_option(options, name, default_value):
+    option_name = name.replace('_', '-')
+    if getattr(options, name):
+        sys.argv += ['--%s' % option_name, default_value]
+
+
 def set_env():
     """
     Determine project-specific and user-specific settings.
@@ -94,10 +100,10 @@ def manage():
     Main function, calling Django code for management commands. Retrieve some default values from Django settings.
     """
     set_env()
+    from django.conf import settings
     from django.core.management import execute_from_command_line
     parser = LaxOptionParser(usage="%prog subcommand [options] [args]", option_list=[])
     options, sub_args = parser.parse_args(sys.argv)
-    from django.conf import settings
     if len(sub_args) >= 2 and sub_args[1] == 'runserver':
         if len(sub_args) == 2:
             sys.argv += [settings.BIND_ADDRESS]
@@ -120,6 +126,7 @@ def gunicorn():
     from gunicorn.app.wsgiapp import run
 
     set_env()
+    from django.conf import settings
     parser = LaxOptionParser(usage="%prog subcommand [options] [args]", version=get_version(), option_list=[])
     parser.add_option('-b', '--bind', action='store', default=None, help=defaults.BIND_ADDRESS_help)
     parser.add_option('-p', '--pid', action='store', default=None, help=defaults.PID_FILE_help)
@@ -131,40 +138,32 @@ def gunicorn():
     parser.add_option('--error-logfile', action='store', default=None, help=defaults.GUNICORN_ERROR_LOG_FILE_help)
     parser.add_option('--access-logfile', action='store', default=None, help=defaults.GUNICORN_ACCESS_LOG_FILE_help)
     parser.add_option('--log-level', action='store', default=None, help=defaults.GUNICORN_LOG_LEVEL_help)
-    from django.conf import settings
     options, args = parser.parse_args(sys.argv)
-    if options.bind is None:
-        sys.argv += ['--bind', settings.BIND_ADDRESS]
-    if options.pid is None:
-        sys.argv += ['--pid', settings.PID_FILE]
-    if options.forwarded_allow_ips is None:
-        sys.argv += ['--forwarded-allow-ips', ','.join(settings.REVERSE_PROXY_IPS)]
     if not options.debug and settings.DEBUG:
         sys.argv += ['--debug']
-    if options.timeout is None:
-        sys.argv += ['--timeout', str(settings.REVERSE_PROXY_TIMEOUT)]
-    if options.proxy_allow_from is None:
-        sys.argv += ['--proxy-allow-from', ','.join(settings.REVERSE_PROXY_IPS)]
-    if options.error_logfile is None:
-        sys.argv += ['--error-logfile', settings.GUNICORN_ERROR_LOG_FILE]
-    if options.access_logfile is None:
-        sys.argv += ['--access-logfile', settings.GUNICORN_ACCESS_LOG_FILE]
-    if options.log_level is None:
-        sys.argv += ['--log-level', settings.GUNICORN_LOG_LEVEL]
+    set_default_option(options, 'bind', settings.BIND_ADDRESS)
+    set_default_option(options, 'pid', settings.GUNICORN_PID_FILE)
+    set_default_option(options, 'forwarded_allow_ips', ','.join(settings.REVERSE_PROXY_IPS))
+    set_default_option(options, 'timeout', str(settings.REVERSE_PROXY_TIMEOUT))
+    set_default_option(options, 'proxy_allow_from', ','.join(settings.REVERSE_PROXY_IPS))
+    set_default_option(options, 'error_logfile', settings.GUNICORN_ERROR_LOG_FILE)
+    set_default_option(options, 'access_logfile', settings.GUNICORN_ACCESS_LOG_FILE)
+    set_default_option(options, 'log_level', settings.GUNICORN_LOG_LEVEL)
 
     application = 'djangofloor.wsgi:application'
     if application not in sys.argv:
         sys.argv.append(application)
-    print(sys.argv)
     return run()
 
 
 def celery():
     from celery.bin.celery import main as celery_main
     set_env()
+    from django.conf import settings
     parser = LaxOptionParser(usage="%prog subcommand [options] [args]", version=get_version(), option_list=[])
     parser.add_option('-A', '--app', action='store', default=None, help=defaults.BIND_ADDRESS_help)
+    parser.add_option('--pidfile', action='store', default=None, help=defaults.GUNICORN_PID_FILE_help)
     options, args = parser.parse_args(sys.argv)
-    if options.app is None:
-        sys.argv += ['--app', 'djangofloor']
+    set_default_option(options, 'app', 'djangofloor')
+    set_default_option(options, 'pidfile', settings.GUNICORN_PID_FILE)
     celery_main(sys.argv)
