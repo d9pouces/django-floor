@@ -108,9 +108,9 @@ for setting_name in user_settings.__dict__:
 
 
 # noinspection PyUnresolvedReferences,PyUnboundLocalVariable
-INSTALLED_APPS += OTHER_ALLAUTH
+INSTALLED_APPS += list(filter(lambda x: x not in INSTALLED_APPS, OTHER_ALLAUTH))
 # noinspection PyUnresolvedReferences
-INSTALLED_APPS += FLOOR_INSTALLED_APPS
+INSTALLED_APPS += list(filter(lambda x: x not in INSTALLED_APPS, FLOOR_INSTALLED_APPS))
 
 # noinspection PyUnresolvedReferences
 for db_dict in DATABASES.values():
