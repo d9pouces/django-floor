@@ -336,19 +336,22 @@ LOGGING = {
             'filters': ['require_debug_false'],
             'class': 'django.utils.log.AdminEmailHandler'
         },
-        'rotating_file': {
-            'level': 'INFO',
-            'filters': ['require_debug_false'],
-            'class': 'logging.handlers.RotatingFileHandler',
-            'filename': '{LOG_PATH}/django.log',
-            'maxBytes': 10000000,  # 10 MB
-            'backupCount': 2,
-            'encoding': 'utf-8',
-        }
+        # 'rotating_file': {
+        #     'level': 'INFO',
+        #     'filters': ['require_debug_false'],
+        #     'class': 'logging.handlers.RotatingFileHandler',
+        #     'filename': '{LOG_PATH}/django.log',
+        #     'maxBytes': 10000000,  # 10 MB
+        #     'backupCount': 2,
+        #     'encoding': 'utf-8',
+        # }
     },
     'loggers': {
         'django.request': {
-            'handlers': ['mail_admins', 'rotating_file'],
+            'handlers': [
+                'mail_admins',
+                # 'rotating_file'
+            ],
             'level': 'ERROR',
             'propagate': True,
         },

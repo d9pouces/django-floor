@@ -21,12 +21,21 @@ import string
 import sys
 from django.utils.importlib import import_module
 from djangofloor import defaults as floor_settings
-
+from djangofloor import __version__ as version
 __author__ = 'flanker'
 
-PROJECT_SETTINGS_PATH = os.environ.get('DJANGOFLOOR_PROJECT_SETTINGS', '')
+PROJECT_SETTINGS_MODULE_NAME = os.environ.get('DJANGOFLOOR_PROJECT_SETTINGS', '')
 USER_SETTINGS_PATH = os.environ.get('DJANGOFLOOR_USER_SETTINGS', '')
 PROJECT_NAME = os.environ.get('DJANGOFLOOR_PROJECT_NAME', 'djangofloor')
+
+
+if not PROJECT_SETTINGS_MODULE_NAME:
+    print('"PROJECT_SETTINGS_MODULE_NAME" environment variable should be set to the '
+          'dotted path of your project defaults')
+else:
+    print('DjangoFloor version %s using %s project defaults' % (version, PROJECT_SETTINGS_MODULE_NAME))
+if USER_SETTINGS_PATH:
+    print('User-defined settings found in file %s' % USER_SETTINGS_PATH)
 
 
 def import_file(filepath):
@@ -40,13 +49,17 @@ def import_file(filepath):
         if dirname not in sys.path:
             sys.path.insert(0, dirname)
         conf_module = os.path.splitext(filepath)[0]
-        module = import_module(conf_module)
+        module_ = import_module(conf_module)
     else:
         import djangofloor.empty
-        module = djangofloor.empty
-    return module
+        module_ = djangofloor.empty
+    return module_
 
-project_settings = import_file(PROJECT_SETTINGS_PATH)
+if PROJECT_SETTINGS_MODULE_NAME:
+    project_settings = import_module(PROJECT_SETTINGS_MODULE_NAME)
+else:
+    import djangofloor.empty
+    project_settings = djangofloor.empty
 user_settings = import_file(USER_SETTINGS_PATH)
 
 
@@ -93,18 +106,10 @@ def __ensure_dir(path_, parent_=True):
     if not os.path.isdir(dirname_):
         os.makedirs(dirname_)
 
-
-for setting_name in floor_settings.__dict__:
-    if setting_name == setting_name.upper():
-        __setting_value(setting_name)
-
-for setting_name in project_settings.__dict__:
-    if setting_name == setting_name.upper():
-        __setting_value(setting_name)
-
-for setting_name in user_settings.__dict__:
-    if setting_name == setting_name.upper():
-        __setting_value(setting_name)
+for module in floor_settings, project_settings, user_settings:
+    for setting_name in module.__dict__:
+        if setting_name == setting_name.upper():
+            __setting_value(setting_name)
 
 
 # noinspection PyUnresolvedReferences,PyUnboundLocalVariable

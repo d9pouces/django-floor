@@ -9,14 +9,11 @@ import ez_setup
 
 ez_setup.use_setuptools()
 from setuptools import setup, find_packages
+from djangofloor import __version__ as version
 
 # get README content from README.rst file
 with codecs.open(os.path.join(os.path.dirname(__file__), 'README.md'), encoding='utf-8') as fd:
     long_description = fd.read()
-
-# get version value from VERSION file
-with codecs.open(os.path.join(os.path.dirname(__file__), 'VERSION'), encoding='utf-8') as fd:
-    version = fd.read().strip()
 entry_points = {'console_scripts': ['djangofloor-manage = djangofloor.scripts:manage',
                                     'djangofloor-gunicorn = djangofloor.scripts:gunicorn',
                                     'djangofloor-celery = djangofloor.scripts:celery',
