@@ -1,13 +1,13 @@
 <!DOCTYPE html>
-{% load bootstrap3 staticfiles compressed i18n fontawesome %}
-<html lang="en-US">
+{% load bootstrap3 staticfiles pipeline i18n fontawesome %}
+<html lang="{{ df_language_code }}">
 <head>
     <title>{% block head_title %}{{ df_project_name }}{% endblock %}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content=""/>
     <meta name="robots" content="index, follow"/>
     <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
-    {% block pipelineheaders %}{% compressed_css 'base' %}{% compressed_js 'base' %}{% endblock %}
+    {% block pipelineheaders %}{% stylesheet 'base' %}{% javascript 'base' %}{% endblock %}
     {% block extra_head %}{% endblock %}
     <link rel="shortcut icon" href="{% static 'images/favicon.png' %}">
     <!--[if lt IE 9 ]>
