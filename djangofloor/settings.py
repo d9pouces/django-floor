@@ -33,9 +33,11 @@ if not PROJECT_SETTINGS_MODULE_NAME:
     print('"PROJECT_SETTINGS_MODULE_NAME" environment variable should be set to the '
           'dotted path of your project defaults')
 else:
-    print('DjangoFloor version %s using %s project defaults' % (version, PROJECT_SETTINGS_MODULE_NAME))
+    print('DjangoFloor version %s, using %s as project defaults' % (version, PROJECT_SETTINGS_MODULE_NAME))
 if USER_SETTINGS_PATH:
-    print('User-defined settings found in file %s' % USER_SETTINGS_PATH)
+    print('User-defined settings expected in module %s' % USER_SETTINGS_PATH)
+else:
+    print('No specific settings file defined in DJANGOFLOOR_USER_SETTINGS')
 
 
 def import_file(filepath):
@@ -48,7 +50,7 @@ def import_file(filepath):
         dirname = os.path.dirname(filepath)
         if dirname not in sys.path:
             sys.path.insert(0, dirname)
-        conf_module = os.path.splitext(filepath)[0]
+        conf_module = os.path.splitext(os.path.basename(filepath))[0]
         module_ = import_module(conf_module)
     else:
         import djangofloor.empty
