@@ -4,10 +4,6 @@
 
 import codecs
 import os.path
-
-import ez_setup
-
-ez_setup.use_setuptools()
 from setuptools import setup, find_packages
 from djangofloor import __version__ as version
 
@@ -33,10 +29,9 @@ setup(
     include_package_data=True,
     zip_safe=False,
     test_suite='djangofloor.tests',
-    install_requires=['django>=1.7', 'django-allauth', 'gunicorn', 'django-bootstrap3', 'django-pipeline',
+    install_requires=['Django>=1.7', 'django-allauth', 'gunicorn', 'django-bootstrap3', 'django-pipeline',
                       'django-debug-toolbar', 'django-fontawesome', 'django-admin-bootstrapped',
                       'celery', 'slimit', 'jsmin'],
-    setup_requires=['django>=1.7', 'django-allauth', 'gunicorn', 'django-bootstrap3', 'django-pipeline',
-                    'django-debug-toolbar', 'django-fontawesome', 'django-admin-bootstrapped', ],
+    setup_requires=[],
     classifiers=[],
 )

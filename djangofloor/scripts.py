@@ -3,6 +3,7 @@
 Define a main() function, allowing you to manage your Django project.
 """
 import re
+from setuptools import Command
 
 from djangofloor import defaults
 
@@ -14,6 +15,21 @@ import os
 import sys
 from django import get_version
 from django.core.management import LaxOptionParser
+
+
+class TestCommand(Command):
+    description = 'Run all Django tests from setup.py'
+    user_options = []
+
+    def initialize_options(self):
+        pass
+
+    def finalize_options(self):
+        pass
+
+    # noinspection PyMethodMayBeStatic
+    def run(self):
+        manage()
 
 
 # noinspection PyShadowingBuiltins
@@ -70,7 +86,7 @@ def set_env():
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "djangofloor.settings")
 
     # project name
-    script_re = re.match('^(\w+)-(manage|gunicorn|celery)(\.py|\.pyc|)$', sys.argv[0])
+    script_re = re.match(r'^([\w_]+)-(manage|gunicorn|celery)(\.py|\.pyc|)$', os.path.basename(sys.argv[0]))
     if 'DJANGOFLOOR_PROJECT_NAME' in os.environ:
         project_name = os.environ['DJANGOFLOOR_PROJECT_NAME']
     elif script_re:
@@ -129,6 +145,7 @@ def gunicorn():
     from django.conf import settings
     parser = LaxOptionParser(usage="%prog subcommand [options] [args]", version=get_version(), option_list=[])
     parser.add_option('-b', '--bind', action='store', default=None, help=defaults.BIND_ADDRESS_help)
+    # noinspection PyUnresolvedReferences
     parser.add_option('-p', '--pid', action='store', default=None, help=defaults.PID_FILE_help)
     parser.add_option('--forwarded-allow-ips', action='store', default=None)
     parser.add_option('--debug', action='store_true', default=False)

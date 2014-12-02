@@ -30,7 +30,7 @@ PROJECT_NAME = os.environ.get('DJANGOFLOOR_PROJECT_NAME', 'djangofloor')
 
 
 if not PROJECT_SETTINGS_MODULE_NAME:
-    print('"PROJECT_SETTINGS_MODULE_NAME" environment variable should be set to the '
+    print('"DJANGOFLOOR_PROJECT_SETTINGS" environment variable should be set to the '
           'dotted path of your project defaults')
 else:
     print('DjangoFloor version %s, using %s as project defaults' % (version, PROJECT_SETTINGS_MODULE_NAME))
@@ -67,6 +67,7 @@ user_settings = import_file(USER_SETTINGS_PATH)
 
 __settings = globals()
 __formatter = string.Formatter()
+__settings_origin = {}
 
 
 def __parse_setting(obj):
@@ -95,10 +96,13 @@ def __setting_value(setting_name_):
         return __settings[setting_name_]
     if hasattr(user_settings, setting_name_):
         value = getattr(user_settings, setting_name_)
+        __settings_origin[setting_name_] = 'user'
     elif hasattr(project_settings, setting_name_):
         value = getattr(project_settings, setting_name_)
+        __settings_origin[setting_name_] = 'project'
     else:
         value = getattr(floor_settings, setting_name_)
+        __settings_origin[setting_name_] = 'default'
     __settings[setting_name_] = __parse_setting(value)
     return __settings[setting_name_]
 
