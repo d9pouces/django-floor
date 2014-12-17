@@ -9,16 +9,16 @@ LOCAL_PATH = abspath(join(dirname(dirname(__file__)), 'django_data'))
 LOG_PATH = '{LOCAL_PATH}/log'
 DATA_PATH = '{LOCAL_PATH}/data'
 DEBUG = True
-DEBUG_help = 'A boolean that turns on/off debug mode.'
+DEBUG_HELP = 'A boolean that turns on/off debug mode.'
 TEMPLATE_DEBUG = False
-TEMPLATE_DEBUG_help = 'A boolean that turns on/off template debug mode.'
+TEMPLATE_DEBUG_HELP = 'A boolean that turns on/off template debug mode.'
 ADMINS = (("admin", "admin@localhost"), )
-ADMINS_help = 'A tuple that lists people who get code error notifications.'
+ADMINS_HELP = 'A tuple that lists people who get code error notifications.'
 MANAGERS = ADMINS
-MANAGERS_help = ('A tuple in the same format as ADMINS that specifies who should get broken link notifications '
+MANAGERS_HELP = ('A tuple in the same format as ADMINS that specifies who should get broken link notifications '
                  'when BrokenLinkEmailsMiddleware is enabled.')
 DEFAULT_FROM_EMAIL = 'admin@localhost'
-DEFAULT_FROM_EMAIL_help = 'Default email address to use for various automated correspondence from the site manager(s).'
+DEFAULT_FROM_EMAIL_HELP = 'Default email address to use for various automated correspondence from the site manager(s).'
 # noinspection PyUnresolvedReferences
 DATABASES = {
     'default': {
@@ -31,63 +31,63 @@ DATABASES = {
         'PORT': '',  # Set to empty string for default.
     },
 }
-DATABASES_help = 'A dictionary containing the settings for all databases to be used with Django.'
+DATABASES_HELP = 'A dictionary containing the settings for all databases to be used with Django.'
 TIME_ZONE = 'Europe/Paris'
-TIME_ZONE_help = 'A string representing the time zone for this installation, or None. '
+TIME_ZONE_HELP = 'A string representing the time zone for this installation, or None. '
 BIND_ADDRESS = 'localhost:9000'
-BIND_ADDRESS_help = 'The socket to bind.'
+BIND_ADDRESS_HELP = 'The socket to bind.'
 THREADS = 1
-THREADS_help = 'The number of worker threads for handling requests.'
+THREADS_HELP = 'The number of worker threads for handling requests.'
 WORKERS = 1
-WORKERS_help = 'The number of worker process for handling requests.'
+WORKERS_HELP = 'The number of worker process for handling requests.'
 GUNICORN_PID_FILE = '{LOCAL_PATH}/run/{PROJECT_NAME}_gunicorn.pid'
-GUNICORN_PID_FILE_help = 'A filename to use for the PID file. '
+GUNICORN_PID_FILE_HELP = 'A filename to use for the PID file. '
 GUNICORN_ERROR_LOG_FILE = '{LOG_PATH}/gunicorn_error.log'
-GUNICORN_ERROR_LOG_FILE_help = 'The Error log file to write to (Gunicorn).'
+GUNICORN_ERROR_LOG_FILE_HELP = 'The Error log file to write to (Gunicorn).'
 GUNICORN_ACCESS_LOG_FILE = '{LOG_PATH}/gunicorn_access.log'
-GUNICORN_ACCESS_LOG_FILE_help = 'The Access log file to write to (Gunicorn).'
+GUNICORN_ACCESS_LOG_FILE_HELP = 'The Access log file to write to (Gunicorn).'
 GUNICORN_LOG_LEVEL = 'info'
-GUNICORN_LOG_LEVEL_help = 'The granularity of Gunicorn Error log outputs.'
+GUNICORN_LOG_LEVEL_HELP = 'The granularity of Gunicorn Error log outputs.'
 
 USE_X_SEND_FILE = False
-USE_X_SEND_FILE_help = 'Use the XSendFile header in Apache or LightHTTPd for sending large files'
+USE_X_SEND_FILE_HELP = 'Use the XSendFile header in Apache or LightHTTPd for sending large files'
 X_ACCEL_REDIRECT = []
-X_ACCEL_REDIRECT_help = 'Use the X-Accel-Redirect header in NGinx. List of tuples (/directory_path/, /alias_url/).'
+X_ACCEL_REDIRECT_HELP = 'Use the X-Accel-Redirect header in NGinx. List of tuples (/directory_path/, /alias_url/).'
 ALLOWED_HOSTS = ['127.0.0.1', ]
-ALLOWED_HOSTS_help = 'A list of strings representing the host/domain names that this Django site can serve.'
+ALLOWED_HOSTS_HELP = 'A list of strings representing the host/domain names that this Django site can serve.'
 REVERSE_PROXY_IPS = []
-REVERSE_PROXY_IPS_help = 'List of IP addresses of reverse proxies'
+REVERSE_PROXY_IPS_HELP = 'List of IP addresses of reverse proxies'
 REVERSE_PROXY_TIMEOUT = 30
-REVERSE_PROXY_TIMEOUT_help = 'Workers silent for more than this many seconds are killed and restarted.'
+REVERSE_PROXY_TIMEOUT_HELP = 'Workers silent for more than this many seconds are killed and restarted.'
 REVERSE_PROXY_ERROR_LOG_FILE = '{LOG_PATH}/error.log'
-REVERSE_PROXY_ERROR_LOG_FILE_help = 'Error log file to write to (Reverse proxy).'
+REVERSE_PROXY_ERROR_LOG_FILE_HELP = 'Error log file to write to (Reverse proxy).'
 REVERSE_PROXY_ACCESS_LOG_FILE = '{LOG_PATH}/access.log'
-REVERSE_PROXY_ACCESS_LOG_FILE_help = 'The Access log file to write to (reverse_proxy).'
+REVERSE_PROXY_ACCESS_LOG_FILE_HELP = 'The Access log file to write to (reverse_proxy).'
 REVERSE_PROXY_SSL_KEY_FILE = None
-REVERSE_PROXY_SSL_KEY_FILE_help = 'Key file of reverse proxy. Can be set to None if the key is with the certificate.'
+REVERSE_PROXY_SSL_KEY_FILE_HELP = 'Key file of reverse proxy. Can be set to None if the key is with the certificate.'
 REVERSE_PROXY_SSL_CRT_FILE = None
 REVERSE_PROXY_SSL_CRT_FILE_hep = 'SSL certificate file of reverse proxy. Required if you use SSL'
 REVERSE_PROXY_PORT = None  #
-REVERSE_PROXY_PORT_help = 'Reverse proxy port (if None, defaults to 80 or 443 if you use SSL)'
+REVERSE_PROXY_PORT_HELP = 'Reverse proxy port (if None, defaults to 80 or 443 if you use SSL)'
 
 # Language code for this installation. All choices can be found here:
 # http://www.i18nguy.com/unicode/language-identifiers.html
 LANGUAGE_CODE = 'fr-fr'
-LANGUAGE_CODE_help = 'A string representing the language code for this installation.'
+LANGUAGE_CODE_HELP = 'A string representing the language code for this installation.'
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = 'NEZ6ngWX0JihNG2wepl1uxY7bkPOWrTEo27vxPGlUM3eBAYfPT'
-SECRET_KEY_help = ('A secret key for a particular Django installation. This is used to provide cryptographic signing, '
+SECRET_KEY_HELP = ('A secret key for a particular Django installation. This is used to provide cryptographic signing, '
                    'and should be set to a unique, unpredictable value.')
 PIPELINE_ENABLED = False
-PIPELINE_ENABLED_help = 'True if assets should be compressed, False if not.'
+PIPELINE_ENABLED_HELP = 'True if assets should be compressed, False if not.'
 PIPELINE_CSS_COMPRESSOR = 'pipeline.compressors.slimit.SlimItCompressor'
-PIPELINE_CSS_COMPRESSOR_help = 'Compressor class to be applied to CSS files.'
+PIPELINE_CSS_COMPRESSOR_HELP = 'Compressor class to be applied to CSS files.'
 PIPELINE_JS_COMPRESSOR = 'pipeline.compressors.jsmin.JSMinCompressor'
-PIPELINE_JS_COMPRESSOR_help = 'Compressor class to be applied to JavaScript files.'
+PIPELINE_JS_COMPRESSOR_HELP = 'Compressor class to be applied to JavaScript files.'
 AUTHENTICATION_HEADER = 'REMOTE_USER'
-AUTHENTICATION_HEADER_help = 'Name of the header set by your reverse-proxy server (probably HTTP_REMOTE_USER).'
+AUTHENTICATION_HEADER_HELP = 'Name of the header set by your reverse-proxy server (probably HTTP_REMOTE_USER).'
 CACHES = {'default': {'BACKEND': 'django.core.cache.backends.dummy.DummyCache', }, }
-CACHES_help = 'A dictionary containing the settings for all caches to be used with Django.'
+CACHES_HELP = 'A dictionary containing the settings for all caches to be used with Django.'
 ACCOUNT_EMAIL_VERIFICATION = None
 
 # iterable of URL of your application. 'my_app.root_urls.urls'
@@ -97,7 +97,7 @@ FLOOR_INDEX = None
 FLOOR_PROJECT_NAME = _('DjangoFloor')
 FLOOR_ = ''
 DEFAULT_GROUP_NAME = _('Users')
-DEFAULT_GROUP_NAME_help = 'Name of the default group of newly-created users.'
+DEFAULT_GROUP_NAME_HELP = 'Name of the default group of newly-created users.'
 PIPELINE_JS = {
     'base': {'source_filenames': ['js/jquery.min.js', 'bootstrap3/js/bootstrap.min.js',
                                   'js/django_fontawesome.js', 'select2/select2.min.js', ],
@@ -110,34 +110,34 @@ PIPELINE_CSS = {
 
 
 EMAIL_HOST = 'localhost'
-EMAIL_HOST_help = 'The host to use for sending email.'
+EMAIL_HOST_HELP = 'The host to use for sending email.'
 EMAIL_HOST_PASSWORD = ''
-EMAIL_HOST_PASSWORD_help = 'Password to use for the SMTP server defined in EMAIL_HOST. This setting is used in ' \
+EMAIL_HOST_PASSWORD_HELP = 'Password to use for the SMTP server defined in EMAIL_HOST. This setting is used in ' \
                            'conjunction with EMAIL_HOST_USER when authenticating to the SMTP server. If either of ' \
                            'these settings is empty, Django won’t attempt authentication'
 EMAIL_HOST_USER = ''
-EMAIL_HOST_USER_help = 'Username to use for the SMTP server defined in EMAIL_HOST. If empty, Django won’t attempt ' \
+EMAIL_HOST_USER_HELP = 'Username to use for the SMTP server defined in EMAIL_HOST. If empty, Django won’t attempt ' \
                        'authentication.'
 EMAIL_PORT = 25
-EMAIL_PORT_help = 'Port to use for the SMTP server defined in EMAIL_HOST.'
+EMAIL_PORT_HELP = 'Port to use for the SMTP server defined in EMAIL_HOST.'
 
 EMAIL_SUBJECT_PREFIX = '[Django] '
-EMAIL_SUBJECT_PREFIX_help = 'Subject-line prefix for email messages sent with django.core.mail.mail_admins or ' \
+EMAIL_SUBJECT_PREFIX_HELP = 'Subject-line prefix for email messages sent with django.core.mail.mail_admins or ' \
                             'django.core.mail.mail_managers. You’ll probably want to include the trailing space'
 EMAIL_USE_TLS = False
-EMAIL_USE_TLS_help = 'Whether to use a TLS (secure) connection when talking to the SMTP server.' \
+EMAIL_USE_TLS_HELP = 'Whether to use a TLS (secure) connection when talking to the SMTP server.' \
                      ' This is used for explicit TLS connections, generally on port 587.'
 EMAIL_USE_SSL = False
-EMAIL_USE_SSL_help = 'Whether to use an implicit TLS (secure) connection when talking to the SMTP server. In most' \
+EMAIL_USE_SSL_HELP = 'Whether to use an implicit TLS (secure) connection when talking to the SMTP server. In most' \
                      ' email documentation this type of TLS connection is referred to as SSL. It is generally used ' \
                      'on port 465. If you are experiencing problems, see the explicit TLS setting EMAIL_USE_TLS.'
 SERVER_EMAIL = 'root@localhost'
-SERVER_EMAIL_help = 'The email address that error messages come from, such as those sent to ADMINS and MANAGERS.'
+SERVER_EMAIL_HELP = 'The email address that error messages come from, such as those sent to ADMINS and MANAGERS.'
 FILE_CHARSET = 'utf-8'
-FILE_CHARSET_help = 'The character encoding used to decode any files read from disk. This includes template files and' \
+FILE_CHARSET_HELP = 'The character encoding used to decode any files read from disk. This includes template files and' \
                     ' initial SQL data files.'
 FILE_UPLOAD_TEMP_DIR = None
-FILE_UPLOAD_TEMP_DIR_help = 'The directory to store data temporarily while uploading files. If None, Django will use ' \
+FILE_UPLOAD_TEMP_DIR_HELP = 'The directory to store data temporarily while uploading files. If None, Django will use ' \
                             'the standard temporary directory for the operating system. For example, this will ' \
                             'default to ‘/tmp’ on *nix-style operating systems.'
 
@@ -165,7 +165,7 @@ DEFAULT_CONTENT_TYPE = 'text/html'
 # Example: "/var/www/example.com/media/"
 # noinspection PyUnresolvedReferences
 MEDIA_ROOT = '{DATA_PATH}/media'
-MEDIA_ROOT_help = 'Absolute filesystem path to the directory that will hold user-uploaded files.'
+MEDIA_ROOT_HELP = 'Absolute filesystem path to the directory that will hold user-uploaded files.'
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash.
@@ -178,7 +178,7 @@ MEDIA_URL = '/media/'
 # Example: "/var/www/example.com/static/"
 # noinspection PyUnresolvedReferences
 STATIC_ROOT = '{LOCAL_PATH}/static'
-STATIC_ROOT_help = 'The absolute path to the directory where collectstatic will collect static files for deployment.'
+STATIC_ROOT_HELP = 'The absolute path to the directory where collectstatic will collect static files for deployment.'
 # URL prefix for static files.
 # Example: "http://example.com/static/", "http://static.example.com/"
 STATIC_URL = '/static/'
@@ -234,10 +234,10 @@ DEBUG_TOOLBAR_PANELS = [
 ]
 DEBUG_TOOLBAR_PATCH_SETTINGS = False
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-SECURE_PROXY_SSL_HEADER_help = 'A tuple representing a HTTP header/value combination that signifies a request is ' \
+SECURE_PROXY_SSL_HEADER_HELP = 'A tuple representing a HTTP header/value combination that signifies a request is ' \
                                'secure. This controls the behavior of the request object’s is_secure() method.'
 USE_X_FORWARDED_HOST = True
-USE_X_FORWARDED_HOST_help = 'A boolean that specifies whether to use the X-Forwarded-Host header in preference to ' \
+USE_X_FORWARDED_HOST_HELP = 'A boolean that specifies whether to use the X-Forwarded-Host header in preference to ' \
                             'the Host header. '
 AUTHENTICATION_BACKENDS = [
     'djangofloor.backends.DefaultGroupRemoteUserBackend',
@@ -289,7 +289,7 @@ INSTALLED_APPS = [
 ]
 
 OTHER_ALLAUTH = []
-OTHER_ALLAUTH_help = 'Other allauth authentication providers, merely a list of allauth.socialaccount.providers.*'
+OTHER_ALLAUTH_HELP = 'Other allauth authentication providers, merely a list of allauth.socialaccount.providers.*'
 
 BOOTSTRAP3 = {
     'jquery_url': '{STATIC_URL}js/jquery.min.js',
@@ -357,7 +357,7 @@ LOGGING = {
         },
     }
 }
-LOGGING_help = 'A data structure containing configuration information.' \
+LOGGING_HELP = 'A data structure containing configuration information.' \
                ' The contents of this data structure will be passed as the argument to the configuration method' \
                ' described in LOGGING_CONFIG.'
 
@@ -367,7 +367,7 @@ FAKE_AUTHENTICATION_GROUPS = ['group1', 'group2']
 # used to fake LDAP groups, added to the remotely-authenticated user
 
 MAX_REQUESTS = 10000
-MAX_REQUESTS_help = 'The maximum number of requests a worker will process before restarting.'
+MAX_REQUESTS_HELP = 'The maximum number of requests a worker will process before restarting.'
 
 LOGIN_URL = '/accounts/login/'
 LOGOUT_URL = '/accounts/logout/'
@@ -378,37 +378,37 @@ LOGIN_REDIRECT_URL = '/'
 ########################################################################################################################
 WEBSOCKET_URL = '/ws/'
 WS4REDIS_CONNECTION = {}
-WS4REDIS_CONNECTION_help = 'If the Redis datastore uses connection settings other than the defaults ' \
+WS4REDIS_CONNECTION_HELP = 'If the Redis datastore uses connection settings other than the defaults ' \
                            '(keys are "host"/"port"/"db"/"password").'
 
 ########################################################################################################################
 # ldap_groups
 ########################################################################################################################
 LDAP_GROUPS_URL = None
-LDAP_GROUPS_URL_help = 'the complete url in the scheme://hostname:hostport format of the server. ' \
+LDAP_GROUPS_URL_HELP = 'the complete url in the scheme://hostname:hostport format of the server. ' \
                        'Can use several servers, separated by commas.'
 LDAP_GROUPS_TLS = None
-LDAP_GROUPS_TLS_help = 'Tls object that contains information about the certificates and the trusted roots needed to' \
+LDAP_GROUPS_TLS_HELP = 'Tls object that contains information about the certificates and the trusted roots needed to' \
                        'establish a secure connection (defaults to None). If None any server certificate will be ' \
                        'accepted.'
 LDAP_GROUPS_BIND_DN = ''
-LDAP_GROUPS_BIND_DN_help = 'The distinguished name to use when binding to the LDAP server. ' \
+LDAP_GROUPS_BIND_DN_HELP = 'The distinguished name to use when binding to the LDAP server. ' \
                            'Use the empty string (the default) for an anonymous bind.'
 LDAP_GROUPS_BIND_PASSWORD = ''
-LDAP_GROUPS_BIND_PASSWORD_help = 'The password to use with LDAP_GROUPS_BIND_DN.'
+LDAP_GROUPS_BIND_PASSWORD_HELP = 'The password to use with LDAP_GROUPS_BIND_DN.'
 LDAP_GROUPS_CACHE_GROUPS_TIME = 0
-LDAP_GROUPS_CACHE_GROUPS_TIME_help = 'If non-zero, LDAP group membership will be cached using Django’s cache ' \
+LDAP_GROUPS_CACHE_GROUPS_TIME_HELP = 'If non-zero, LDAP group membership will be cached using Django’s cache ' \
                                      'framework. Otherwhise, this is the cache timeout (in seconds).'
 LDAP_GROUPS_SEARCH_BASE = 'CN=Users,DC=example,DC=org'
-LDAP_GROUPS_SEARCH_BASE_help = 'The base DN for the search'
+LDAP_GROUPS_SEARCH_BASE_HELP = 'The base DN for the search'
 LDAP_GROUPS_SEARCH_FILTER = '(cn=%(username)s)'
-LDAP_GROUPS_SEARCH_FILTER_help = 'Filter to use for the search. %(username)s and %(email)s are available.'
+LDAP_GROUPS_SEARCH_FILTER_HELP = 'Filter to use for the search. %(username)s and %(email)s are available.'
 LDAP_GROUPS_SEARCH_SCOPE = 'SUBTREE'
-LDAP_GROUPS_SEARCH_SCOPE_help = 'Either SUBTREE (default), BASE or SINGLE_LEVEL'
+LDAP_GROUPS_SEARCH_SCOPE_HELP = 'Either SUBTREE (default), BASE or SINGLE_LEVEL'
 LDAP_GROUPS_SEARCH_GROUP_ATTRIBUTE = 'memberOf'
-LDAP_GROUPS_SEARCH_GROUP_ATTRIBUTE_help = 'Name of the attribute with the list of the user groups.'
+LDAP_GROUPS_SEARCH_GROUP_ATTRIBUTE_HELP = 'Name of the attribute with the list of the user groups.'
 LDAP_GROUPS_FORMAT_GROUP_NAME = None
-LDAP_GROUPS_FORMAT_GROUP_NAME_help = 'If not None, the name of a Python function ("package.module.function"), ' \
+LDAP_GROUPS_FORMAT_GROUP_NAME_HELP = 'If not None, the name of a Python function ("package.module.function"), ' \
                                      'my_function(request, LDAP_group_name) must return a nicely-formatted name.'
 
 ########################################################################################################################
@@ -420,9 +420,8 @@ CELERY_RESULT_EXCHANGE = '{PROJECT_NAME}_results'
 CELERY_ACCEPT_CONTENT = ['json', 'yaml', 'msgpack']
 BROKER_URL = 'redis://localhost:6379/0'
 CELERY_PID_FILE = '{LOCAL_PATH}/run/{PROJECT_NAME}_celery.pid'
-CELERY_PID_FILE_help = 'A filename to use for the PID file. '
+CELERY_PID_FILE_HELP = 'A filename to use for the PID file. '
 CELERY_APP = 'djangofloor'
-CELERYD_LOG_FILE = '{LOG_PATH}/celery.log'
 CELERY_CREATE_DIRS = True
-CELERYBEAT_PID_FILE = '{LOCAL_PATH}/run/{PROJECT_NAME}_celerybeat.pid'
-CELERYBEAT_LOG_FILE = '{LOG_PATH}/celerybeat.log'
+CELERY_LOG_FILE = '{LOG_PATH}/celerybeat.log'
+CELERY_TASK_SERIALIZER = 'json'

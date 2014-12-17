@@ -13,7 +13,7 @@ djangofloor.defaults settings are overridden by project-specific settings, which
 Only variables in uppercase (like INSTALLED_APPS) are taken into account.
 Only variables defined in djangofloor.defaults or in project-specific settings are taken into account.
 
-If VARIABLE is uppercase and if VARIABLE_help exists, then VARIABLE is shown with command `manage.py config`.
+If VARIABLE is uppercase and if VARIABLE_HELP exists, then VARIABLE is shown with command `manage.py config`.
 
 """
 import os

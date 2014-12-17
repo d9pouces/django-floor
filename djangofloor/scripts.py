@@ -1,11 +1,10 @@
-#coding=utf-8
+# coding=utf-8
 """
 Define a main() function, allowing you to manage your Django project.
 """
 import re
-from setuptools import Command
 
-from djangofloor import defaults
+from setuptools import Command
 
 
 __author__ = 'flanker'
@@ -144,17 +143,17 @@ def gunicorn():
     set_env()
     from django.conf import settings
     parser = LaxOptionParser(usage="%prog subcommand [options] [args]", version=get_version(), option_list=[])
-    parser.add_option('-b', '--bind', action='store', default=None, help=defaults.BIND_ADDRESS_help)
+    parser.add_option('-b', '--bind', action='store', default=None, help=settings.BIND_ADDRESS_HELP)
     # noinspection PyUnresolvedReferences
-    parser.add_option('-p', '--pid', action='store', default=None, help=defaults.PID_FILE_help)
+    parser.add_option('-p', '--pid', action='store', default=None, help=settings.GUNICORN_PID_FILE_HELP)
     parser.add_option('--forwarded-allow-ips', action='store', default=None)
     parser.add_option('--debug', action='store_true', default=False)
-    parser.add_option('-t', '--timeout', action='store', default=None, help=defaults.REVERSE_PROXY_TIMEOUT_help)
+    parser.add_option('-t', '--timeout', action='store', default=None, help=settings.REVERSE_PROXY_TIMEOUT_HELP)
     parser.add_option('--proxy-allow-from', action='store', default=None,
                       help='Front-end\'s IPs from which allowed accept proxy requests (comma separate)')
-    parser.add_option('--error-logfile', action='store', default=None, help=defaults.GUNICORN_ERROR_LOG_FILE_help)
-    parser.add_option('--access-logfile', action='store', default=None, help=defaults.GUNICORN_ACCESS_LOG_FILE_help)
-    parser.add_option('--log-level', action='store', default=None, help=defaults.GUNICORN_LOG_LEVEL_help)
+    parser.add_option('--error-logfile', action='store', default=None, help=settings.GUNICORN_ERROR_LOG_FILE_HELP)
+    parser.add_option('--access-logfile', action='store', default=None, help=settings.GUNICORN_ACCESS_LOG_FILE_HELP)
+    parser.add_option('--log-level', action='store', default=None, help=settings.GUNICORN_LOG_LEVEL_HELP)
     options, args = parser.parse_args(sys.argv)
     if not options.debug and settings.DEBUG:
         sys.argv += ['--debug']
@@ -178,8 +177,9 @@ def celery():
     set_env()
     from django.conf import settings
     parser = LaxOptionParser(usage="%prog subcommand [options] [args]", version=get_version(), option_list=[])
-    parser.add_option('-A', '--app', action='store', default=None, help=defaults.BIND_ADDRESS_help)
-    parser.add_option('--pidfile', action='store', default=None, help=defaults.GUNICORN_PID_FILE_help)
+    parser.add_option('-A', '--app', action='store', default=settings.CELERY_APP, help=settings.BIND_ADDRESS_HELP)
+    parser.add_option('--pidfile', action='store', default=None, help=settings.GUNICORN_PID_FILE_HELP)
+    parser.add_option('--logfile', action='store', default=settings.CELERY_LOG_FILE)
     options, args = parser.parse_args(sys.argv)
     set_default_option(options, 'app', 'djangofloor')
     set_default_option(options, 'pidfile', settings.GUNICORN_PID_FILE)
