@@ -20,13 +20,15 @@ class Command(BaseCommand):
         print(_('Default values: %(path)s') % {'path': default_conf})
         print('-' * 80)
         print(_('List of available settings:'))
-        keys = set([key for key in defaults.__dict__ if key == key.upper() and key + '_HELP' in defaults.__dict__])
-        keys |= set([key for key in project.__dict__ if key == key.upper() and key + '_HELP' in project.__dict__])
+        all_keys = defaults.__dict__.copy()
+        all_keys.update(project.__dict__)
+        keys = set([key for key in defaults.__dict__ if key == key.upper() and key + '_HELP' in all_keys])
+        keys |= set([key for key in project.__dict__ if key == key.upper() and key + '_HELP' in all_keys])
         keys = list(keys)
         keys.sort()
         for key in keys:
             print(_('%(key)s = %(default)r:\n     %(help)s\n') %
-                  {'key': key, 'help': defaults.__dict__[key + '_HELP'], 'default': defaults.__dict__[key]})
+                  {'key': key, 'help': all_keys[key + '_HELP'], 'default': all_keys[key]})
 
 
 if __name__ == '__main__':

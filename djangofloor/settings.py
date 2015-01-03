@@ -1,4 +1,4 @@
-#coding=utf-8
+# coding=utf-8
 """ Django settings for DjangoFloor.
 
 Settings come from 3 modules:
@@ -20,8 +20,12 @@ import os
 import string
 import sys
 from django.utils.importlib import import_module
+from pathlib import Path
 from djangofloor import defaults as floor_settings
 from djangofloor import __version__ as version
+from djangofloor.utils import DirectoryPath, FilePath
+
+
 __author__ = 'flanker'
 
 PROJECT_SETTINGS_MODULE_NAME = os.environ.get('DJANGOFLOOR_PROJECT_SETTINGS', '')
@@ -78,6 +82,16 @@ def __parse_setting(obj):
                 values[field_name] = __setting_value(field_name)
         if values:
             return __formatter.format(obj, **values)
+    elif isinstance(obj, DirectoryPath):
+        obj = __parse_setting(str(obj))
+        __ensure_dir(obj, parent_=False)
+        return obj
+    elif isinstance(obj, FilePath):
+        obj = __parse_setting(str(obj))
+        __ensure_dir(obj, parent_=True)
+        return obj
+    elif isinstance(obj, Path):
+        return __parse_setting(str(obj))
     elif isinstance(obj, list) or isinstance(obj, tuple):
         return [__parse_setting(x) for x in obj]
     elif isinstance(obj, dict):
@@ -110,7 +124,11 @@ def __setting_value(setting_name_):
 def __ensure_dir(path_, parent_=True):
     dirname_ = os.path.dirname(path_) if parent_ else path_
     if not os.path.isdir(dirname_):
-        os.makedirs(dirname_)
+        try:
+            os.makedirs(dirname_)
+            print('Directory %s created.' % dirname_)
+        except IOError:
+            print('Unable to create directory %s.' % dirname_)
 
 for module in floor_settings, project_settings, user_settings:
     for setting_name in module.__dict__:
@@ -122,27 +140,6 @@ for module in floor_settings, project_settings, user_settings:
 INSTALLED_APPS += list(filter(lambda x: x not in INSTALLED_APPS, OTHER_ALLAUTH))
 # noinspection PyUnresolvedReferences
 INSTALLED_APPS += list(filter(lambda x: x not in INSTALLED_APPS, FLOOR_INSTALLED_APPS))
-
-# noinspection PyUnresolvedReferences
-for db_dict in DATABASES.values():
-    if db_dict['ENGINE'] == 'django.db.backends.sqlite3':
-        __ensure_dir(db_dict['NAME'])
-# noinspection PyUnresolvedReferences
-for db_dict in CACHES.values():
-    if db_dict['BACKEND'] == 'django.core.cache.backends.filebased.FileBasedCache':
-        __ensure_dir(db_dict['LOCATION'], False)
-# noinspection PyUnresolvedReferences
-for db_dict in LOGGING['handlers'].values():
-    if 'RotatingFileHandler' in db_dict['class']:
-        __ensure_dir(db_dict['filename'])
-# noinspection PyUnresolvedReferences
-__ensure_dir(MEDIA_ROOT, False)
-# noinspection PyUnresolvedReferences
-__ensure_dir(STATIC_ROOT, False)
-# noinspection PyUnresolvedReferences
-for path in (GUNICORN_PID_FILE, GUNICORN_ERROR_LOG_FILE, GUNICORN_ACCESS_LOG_FILE, REVERSE_PROXY_ERROR_LOG_FILE,
-             REVERSE_PROXY_ACCESS_LOG_FILE, ):
-    __ensure_dir(path)
 
 
 if __name__ == '__main__':

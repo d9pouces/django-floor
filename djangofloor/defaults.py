@@ -1,13 +1,14 @@
-#coding=utf-8
+# coding=utf-8
 """ Django settings for DjangoFloor project. """
+from djangofloor.utils import DirectoryPath, FilePath
 
 __author__ = 'flanker'
 from os.path import join, dirname, abspath
 from django.utils.translation import ugettext_lazy as _
 # define a root path for misc. Django data (SQLite database, static files, ...)
 LOCAL_PATH = abspath(join(dirname(dirname(__file__)), 'django_data'))
-LOG_PATH = '{LOCAL_PATH}/log'
-DATA_PATH = '{LOCAL_PATH}/data'
+LOG_PATH = DirectoryPath('{LOCAL_PATH}/log')
+DATA_PATH = DirectoryPath('{LOCAL_PATH}/data')
 DEBUG = True
 DEBUG_HELP = 'A boolean that turns on/off debug mode.'
 TEMPLATE_DEBUG = False
@@ -23,7 +24,7 @@ DEFAULT_FROM_EMAIL_HELP = 'Default email address to use for various automated co
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',  # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': '{DATA_PATH}/database.sqlite3',  # Or path to database file if using sqlite3.
+        'NAME': FilePath('{DATA_PATH}/database.sqlite3'),  # Or path to database file if using sqlite3.
         # The following settings are not used with sqlite3:
         'USER': '',
         'PASSWORD': '',
@@ -40,11 +41,11 @@ THREADS = 1
 THREADS_HELP = 'The number of worker threads for handling requests.'
 WORKERS = 1
 WORKERS_HELP = 'The number of worker process for handling requests.'
-GUNICORN_PID_FILE = '{LOCAL_PATH}/run/{PROJECT_NAME}_gunicorn.pid'
+GUNICORN_PID_FILE = FilePath('{LOCAL_PATH}/run/{PROJECT_NAME}_gunicorn.pid')
 GUNICORN_PID_FILE_HELP = 'A filename to use for the PID file. '
-GUNICORN_ERROR_LOG_FILE = '{LOG_PATH}/gunicorn_error.log'
+GUNICORN_ERROR_LOG_FILE = FilePath('{LOG_PATH}/gunicorn_error.log')
 GUNICORN_ERROR_LOG_FILE_HELP = 'The Error log file to write to (Gunicorn).'
-GUNICORN_ACCESS_LOG_FILE = '{LOG_PATH}/gunicorn_access.log'
+GUNICORN_ACCESS_LOG_FILE = FilePath('{LOG_PATH}/gunicorn_access.log')
 GUNICORN_ACCESS_LOG_FILE_HELP = 'The Access log file to write to (Gunicorn).'
 GUNICORN_LOG_LEVEL = 'info'
 GUNICORN_LOG_LEVEL_HELP = 'The granularity of Gunicorn Error log outputs.'
@@ -59,9 +60,9 @@ REVERSE_PROXY_IPS = []
 REVERSE_PROXY_IPS_HELP = 'List of IP addresses of reverse proxies'
 REVERSE_PROXY_TIMEOUT = 30
 REVERSE_PROXY_TIMEOUT_HELP = 'Workers silent for more than this many seconds are killed and restarted.'
-REVERSE_PROXY_ERROR_LOG_FILE = '{LOG_PATH}/error.log'
+REVERSE_PROXY_ERROR_LOG_FILE = FilePath('{LOG_PATH}/error.log')
 REVERSE_PROXY_ERROR_LOG_FILE_HELP = 'Error log file to write to (Reverse proxy).'
-REVERSE_PROXY_ACCESS_LOG_FILE = '{LOG_PATH}/access.log'
+REVERSE_PROXY_ACCESS_LOG_FILE = FilePath('{LOG_PATH}/access.log')
 REVERSE_PROXY_ACCESS_LOG_FILE_HELP = 'The Access log file to write to (reverse_proxy).'
 REVERSE_PROXY_SSL_KEY_FILE = None
 REVERSE_PROXY_SSL_KEY_FILE_HELP = 'Key file of reverse proxy. Can be set to None if the key is with the certificate.'
@@ -164,7 +165,7 @@ DEFAULT_CONTENT_TYPE = 'text/html'
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 # Example: "/var/www/example.com/media/"
 # noinspection PyUnresolvedReferences
-MEDIA_ROOT = '{DATA_PATH}/media'
+MEDIA_ROOT = DirectoryPath('{DATA_PATH}/media')
 MEDIA_ROOT_HELP = 'Absolute filesystem path to the directory that will hold user-uploaded files.'
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
@@ -177,7 +178,7 @@ MEDIA_URL = '/media/'
 # in apps' "static/" subdirectories and in STATICFILES_DIRS.
 # Example: "/var/www/example.com/static/"
 # noinspection PyUnresolvedReferences
-STATIC_ROOT = '{LOCAL_PATH}/static'
+STATIC_ROOT = DirectoryPath('{LOCAL_PATH}/static')
 STATIC_ROOT_HELP = 'The absolute path to the directory where collectstatic will collect static files for deployment.'
 # URL prefix for static files.
 # Example: "http://example.com/static/", "http://static.example.com/"
@@ -336,15 +337,15 @@ LOGGING = {
             'filters': ['require_debug_false'],
             'class': 'django.utils.log.AdminEmailHandler'
         },
-        # 'rotating_file': {
-        #     'level': 'INFO',
-        #     'filters': ['require_debug_false'],
-        #     'class': 'logging.handlers.RotatingFileHandler',
-        #     'filename': '{LOG_PATH}/django.log',
-        #     'maxBytes': 10000000,  # 10 MB
-        #     'backupCount': 2,
-        #     'encoding': 'utf-8',
-        # }
+        'rotating_file': {
+            'level': 'INFO',
+            'filters': ['require_debug_false'],
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': FilePath('{LOG_PATH}/django.log'),
+            'maxBytes': 10000000,  # 10 MB
+            'backupCount': 2,
+            'encoding': 'utf-8',
+        }
     },
     'loggers': {
         'django.request': {
@@ -419,9 +420,9 @@ CELERY_TIMEZONE = '{TIME_ZONE}'
 CELERY_RESULT_EXCHANGE = '{PROJECT_NAME}_results'
 CELERY_ACCEPT_CONTENT = ['json', 'yaml', 'msgpack']
 BROKER_URL = 'redis://localhost:6379/0'
-CELERY_PID_FILE = '{LOCAL_PATH}/run/{PROJECT_NAME}_celery.pid'
+CELERY_PID_FILE = FilePath('{LOCAL_PATH}/run/{PROJECT_NAME}_celery.pid')
 CELERY_PID_FILE_HELP = 'A filename to use for the PID file. '
 CELERY_APP = 'djangofloor'
 CELERY_CREATE_DIRS = True
-CELERY_LOG_FILE = '{LOG_PATH}/celerybeat.log'
+CELERY_LOG_FILE = FilePath('{LOG_PATH}/celerybeat.log')
 CELERY_TASK_SERIALIZER = 'json'
