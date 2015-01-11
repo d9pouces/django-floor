@@ -27,8 +27,9 @@ class Command(BaseCommand):
         keys = list(keys)
         keys.sort()
         for key in keys:
-            print(_('%(key)s = %(default)r:\n     %(help)s\n') %
-                  {'key': key, 'help': all_keys[key + '_HELP'], 'default': all_keys[key]})
+            if all_keys[key + '_HELP']:
+                print(_('%(key)s = %(default)r:\n     %(help)s\n') %
+                      {'key': key, 'help': all_keys[key + '_HELP'], 'default': all_keys[key]})
 
 
 if __name__ == '__main__':

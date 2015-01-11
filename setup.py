@@ -1,4 +1,4 @@
-#coding=utf-8
+# coding=utf-8
 """Setup file for the DjangoFloor project.
 """
 
@@ -29,9 +29,8 @@ setup(
     include_package_data=True,
     zip_safe=False,
     test_suite='djangofloor.tests',
-    install_requires=['Django>=1.7', 'django-allauth', 'gunicorn', 'django-bootstrap3', 'django-pipeline',
-                      'django-debug-toolbar', 'django-fontawesome', 'django-admin-bootstrapped',
-                      'celery', 'slimit', 'jsmin'],
+    install_requires=['Django>=1.7', 'django-allauth', 'gunicorn', 'django-bootstrap3', 'celery', 'slimit', 'jsmin',
+                      'django-debug-toolbar', 'django-fontawesome', 'django-admin-bootstrapped', ],
     setup_requires=[],
     classifiers=[],
 )

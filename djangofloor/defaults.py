@@ -79,12 +79,6 @@ LANGUAGE_CODE_HELP = 'A string representing the language code for this installat
 SECRET_KEY = 'NEZ6ngWX0JihNG2wepl1uxY7bkPOWrTEo27vxPGlUM3eBAYfPT'
 SECRET_KEY_HELP = ('A secret key for a particular Django installation. This is used to provide cryptographic signing, '
                    'and should be set to a unique, unpredictable value.')
-PIPELINE_ENABLED = False
-PIPELINE_ENABLED_HELP = 'True if assets should be compressed, False if not.'
-PIPELINE_CSS_COMPRESSOR = 'pipeline.compressors.slimit.SlimItCompressor'
-PIPELINE_CSS_COMPRESSOR_HELP = 'Compressor class to be applied to CSS files.'
-PIPELINE_JS_COMPRESSOR = 'pipeline.compressors.jsmin.JSMinCompressor'
-PIPELINE_JS_COMPRESSOR_HELP = 'Compressor class to be applied to JavaScript files.'
 AUTHENTICATION_HEADER = 'REMOTE_USER'
 AUTHENTICATION_HEADER_HELP = 'Name of the header set by your reverse-proxy server (probably HTTP_REMOTE_USER).'
 CACHES = {'default': {'BACKEND': 'django.core.cache.backends.dummy.DummyCache', }, }
@@ -99,16 +93,6 @@ FLOOR_PROJECT_NAME = _('DjangoFloor')
 FLOOR_ = ''
 DEFAULT_GROUP_NAME = _('Users')
 DEFAULT_GROUP_NAME_HELP = 'Name of the default group of newly-created users.'
-PIPELINE_JS = {
-    'base': {'source_filenames': ['js/jquery.min.js', 'bootstrap3/js/bootstrap.min.js',
-                                  'js/django_fontawesome.js', 'select2/select2.min.js', ],
-             'output_filename': 'js/base.js', },
-}
-PIPELINE_CSS = {
-    'base': {'source_filenames': ['bootstrap3/css/bootstrap.min.css', 'select2/select2.css',
-                                  'select2-bootstrap.css', 'css/font-awesome.min.css', ],
-             'output_filename': 'css/base.css', 'extra_context': {'media': 'all'}, }, }
-
 
 EMAIL_HOST = 'localhost'
 EMAIL_HOST_HELP = 'The host to use for sending email.'
@@ -216,7 +200,6 @@ MIDDLEWARE_CLASSES = ['django.middleware.cache.UpdateCacheMiddleware',
                       'djangofloor.middleware.RemoteUserMiddleware',
                       'djangofloor.middleware.BasicAuthMiddleware',
                       'djangofloor.middleware.FakeAuthenticationMiddleware',
-                      'pipeline.middleware.MinifyHTMLMiddleware',
                       'django.middleware.cache.FetchFromCacheMiddleware', ]
 INTERNAL_IPS = ('127.0.0.1', )
 
@@ -280,7 +263,6 @@ INSTALLED_APPS = [
     'django_admin_bootstrapped.bootstrap3',
     'django_admin_bootstrapped',
     'django.contrib.admin',
-    'pipeline',
     'bootstrap3',
     'fontawesome',
     'djangofloor',
@@ -303,17 +285,6 @@ BOOTSTRAP3 = {
 }
 FONTAWESOME_CSS_URL = 'css/font-awesome.min.css'
 TEST_RUNNER = 'django.test.runner.DiscoverRunner'
-# Pipeline configuration
-
-PIPELINE_MIMETYPES = (
-    ('text/coffeescript', '.coffee'),
-    ('text/less', '.less'),
-    ('text/javascript', '.js'),  # required for IE8
-    ('text/x-sass', '.sass'),
-    ('text/x-scss', '.scss')
-)
-PIPELINE_DISABLE_WRAPPER = True
-STATICFILES_STORAGE = 'pipeline.storage.PipelineCachedStorage'
 
 ACCOUNT_AUTHENTICATION_METHOD = 'username_email'
 # A sample logging configuration. The only tangible logging
