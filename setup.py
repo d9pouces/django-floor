@@ -31,7 +31,7 @@ setup(
     test_suite='djangofloor.tests',
     install_requires=['Django>=1.7', 'django-allauth', 'gunicorn', 'django-bootstrap3', 'celery', 'jsmin',
                       'django-debug-toolbar', 'django-fontawesome', 'django-admin-bootstrapped', 'rcssmin',
-                      'django-pipeline', ],
+                      'django-pipeline', 'django-redis', ],
     setup_requires=[],
     classifiers=[],
 )

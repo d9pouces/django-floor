@@ -27,7 +27,7 @@
                 </div>
                 <div class="navbar-collapse collapse">
                     {% if user.is_authenticated and not df_remote_authenticated %}
-                        <a class="navbar-brand" href="{% url 'account_email' %}">{% fontawesome_icon 'pencil' %}</a>
+                        <a class="navbar-brand" href="{% url 'account_email' %}">{% fontawesome_icon 'pencil' %}&nbsp;<small>{{ user }}</small></a>
                         <a class="navbar-brand" href="{% url 'account_logout' %}">{% fontawesome_icon 'sign-out' %}</a>
                     {% elif user.is_authenticated %}
                         <a class="navbar-brand">{{ user.username }}</a>

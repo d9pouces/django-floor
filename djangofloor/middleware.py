@@ -27,7 +27,7 @@ class RemoteUserMiddleware(BaseRemoteUserMiddleware):
 
     def process_request(self, request):
         request.df_remote_authenticated = False
-        if request.META['REMOTE_ADDR'] in settings.REVERSE_PROXY_IPS:
+        if request.META['REMOTE_ADDR'] in settings.REVERSE_PROXY_IPS and self.header:
             if not request.user.is_authenticated():
                 super(RemoteUserMiddleware, self).process_request(request)
                 request.df_remote_authenticated = request.user.is_authenticated()
@@ -40,7 +40,7 @@ class FakeAuthenticationMiddleware(object):
 
     # noinspection PyMethodMayBeStatic
     def process_request(self, request):
-        username = settings.FAKE_AUTHENTICATION_USERNAME
+        username = settings.FLOOR_FAKE_AUTHENTICATION_USERNAME
         if not settings.DEBUG or not username:
             return
         user = auth.authenticate(remote_user=username)
@@ -48,8 +48,8 @@ class FakeAuthenticationMiddleware(object):
             request.user = user
             auth.login(request, user)
             request.df_remote_authenticated = True
-            if settings.FAKE_AUTHENTICATION_GROUPS:
-                for group_name in settings.FAKE_AUTHENTICATION_GROUPS:
+            if settings.FLOOR_FAKE_AUTHENTICATION_GROUPS:
+                for group_name in settings.FLOOR_FAKE_AUTHENTICATION_GROUPS:
                     if group_name not in self.group_cache:
                         group, created = Group.objects.get_or_create(name=group_name)
                         self.group_cache[group_name] = group

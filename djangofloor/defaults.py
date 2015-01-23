@@ -36,8 +36,8 @@ DATABASES = {
 DATABASES_HELP = 'A dictionary containing the settings for all databases to be used with Django.'
 TIME_ZONE = 'Europe/Paris'
 TIME_ZONE_HELP = 'A string representing the time zone for this installation, or None. '
-BIND_ADDRESS = '{SERVER_NAME}:9000'
-BIND_ADDRESS_HELP = 'The socket to bind.'
+BIND_ADDRESS = '127.0.0.1:9000'
+BIND_ADDRESS_HELP = 'The socket (IP address:port) to bind to.'
 THREADS = 1
 THREADS_HELP = 'The number of worker threads for handling requests.'
 WORKERS = 1
@@ -58,7 +58,7 @@ X_ACCEL_REDIRECT_HELP = 'Use the X-Accel-Redirect header in NGinx. List of tuple
 ALLOWED_HOSTS = ['127.0.0.1', '{SERVER_NAME}', ]
 ALLOWED_HOSTS_HELP = 'A list of strings representing the host/domain names that this Django site can serve.'
 REVERSE_PROXY_IPS = []
-REVERSE_PROXY_IPS_HELP = 'List of IP addresses of reverse proxies'
+REVERSE_PROXY_IPS_HELP = 'List of IP addresses of the reverse proxies'
 REVERSE_PROXY_TIMEOUT = 30
 # Workers silent for more than this many seconds are killed and restarted.
 REVERSE_PROXY_ERROR_LOG_FILE = FilePath('{LOG_PATH}/error.log')
@@ -81,12 +81,12 @@ LANGUAGE_CODE_HELP = 'A string representing the language code for this installat
 SECRET_KEY = 'NEZ6ngWX0JihNG2wepl1uxY7bkPOWrTEo27vxPGlUM3eBAYfPT'
 SECRET_KEY_HELP = ('A secret key for a particular Django installation. This is used to provide cryptographic signing, '
                    'and should be set to a unique, unpredictable value.')
-AUTHENTICATION_HEADER = 'REMOTE_USER'
-AUTHENTICATION_HEADER_HELP = 'Name of the header set by your reverse-proxy server (probably HTTP_REMOTE_USER).'
-CACHES = {'default': {'BACKEND': 'django.core.cache.backends.dummy.DummyCache', }, }
+CACHES = {'default': {'BACKEND': 'django.core.cache.backends.locmem.LocMemCache', }}
+# CACHES = {'default': {'BACKEND': 'django_redis.cache.RedisCache', 'LOCATION': 'redis://127.0.0.1:6379/1',
+#                       'OPTIONS': {'CLIENT_CLASS': 'django_redis.client.DefaultClient', }, }, }
 CACHES_HELP = 'A dictionary containing the settings for all caches to be used with Django.'
 ACCOUNT_EMAIL_VERIFICATION = None
-
+ACCOUNT_EMAIL_SUBJECT_PREFIX = '[{SERVER_NAME}] '
 # iterable of URL of your application. 'my_app.root_urls.urls'
 FLOOR_URL_CONF = None
 FLOOR_INSTALLED_APPS = []
@@ -96,28 +96,8 @@ FLOOR_PROJECT_NAME = _('DjangoFloor')
 DEFAULT_GROUP_NAME = _('Users')
 DEFAULT_GROUP_NAME_HELP = 'Name of the default group of newly-created users.'
 
-EMAIL_HOST = '{SERVER_NAME}'
-#  The host to use for sending email.
-EMAIL_HOST_PASSWORD = ''
-# Password to use for the SMTP server defined in EMAIL_HOST. This setting is used in
-# conjunction with EMAIL_HOST_USER when authenticating to the SMTP server. If either of
-# these settings is empty, Django won’t attempt authentication
-EMAIL_HOST_USER = ''
-# Username to use for the SMTP server defined in EMAIL_HOST. If empty, Django won’t attempt authentication.
-EMAIL_PORT = 25
-# Port to use for the SMTP server defined in EMAIL_HOST.
 EMAIL_SUBJECT_PREFIX = '[{SERVER_NAME}] '
-# Subject-line prefix for email messages sent with django.core.mail.mail_admins or
-# django.core.mail.mail_managers. You’ll probably want to include the trailing space
-EMAIL_USE_TLS = False
-# Whether to use a TLS (secure) connection when talking to the SMTP server.
-# This is used for explicit TLS connections, generally on port 587.
-EMAIL_USE_SSL = False
-# Whether to use an implicit TLS (secure) connection when talking to the SMTP server. In most
-# email documentation this type of TLS connection is referred to as SSL. It is generally used
-# on port 465. If you are experiencing problems, see the explicit TLS setting EMAIL_USE_TLS.
 SERVER_EMAIL = 'root@{SERVER_NAME}'
-SERVER_EMAIL_HELP = 'The email address that error messages come from, such as those sent to ADMINS and MANAGERS.'
 FILE_CHARSET = 'utf-8'
 # The character encoding used to decode any files read from disk. This includes template files and
 # initial SQL data files
@@ -125,8 +105,6 @@ FILE_UPLOAD_TEMP_DIR = None
 # The directory to store data temporarily while uploading files. If None, Django will use
 # the standard temporary directory for the operating system. For example, this will
 # default to ‘/tmp’ on *nix-style operating systems.
-
-DATABASE_ROUTERS = ['djangofloor.routers.BaseRouter', ]
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
@@ -252,6 +230,9 @@ DEBUG_TOOLBAR_PANELS = [
     'debug_toolbar.panels.redirects.RedirectsPanel',
 ]
 DEBUG_TOOLBAR_PATCH_SETTINGS = False
+AUTHENTICATION_HEADER = 'HTTP_REMOTE_USER'
+AUTHENTICATION_HEADER_HELP = 'HTTP header corresponding to the username (when using HTTP authentication).' \
+                             ' Set it to None to disable it.'
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 SECURE_PROXY_SSL_HEADER_HELP = 'A tuple representing a HTTP header/value combination that signifies a request is ' \
                                'secure. This controls the behavior of the request object’s is_secure() method.'
@@ -261,6 +242,7 @@ USE_X_FORWARDED_HOST_HELP = 'A boolean that specifies whether to use the X-Forwa
 AUTHENTICATION_BACKENDS = [
     'djangofloor.backends.DefaultGroupRemoteUserBackend',
     'django.contrib.auth.backends.ModelBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
 ]
 
 TEMPLATE_CONTEXT_PROCESSORS = (
@@ -369,9 +351,9 @@ LOGGING_HELP = 'A data structure containing configuration information.' \
                ' The contents of this data structure will be passed as the argument to the configuration method' \
                ' described in LOGGING_CONFIG.'
 
-FAKE_AUTHENTICATION_USERNAME = 'test'
+FLOOR_FAKE_AUTHENTICATION_USERNAME = None
 # used to fake a reverse proxy authentication for development purpose
-FAKE_AUTHENTICATION_GROUPS = ['group1', 'group2']
+FLOOR_FAKE_AUTHENTICATION_GROUPS = ['group1', 'group2']
 # used to fake LDAP groups, added to the remotely-authenticated user
 
 MAX_REQUESTS = 10000
@@ -388,36 +370,6 @@ WEBSOCKET_URL = '/ws/'
 WS4REDIS_CONNECTION = {}
 WS4REDIS_CONNECTION_HELP = 'If the Redis datastore uses connection settings other than the defaults ' \
                            '(keys are "host"/"port"/"db"/"password").'
-
-########################################################################################################################
-# ldap_groups
-########################################################################################################################
-LDAP_GROUPS_URL = None
-LDAP_GROUPS_URL_HELP = 'the complete url in the scheme://hostname:hostport format of the server. ' \
-                       'Can use several servers, separated by commas.'
-LDAP_GROUPS_TLS = None
-LDAP_GROUPS_TLS_HELP = 'Tls object that contains information about the certificates and the trusted roots needed to' \
-                       'establish a secure connection (defaults to None). If None any server certificate will be ' \
-                       'accepted.'
-LDAP_GROUPS_BIND_DN = ''
-LDAP_GROUPS_BIND_DN_HELP = 'The distinguished name to use when binding to the LDAP server. ' \
-                           'Use the empty string (the default) for an anonymous bind.'
-LDAP_GROUPS_BIND_PASSWORD = ''
-LDAP_GROUPS_BIND_PASSWORD_HELP = 'The password to use with LDAP_GROUPS_BIND_DN.'
-LDAP_GROUPS_CACHE_GROUPS_TIME = 0
-LDAP_GROUPS_CACHE_GROUPS_TIME_HELP = 'If non-zero, LDAP group membership will be cached using Django’s cache ' \
-                                     'framework. Otherwhise, this is the cache timeout (in seconds).'
-LDAP_GROUPS_SEARCH_BASE = 'CN=Users,DC=example,DC=org'
-LDAP_GROUPS_SEARCH_BASE_HELP = 'The base DN for the search'
-LDAP_GROUPS_SEARCH_FILTER = '(cn=%(username)s)'
-LDAP_GROUPS_SEARCH_FILTER_HELP = 'Filter to use for the search. %(username)s and %(email)s are available.'
-LDAP_GROUPS_SEARCH_SCOPE = 'SUBTREE'
-LDAP_GROUPS_SEARCH_SCOPE_HELP = 'Either SUBTREE (default), BASE or SINGLE_LEVEL'
-LDAP_GROUPS_SEARCH_GROUP_ATTRIBUTE = 'memberOf'
-LDAP_GROUPS_SEARCH_GROUP_ATTRIBUTE_HELP = 'Name of the attribute with the list of the user groups.'
-LDAP_GROUPS_FORMAT_GROUP_NAME = None
-LDAP_GROUPS_FORMAT_GROUP_NAME_HELP = 'If not None, the name of a Python function ("package.module.function"), ' \
-                                     'my_function(request, LDAP_group_name) must return a nicely-formatted name.'
 
 ########################################################################################################################
 # celery
