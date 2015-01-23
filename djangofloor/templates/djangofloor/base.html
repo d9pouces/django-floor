@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-{% load bootstrap3 staticfiles i18n fontawesome %}
+{% load bootstrap3 staticfiles i18n fontawesome pipeline %}
 <html lang="{{ df_language_code }}">
 <head>
     <title>{% block head_title %}{{ df_project_name }}{% endblock %}</title>
@@ -7,20 +7,9 @@
     <meta name="description" content=""/>
     <meta name="robots" content="index, follow"/>
     <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
-    {% block extra_head %}{% endblock %}
-    <link rel="shortcut icon" href="{% static 'images/favicon.png' %}">
-<script src="{% static 'js/jquery.min.js' %}"></script>
-<script src="{% static 'bootstrap3/js/bootstrap.min.js' %}"></script>
-<script src="{% static 'fontawesome/js/django_fontawesome.js' %}"></script>
-<script src="{% static 'fontawesome/select2/select2.min.js' %}"></script>
-<link rel="stylesheet" type="text/css" href="{% static 'bootstrap3/css/bootstrap.min.css' %}"/>
-<link rel="stylesheet" type="text/css" href="{% static 'fontawesome/select2/select2.css' %}"/>
-<link rel="stylesheet" type="text/css" href="{% static 'fontawesome/select2/select2-bootstrap.css' %}"/>
-<link rel="stylesheet" type="text/css" href="{% static 'fontawesome/css/font-awesome.min.css' %}"/>
-    <!--[if lt IE 9 ]>
-      <script src="{% static 'js/html5shiv.js' %}"></script>
-      <script src="{% static 'js/respond.min.js' %}"></script>
-    <![endif]-->
+    {% block head_extra %}{% endblock %}
+    {% block head_favicon %}<link rel="shortcut icon" href="{% static 'images/favicon.png' %}">{% endblock %}
+    {% block head_pipeline %}{% javascript 'default' %}{% stylesheet 'default' %}<!--[if lt IE 9 ]>{% javascript 'ie9' %}<![endif]-->{% endblock %}
 </head>
 <body>
 {% block body %}

@@ -7,18 +7,19 @@ from os.path import join, dirname, abspath
 from django.utils.translation import ugettext_lazy as _
 # define a root path for misc. Django data (SQLite database, static files, ...)
 LOCAL_PATH = abspath(join(dirname(dirname(__file__)), 'django_data'))
+SERVER_NAME = 'localhost'
 LOG_PATH = DirectoryPath('{LOCAL_PATH}/log')
 DATA_PATH = DirectoryPath('{LOCAL_PATH}/data')
 DEBUG = True
 DEBUG_HELP = 'A boolean that turns on/off debug mode.'
 TEMPLATE_DEBUG = False
 TEMPLATE_DEBUG_HELP = 'A boolean that turns on/off template debug mode.'
-ADMINS = (("admin", "admin@localhost"), )
+ADMINS = (("admin", "admin@{SERVER_NAME}"), )
 ADMINS_HELP = 'A tuple that lists people who get code error notifications.'
 MANAGERS = ADMINS
 MANAGERS_HELP = ('A tuple in the same format as ADMINS that specifies who should get broken link notifications '
                  'when BrokenLinkEmailsMiddleware is enabled.')
-DEFAULT_FROM_EMAIL = 'admin@localhost'
+DEFAULT_FROM_EMAIL = 'admin@{SERVER_NAME}'
 DEFAULT_FROM_EMAIL_HELP = 'Default email address to use for various automated correspondence from the site manager(s).'
 # noinspection PyUnresolvedReferences
 DATABASES = {
@@ -35,7 +36,7 @@ DATABASES = {
 DATABASES_HELP = 'A dictionary containing the settings for all databases to be used with Django.'
 TIME_ZONE = 'Europe/Paris'
 TIME_ZONE_HELP = 'A string representing the time zone for this installation, or None. '
-BIND_ADDRESS = 'localhost:9000'
+BIND_ADDRESS = '{SERVER_NAME}:9000'
 BIND_ADDRESS_HELP = 'The socket to bind.'
 THREADS = 1
 THREADS_HELP = 'The number of worker threads for handling requests.'
@@ -54,22 +55,23 @@ USE_X_SEND_FILE = False
 USE_X_SEND_FILE_HELP = 'Use the XSendFile header in Apache or LightHTTPd for sending large files'
 X_ACCEL_REDIRECT = []
 X_ACCEL_REDIRECT_HELP = 'Use the X-Accel-Redirect header in NGinx. List of tuples (/directory_path/, /alias_url/).'
-ALLOWED_HOSTS = ['127.0.0.1', ]
+ALLOWED_HOSTS = ['127.0.0.1', '{SERVER_NAME}', ]
 ALLOWED_HOSTS_HELP = 'A list of strings representing the host/domain names that this Django site can serve.'
 REVERSE_PROXY_IPS = []
 REVERSE_PROXY_IPS_HELP = 'List of IP addresses of reverse proxies'
 REVERSE_PROXY_TIMEOUT = 30
-REVERSE_PROXY_TIMEOUT_HELP = 'Workers silent for more than this many seconds are killed and restarted.'
+# Workers silent for more than this many seconds are killed and restarted.
 REVERSE_PROXY_ERROR_LOG_FILE = FilePath('{LOG_PATH}/error.log')
 REVERSE_PROXY_ERROR_LOG_FILE_HELP = 'Error log file to write to (Reverse proxy).'
 REVERSE_PROXY_ACCESS_LOG_FILE = FilePath('{LOG_PATH}/access.log')
 REVERSE_PROXY_ACCESS_LOG_FILE_HELP = 'The Access log file to write to (reverse_proxy).'
 REVERSE_PROXY_SSL_KEY_FILE = None
-REVERSE_PROXY_SSL_KEY_FILE_HELP = 'Key file of reverse proxy. Can be set to None if the key is with the certificate.'
+REVERSE_PROXY_SSL_KEY_FILE_HELP = 'Key file of reverse proxy (apache/nginx). ' \
+                                  'Can be set to None if the key is with the certificate.'
 REVERSE_PROXY_SSL_CRT_FILE = None
-REVERSE_PROXY_SSL_CRT_FILE_hep = 'SSL certificate file of reverse proxy. Required if you use SSL'
+REVERSE_PROXY_SSL_CRT_FILE_hep = 'SSL certificate file of reverse proxy (apache/nginx). Required if you use SSL'
 REVERSE_PROXY_PORT = None  #
-REVERSE_PROXY_PORT_HELP = 'Reverse proxy port (if None, defaults to 80 or 443 if you use SSL)'
+REVERSE_PROXY_PORT_HELP = 'Reverse proxy (apache/nginx) port (if None, defaults to 80 or 443 if you use SSL)'
 
 # Language code for this installation. All choices can be found here:
 # http://www.i18nguy.com/unicode/language-identifiers.html
@@ -86,45 +88,43 @@ CACHES_HELP = 'A dictionary containing the settings for all caches to be used wi
 ACCOUNT_EMAIL_VERIFICATION = None
 
 # iterable of URL of your application. 'my_app.root_urls.urls'
-FLOOR_URLCONF = None
+FLOOR_URL_CONF = None
 FLOOR_INSTALLED_APPS = []
 FLOOR_INDEX = None
 FLOOR_PROJECT_NAME = _('DjangoFloor')
-FLOOR_ = ''
+
 DEFAULT_GROUP_NAME = _('Users')
 DEFAULT_GROUP_NAME_HELP = 'Name of the default group of newly-created users.'
 
-EMAIL_HOST = 'localhost'
-EMAIL_HOST_HELP = 'The host to use for sending email.'
+EMAIL_HOST = '{SERVER_NAME}'
+#  The host to use for sending email.
 EMAIL_HOST_PASSWORD = ''
-EMAIL_HOST_PASSWORD_HELP = 'Password to use for the SMTP server defined in EMAIL_HOST. This setting is used in ' \
-                           'conjunction with EMAIL_HOST_USER when authenticating to the SMTP server. If either of ' \
-                           'these settings is empty, Django won’t attempt authentication'
+# Password to use for the SMTP server defined in EMAIL_HOST. This setting is used in
+# conjunction with EMAIL_HOST_USER when authenticating to the SMTP server. If either of
+# these settings is empty, Django won’t attempt authentication
 EMAIL_HOST_USER = ''
-EMAIL_HOST_USER_HELP = 'Username to use for the SMTP server defined in EMAIL_HOST. If empty, Django won’t attempt ' \
-                       'authentication.'
+# Username to use for the SMTP server defined in EMAIL_HOST. If empty, Django won’t attempt authentication.
 EMAIL_PORT = 25
-EMAIL_PORT_HELP = 'Port to use for the SMTP server defined in EMAIL_HOST.'
-
-EMAIL_SUBJECT_PREFIX = '[Django] '
-EMAIL_SUBJECT_PREFIX_HELP = 'Subject-line prefix for email messages sent with django.core.mail.mail_admins or ' \
-                            'django.core.mail.mail_managers. You’ll probably want to include the trailing space'
+# Port to use for the SMTP server defined in EMAIL_HOST.
+EMAIL_SUBJECT_PREFIX = '[{SERVER_NAME}] '
+# Subject-line prefix for email messages sent with django.core.mail.mail_admins or
+# django.core.mail.mail_managers. You’ll probably want to include the trailing space
 EMAIL_USE_TLS = False
-EMAIL_USE_TLS_HELP = 'Whether to use a TLS (secure) connection when talking to the SMTP server.' \
-                     ' This is used for explicit TLS connections, generally on port 587.'
+# Whether to use a TLS (secure) connection when talking to the SMTP server.
+# This is used for explicit TLS connections, generally on port 587.
 EMAIL_USE_SSL = False
-EMAIL_USE_SSL_HELP = 'Whether to use an implicit TLS (secure) connection when talking to the SMTP server. In most' \
-                     ' email documentation this type of TLS connection is referred to as SSL. It is generally used ' \
-                     'on port 465. If you are experiencing problems, see the explicit TLS setting EMAIL_USE_TLS.'
-SERVER_EMAIL = 'root@localhost'
+# Whether to use an implicit TLS (secure) connection when talking to the SMTP server. In most
+# email documentation this type of TLS connection is referred to as SSL. It is generally used
+# on port 465. If you are experiencing problems, see the explicit TLS setting EMAIL_USE_TLS.
+SERVER_EMAIL = 'root@{SERVER_NAME}'
 SERVER_EMAIL_HELP = 'The email address that error messages come from, such as those sent to ADMINS and MANAGERS.'
 FILE_CHARSET = 'utf-8'
-FILE_CHARSET_HELP = 'The character encoding used to decode any files read from disk. This includes template files and' \
-                    ' initial SQL data files.'
+# The character encoding used to decode any files read from disk. This includes template files and
+# initial SQL data files
 FILE_UPLOAD_TEMP_DIR = None
-FILE_UPLOAD_TEMP_DIR_HELP = 'The directory to store data temporarily while uploading files. If None, Django will use ' \
-                            'the standard temporary directory for the operating system. For example, this will ' \
-                            'default to ‘/tmp’ on *nix-style operating systems.'
+# The directory to store data temporarily while uploading files. If None, Django will use
+# the standard temporary directory for the operating system. For example, this will
+# default to ‘/tmp’ on *nix-style operating systems.
 
 DATABASE_ROUTERS = ['djangofloor.routers.BaseRouter', ]
 
@@ -179,8 +179,43 @@ STATICFILES_DIRS = (
 # List of finder classes that know how to find static files in
 # various locations.
 STATICFILES_FINDERS = ['django.contrib.staticfiles.finders.AppDirectoriesFinder',
-                       'django.contrib.staticfiles.finders.FileSystemFinder', ]
+                       'django.contrib.staticfiles.finders.FileSystemFinder',
+                       'pipeline.finders.PipelineFinder', ]
+PIPELINE_CSS = {
+    'default': {
+        'source_filenames': ('bootstrap3/css/bootstrap.min.css', 'fontawesome/select2/select2.css',
+                             'fontawesome/select2/select2-bootstrap.css', 'fontawesome/css/font-awesome.min.css', ),
+        'output_filename': 'css/default.css',
+        'extra_context': {
+            'media': 'all',
+        },
+    },
+}
+PIPELINE_JS = {
+    'default': {
+        'source_filenames': ('js/jquery.min.js', 'bootstrap3/js/bootstrap.min.js',
+                             'fontawesome/js/django_fontawesome.js', 'fontawesome/select2/select2.min.js', ),
+        'output_filename': 'js/default.js',
+    },
+    'ie9': {
+        'source_filenames': ('js/html5shiv.js', 'js/respond.min.js', ),
+        'output_filename': 'js/ie9.js',
+    }
+}
+# PIPELINE_ENABLED = True
+# does not enable PIPELINE if DEBUG is set to True (files generated by PIPELINE are not available in DEBUG mode)
 
+PIPELINE_MIMETYPES = (
+    ('text/coffeescript', '.coffee'),
+    ('text/less', '.less'),
+    ('text/javascript', '.js'),
+    ('text/x-sass', '.sass'),
+    ('text/x-scss', '.scss')
+)
+# these two cmpressors are not the best ones, but are installed with DjangoFloor as dependencies
+PIPELINE_JS_COMPRESSOR = 'pipeline.compressors.jsmin.JSMinCompressor'
+PIPELINE_CSS_COMPRESSOR = 'djangofloor.middleware.RCSSMinCompressor'
+STATICFILES_STORAGE = 'pipeline.storage.PipelineCachedStorage'
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = [
@@ -269,6 +304,7 @@ INSTALLED_APPS = [
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
+    'pipeline',
 ]
 
 OTHER_ALLAUTH = []

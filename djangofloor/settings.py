@@ -38,16 +38,15 @@ if not PROJECT_SETTINGS_MODULE_NAME:
           'dotted path of your project defaults')
 else:
     print('DjangoFloor version %s, using %s as project defaults' % (version, PROJECT_SETTINGS_MODULE_NAME))
-if USER_SETTINGS_PATH:
-    print('User-defined settings expected in module %s' % USER_SETTINGS_PATH)
-else:
-    print('No specific settings file defined in DJANGOFLOOR_USER_SETTINGS')
 
 
-def import_file(filepath):
+def import_file(filepath, messages=None):
     """import the Python source file as a Python module.
 
-    :param filepath:
+    :param filepath: absolute path of the Python module
+    :type filepath: :class:`str`
+    :param messages: tuple of three messages:
+        (filepath is not given, filepath is given but does not exist, filepath is given and exists)
     :return:
     """
     if filepath and os.path.isfile(filepath):
@@ -55,8 +54,17 @@ def import_file(filepath):
         if dirname not in sys.path:
             sys.path.insert(0, dirname)
         conf_module = os.path.splitext(os.path.basename(filepath))[0]
+        if messages:
+            print(messages[2])
         module_ = import_module(conf_module)
+    elif filepath:
+        if messages:
+            print(messages[1])
+        import djangofloor.empty
+        module_ = djangofloor.empty
     else:
+        if messages:
+            print(messages[0])
         import djangofloor.empty
         module_ = djangofloor.empty
     return module_
@@ -66,7 +74,10 @@ if PROJECT_SETTINGS_MODULE_NAME:
 else:
     import djangofloor.empty
     project_settings = djangofloor.empty
-user_settings = import_file(USER_SETTINGS_PATH)
+user_settings = import_file(USER_SETTINGS_PATH,
+                            ('No specific settings file defined in DJANGOFLOOR_USER_SETTINGS',
+                             'User-defined settings are expected in module %s' % USER_SETTINGS_PATH,
+                             'User-defined settings found in module %s' % USER_SETTINGS_PATH, ))
 
 
 __settings = globals()

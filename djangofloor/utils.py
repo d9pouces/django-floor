@@ -5,8 +5,10 @@ __author__ = 'flanker'
 
 
 class DirectoryPath(PosixPath):
-    pass
+    def __repr__(self):
+        return repr(str(self))
 
 
 class FilePath(PosixPath):
-    pass
+    def __repr__(self):
+        return repr(str(self))

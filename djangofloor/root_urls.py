@@ -1,4 +1,4 @@
-#coding=utf-8
+# coding=utf-8
 """Define mappings from the URL requested by a user to a proper Python view."""
 from django.utils.module_loading import import_string
 from djangofloor.scripts import load_celery
@@ -12,8 +12,8 @@ load_celery()
 
 admin.autodiscover()
 
-if settings.FLOOR_URLCONF:
-    extra_urls = import_string(settings.FLOOR_URLCONF)
+if settings.FLOOR_URL_CONF:
+    extra_urls = import_string(settings.FLOOR_URL_CONF)
 else:
     extra_urls = []
 

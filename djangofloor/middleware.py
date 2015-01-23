@@ -1,10 +1,13 @@
-#coding=utf-8
+# coding=utf-8
 """Define your middlewares here"""
 import base64
 from django.conf import settings
 from django.contrib import auth
 from django.contrib.auth.middleware import RemoteUserMiddleware as BaseRemoteUserMiddleware
 from django.contrib.auth.models import Group
+# noinspection PyPackageRequirements
+from pipeline.compressors import CompressorBase
+from rcssmin import cssmin
 
 __author__ = 'flanker'
 
@@ -69,3 +72,10 @@ class BasicAuthMiddleware(object):
                 if user:
                     request.user = user
                     auth.login(request, user)
+
+
+# noinspection PyAbstractClass
+class RCSSMinCompressor(CompressorBase):
+    # noinspection PyMethodMayBeStatic
+    def compress_css(self, css):
+        return cssmin(css)

@@ -29,8 +29,9 @@ setup(
     include_package_data=True,
     zip_safe=False,
     test_suite='djangofloor.tests',
-    install_requires=['Django>=1.7', 'django-allauth', 'gunicorn', 'django-bootstrap3', 'celery', 'slimit', 'jsmin',
-                      'django-debug-toolbar', 'django-fontawesome', 'django-admin-bootstrapped', ],
+    install_requires=['Django>=1.7', 'django-allauth', 'gunicorn', 'django-bootstrap3', 'celery', 'jsmin',
+                      'django-debug-toolbar', 'django-fontawesome', 'django-admin-bootstrapped', 'rcssmin',
+                      'django-pipeline', ],
     setup_requires=[],
     classifiers=[],
 )
