@@ -13,7 +13,8 @@ A common base for modern and complete Django websites, with many tools integrate
   * génération des commandes pour créer un utilisateur système, la base de données
 
 
-Conventions :
+Conventions
+-----------
 
   * Nom du projet :
     - paramètre --dfproject

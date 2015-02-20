@@ -1,4 +1,4 @@
-#coding=utf-8
+# coding=utf-8
 import os
 
 from django.conf import settings
@@ -10,7 +10,6 @@ from django.contrib.syndication.views import add_domain
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.utils.translation import ugettext_lazy as _
-from djangofloor.tasks import add
 
 
 __author__ = 'flanker'
@@ -60,6 +59,7 @@ def index(request):
 
 
 def test(request):
+    from djangofloor.tasks import add
     messages.info(request, _('Message test'))
     template_values = {}
     add.delay(4, 5)

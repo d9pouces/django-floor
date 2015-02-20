@@ -83,7 +83,7 @@ SECRET_KEY_HELP = ('A secret key for a particular Django installation. This is u
                    'and should be set to a unique, unpredictable value.')
 CACHES = {'default': {'BACKEND': 'django.core.cache.backends.locmem.LocMemCache', }}
 # CACHES = {'default': {'BACKEND': 'django_redis.cache.RedisCache', 'LOCATION': 'redis://127.0.0.1:6379/1',
-#                       'OPTIONS': {'CLIENT_CLASS': 'django_redis.client.DefaultClient', }, }, }
+# 'OPTIONS': {'CLIENT_CLASS': 'django_redis.client.DefaultClient', }, }, }
 CACHES_HELP = 'A dictionary containing the settings for all caches to be used with Django.'
 ACCOUNT_EMAIL_VERIFICATION = None
 ACCOUNT_EMAIL_SUBJECT_PREFIX = '[{SERVER_NAME}] '
@@ -202,18 +202,20 @@ TEMPLATE_LOADERS = [
     # 'django.template.loaders.eggs.Loader',
 ]
 
-MIDDLEWARE_CLASSES = ['django.middleware.cache.UpdateCacheMiddleware',
-                      'django.middleware.common.CommonMiddleware',
-                      'django.contrib.sessions.middleware.SessionMiddleware',
-                      'django.middleware.csrf.CsrfViewMiddleware',
-                      'django.contrib.auth.middleware.AuthenticationMiddleware',
-                      'django.contrib.messages.middleware.MessageMiddleware',
-                      'django.middleware.clickjacking.XFrameOptionsMiddleware',
-                      'djangofloor.middleware.IEMiddleware',
-                      'djangofloor.middleware.RemoteUserMiddleware',
-                      'djangofloor.middleware.BasicAuthMiddleware',
-                      'djangofloor.middleware.FakeAuthenticationMiddleware',
-                      'django.middleware.cache.FetchFromCacheMiddleware', ]
+MIDDLEWARE_CLASSES = [
+    # 'django.middleware.cache.UpdateCacheMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'djangofloor.middleware.IEMiddleware',
+    'djangofloor.middleware.RemoteUserMiddleware',
+    'djangofloor.middleware.BasicAuthMiddleware',
+    'djangofloor.middleware.FakeAuthenticationMiddleware',
+    # 'django.middleware.cache.FetchFromCacheMiddleware',
+]
 INTERNAL_IPS = ('127.0.0.1', )
 
 DEBUG_TOOLBAR_PANELS = [
@@ -374,7 +376,7 @@ WS4REDIS_CONNECTION_HELP = 'If the Redis datastore uses connection settings othe
 ########################################################################################################################
 # celery
 ########################################################################################################################
-USE_CELERY = True
+USE_CELERY = False
 CELERY_TIMEZONE = '{TIME_ZONE}'
 CELERY_RESULT_EXCHANGE = '{PROJECT_NAME}_results'
 CELERY_ACCEPT_CONTENT = ['json', 'yaml', 'msgpack']

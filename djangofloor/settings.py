@@ -20,7 +20,12 @@ import os
 import string
 import sys
 from django.utils.importlib import import_module
-from pathlib import Path
+# noinspection PyUnresolvedReferences
+try:
+    from pathlib import Path
+except ImportError as e:
+    print('Unable to import pathlib. Please make sure that pathlib is available.')
+    raise e
 from djangofloor import defaults as floor_settings
 from djangofloor import __version__ as version
 from djangofloor.utils import DirectoryPath, FilePath
