@@ -244,7 +244,7 @@ USE_X_FORWARDED_HOST_HELP = 'A boolean that specifies whether to use the X-Forwa
 AUTHENTICATION_BACKENDS = [
     'djangofloor.backends.DefaultGroupRemoteUserBackend',
     'django.contrib.auth.backends.ModelBackend',
-    'allauth.account.auth_backends.AuthenticationBackend',
+    # 'allauth.account.auth_backends.AuthenticationBackend',
 ]
 
 TEMPLATE_CONTEXT_PROCESSORS = (
@@ -257,8 +257,8 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     'django.core.context_processors.tz',
     'django.contrib.messages.context_processors.messages',
     'djangofloor.context_processors.context_base',
-    'allauth.account.context_processors.account',
-    'allauth.socialaccount.context_processors.socialaccount',
+    # 'allauth.account.context_processors.account',
+    # 'allauth.socialaccount.context_processors.socialaccount',
 )
 ROOT_URLCONF = 'djangofloor.root_urls'
 
@@ -285,9 +285,9 @@ INSTALLED_APPS = [
     'bootstrap3',
     'fontawesome',
     'djangofloor',
-    'allauth',
-    'allauth.account',
-    'allauth.socialaccount',
+    # 'allauth',
+    # 'allauth.account',
+    # 'allauth.socialaccount',
     'pipeline',
 ]
 
