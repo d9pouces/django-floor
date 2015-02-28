@@ -289,6 +289,8 @@ INSTALLED_APPS = [
     # 'allauth.account',
     # 'allauth.socialaccount',
     'pipeline',
+    'archeolog_server', 'archeolog_server.executions', 'archeolog_server.repository',
+    'archeolog_server.bricks', 'archeolog_server.editor',
 ]
 
 OTHER_ALLAUTH = []
