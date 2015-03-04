@@ -172,7 +172,8 @@ PIPELINE_CSS = {
 PIPELINE_JS = {
     'default': {
         'source_filenames': ('js/jquery.min.js', 'bootstrap3/js/bootstrap.min.js',
-                             'fontawesome/js/django_fontawesome.js', 'fontawesome/select2/select2.min.js', ),
+                             'fontawesome/js/django_fontawesome.js', 'fontawesome/select2/select2.min.js',
+                             'js/multiselect.min.js', ),
         'output_filename': 'js/default.js',
     },
     'ie9': {
