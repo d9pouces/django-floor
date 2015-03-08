@@ -162,7 +162,8 @@ STATICFILES_FINDERS = ['django.contrib.staticfiles.finders.AppDirectoriesFinder'
 PIPELINE_CSS = {
     'default': {
         'source_filenames': ('bootstrap3/css/bootstrap.min.css', 'fontawesome/select2/select2.css',
-                             'fontawesome/select2/select2-bootstrap.css', 'fontawesome/css/font-awesome.min.css', ),
+                             'fontawesome/select2/select2-bootstrap.css', 'fontawesome/css/font-awesome.min.css',
+                             'jsPlumb/css/jsplumb.css', 'css/fuelux.min.css', ),
         'output_filename': 'css/default.css',
         'extra_context': {
             'media': 'all',
@@ -171,9 +172,10 @@ PIPELINE_CSS = {
 }
 PIPELINE_JS = {
     'default': {
-        'source_filenames': ('js/jquery.min.js', 'bootstrap3/js/bootstrap.min.js',
+        'source_filenames': ('js/jquery.min.js', 'bootstrap3/js/bootstrap.min.js', 'js/multiselect.min.js',
                              'fontawesome/js/django_fontawesome.js', 'fontawesome/select2/select2.min.js',
-                             'js/multiselect.min.js', ),
+                             'jsPlumb/js/dom.jsPlumb-1.7.3-min.js', 'js/archeolog.js', 'js/editor.js',
+                             'js/fuelux.min.js', ),
         'output_filename': 'js/default.js',
     },
     'ie9': {
