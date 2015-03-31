@@ -174,8 +174,8 @@ PIPELINE_JS = {
     'default': {
         'source_filenames': ('js/jquery.min.js', 'bootstrap3/js/bootstrap.min.js', 'js/multiselect.min.js',
                              'fontawesome/js/django_fontawesome.js', 'fontawesome/select2/select2.min.js',
-                             'jsPlumb/js/dom.jsPlumb-1.7.3-min.js', 'js/archeolog.js', 'js/editor.js',
-                             'js/fuelux.min.js', ),
+                             'jsPlumb/js/dom.jsPlumb-1.7.3-min.js', 'js/archeolog.js', 'js/editor.js', 'js/repository.js',
+                             'js/fuelux.min.js', 'js/executions.js', ),
         'output_filename': 'js/default.js',
     },
     'ie9': {
