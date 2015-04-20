@@ -161,9 +161,9 @@ STATICFILES_FINDERS = ['django.contrib.staticfiles.finders.AppDirectoriesFinder'
                        'pipeline.finders.PipelineFinder', ]
 PIPELINE_CSS = {
     'default': {
-        'source_filenames': ('bootstrap3/css/bootstrap.min.css', 'fontawesome/select2/select2.css',
-                             'fontawesome/select2/select2-bootstrap.css', 'fontawesome/css/font-awesome.min.css',
-                             'jsPlumb/css/jsplumb.css', 'css/fuelux.min.css', ),
+        'source_filenames': ('css/jsplumb.css', 'css/fuelux.min.css', 'bootstrap3/css/bootstrap.min.css', 'css/select2.min.css',
+                             'css/select2-bootstrap.min.css', 'css/font-awesome.min.css', 'css/archeolog.css',
+                             'css/bootstrap-colorpicker.min.css, '),
         'output_filename': 'css/default.css',
         'extra_context': {
             'media': 'all',
@@ -173,9 +173,9 @@ PIPELINE_CSS = {
 PIPELINE_JS = {
     'default': {
         'source_filenames': ('js/jquery.min.js', 'bootstrap3/js/bootstrap.min.js', 'js/multiselect.min.js',
-                             'fontawesome/js/django_fontawesome.js', 'fontawesome/select2/select2.min.js',
-                             'jsPlumb/js/dom.jsPlumb-1.7.3-min.js', 'js/archeolog.js', 'js/editor.js', 'js/repository.js',
-                             'js/fuelux.min.js', 'js/executions.js', ),
+                             'js/select2.min.js', 'js/bootstrap-colorpicker.min.js',
+                             'jsPlumb/js/dom.jsPlumb-1.7.3.js', 'js/archeolog.js', 'js/editor.js', 'js/repository.js',
+                             'js/fuelux.min.js', 'js/executions.js', 'js/mousetrap.min.js', ),
         'output_filename': 'js/default.js',
     },
     'ie9': {
