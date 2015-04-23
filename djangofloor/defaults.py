@@ -183,8 +183,7 @@ PIPELINE_CSS = {
 }
 PIPELINE_JS = {
     'default': {
-        'source_filenames': ('js/jquery.min.js', 'bootstrap3/js/bootstrap.min.js', 'js/djangofloor.js', 'js/ws4redis.js',
-                             'fontawesome/js/django_fontawesome.js', 'fontawesome/select2/select2.min.js', ),
+        'source_filenames': ('js/jquery.min.js', 'bootstrap3/js/bootstrap.min.js', 'js/djangofloor.js', 'js/ws4redis.js', ),
         'output_filename': 'js/default.js',
     },
     'ie9': {
@@ -275,7 +274,6 @@ INSTALLED_APPS = [
     # 'django_admin_bootstrapped',  # TODO attendre la v2.5
     'django.contrib.admin',
     'bootstrap3',
-    'fontawesome',
     'djangofloor',
     'allauth',
     'allauth.account',
