@@ -4,6 +4,7 @@ import json
 from django.conf import settings
 from django.utils.encoding import force_text
 from django.utils.six import binary_type
+from djangofloor.decorators import SignalRequest
 from djangofloor.exceptions import ApiException
 from djangofloor.tasks import BROADCAST, df_call, SESSION, USER
 from ws4redis.redis_store import RedisMessage
@@ -35,7 +36,7 @@ class Subscriber(RedisSubscriber):
 
     def __init__(self, connection):
         super(Subscriber, self).__init__(connection)
-        self.request = None
+        self.request = SignalRequest(None, None)
 
     def set_pubsub_channels(self, request, channels):
         self.request = request

@@ -109,6 +109,8 @@ def __parse_setting(obj):
         return __parse_setting(force_text(obj))
     elif isinstance(obj, list) or isinstance(obj, tuple):
         return [__parse_setting(x) for x in obj]
+    elif isinstance(obj, set):
+        return {__parse_setting(x) for x in obj}
     elif isinstance(obj, dict):
         return dict([(__parse_setting(x), __parse_setting(y)) for (x, y) in obj.items()])
     return obj

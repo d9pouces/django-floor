@@ -1,21 +1,19 @@
 # coding=utf-8
 from __future__ import unicode_literals, absolute_import
-import subprocess
 
 """
 Define a main() function, allowing you to manage your Django project.
 """
 from argparse import ArgumentParser
+import subprocess
 import re
+import os
+import sys
 
 from setuptools import Command
 
 
 __author__ = 'flanker'
-
-
-import os
-import sys
 
 
 class TestCommand(Command):

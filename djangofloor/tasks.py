@@ -53,7 +53,7 @@ def df_call(signal_name, request, sharing, from_client, kwargs):
     :param signal_name:
     :type signal_name: :class:`str`
     :param request: initial request, giving informations about HTTP sessions and its user
-    :type signal_name: :class:`SignalRequest` or :class:`django.http.HttpRequest`
+    :type request: :class:`SignalRequest` or :class:`django.http.HttpRequest`
     :param sharing:
         * `None` : does not propagate to the JavaScript (client) side
         * `USER`, `SESSION`, `BROADCAST` : propagate to the request user, only to its current session, or to all currently logged-in users

@@ -49,16 +49,17 @@ class Choice(object):
 class SerializedForm(object):
     """given a form and a `list` of `dict`, transforms the `dict` into a :class:`django.http.QueryDict` and initialize the form with it.
 
-    >>> class SimpleForm(forms.Form):
-    ...     field = forms.CharField()
-    ...
-    >>> x = SerializedForm(SimpleForm)
-    >>> form = x([{'field': 'object'}])
-    >>> form.is_valid()
-    True
+>>> class SimpleForm(forms.Form):
+...    field = forms.CharField()
+...
+>>> x = SerializedForm(SimpleForm)
+>>> form = x([{'field': 'object'}])
+>>> form.is_valid()
+True
 
 
     """
+
     def __init__(self, form_cls):
         self.form_cls = form_cls
 
@@ -85,7 +86,6 @@ class SignalRequest(object):
 
 
 class CallWrapper(object):
-
     def __init__(self, fn, path=None):
         self.path = path
         self.function = fn
@@ -99,7 +99,7 @@ class CallWrapper(object):
         self.argument_types = {}
 
         for key, param in sig.parameters.items():
-            if key in ('request', ):
+            if key in ('request',):
                 continue
             if param.kind == param.VAR_KEYWORD:  # corresponds to "fn(**kwargs)"
                 self.accept_kwargs = True
@@ -143,7 +143,6 @@ class CallWrapper(object):
 
 
 class RedisCallWrapper(CallWrapper):
-
     def __init__(self, fn, path=None, delayed=False, allow_from_client=True):
         super(RedisCallWrapper, self).__init__(fn, path=path)
         self.allow_from_client = allow_from_client

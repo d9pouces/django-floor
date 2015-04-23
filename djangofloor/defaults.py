@@ -146,19 +146,6 @@ MEDIA_ROOT_HELP = 'Absolute filesystem path to the directory that will hold user
 # noinspection PyUnresolvedReferences
 STATIC_ROOT = DirectoryPath('{LOCAL_PATH}/static')
 STATIC_ROOT_HELP = 'The absolute path to the directory where collectstatic will collect static files for deployment.'
-# URL that handles the media served from MEDIA_ROOT. Make sure to use a
-# trailing slash.
-# Examples: "http://example.com/media/", "http://media.example.com/"
-MEDIA_URL = '/media/'
-# URL prefix for static files.
-# Example: "http://example.com/static/", "http://static.example.com/"
-STATIC_URL = '/static/'
-LOGIN_URL = '/accounts/login/'
-LOGOUT_URL = '/accounts/logout/'
-LOGIN_REDIRECT_URL = '/'
-WEBSOCKET_URL = '/ws/'
-
-
 # Additional locations of static files
 STATICFILES_DIRS = (
     abspath(join(dirname(__file__), 'static')),
@@ -172,6 +159,21 @@ STATICFILES_DIRS = (
 STATICFILES_FINDERS = ['django.contrib.staticfiles.finders.AppDirectoriesFinder',
                        'django.contrib.staticfiles.finders.FileSystemFinder',
                        'pipeline.finders.PipelineFinder', ]
+
+# URL that handles the media served from MEDIA_ROOT. Make sure to use a
+# trailing slash.
+# Examples: "http://example.com/media/", "http://media.example.com/"
+MEDIA_URL = '/media/'
+# URL prefix for static files.
+# Example: "http://example.com/static/", "http://static.example.com/"
+STATIC_URL = '/static/'
+LOGIN_URL = '/accounts/login/'
+LOGOUT_URL = '/accounts/logout/'
+LOGIN_REDIRECT_URL = '/'
+WEBSOCKET_URL = '/ws/'
+
+
+
 PIPELINE_CSS = {
     'default': {
         'source_filenames': ('bootstrap3/css/bootstrap.min.css', 'css/font-awesome.min.css', ),
@@ -295,7 +297,6 @@ BOOTSTRAP3 = {
     'horizontal_label_class': 'col-md-2',
     'horizontal_field_class': 'col-md-4',
 }
-FONTAWESOME_CSS_URL = 'css/font-awesome.min.css'
 TEST_RUNNER = 'django.test.runner.DiscoverRunner'
 AUTHENTICATION_HEADER = 'HTTP_REMOTE_USER'
 AUTHENTICATION_HEADER_HELP = 'HTTP header corresponding to the username (when using HTTP authentication).' \
