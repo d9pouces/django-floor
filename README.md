@@ -77,9 +77,9 @@ in the Django shell, you can check that settings are gracefully merged together:
 *How to use it?* Since your settings are expected to be in  `myproject.defaults` and in `[prefix]/etc/myproject/settings.py`, DjangoFloor must determine `myproject`.
 There are three ways to let it know `myproject`:
 
-.1 use provided commands `djangofloor-celery`, `djangofloor-manage`, `djangofloor-gunicorn` or `djangofloor-uwsgi` with the option `--dfproject myproject`
-.2 `export DJANGOFLOOR_PROJECT_NAME=myproject` before using `djangofloor-celery`, `djangofloor-manage`, `djangofloor-gunicorn` or `djangofloor-uwsgi`
-.3 renaming `djangofloor-celery`, `djangofloor-manage`, `djangofloor-gunicorn` or `djangofloor-uwsgi` to `myproject-[celery|manage|gunicorn|uwsgi`
+  -  use provided commands `djangofloor-celery`, `djangofloor-manage`, `djangofloor-gunicorn` or `djangofloor-uwsgi` with the option `--dfproject myproject`
+  -  `export DJANGOFLOOR_PROJECT_NAME=myproject` before using `djangofloor-celery`, `djangofloor-manage`, `djangofloor-gunicorn` or `djangofloor-uwsgi`
+  -  renaming `djangofloor-celery`, `djangofloor-manage`, `djangofloor-gunicorn` or `djangofloor-uwsgi` to `myproject-[celery|manage|gunicorn|uwsgi`
 
 You can change `myproject.defaults` to another value with the environment variable `DJANGOFLOOR_PROJECT_SETTINGS`
 You can specify another local setting files with the option `--dfconf [path/to/settings.py]`
@@ -90,11 +90,11 @@ If you run without installation, local settings are expected in `working_dir/my_
 
 Notes:
 
-.1 Only settings in capitals are taken into account.
-.2 interpolation of settings is also recursively processed for dicts, lists, tuples and sets.
-.3 You can use `djangofloor.utils.[DirectoryPath|FilePath]('{LOCAL_PATH}/static')`: directory will be automatically created.
-.4 Use `manage.py config` to show actual values and where are expected your local settings.
-.5 If you have a settings MY_SETTING and another called MY_SETTING_HELP, the latter will be used as help for `manage.py config`.
+  - Only settings in capitals are taken into account.
+  - interpolation of settings is also recursively processed for dicts, lists, tuples and sets.
+  - You can use `djangofloor.utils.[DirectoryPath|FilePath]('{LOCAL_PATH}/static')`: directory will be automatically created.
+  - Use `manage.py config` to show actual values and where are expected your local settings.
+  - If you have a settings MY_SETTING and another called MY_SETTING_HELP, the latter will be used as help for `manage.py config`.
 
 Signals
 -------
@@ -147,10 +147,10 @@ And in JavaScript?
 
 Notes:
 
-1) You can prevent Python code to be directly called by JS: @connect(path='demo.my_signal', allow_from_client=False)
-2) You can prevent Python code to call JS signals call('demo.my_signal', request, None, \*\*kwargs)
-3) You can propagate signals to all sessions of the logged user (use USER instead of SESSION), any logged user (use BROADCAST), or a limited set of users with {USER: ['username']}
-4) Several functions (both JS and Python) can be connected to the same signal 
+  - You can prevent Python code to be directly called by JS: @connect(path='demo.my_signal', allow_from_client=False)
+  - You can prevent Python code to call JS signals call('demo.my_signal', request, None, \*\*kwargs)
+  - You can propagate signals to all sessions of the logged user (use USER instead of SESSION), any logged user (use BROADCAST), or a limited set of users with {USER: ['username']}
+  - Several functions (both JS and Python) can be connected to the same signal 
   
 
 Batteries included
