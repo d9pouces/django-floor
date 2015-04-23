@@ -101,8 +101,59 @@ Notes:
 Signals
 -------
 
+Communications between Python world and Javascript one is often awful, with a lot of boilerplate.
+The main goal of my implementation of signals is to really limit this code and to easily integrate Celery and websockets.
+ 
+In DjangoFloor, you have four kind of codes:
+
+  * JavaScript (can call Django views or communicate with websockets)
+  * Python code in Django views (receives a HttpRequest as argument and returns a HttpResponse, can call Celery tasks)
+  * Python code in Celery tasks (receives some arguments and often return None, can only call other tasks, cannot communicate with Django, websocket or JS)
+  * Python code in the websocket world (can call some Celery tasks but cannot perform any blocking call or call Django views)
+  
+
+In DjangoFloor, a signal is a simple name (a unicode string). You connect some code (JS or Python) to this name. Then you can call a signal (with some arguments).
+
+Python example:
+
+    from djangofloor.decorators import connect
+    @connect(path='demo.my_signal')
+    def my_signal(request, arg):
+        [ some interesting code ]
+        print('blablabla', arg)
+        
+A lot of computation, and this code must be used through Celery?
+
+    from djangofloor.decorators import connect
+    @connect(path='demo.my_signal', delayed=True)
+    def my_signal(request, arg):
+        [ some interesting code ]
+        print('blablabla', arg)
+        
+JavaScript example:
+
+    df.connect('demo.my_signal', function (options) { alert(options.arg); });
 
 
+Ok, that is enough to connect any code to a signal. Now, if you want to call this code in Python: 
+ 
+    from djangofloor.tasks import call, SESSION
+    call('demo.my_signal', request, SESSION, arg='argument')
+
+And in JavaScript?
+
+    df.call('demo.my_signal', {arg: 'argument'})
+    
+
+*Any Python or Javascript can call any Python or JavaScript signal, with (almost) the same syntax.*
+
+Notes:
+
+1) You can prevent Python code to be directly called by JS: @connect(path='demo.my_signal', allow_from_client=False)
+2) You can prevent Python code to call JS signals call('demo.my_signal', request, None, \*\*kwargs)
+3) You can propagate signals to all sessions of the logged user (use USER instead of SESSION), any logged user (use BROADCAST), or a limited set of users with {USER: ['username']}
+
+  
 
 Batteries included
 ------------------
