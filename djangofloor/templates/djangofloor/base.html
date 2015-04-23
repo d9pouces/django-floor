@@ -10,6 +10,7 @@
     {% block head_extra %}{% endblock %}
     {% block head_favicon %}<link rel="shortcut icon" href="{% static 'images/favicon.png' %}">{% endblock %}
     {% block head_pipeline %}{% javascript 'default' %}{% stylesheet 'default' %}<!--[if lt IE 9 ]>{% javascript 'ie9' %}<![endif]-->{% endblock %}
+    <script type="text/javascript" src="{% url 'djangofloor.views.signals' %}"></script>
 </head>
 <body>
 {% block body %}
@@ -47,7 +48,9 @@
             </div>
         </div>
     {% endblock %}
-    {% block messages %}{% bootstrap_messages %}{% endblock messages %}
+    {% block messages %}
+        <div id="messages">{% bootstrap_messages %}</div>
+    {% endblock messages %}
     {% block breadcrumbs %}{% endblock %}
 
 <div class="container">    {% block content %}
@@ -58,6 +61,12 @@
 {% endblock %}
 {% block extra_body %}
 {% endblock %}
+<div class="modal fade" id="df_modal" tabindex="-1" role="dialog" aria-labelledby="df_modal" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+        </div>
+    </div>
+</div>
 
 </body>
 </html>

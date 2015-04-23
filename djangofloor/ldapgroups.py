@@ -1,6 +1,7 @@
 # coding=utf-8
+from __future__ import unicode_literals
 import logging
-from urllib.parse import urlparse
+from django.utils.six.moves.urllib.parse import urlparse
 from django.conf import settings
 from django.contrib.auth.models import Group
 from django.utils.importlib import import_module

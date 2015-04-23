@@ -1,0 +1,12 @@
+$(function () {
+{% if use_ws4redis %}
+    df.ws4redis = WS4Redis({
+        uri: '{{ WEBSOCKET_URI }}djangofloor?subscribe-broadcast&subscribe-user&subscribe-session&publish-broadcast&echo',
+        receive_message: function (msg) { var parsed = JSON.parse(msg); df.call(parsed.signal, parsed.options); },
+        heartbeat_msg: {{ WS4REDIS_HEARTBEAT }}
+    });
+    {% for name in signals %}df.connect_ws('{{ name }}');
+    {% endfor %}{% else %}
+    {% for name in signals %}df.connect_http('{{ name }}', "{% url 'djangofloor.views.signal_call' signal=name %}");
+    {% endfor %}{% endif %}
+});

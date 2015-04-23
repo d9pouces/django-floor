@@ -1,4 +1,4 @@
-#coding=utf-8
+# coding=utf-8
 """
 Package gathering all unitary tests for djangofloor.
 Module names must start with `test_` to be taken into account.

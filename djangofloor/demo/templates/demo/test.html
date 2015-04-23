@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% load bootstrap3 %}
+
+{% block content %}
+    <div class="btn-group">
+        <a class="btn btn-default" href="?" onclick="return df.call('df.messages.info', {html: 'This is a message'});">Add a message!</a>
+        <a class="btn btn-default" href="?" onclick="return df.call('df.messages.warning', {html: 'This is a warning'});">Add a warning!</a>
+        <a class="btn btn-default" href="?" onclick="return df.call('df.modal.show', {html: 'This is a modal'});">Add a modal!</a>
+        <a class="btn btn-default" href="?" onclick="return df.call('demo.test_signal', {});">Signal to the server</a>
+        <a class="btn btn-default" href="?" onclick="return df.call('df.redirect', {url: '/'});">Redirection to index</a>
+        <a class="btn btn-default" href="?" onclick="return df.call('demo.test_websocket', {});">Receive by Websockets</a>
+        <a class="btn btn-default" href="?" onclick="return df.call('demo.test_redis', {});">Send by Websockets</a>
+        <a class="btn btn-default" href="?" onclick="return df.call('demo.test_celery', {});">Test Celery tasks</a>
+
+    </div>
+    <form method="post" onsubmit="return df.call('demo.test_form', {form: $(this).serializeArray()});">
+        {% csrf_token %}
+        {% bootstrap_form form %}
+        <input type="submit" value="submit form">
+    </form>
+{% endblock %}

@@ -1,27 +1,12 @@
-#coding=utf-8
-"""
-WSGI config for toto project.
-
-This module contains the WSGI application used by Django's development server
-and any production WSGI deployments. It should expose a module-level variable
-named ``application``. Django's ``runserver`` and ``runfcgi`` commands discover
-this application via the ``WSGI_APPLICATION`` setting.
-
-Usually you will have the standard Django WSGI application here, but it also
-might make sense to replace the whole Django WSGI application with a custom one
-that later delegates to the Django one. For example, you could introduce WSGI
-middleware here, or combine a Django application with an application of another
-framework.
-
-"""
-
+# coding=utf-8
+from __future__ import unicode_literals
 __author__ = 'flanker'
+from django.conf import settings
+from djangofloor.wsgi_http import application as _django_app
 
-# This application object is used by any WSGI server configured to use this
-# file. This includes Django's development server, if the WSGI_APPLICATION
-# setting points here.
-from django.core.wsgi import get_wsgi_application
-application = get_wsgi_application()  # pylint: disable=C0103
-# Apply WSGI middleware here.
-# from helloworld.wsgi import HelloWorldApplication
-# application = HelloWorldApplication(application)
+
+def application(environ, start_response):
+    if settings.USE_WS4REDIS and environ.get('PATH_INFO').startswith(settings.WEBSOCKET_URL):
+        from djangofloor.wsgi_websockets import application as _websocket_app
+        return _websocket_app(environ, start_response)
+    return _django_app(environ, start_response)

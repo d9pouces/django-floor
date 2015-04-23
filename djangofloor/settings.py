@@ -1,4 +1,8 @@
 # coding=utf-8
+from __future__ import unicode_literals
+from django.utils import six
+from django.utils.encoding import force_text
+
 """ Django settings for DjangoFloor.
 
 Settings come from 3 modules:
@@ -20,12 +24,7 @@ import os
 import string
 import sys
 from django.utils.importlib import import_module
-# noinspection PyUnresolvedReferences
-try:
-    from pathlib import Path
-except ImportError as e:
-    print('Unable to import pathlib. Please make sure that pathlib is available.')
-    raise e
+from pathlib import Path
 from djangofloor import defaults as floor_settings
 from djangofloor import __version__ as version
 from djangofloor.utils import DirectoryPath, FilePath
@@ -91,7 +90,7 @@ __settings_origin = {}
 
 
 def __parse_setting(obj):
-    if isinstance(obj, str):
+    if isinstance(obj, six.text_type):
         values = {'PROJECT_NAME': PROJECT_NAME}
         for (literal_text, field_name, format_spec, conversion) in __formatter.parse(obj):
             if field_name is not None:
@@ -99,15 +98,15 @@ def __parse_setting(obj):
         if values:
             return __formatter.format(obj, **values)
     elif isinstance(obj, DirectoryPath):
-        obj = __parse_setting(str(obj))
+        obj = __parse_setting(force_text(obj))
         __ensure_dir(obj, parent_=False)
         return obj
     elif isinstance(obj, FilePath):
-        obj = __parse_setting(str(obj))
+        obj = __parse_setting(force_text(obj))
         __ensure_dir(obj, parent_=True)
         return obj
     elif isinstance(obj, Path):
-        return __parse_setting(str(obj))
+        return __parse_setting(force_text(obj))
     elif isinstance(obj, list) or isinstance(obj, tuple):
         return [__parse_setting(x) for x in obj]
     elif isinstance(obj, dict):

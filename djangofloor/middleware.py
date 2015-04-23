@@ -1,4 +1,5 @@
 # coding=utf-8
+from __future__ import unicode_literals
 """Define your middlewares here"""
 import base64
 from django.conf import settings
