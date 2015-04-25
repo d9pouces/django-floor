@@ -1,16 +1,18 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals, absolute_import
 import json
+
 from django.conf import settings
 from django.utils.encoding import force_text
 from django.utils.six import binary_type
-from djangofloor.decorators import SignalRequest
-from djangofloor.exceptions import ApiException
-from djangofloor.tasks import BROADCAST, df_call, SESSION, USER
-from ws4redis.redis_store import RedisMessage
+from django.utils.translation import ugettext as _
 from ws4redis.subscriber import RedisSubscriber
 from ws4redis.publisher import RedisPublisher
 from ws4redis.redis_store import RedisMessage
+
+from djangofloor.decorators import SignalRequest
+from djangofloor.exceptions import ApiException
+from djangofloor.tasks import BROADCAST, df_call, SESSION, USER
 
 
 __author__ = 'flanker'
@@ -23,11 +25,13 @@ def ws_call(signal_name, request, sharing, kwargs):
         sharing = {SESSION: [request.session_key, ]}
     elif sharing == USER:
         sharing = {USER: [request.username, ]}
+    elif sharing == BROADCAST:
+        sharing = {BROADCAST: True}
     if BROADCAST in sharing:
         sharing[BROADCAST] = True
     redis_publisher = RedisPublisher(facility=settings.DF_WS_FACILITY, **sharing)
     msg = json.dumps({'signal': signal_name, 'options': kwargs})
-    redis_publisher.publish_message(RedisMessage(msg))
+    redis_publisher.publish_message(RedisMessage(msg.encode('utf-8')))
 
 
 class Subscriber(RedisSubscriber):
@@ -55,7 +59,7 @@ class Subscriber(RedisSubscriber):
             return
         # noinspection PyBroadException
         try:
-            message_dict = json.loads(message)
+            message_dict = json.loads(message.decode('utf-8'))
             df_call(message_dict['signal'], self.request, sharing=None, from_client=True, kwargs=message_dict['options'])
         except ApiException as e:
             df_call('df.messages.error', self.request, sharing=SESSION, from_client=True, kwargs={'html': _('Error: %(msg)s') % {'msg': force_text(e)}})

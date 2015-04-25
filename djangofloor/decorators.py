@@ -77,12 +77,27 @@ True
 
 
 class SignalRequest(object):
+    """ Store the username and the session key and must be supplied to any Python signal call.
+    Can be constructed from a plain :class:`django.http.HttpRequest`.
+    """
     def __init__(self, username, session_key):
         self.username = username
         self.session_key = session_key
 
     def to_dict(self):
         return self.__dict__
+
+    @classmethod
+    def from_request(cls, request):
+        """ return a `SignalRequest` from a Django request
+        :param request: standard Django request
+        :type request: :class:`django.http.HttpRequest`
+        :return:
+        :rtype: :class:`djangofloor.decorators.SignalRequest`
+        """
+        username = request.user.get_username() if request.user and request.user.is_authenticated() else None
+        session_key = request.session.session_key if request.session else None
+        return cls(username=username, session_key=session_key)
 
 
 class CallWrapper(object):
@@ -143,17 +158,18 @@ class CallWrapper(object):
 
 
 class RedisCallWrapper(CallWrapper):
-    def __init__(self, fn, path=None, delayed=False, allow_from_client=True):
+    def __init__(self, fn, path=None, delayed=False, allow_from_client=True, auth_required=True):
         super(RedisCallWrapper, self).__init__(fn, path=path)
         self.allow_from_client = allow_from_client
         self.delayed = delayed
+        self.auth_required = auth_required
 
     def register(self, path):
         REGISTERED_SIGNALS.setdefault(path, []).append(self)
 
 
-def connect(fn=None, path=None, delayed=False, allow_from_client=True):
-    wrapped = lambda fn_: RedisCallWrapper(fn_, path=path, delayed=delayed, allow_from_client=allow_from_client)
+def connect(fn=None, path=None, delayed=False, allow_from_client=True, auth_required=True):
+    wrapped = lambda fn_: RedisCallWrapper(fn_, path=path, delayed=delayed, allow_from_client=allow_from_client, auth_required=auth_required)
     if fn is not None:
         wrapped = wrapped(fn)
     return wrapped

@@ -1,8 +1,8 @@
 # coding=utf-8
 from __future__ import unicode_literals
 from djangofloor.decorators import connect, SerializedForm
-from djangofloor.demo.forms import SimpleForm
-from djangofloor.tasks import call, SESSION
+from demo.forms import SimpleForm
+from djangofloor.tasks import call, SESSION, BROADCAST, USER
 
 __author__ = 'flanker'
 
@@ -29,9 +29,13 @@ def test_websocket(request):
 
 @connect(path='demo.test_redis')
 def test_redis(request):
-    call('df.messages.info', request, SESSION, html='This message has been received and sent through websockets.')
+    call('df.messages.info', request, BROADCAST, html='[BROADCAST] This message has been received and sent through websockets.')
+    call('df.messages.info', request, SESSION, html='[SESSION] This message has been received and sent through websockets.')
+    call('df.messages.info', request, USER, html='[USER] This message has been received and sent through websockets.')
 
 
 @connect(path='demo.test_celery', delayed=True)
 def test_celery(request):
-    call('df.messages.info', request, SESSION, html='This message has been received and sent through Celery and websockets.')
+    call('df.messages.info', request, BROADCAST, html='[BROADCAST] This message has been received and sent through Celery and websockets.')
+    call('df.messages.info', request, SESSION, html='[SESSION] This message has been received and sent through Celery and websockets.')
+    call('df.messages.info', request, USER, html='[USER] This message has been received and sent through Celery and websockets.')

@@ -99,7 +99,7 @@ ACCOUNT_EMAIL_VERIFICATION = None
 ACCOUNT_EMAIL_SUBJECT_PREFIX = '[{SERVER_NAME}] '
 # iterable of URL of your application. 'my_app.root_urls.urls'
 FLOOR_URL_CONF = None
-FLOOR_INSTALLED_APPS = ['djangofloor.demo', ]
+FLOOR_INSTALLED_APPS = []
 FLOOR_INDEX = None
 FLOOR_PROJECT_NAME = _('DjangoFloor')
 
@@ -171,8 +171,6 @@ LOGIN_URL = '/accounts/login/'
 LOGOUT_URL = '/accounts/logout/'
 LOGIN_REDIRECT_URL = '/'
 WEBSOCKET_URL = '/ws/'
-
-
 
 PIPELINE_CSS = {
     'default': {

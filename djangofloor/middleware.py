@@ -77,6 +77,7 @@ class BasicAuthMiddleware(object):
 
 # noinspection PyAbstractClass
 class RCSSMinCompressor(CompressorBase):
+
     # noinspection PyMethodMayBeStatic
     def compress_css(self, css):
         return cssmin(css)

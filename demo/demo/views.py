@@ -4,8 +4,8 @@ from django.contrib import messages
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.utils.translation import ugettext_lazy as _
-from djangofloor.demo.forms import SimpleForm
-from djangofloor.demo.tasks import add
+from demo.forms import SimpleForm
+from demo.tasks import add
 
 __author__ = 'flanker'
 

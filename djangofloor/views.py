@@ -1,6 +1,7 @@
 # coding=utf-8
 from __future__ import unicode_literals
 import json
+import mimetypes
 import os
 
 from django.conf import settings
@@ -18,6 +19,7 @@ from djangofloor.tasks import import_signals, df_call
 
 
 __author__ = 'flanker'
+mimetypes.init()
 
 
 def read_file_in_chunks(fileobj, chunk_size=32768):
@@ -55,22 +57,26 @@ def signal_call(request, signal):
 
 
 def send_file(xsend_path, mimetype=None):
+    if mimetype is None:
+        (mimetype, encoding) = mimetypes.guess_type(xsend_path)
+        if mimetype is None:
+            mimetype = 'text/plain'
     if settings.USE_X_SEND_FILE:
         response = HttpResponse(content_type=mimetype)
-        response['Content-Disposition'] = 'attachment; filename={0}'.format(os.path.basename(xsend_path))
         response['X-SENDFILE'] = xsend_path
-        return response
-    for dirpath, alias_url in settings.X_ACCEL_REDIRECT_ARCHIVE:
-        if xsend_path.startswith(dirpath):
-            response = HttpResponse(content_type=mimetype)
-            response['Content-Disposition'] = 'attachment; filename={0}'.format(os.path.basename(xsend_path))
-            response['X-Accel-Redirect'] = alias_url + xsend_path
-            return response
-    fileobj = open(xsend_path, 'rb')
-    response = StreamingHttpResponse(read_file_in_chunks(fileobj), content_type=mimetype)
+    else:
+        for dirpath, alias_url in settings.X_ACCEL_REDIRECT_ARCHIVE:
+            if xsend_path.startswith(dirpath):
+                response = HttpResponse(content_type=mimetype)
+                response['Content-Disposition'] = 'attachment; filename={0}'.format(os.path.basename(xsend_path))
+                response['X-Accel-Redirect'] = alias_url + xsend_path
+                break
+        else:
+            fileobj = open(xsend_path, 'rb')
+            response = StreamingHttpResponse(read_file_in_chunks(fileobj), content_type=mimetype)
+            response['Content-Length'] = os.path.getsize(xsend_path)
     if mimetype[0:4] != 'text' and mimetype[0:5] != 'image':
         response['Content-Disposition'] = 'attachment; filename={0}'.format(os.path.basename(xsend_path))
-    response['Content-Length'] = os.path.getsize(xsend_path)
     return response
 
 

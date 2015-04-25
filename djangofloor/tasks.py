@@ -26,7 +26,7 @@ def signal_task(signal_name, request, from_client, kwargs):
     for wrapper in REGISTERED_SIGNALS[signal_name]:
         if not isinstance(wrapper, RedisCallWrapper) or not wrapper.delayed:
             continue
-        if from_client and not wrapper.allow_from_client:
+        if (from_client and not wrapper.allow_from_client) or (wrapper.auth_required and not request.session_key):
             continue
         wrapper.function(request, **kwargs)
 
@@ -66,16 +66,14 @@ def df_call(signal_name, request, sharing, from_client, kwargs):
     import_signals()
     result = []
     if isinstance(request, HttpRequest):
-        username = request.user.get_username() if request.user and request.user.is_authenticated() else None
-        session_key = request.session.session_key if request.session else None
-        request = SignalRequest(username=username, session_key=session_key)
+        request = SignalRequest.from_request(request)
     if sharing is not None and settings.USE_WS4REDIS:
         from djangofloor.df_ws4redis import ws_call
         ws_call(signal_name, request, sharing, kwargs)
 
     must_delay = False
     for wrapper in REGISTERED_SIGNALS.get(signal_name, []):
-        if not wrapper.allow_from_client and from_client:
+        if (not wrapper.allow_from_client and from_client) or (wrapper.auth_required and not request.session_key):
             continue
         if wrapper.delayed:
             must_delay = True

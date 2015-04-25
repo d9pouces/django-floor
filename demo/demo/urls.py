@@ -3,5 +3,5 @@ from __future__ import unicode_literals
 __author__ = 'flanker'
 
 urls = [
-    (r'^test.html$', 'djangofloor.demo.views.test'),
+    (r'^test.html$', 'demo.views.test'),
 ]

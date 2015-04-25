@@ -5,6 +5,7 @@ __author__ = 'flanker'
 
 FLOOR_URL_CONF = 'djangofloor.demo.urls.urls'
 DJANGOFLOOR_PROJECT_NAME = 'DemoDjangoFloor'
+FLOOR_INSTALLED_APPS = ['djangofloor.demo', ]
 
 ########################################################################################################################
 # sessions

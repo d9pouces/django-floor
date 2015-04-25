@@ -15,7 +15,7 @@ with codecs.open(os.path.join(os.path.dirname(__file__), 'README.md'), encoding=
     long_description = fd.read()
 entry_points = {'console_scripts': ['djangofloor-manage = djangofloor.scripts:manage',
                                     'djangofloor-gunicorn = djangofloor.scripts:gunicorn',
-                                    'djangofloor-celery = djangofloor.scripts:run_celery',
+                                    'djangofloor-celery = djangofloor.scripts:celery',
                                     'djangofloor-uswgi = djangofloor.scripts:uswgi', ]}
 
 requirements = ['Django>=1.8', 'django-allauth', 'gunicorn', 'django-bootstrap3', 'jsmin',
