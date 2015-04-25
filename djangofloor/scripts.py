@@ -40,10 +40,10 @@ def check_extra_option(name, default, *argnames):
     return getattr(options, name)
 
 
-def set_default_option(options, name, default_value):
+def set_default_option(options, name):
     option_name = name.replace('_', '-')
     if getattr(options, name):
-        sys.argv += ['--%s' % option_name, default_value]
+        sys.argv += ['--%s' % option_name, getattr(options, name)]
 
 
 def set_env():
@@ -139,30 +139,26 @@ def gunicorn():
     set_env()
     from django.conf import settings
     parser = ArgumentParser(usage="%(prog)s subcommand [options] [args]")
-    parser.add_argument('-b', '--bind', action='store', default=None, help=settings.BIND_ADDRESS_HELP)
-    # noinspection PyUnresolvedReferences
-    parser.add_argument('-p', '--pid', action='store', default=None, help=settings.GUNICORN_PID_FILE_HELP)
-    parser.add_argument('--forwarded-allow-ips', action='store', default=None)
+    parser.add_argument('-b', '--bind', action='store', default=settings.BIND_ADDRESS, help=settings.BIND_ADDRESS_HELP)
+    parser.add_argument('-p', '--pid', action='store', default=settings.GUNICORN_PID_FILE, help=settings.GUNICORN_PID_FILE_HELP)
+    parser.add_argument('--forwarded-allow-ips', action='store', default=','.join(settings.REVERSE_PROXY_IPS))
     parser.add_argument('--debug', action='store_true', default=False)
-    parser.add_argument('-t', '--timeout', action='store', default=None, help=settings.REVERSE_PROXY_TIMEOUT_HELP)
-    parser.add_argument('--proxy-allow-from', action='store', default=None,
+    parser.add_argument('-t', '--timeout', action='store', default=str(settings.REVERSE_PROXY_TIMEOUT), help=settings.REVERSE_PROXY_TIMEOUT_HELP)
+    parser.add_argument('--proxy-allow-from', action='store', default=','.join(settings.REVERSE_PROXY_IPS),
                         help='Front-end\'s IPs from which allowed accept proxy requests (comma separate)')
-    parser.add_argument('--error-logfile', action='store', default=None, help=settings.GUNICORN_ERROR_LOG_FILE_HELP)
-    parser.add_argument('--access-logfile', action='store', default=None, help=settings.GUNICORN_ACCESS_LOG_FILE_HELP)
-    parser.add_argument('--log-level', action='store', default=None, help=settings.GUNICORN_LOG_LEVEL_HELP)
+    parser.add_argument('--error-logfile', action='store', default=settings.GUNICORN_ERROR_LOG_FILE, help=settings.GUNICORN_ERROR_LOG_FILE_HELP)
+    parser.add_argument('--access-logfile', action='store', default=settings.GUNICORN_ACCESS_LOG_FILE, help=settings.GUNICORN_ACCESS_LOG_FILE_HELP)
+    parser.add_argument('--log-level', action='store', default=settings.GUNICORN_LOG_LEVEL, help=settings.GUNICORN_LOG_LEVEL_HELP)
     options, extra_args = parser.parse_known_args()
     sys.argv[1:] = extra_args
-    if not options.debug and settings.DEBUG:
-        sys.argv += ['--debug']
-    set_default_option(options, 'bind', settings.BIND_ADDRESS)
-    set_default_option(options, 'pid', settings.GUNICORN_PID_FILE)
-    set_default_option(options, 'forwarded_allow_ips', ','.join(settings.REVERSE_PROXY_IPS))
-    set_default_option(options, 'timeout', str(settings.REVERSE_PROXY_TIMEOUT))
-    set_default_option(options, 'proxy_allow_from', ','.join(settings.REVERSE_PROXY_IPS))
-    set_default_option(options, 'error_logfile', settings.GUNICORN_ERROR_LOG_FILE)
-    set_default_option(options, 'access_logfile', settings.GUNICORN_ACCESS_LOG_FILE)
-    set_default_option(options, 'log_level', settings.GUNICORN_LOG_LEVEL)
-
+    set_default_option(options, 'bind')
+    set_default_option(options, 'pid')
+    set_default_option(options, 'forwarded_allow_ips')
+    set_default_option(options, 'timeout')
+    set_default_option(options, 'proxy_allow_from')
+    set_default_option(options, 'error_logfile')
+    set_default_option(options, 'access_logfile')
+    set_default_option(options, 'log_level')
     application = 'djangofloor.wsgi_http:application'
     if application not in sys.argv:
         sys.argv.append(application)
@@ -174,13 +170,13 @@ def celery():
     from celery.bin.celery import main as celery_main
     from django.conf import settings
     parser = ArgumentParser(usage="%(prog)s subcommand [options] [args]")
-    parser.add_argument('-A', '--app', action='store', default=settings.CELERY_APP, help=settings.BIND_ADDRESS_HELP)
-    parser.add_argument('--pidfile', action='store', default=None, help=settings.GUNICORN_PID_FILE_HELP)
+    parser.add_argument('-A', '--app', action='store', default='djangofloor', help=settings.BIND_ADDRESS_HELP)
+    parser.add_argument('--pidfile', action='store', default=settings.GUNICORN_PID_FILE, help=settings.GUNICORN_PID_FILE_HELP)
     parser.add_argument('--logfile', action='store', default=settings.CELERY_LOG_FILE)
     options, extra_args = parser.parse_known_args()
     sys.argv[1:] = extra_args
-    set_default_option(options, 'app', 'djangofloor')
-    set_default_option(options, 'pidfile', settings.GUNICORN_PID_FILE)
+    set_default_option(options, 'app')
+    set_default_option(options, 'pidfile')
     celery_main(sys.argv)
 
 

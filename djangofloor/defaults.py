@@ -72,6 +72,7 @@ MAX_REQUESTS_HELP = 'The maximum number of requests a worker will process before
 REVERSE_PROXY_IPS = []
 REVERSE_PROXY_IPS_HELP = 'List of IP addresses of the reverse proxies'
 REVERSE_PROXY_TIMEOUT = 30
+REVERSE_PROXY_TIMEOUT_HELP = 'Timeout for reverse proxy'
 # Workers silent for more than this many seconds are killed and restarted.
 REVERSE_PROXY_ERROR_LOG_FILE = FilePath('{LOG_PATH}/error.log')
 REVERSE_PROXY_ERROR_LOG_FILE_HELP = 'Error log file to write to (Reverse proxy).'

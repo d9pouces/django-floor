@@ -196,6 +196,7 @@ Batteries included
   * new cache, websockets and sessions engines (django-websocket-redis, django-redis-sessions-fork, django-redis-cache)
   * django-debug-toolbar
   * gunicorn (of course, you can also use uwsgi)
+  * celery
   
 
 Creating a new site
