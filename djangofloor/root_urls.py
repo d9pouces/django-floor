@@ -1,14 +1,12 @@
 # coding=utf-8
 from __future__ import unicode_literals
 """Define mappings from the URL requested by a user to a proper Python view."""
-from django.utils.module_loading import import_string
-from djangofloor.scripts import load_celery
-
 __author__ = 'flanker'
-
+from django.utils.module_loading import import_string
 from django.conf import settings
 from django.conf.urls import patterns, include, url
 from django.contrib import admin
+from djangofloor.scripts import load_celery
 load_celery()
 
 admin.autodiscover()
@@ -29,3 +27,7 @@ urlpatterns = patterns('',
                        (r'^robots\.txt$', 'djangofloor.views.robots'),
                        (r'^$', 'djangofloor.views.index'),
                        *extra_urls)
+
+if settings.DEBUG:
+    import debug_toolbar
+    urlpatterns += patterns('', url(r'^__debug__/', include(debug_toolbar.urls)), )

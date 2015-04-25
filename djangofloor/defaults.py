@@ -215,6 +215,7 @@ TEMPLATE_LOADERS = [
 
 MIDDLEWARE_CLASSES = ['django.middleware.cache.UpdateCacheMiddleware',
                       'django.middleware.common.CommonMiddleware',
+                      'debug_toolbar.middleware.DebugToolbarMiddleware',
                       'django.contrib.sessions.middleware.SessionMiddleware',
                       'django.middleware.csrf.CsrfViewMiddleware',
                       'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -229,6 +230,7 @@ MIDDLEWARE_CLASSES = ['django.middleware.cache.UpdateCacheMiddleware',
 DEBUG_TOOLBAR_PANELS = [
     'debug_toolbar.panels.versions.VersionsPanel',
     'debug_toolbar.panels.timer.TimerPanel',
+    'debug_toolbar.panels.profiling.ProfilingPanel',
     'debug_toolbar.panels.settings.SettingsPanel',
     'debug_toolbar.panels.headers.HeadersPanel',
     'debug_toolbar.panels.request.RequestPanel',
@@ -279,6 +281,7 @@ INSTALLED_APPS = [
     'allauth.account',
     'allauth.socialaccount',
     'pipeline',
+    'debug_toolbar',
 ]
 if PY2:
     INSTALLED_APPS += ['ws4redis', ]

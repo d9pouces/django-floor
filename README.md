@@ -19,12 +19,15 @@ Demo
 
 
     mkvirtualenv djangofloor -p `which python2.7`
-    curl -O https://github.com/d9pouces/django-floor/archive/master.zip
+    pip install djangofloor
+    curl -LO https://github.com/d9pouces/django-floor/archive/master.zip
     unzip master.zip
+    cd django-floor-master/demo
+    python setup.py develop
     djangofloor-manage  --dfproject demo migrate
     djangofloor-manage  --dfproject demo runserver
   
-Open your brower on `http://localhost:9000/test.html`. To see a more complete demonstration (requires a Redis server on its standard port — 6379). 
+Open your brower on `http://localhost:9000/test.html`. To see a more complete demonstration with websockets (requires a Redis server on its standard port — 6379). 
 In `demo/defaults.py`, uncomment the following lines:
 
     # WSGI_APPLICATION = 'ws4redis.django_runserver.application'
@@ -220,7 +223,7 @@ Extra stuff
 -----------
 
 
-  * Avoid to modify INSTALLED_APPS if you only want to add extra apps: please use FLOOR_INSTALLED_APPS instead.
+  * Avoid to modify INSTALLED_APPS if you only want to add extra apps: you can use FLOOR_INSTALLED_APPS instead.
 
 
 Authentication:
