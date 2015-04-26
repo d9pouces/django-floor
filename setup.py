@@ -19,10 +19,11 @@ entry_points = {'console_scripts': ['djangofloor-manage = djangofloor.scripts:ma
                                     'djangofloor-uswgi = djangofloor.scripts:uswgi', ]}
 
 requirements = ['Django>=1.8', 'django-allauth', 'gunicorn', 'django-bootstrap3', 'jsmin',
-                'django-debug-toolbar', 'rcssmin',  # 'django-admin-bootstrapped', TODO attendre la 2.5, modifier aussi dans INSTALLED_APPS
+                'django-debug-toolbar', 'rcssmin',  'django-admin-bootstrapped',
                 'django-pipeline', 'celery', 'django-redis', 'django-redis-sessions-fork', 'django-redis-cache', ]
 PY2 = sys.version_info[0] == 2
 
+extras_require = {}
 try:
     import pathlib
 except ImportError:
@@ -34,7 +35,8 @@ except ImportError:
     signature = None
     requirements.append('funcsigs')
 if PY2:
-    requirements += ['django-websocket-redis', 'gevent', ]
+    extras_require['websocket'] = ['django-websocket-redis', 'gevent', ]
+    extras_require['uwsgi'] = ['uwsgi', ]
 
 setup(
     name='djangofloor',
@@ -51,6 +53,7 @@ setup(
     zip_safe=False,
     test_suite='djangofloor.tests',
     install_requires=requirements,
+    extras_require=extras_require,
     setup_requires=[],
     classifiers=[],
 )

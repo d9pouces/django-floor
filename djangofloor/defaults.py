@@ -8,7 +8,12 @@ from djangofloor.utils import DirectoryPath, FilePath
 __author__ = 'flanker'
 from os.path import join, dirname, abspath
 from django.utils.translation import ugettext_lazy as _
-PY2 = sys.version_info[0] == 2
+try:
+    import ws4redis
+    USE_WS4REDIS = True
+except ImportError:
+    ws4redis = None
+    USE_WS4REDIS = False
 # define a root path for misc. Django data (SQLite database, static files, ...)
 LOCAL_PATH = abspath(join(dirname(dirname(__file__)), 'django_data'))
 SERVER_NAME = 'localhost'
@@ -255,7 +260,7 @@ TEMPLATE_CONTEXT_PROCESSORS = [
     'djangofloor.context_processors.context_base',
     'allauth.account.context_processors.account',
     'allauth.socialaccount.context_processors.socialaccount', ]
-if PY2:
+if USE_WS4REDIS:
     TEMPLATE_CONTEXT_PROCESSORS += ['ws4redis.context_processors.default', ]
 ROOT_URLCONF = 'djangofloor.root_urls'
 
@@ -273,8 +278,7 @@ INSTALLED_APPS = [
     'django.contrib.humanize',
     'django.contrib.sites',
     'django.contrib.sitemaps',
-    # 'django_admin_bootstrapped.bootstrap3',  # TODO attendre la v2.5
-    # 'django_admin_bootstrapped',  # TODO attendre la v2.5
+    'django_admin_bootstrapped',
     'django.contrib.admin',
     'bootstrap3',
     'djangofloor',
@@ -284,7 +288,7 @@ INSTALLED_APPS = [
     'pipeline',
     'debug_toolbar',
 ]
-if PY2:
+if USE_WS4REDIS:
     INSTALLED_APPS += ['ws4redis', ]
 
 OTHER_ALLAUTH = []
@@ -299,6 +303,8 @@ BOOTSTRAP3 = {
     'horizontal_label_class': 'col-md-2',
     'horizontal_field_class': 'col-md-4',
 }
+DAB_FIELD_RENDERER = 'django_admin_bootstrapped.renderers.BootstrapFieldRenderer'
+
 TEST_RUNNER = 'django.test.runner.DiscoverRunner'
 AUTHENTICATION_HEADER = 'HTTP_REMOTE_USER'
 AUTHENTICATION_HEADER_HELP = 'HTTP header corresponding to the username (when using HTTP authentication).' \
@@ -338,7 +344,6 @@ CACHES_HELP = 'A dictionary containing the settings for all caches to be used wi
 ########################################################################################################################
 # django-redis-websocket
 ########################################################################################################################
-USE_WS4REDIS = False
 WS4REDIS_CONNECTION = {'host': '{REDIS_HOST}', 'port': '{REDIS_PORT}', 'db': 15, }
 WS4REDIS_CONNECTION_HELP = 'If the Redis datastore uses connection settings other than the defaults.'
 WS4REDIS_EXPIRE = 0
@@ -411,4 +416,3 @@ LOGGING = {
 LOGGING_HELP = 'A data structure containing configuration information.' \
                ' The contents of this data structure will be passed as the argument to the configuration method' \
                ' described in LOGGING_CONFIG.'
-
