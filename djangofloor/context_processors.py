@@ -8,7 +8,7 @@ __author__ = 'flanker'
 
 def context_base(request):
     return {
-        'df_remote_authenticated': request.df_remote_authenticated,
+        'df_remote_authenticated': getattr(request, 'df_remote_authenticated', False),
         'df_project_name': settings.FLOOR_PROJECT_NAME,
         'df_user': request.user,
         'df_language_code': settings.LANGUAGE_CODE,
