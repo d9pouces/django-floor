@@ -352,8 +352,11 @@ WS4REDIS_PREFIX = 'ws'
 # Python dotted path to the WSGI application used by Django's runserver.
 # WSGI_APPLICATION = 'djangofloor.wsgi_http.application'
 WSGI_APPLICATION = 'djangofloor.wsgi_http.application'
+if USE_WS4REDIS:
+    WSGI_APPLICATION = 'ws4redis.django_runserver.application'
 WS4REDIS_SUBSCRIBER = 'djangofloor.df_ws4redis.Subscriber'
 DF_WS_FACILITY = 'djangofloor'
+
 ########################################################################################################################
 # celery
 ########################################################################################################################

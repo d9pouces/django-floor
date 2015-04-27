@@ -1,6 +1,9 @@
 # coding=utf-8
 from __future__ import unicode_literals, absolute_import
 
+import celery
+# used to avoid strange import bug with Python 3.3
+celery.__file__
 from celery import shared_task
 from django.conf import settings
 from django.http import HttpRequest

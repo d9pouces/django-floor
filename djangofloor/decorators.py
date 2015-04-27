@@ -80,9 +80,10 @@ class SignalRequest(object):
     """ Store the username and the session key and must be supplied to any Python signal call.
     Can be constructed from a plain :class:`django.http.HttpRequest`.
     """
-    def __init__(self, username, session_key):
+    def __init__(self, username, session_key, user_pk=None):
         self.username = username
         self.session_key = session_key
+        self.user_pk = user_pk
 
     def to_dict(self):
         return self.__dict__
@@ -96,8 +97,9 @@ class SignalRequest(object):
         :rtype: :class:`djangofloor.decorators.SignalRequest`
         """
         username = request.user.get_username() if request.user and request.user.is_authenticated() else None
+        user_pk = request.user.pk if request.user and request.user.is_authenticated() else None
         session_key = request.session.session_key if request.session else None
-        return cls(username=username, session_key=session_key)
+        return cls(username=username, session_key=session_key, user_pk=user_pk)
 
 
 class CallWrapper(object):

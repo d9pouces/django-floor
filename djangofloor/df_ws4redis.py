@@ -40,7 +40,7 @@ class Subscriber(RedisSubscriber):
 
     def __init__(self, connection):
         super(Subscriber, self).__init__(connection)
-        self.request = SignalRequest(None, None)
+        self.request = SignalRequest(None, None, None)
 
     def set_pubsub_channels(self, request, channels):
         self.request = request
