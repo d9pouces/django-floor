@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 __author__ = 'flanker'
 
 FLOOR_URL_CONF = 'demo.urls.urls'
-DJANGOFLOOR_PROJECT_NAME = 'DemoDjangoFloor'
+FLOOR_PROJECT_NAME = 'Demo DjangoFloor'
 FLOOR_INSTALLED_APPS = ['demo', ]
 
 ########################################################################################################################
