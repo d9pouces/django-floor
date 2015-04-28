@@ -39,7 +39,7 @@ def import_signals():
     for app in settings.INSTALLED_APPS:
         try:
             import_module('%s.signals' % app)
-        except ImportError:
+        except ImportError as e:
             pass
 
 
