@@ -31,7 +31,8 @@ def signal_task(signal_name, request, from_client, kwargs):
             continue
         if (from_client and not wrapper.allow_from_client) or (wrapper.auth_required and not request.session_key):
             continue
-        wrapper.function(request, **kwargs)
+        prepared_kwargs = wrapper.prepare_kwargs(kwargs)
+        wrapper.function(request, **prepared_kwargs)
 
 
 @lru_cache()
@@ -81,7 +82,8 @@ def df_call(signal_name, request, sharing, from_client, kwargs):
         if wrapper.delayed:
             must_delay = True
         else:
-            wrapper_result = wrapper.function(request, **kwargs)
+            prepared_kwargs = wrapper.prepare_kwargs(kwargs)
+            wrapper_result = wrapper.function(request, **prepared_kwargs)
             if wrapper_result:
                 result += list(wrapper_result)
     if must_delay:
