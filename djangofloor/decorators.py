@@ -80,10 +80,13 @@ class SignalRequest(object):
     """ Store the username and the session key and must be supplied to any Python signal call.
     Can be constructed from a plain :class:`django.http.HttpRequest`.
     """
-    def __init__(self, username, session_key, user_pk=None):
+    def __init__(self, username, session_key, user_pk=None, is_superuser=False, is_staff=False, is_active=False):
         self.username = username
         self.session_key = session_key
         self.user_pk = user_pk
+        self.is_superuser = is_superuser
+        self.is_staff = is_staff
+        self.is_active = is_active
 
     def to_dict(self):
         return self.__dict__
@@ -96,10 +99,12 @@ class SignalRequest(object):
         :return:
         :rtype: :class:`djangofloor.decorators.SignalRequest`
         """
-        username = request.user.get_username() if request.user and request.user.is_authenticated() else None
-        user_pk = request.user.pk if request.user and request.user.is_authenticated() else None
         session_key = request.session.session_key if request.session else None
-        return cls(username=username, session_key=session_key, user_pk=user_pk)
+        user = request.user
+        if user.is_authenticated():
+            return cls(username=user.get_username(), session_key=session_key,
+                       user_pk=user.pk, is_superuser=user.is_superuser, is_staff=user.is_staff, is_active=user.is_active)
+        return cls(None, session_key)
 
 
 class CallWrapper(object):
@@ -138,8 +143,9 @@ class CallWrapper(object):
     def register(self, path):
         raise NotImplementedError
 
-    def check_kwargs(self, kwargs):
+    def prepare_kwargs(self, kwargs):
         logger.debug(self.path, kwargs)
+        kwargs = {x: y for (x, y) in kwargs.items()}
         if not self.accept_kwargs:
             for arg_name in kwargs:
                 if arg_name not in self.required_arguments and arg_name not in self.optional_arguments:

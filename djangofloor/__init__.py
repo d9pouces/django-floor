@@ -2,4 +2,4 @@
 from __future__ import unicode_literals
 
 __author__ = 'flanker'
-__version__ = '0.9.5'
+__version__ = '0.9.6'
