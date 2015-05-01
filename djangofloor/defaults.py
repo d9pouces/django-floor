@@ -288,8 +288,10 @@ INSTALLED_APPS = [
     'allauth.socialaccount',
     'pipeline',
     'debug_toolbar',
-    'archeolog_server', 'archeolog_server.executions', 'archeolog_server.repository',
-    'archeolog_server.bricks', 'archeolog_server.editor',
+    'archeolog_server',
+    'archeolog_server.executions',
+    'archeolog_server.bricks',
+    'archeolog_server.editor',
 ]
 if USE_WS4REDIS:
     INSTALLED_APPS += ['ws4redis', ]
