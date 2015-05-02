@@ -292,6 +292,7 @@ INSTALLED_APPS = [
     'archeolog_server.executions',
     'archeolog_server.bricks',
     'archeolog_server.editor',
+    'archeolog_server.administration',
 ]
 if USE_WS4REDIS:
     INSTALLED_APPS += ['ws4redis', ]
