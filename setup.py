@@ -19,7 +19,7 @@ entry_points = {'console_scripts': ['djangofloor-manage = djangofloor.scripts:ma
                                     'djangofloor-uswgi = djangofloor.scripts:uswgi', ]}
 
 requirements = ['Django>=1.8', 'django-allauth', 'gunicorn', 'django-bootstrap3', 'jsmin',
-                'django-debug-toolbar', 'rcssmin',  'django-admin-bootstrapped', 'Pillow', 'pyScss',
+                'django-debug-toolbar', 'rcssmin',  'django-admin-bootstrapped', 'Pillow',
                 'django-pipeline', 'celery', 'django-redis', 'django-redis-sessions-fork', 'django-redis-cache', ]
 PY2 = sys.version_info[0] == 2
 
@@ -36,7 +36,8 @@ except ImportError:
     requirements.append('funcsigs')
 if PY2:
     extras_require['websocket'] = ['django-websocket-redis', 'gevent', ]
-    extras_require['uwsgi'] = ['uwsgi', ]
+extras_require['uwsgi'] = ['uwsgi', ]
+extras_require['scss'] = ['pyScss', ]
 
 setup(
     name='djangofloor',

@@ -14,6 +14,12 @@ try:
 except ImportError:
     ws4redis = None
     USE_WS4REDIS = False
+try:
+    import scss
+    USE_SCSS = True
+except ImportError:
+    scss = None
+    USE_SCSS = False
 # define a root path for misc. Django data (SQLite database, static files, ...)
 LOCAL_PATH = abspath(join(dirname(dirname(__file__)), 'django_data'))
 SERVER_NAME = 'localhost'
@@ -211,9 +217,10 @@ PIPELINE_MIMETYPES = (
 PIPELINE_JS_COMPRESSOR = 'pipeline.compressors.jsmin.JSMinCompressor'
 PIPELINE_CSS_COMPRESSOR = 'djangofloor.middleware.RCSSMinCompressor'
 STATICFILES_STORAGE = 'pipeline.storage.PipelineCachedStorage'
-PIPELINE_COMPILERS = (
-    'djangofloor.middleware.PyScssCompiler',
-)
+if USE_SCSS:
+    PIPELINE_COMPILERS = (
+        'djangofloor.middleware.PyScssCompiler',
+    )
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = [
     'django.template.loaders.filesystem.Loader',

@@ -89,7 +89,6 @@ class RCSSMinCompressor(CompressorBase):
 class PyScssCompiler(CompilerBase):
     output_extension = 'css'
 
-    @staticmethod
     def match_file(self, filename):
         return filename.endswith('.scss')
 
