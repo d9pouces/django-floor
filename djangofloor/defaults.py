@@ -211,7 +211,9 @@ PIPELINE_MIMETYPES = (
 PIPELINE_JS_COMPRESSOR = 'pipeline.compressors.jsmin.JSMinCompressor'
 PIPELINE_CSS_COMPRESSOR = 'djangofloor.middleware.RCSSMinCompressor'
 STATICFILES_STORAGE = 'pipeline.storage.PipelineCachedStorage'
-
+PIPELINE_COMPILERS = (
+    'djangofloor.middleware.PyScssCompiler',
+)
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = [
     'django.template.loaders.filesystem.Loader',
@@ -288,11 +290,6 @@ INSTALLED_APPS = [
     'allauth.socialaccount',
     'pipeline',
     'debug_toolbar',
-    'archeolog_server',
-    'archeolog_server.executions',
-    'archeolog_server.bricks',
-    'archeolog_server.editor',
-    'archeolog_server.administration',
 ]
 if USE_WS4REDIS:
     INSTALLED_APPS += ['ws4redis', ]

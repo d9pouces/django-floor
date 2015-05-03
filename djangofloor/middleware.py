@@ -1,5 +1,8 @@
 # coding=utf-8
 from __future__ import unicode_literals
+import codecs
+from pipeline.compilers import CompilerBase
+import scss.compiler
 """Define your middlewares here"""
 import base64
 from django.conf import settings
@@ -78,6 +81,21 @@ class BasicAuthMiddleware(object):
 # noinspection PyAbstractClass
 class RCSSMinCompressor(CompressorBase):
 
-    # noinspection PyMethodMayBeStatic
-    def compress_css(self, css):
+    @staticmethod
+    def compress_css(css):
         return cssmin(css)
+
+
+class PyScssCompiler(CompilerBase):
+    output_extension = 'css'
+
+    @staticmethod
+    def match_file(self, filename):
+        return filename.endswith('.scss')
+
+    def compile_file(self, infile, outfile, outdated=False, force=False):
+        if not outdated and not force:
+            return  # No need to recompiled file
+        result = scss.compiler.compile_file(infile)
+        with codecs.open(outfile, 'w', encoding='utf-8') as fd:
+            fd.write(result)
