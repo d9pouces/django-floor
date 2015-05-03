@@ -310,8 +310,8 @@ BOOTSTRAP3 = {
     'css_url': None,
     'theme_url': None,
     'javascript_url': None,
-    'horizontal_label_class': 'col-md-2',
-    'horizontal_field_class': 'col-md-4',
+    'horizontal_label_class': 'col-md-4',
+    'horizontal_field_class': 'col-md-8',
 }
 DAB_FIELD_RENDERER = 'django_admin_bootstrapped.renderers.BootstrapFieldRenderer'
 

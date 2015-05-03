@@ -1,10 +1,43 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals, absolute_import
+from urllib.parse import urljoin
 from django import template
+from django.templatetags.static import StaticNode, PrefixNode
 
 __author__ = 'flanker'
 
 register = template.Library()
+
+
+class MediaNode(StaticNode):
+
+    @classmethod
+    def handle_simple(cls, path):
+        return urljoin(PrefixNode.handle_simple('MEDIA_URL'), path)
+
+
+@register.tag('media')
+def do_media(parser, token):
+    """
+    Joins the given path with the MEDIA_URL setting.
+
+    Usage::
+
+        {% media path [as varname] %}
+
+    Examples::
+
+        {% media "myapp/css/base.css" %}
+        {% media variable_with_path %}
+        {% media "myapp/css/base.css" as admin_base_css %}
+        {% media variable_with_path as varname %}
+
+    """
+    return MediaNode.handle_token(parser, token)
+
+
+def media(path):
+    return MediaNode.handle_simple(path)
 
 
 @register.simple_tag
