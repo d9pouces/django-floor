@@ -12,4 +12,5 @@ def context_base(request):
         'df_project_name': settings.FLOOR_PROJECT_NAME,
         'df_user': request.user,
         'df_language_code': settings.LANGUAGE_CODE,
+        'df_user_agent': request.META.get('HTTP_USER_AGENT', ''),
     }
