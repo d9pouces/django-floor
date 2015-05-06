@@ -2,6 +2,8 @@
 from __future__ import unicode_literals, absolute_import
 import logging
 import re
+from django.contrib.auth.models import Permission
+from django.db.models import Q
 
 from django.http import QueryDict
 
@@ -80,16 +82,53 @@ class SignalRequest(object):
     """ Store the username and the session key and must be supplied to any Python signal call.
     Can be constructed from a plain :class:`django.http.HttpRequest`.
     """
-    def __init__(self, username, session_key, user_pk=None, is_superuser=False, is_staff=False, is_active=False):
+    def __init__(self, username, session_key, user_pk=None, is_superuser=False, is_staff=False, is_active=False, perms=None):
         self.username = username
         self.session_key = session_key
         self.user_pk = user_pk
         self.is_superuser = is_superuser
         self.is_staff = is_staff
         self.is_active = is_active
+        self._perms = perms
+        self._template_perms = None
 
     def to_dict(self):
-        return self.__dict__
+        result = {}
+        result.update(self.__dict__)
+        if isinstance(self._perms, set):
+            result['perms'] = list(self._perms)
+        else:
+            result['perms'] = None
+        del result['_perms']
+        del result['_template_perms']
+        return result
+
+    def has_perm(self, perm):
+        return perm in self.perms
+
+    @property
+    def perms(self):
+        if not self.user_pk:
+            return set()
+        elif self._perms is not None:
+            return self._perms
+        if self.is_superuser:
+            query = Permission.objects.all()
+        else:
+            query = Permission.objects.filter(Q(user__pk=self.user_pk) | Q(group__user__pk=self.user_pk))
+        self._perms = {'%s.%s' % p for p in
+                       query.select_related('content_type').values_list('content_type__app_label', 'codename')}
+        return self._perms
+
+    @property
+    def template_perms(self):
+        if self._template_perms is None:
+            result = {}
+            for perm in self.perms:
+                app_name, sep, codename = perm.partition('.')
+                result.setdefault(app_name, {})[codename] = True
+            self._template_perms = result
+        return self._template_perms
 
     @classmethod
     def from_request(cls, request):
