@@ -12,6 +12,7 @@ from django.contrib.syndication.views import add_domain
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.utils.lru_cache import lru_cache
+from django.views.decorators.cache import cache_control
 from django.views.decorators.csrf import csrf_exempt
 
 from djangofloor.decorators import REGISTERED_SIGNALS
@@ -46,6 +47,7 @@ def signals(request):
 
 
 @csrf_exempt
+@cache_control(no_cache=True)
 def signal_call(request, signal):
     import_signals()
     if request.body:
