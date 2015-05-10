@@ -134,10 +134,12 @@ class SignalRequest(object):
     def from_request(cls, request):
         """ return a `SignalRequest` from a Django request
         :param request: standard Django request
-        :type request: :class:`django.http.HttpRequest`
+        :type request: :class:`django.http.HttpRequest` or :class:`SignalRequest`
         :return:
         :rtype: :class:`djangofloor.decorators.SignalRequest`
         """
+        if isinstance(request, SignalRequest):
+            return request
         session_key = request.session.session_key if request.session else None
         user = request.user
         if user.is_authenticated():
