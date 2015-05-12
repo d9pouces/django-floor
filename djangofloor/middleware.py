@@ -2,8 +2,6 @@
 from __future__ import unicode_literals
 import codecs
 from pipeline.compilers import CompilerBase
-import scss.compiler
-"""Define your middlewares here"""
 import base64
 from django.conf import settings
 from django.contrib import auth
@@ -93,6 +91,8 @@ class PyScssCompiler(CompilerBase):
         return filename.endswith('.scss')
 
     def compile_file(self, infile, outfile, outdated=False, force=False):
+        import scss.compiler
+        """Define your middlewares here"""
         if not outdated and not force:
             return  # No need to recompiled file
         result = scss.compiler.compile_file(infile)

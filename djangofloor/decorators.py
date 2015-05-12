@@ -92,6 +92,11 @@ class SignalRequest(object):
         self._perms = perms
         self._template_perms = None
 
+    @classmethod
+    def from_user(cls, user):
+        return cls(user.get_username(), None, user_pk=user.pk, is_superuser=user.is_superuser, is_staff=user.is_staff,
+                   is_active=user.is_active)
+
     def to_dict(self):
         result = {}
         result.update(self.__dict__)
