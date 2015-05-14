@@ -19,7 +19,7 @@ entry_points = {'console_scripts': ['djangofloor-manage = djangofloor.scripts:ma
                                     'djangofloor-uswgi = djangofloor.scripts:uswgi', ]}
 
 requirements = ['Django>=1.8', 'django-allauth', 'gunicorn', 'django-bootstrap3', 'jsmin',
-                'django-debug-toolbar', 'rcssmin',  'django-admin-bootstrapped', 'Pillow',
+                'django-debug-toolbar', 'rcssmin', 'django-admin-bootstrapped',
                 'django-pipeline', 'celery', 'django-redis', 'django-redis-sessions-fork', 'django-redis-cache', ]
 PY2 = sys.version_info[0] == 2
 
@@ -35,14 +35,13 @@ except ImportError:
     signature = None
     requirements.append('funcsigs')
 if PY2:
-    extras_require['websocket'] = ['django-websocket-redis', 'gevent', ]
-extras_require['uwsgi'] = ['uwsgi', ]
+    extras_require['websocket'] = ['django-websocket-redis', 'gevent', 'uwsgi']
 extras_require['scss'] = ['pyScss', ]
 
 setup(
     name='djangofloor',
     version=version,
-    description="No description yet.",
+    description="infrastructure for Django websites.",
     long_description=long_description,
     author='flanker',
     author_email='flanker@19pouces.net',
@@ -56,5 +55,13 @@ setup(
     install_requires=requirements,
     extras_require=extras_require,
     setup_requires=[],
-    classifiers=[],
+    classifiers=['Environment :: Web Environment',
+                 'Framework :: Django :: 1.8',
+                 'License :: OSI Approved',
+                 'Operating System :: MacOS :: MacOS X', 'Operating System :: POSIX',
+                 'Programming Language :: Python :: 2.7',
+                 'Programming Language :: Python :: 3.2',
+                 'Programming Language :: Python :: 3.3',
+                 'Programming Language :: Python :: 3.4',
+                 ],
 )

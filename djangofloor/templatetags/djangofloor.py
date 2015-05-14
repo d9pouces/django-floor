@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals, absolute_import
-from urllib.parse import urljoin
+from django.utils.six.moves.urllib.parse import urljoin
 from django import template
 from django.templatetags.static import StaticNode, PrefixNode
 
@@ -58,8 +58,3 @@ def fontawesome_icon(name, large=False, fixed=False, spin=False, li=False, rotat
         border=' fa-border' if border else '',
         color='style="color:%s;"' % color if color else ''
     )
-
-if __name__ == '__main__':
-    import doctest
-
-    doctest.testmod()

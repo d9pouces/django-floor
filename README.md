@@ -180,17 +180,17 @@ Notes:
   
   
 **Degraded mode:** Maybe you cannot use websockets (Python 3…). You can still use signals through HTTP requests.
-Set `USE_WS4REDIS` to False. Each Python signal may return a list of dict `{'signal': 'signal.name', 'options': kwargs}`.
-These dictionnaries will act as regular signals. Of course, you can only propagate JS signals at the end of a signal called by the client. 
-  
-
+Set `USE_WS4REDIS` to False. Each Python signal return a list of dict `{'signal': 'signal.name', 'options': kwargs}`.
+These dictionnaries will act as regular signals. Of course, you can only propagate JS signals at the end of a signal called by the client.
+ 
+ 
 Batteries included
 ------------------
 
   * uwsgi
   * bootstrap3 (django-bootstrap3 and django-admin-bootstrapped)
   * font-awesome
-  * CSS and JS minimizing (django-pipeline, jsmin and rcssmin)
+  * SCSS, CSS and JS minimizing (django-pipeline with pyscss, jsmin and rcssmin)
   * templates for authentication (django-allauth)
   * distributed tasks (celery via Redis)
   * new cache, websockets and sessions engines (django-websocket-redis, django-redis-sessions-fork, django-redis-cache)
@@ -216,6 +216,7 @@ Creating a new site
 Of course, you can also use:
 
   demo-manage migrate
+  demo-manage collectstatic
   demo-manage runserver
   demo-celery worker
   
@@ -243,4 +244,12 @@ File management:
   * Sending large files:
       * If you use Apache and mod_x_sendfile, set USE_X_SEND_FILE to True
       * If you use NGinx, set X_ACCEL_REDIRECT
-      * Then use `djangofloor.views.send_file` to send a file in an optimized way 
+      * Then use `djangofloor.views.send_file` to send a file in an optimized way
+       
+       
+Extra setup options
+-------------------
+
+    pip install djangofloor[websocket,scss]
+
+websocket only works with Python 2.7 and requires uwsgi. scss is required to install pyscss, allowing to compile SCSS files (superset of the CSS language) with the collectstatic command (check the django-pipeline documentation).
