@@ -49,6 +49,7 @@ DATABASES = {
     },
 }
 DATABASES_HELP = 'A dictionary containing the settings for all databases to be used with Django.'
+CONN_MAX_AGE = 600
 TIME_ZONE = 'Europe/Paris'
 TIME_ZONE_HELP = 'A string representing the time zone for this installation, or None. '
 BIND_ADDRESS = '127.0.0.1:9000'
@@ -233,6 +234,7 @@ MIDDLEWARE_CLASSES = ['django.middleware.cache.UpdateCacheMiddleware',
                       'debug_toolbar.middleware.DebugToolbarMiddleware',
                       'django.contrib.sessions.middleware.SessionMiddleware',
                       'django.middleware.csrf.CsrfViewMiddleware',
+                      'django.middleware.security.SecurityMiddleware',
                       'django.contrib.auth.middleware.AuthenticationMiddleware',
                       'django.contrib.messages.middleware.MessageMiddleware',
                       'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -322,6 +324,13 @@ AUTHENTICATION_HEADER_HELP = 'HTTP header corresponding to the username (when us
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 SECURE_PROXY_SSL_HEADER_HELP = 'A tuple representing a HTTP header/value combination that signifies a request is ' \
                                'secure. This controls the behavior of the request object’s is_secure() method.'
+X_FRAME_OPTIONS = 'DENY'
+SECURE_CONTENT_TYPE_NOSNIFF = True
+SECURE_BROWSER_XSS_FILTER = True
+SECURE_SSL_REDIRECT = False
+SESSION_COOKIE_SECURE = False
+CSRF_COOKIE_SECURE = False
+CSRF_COOKIE_HTTPONLY = False
 USE_X_FORWARDED_HOST = True
 USE_X_FORWARDED_HOST_HELP = 'A boolean that specifies whether to use the X-Forwarded-Host header in preference to ' \
                             'the Host header. '
