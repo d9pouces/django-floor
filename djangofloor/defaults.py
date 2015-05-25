@@ -286,6 +286,7 @@ TEMPLATE_CONTEXT_PROCESSORS = [
     'allauth.account.context_processors.account',
     'allauth.socialaccount.context_processors.socialaccount', ]
 if USE_WS4REDIS:
+    # noinspection PyUnresolvedReferences
     TEMPLATE_CONTEXT_PROCESSORS += ['ws4redis.context_processors.default', ]
 ROOT_URLCONF = 'djangofloor.root_urls'
 
@@ -314,6 +315,7 @@ INSTALLED_APPS = [
     'debug_toolbar',
 ]
 if USE_WS4REDIS:
+    # noinspection PyUnresolvedReferences
     INSTALLED_APPS += ['ws4redis', ]
 
 OTHER_ALLAUTH = []
@@ -379,6 +381,7 @@ CACHES_HELP = 'A dictionary containing the settings for all caches to be used wi
 WS4REDIS_CONNECTION = {'host': '{REDIS_HOST}', 'port': '{REDIS_PORT}', 'db': 15, }
 WS4REDIS_CONNECTION_HELP = 'If the Redis datastore uses connection settings other than the defaults.'
 WS4REDIS_EXPIRE = 0
+WS4REDIS_EMULATION_INTERVAL = 1000
 WS4REDIS_PREFIX = 'ws'
 # Python dotted path to the WSGI application used by Django's runserver.
 # WSGI_APPLICATION = 'djangofloor.wsgi_http.application'

@@ -6,8 +6,11 @@ from django.conf import settings
 from django.utils.encoding import force_text
 from django.utils.six import binary_type
 from django.utils.translation import ugettext as _
+# noinspection PyUnresolvedReferences
 from ws4redis.subscriber import RedisSubscriber
+# noinspection PyUnresolvedReferences
 from ws4redis.publisher import RedisPublisher
+# noinspection PyUnresolvedReferences
 from ws4redis.redis_store import RedisMessage
 
 from djangofloor.decorators import SignalRequest

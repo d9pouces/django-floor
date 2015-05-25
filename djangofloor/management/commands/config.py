@@ -71,9 +71,3 @@ class Command(BaseCommand):
 
         self.stdout.write(self.style.MIGRATE_HEADING(_('Use djangofloor.utils.[DirectoryPath|FilePath]("/{directory}/path") instead of "/{directory}/path"'
                           ' to automatically create required directories.')))
-
-
-if __name__ == '__main__':
-    import doctest
-
-    doctest.testmod()

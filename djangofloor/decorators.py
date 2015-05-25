@@ -11,6 +11,7 @@ from django.http import QueryDict
 try:
     from inspect import signature
 except ImportError:
+    # noinspection PyUnresolvedReferences,PyPackageRequirements
     from funcsigs import signature
 from django import forms
 from django.utils.translation import ugettext as _

@@ -16,8 +16,8 @@ from django.views.decorators.cache import cache_control
 from django.views.decorators.csrf import csrf_exempt
 
 from djangofloor.decorators import REGISTERED_SIGNALS
-from djangofloor.tasks import import_signals, df_call
-
+from djangofloor.df_redis import fetch_signal_calls
+from djangofloor.tasks import import_signals, df_call, RETURN
 
 __author__ = 'flanker'
 mimetypes.init()
@@ -42,20 +42,40 @@ def __get_js_mimetype():
 def signals(request):
     import_signals()
     return render_to_response('djangofloor/signals.html',
-                              {'signals': REGISTERED_SIGNALS, 'use_ws4redis': settings.USE_WS4REDIS},
+                              {'signals': REGISTERED_SIGNALS, 'use_ws4redis': settings.USE_WS4REDIS,
+                               'WS4REDIS_EMULATION_INTERVAL': settings.WS4REDIS_EMULATION_INTERVAL},
                               RequestContext(request), content_type=__get_js_mimetype())
 
 
 @csrf_exempt
 @cache_control(no_cache=True)
 def signal_call(request, signal):
+    """ Called by JS code when websockets are not available. Allow to call Python signals from JS.
+    :param request:
+    :type request:
+    :param signal:
+    :type signal:
+    :return:
+    :rtype:
+    """
     import_signals()
     if request.body:
         kwargs = json.loads(request.body.decode('utf-8'))
     else:
         kwargs = {}
-    result = df_call(signal, request, sharing=None, from_client=True, kwargs=kwargs)
+    result = df_call(signal, request, sharing=RETURN, from_client=True, kwargs=kwargs)
     return JsonResponse(result, safe=False)
+
+
+@cache_control(no_cache=True)
+def get_signal_calls(request):
+    """ Regularly called by JS code when websockets are not available. Allow Python code to call JS signals.
+    :param request:
+    :type request:
+    :return:
+    :rtype:
+    """
+    return JsonResponse(fetch_signal_calls(request), safe=False)
 
 
 def send_file(xsend_path, mimetype=None):

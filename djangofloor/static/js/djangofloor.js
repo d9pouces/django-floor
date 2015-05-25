@@ -5,7 +5,7 @@ var df = {};
 
 df.registered_signals = {};
 df.__message_count = 0;
-
+df.ws_emulation_interval = 1000;
 
 /**
  * Call an existing signal
@@ -13,15 +13,14 @@ df.__message_count = 0;
  * @param options
  * @returns boolean always false
  */
-df.call = function (signal, options) {
+df.call = function (signal, options, from_server) {
     "use strict";
     var i;
-    console.info('call', signal, options);
     if (this.registered_signals[signal] === undefined) {
         return false;
     }
     for (i = 0; i < this.registered_signals[signal].length; i += 1) {
-        this.registered_signals[signal][i](options);
+        this.registered_signals[signal][i](options, from_server);
     }
     return false;
 };
@@ -37,13 +36,15 @@ df.connect = function (signal, fn) {
     if (this.registered_signals[signal] === undefined) {
         this.registered_signals[signal] = [];
     }
-    console.info('register', signal);
     this.registered_signals[signal].push(fn);
 };
 
 df.connect_http = function (signal, url) {
     "use strict";
-    var wrapper = function (options) {
+    var wrapper = function (options, from_server) {
+        if(from_server) {
+            return;
+        }
         var jqxhr;
         jqxhr = $.post(url, JSON.stringify(options));
         jqxhr.done(function (calls) { for (var i = 0; i < calls.length; i += 1) { df.call(calls[i].signal, calls[i].options); } });
@@ -51,9 +52,25 @@ df.connect_http = function (signal, url) {
     df.connect(signal, wrapper);
 };
 
+df.connect_ws_emulator = function (url) {
+    "use strict";
+    var jqxhr;
+    jqxhr = $.get(url);
+    jqxhr.done(function (calls) {
+        for (var i = 0; i < calls.length; i += 1) {
+            df.call(calls[i].signal, calls[i].options, true);
+        }
+    });
+    jqxhr.always(function () { setTimeout(function () { df.connect_ws_emulator(url); }, df.ws_emulation_interval); })
+};
+
+
 df.connect_ws = function (signal) {
     "use strict";
-    var wrapper = function (options) {
+    var wrapper = function (options, from_server) {
+        if(from_server) {
+            return;
+        }
         df.ws4redis.send_message(JSON.stringify({signal: signal, options: options}));
     };
     df.connect(signal, wrapper);

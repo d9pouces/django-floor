@@ -2,7 +2,9 @@
 from __future__ import unicode_literals, absolute_import
 from django.http import HttpRequest
 from redis import StrictRedis
+# noinspection PyUnresolvedReferences
 from ws4redis.publisher import redis_connection_pool
+# noinspection PyUnresolvedReferences
 from ws4redis.settings import WS4REDIS_PREFIX
 from djangofloor.decorators import SignalRequest
 

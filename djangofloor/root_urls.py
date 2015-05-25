@@ -24,6 +24,7 @@ urlpatterns = patterns('',
                        (r'^' + settings.STATIC_URL[1:] + '(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.STATIC_ROOT}),
                        (r'^df/signal/(?P<signal>[\w\.\-_]+)\.json$', 'djangofloor.views.signal_call'),
                        (r'^df/signals.js$', 'djangofloor.views.signals'),
+                       (r'^df/ws_emulation.js$', 'djangofloor.views.get_signal_calls'),
                        (r'^robots\.txt$', 'djangofloor.views.robots'),
                        (r'^$', 'djangofloor.views.index'),
                        *extra_urls)

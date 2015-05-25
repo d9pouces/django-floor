@@ -3,6 +3,7 @@ from __future__ import unicode_literals, absolute_import
 
 import celery
 # used to avoid strange import bug with Python 3.3
+# noinspection PyStatementEffect
 celery.__file__
 from celery import shared_task
 from django.conf import settings
@@ -18,6 +19,8 @@ __author__ = 'flanker'
 USER = 'users'
 SESSION = 'sessions'
 BROADCAST = 'broadcast'
+# special value used for plain HTTP requests
+RETURN = 'return'
 
 
 @shared_task(serializer='json')
@@ -40,7 +43,7 @@ def import_signals():
     for app in settings.INSTALLED_APPS:
         try:
             import_module('%s.signals' % app)
-        except ImportError as e:
+        except ImportError:
             pass
 
 
@@ -62,10 +65,13 @@ def df_call(signal_name, request, sharing, from_client, kwargs):
         * `None` : does not propagate to the JavaScript (client) side
         * `USER`, `SESSION`, `BROADCAST` : propagate to the request user, only to its current session, or to all currently logged-in users
         * {'users': ['username1', 'username2'], 'groups': ['group1', 'group2'], 'broadcast': True} (or any subset of these keys)
+        * `RETURN` return result values of signal calls to the caller
     :param from_client:
         * this call comes a client
     :param kwargs: arguments for the receiver
-    :return:
+    :return:`
+        if sharing != `RETURN: return `None`
+        else: call `df_call` on each element of the call result
     """
     import_signals()
     result = []
@@ -74,6 +80,9 @@ def df_call(signal_name, request, sharing, from_client, kwargs):
     if sharing is not None and settings.USE_WS4REDIS:
         from djangofloor.df_ws4redis import ws_call
         ws_call(signal_name, request, sharing, kwargs)
+    elif sharing:
+        from djangofloor.df_redis import push_signal_call
+        push_signal_call(request, signal_name, kwargs=kwargs)
 
     must_delay = False
     for wrapper in REGISTERED_SIGNALS.get(signal_name, []):
@@ -88,4 +97,7 @@ def df_call(signal_name, request, sharing, from_client, kwargs):
                 result += list(wrapper_result)
     if must_delay:
         signal_task.delay(signal_name, request.to_dict(), from_client, kwargs)
-    return result
+    if sharing == RETURN:
+        return result
+    for data in result:
+        df_call(data['signal'], request, sharing=data.get('sharing', SESSION), from_client=False, kwargs=data['options'])
