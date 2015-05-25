@@ -68,21 +68,19 @@ def set_env():
     else:
         project_name = 'djangofloor'
     project_name = check_extra_option('dfproject', project_name, '--dfproject')
-    os.environ.setdefault('DJANGOFLOOR_PROJECT_SETTINGS', '%s.defaults' % project_name)
+    os.environ.setdefault('DJANGOFLOOR_PROJECT_DEFAULTS', '%s.defaults' % project_name)
     os.environ.setdefault('DJANGOFLOOR_PROJECT_NAME', project_name)
 
-    conf_path = os.path.abspath(os.path.join('.', '%s_configuration.py' % project_name))
-    if not os.path.isfile(conf_path):
-        conf_path = '%s/etc/%s/settings.py' % (sys.prefix, project_name)
-    ini_path = os.path.abspath(os.path.join('.', '%s_configuration.ini' % project_name))
-    if not os.path.isfile(ini_path):
-        ini_path = '%s/etc/%s/settings.ini' % (sys.prefix, project_name)
+    python_settings_path = os.path.abspath(os.path.join('.', '%s_configuration.py' % project_name))
+    if not os.path.isfile(python_settings_path):
+        python_settings_path = '%s/etc/%s/settings.py' % (sys.prefix, project_name)
+    ini_settings_path = os.path.abspath(os.path.join('.', '%s_configuration.ini' % project_name))
+    if not os.path.isfile(ini_settings_path):
+        ini_settings_path = '%s/etc/%s/settings.ini' % (sys.prefix, project_name)
 
-    conf_path = check_extra_option('dfconf', os.path.abspath(conf_path), '--dfconf')
-    quiet = check_extra_option('dfquiet', '0', '--dfquiet')
-    os.environ.setdefault("DJANGOFLOOR_USER_SETTINGS", conf_path)
-    os.environ.setdefault("DJANGOFLOOR_QUIET", quiet)
-    os.environ.setdefault("DJANGOFLOOR_CONFIG", os.path.abspath(ini_path))
+    python_settings_path = check_extra_option('dfconf', os.path.abspath(python_settings_path), '--dfconf')
+    os.environ.setdefault("DJANGOFLOOR_PYTHON_SETTINGS", python_settings_path)
+    os.environ.setdefault("DJANGOFLOOR_INI_SETTINGS", os.path.abspath(ini_settings_path))
     os.environ.setdefault("DJANGOFLOOR_MAPPING", '%s.iniconf:INI_MAPPING' % project_name)
     return project_name
 
