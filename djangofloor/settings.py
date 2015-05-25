@@ -1,5 +1,7 @@
 # coding=utf-8
-from __future__ import unicode_literals
+from __future__ import unicode_literals, print_function
+import codecs
+from configparser import ConfigParser
 from django.utils import six
 from django.utils.encoding import force_text
 
@@ -29,22 +31,21 @@ from djangofloor import defaults as floor_settings
 from djangofloor import __version__ as version
 from djangofloor.utils import DirectoryPath, FilePath
 
-
 __author__ = 'flanker'
 
 PROJECT_SETTINGS_MODULE_NAME = os.environ.get('DJANGOFLOOR_PROJECT_SETTINGS', '')
 USER_SETTINGS_PATH = os.environ.get('DJANGOFLOOR_USER_SETTINGS', '')
+DJANGOFLOOR_CONFIG = os.environ.get('DJANGOFLOOR_CONFIG', '')
+DJANGOFLOOR_MAPPING = os.environ.get('DJANGOFLOOR_MAPPING', '')
 PROJECT_NAME = os.environ.get('DJANGOFLOOR_PROJECT_NAME', 'djangofloor')
+quiet = os.environ.get('DJANGOFLOOR_QUIET', '1') == '1'
 
-
-if not PROJECT_SETTINGS_MODULE_NAME:
-    print('"DJANGOFLOOR_PROJECT_SETTINGS" environment variable should be set to the '
-          'dotted path of your project defaults')
+if quiet:
+    print_function = lambda x: x
 else:
-    print('DjangoFloor version %s, using %s as project defaults' % (version, PROJECT_SETTINGS_MODULE_NAME))
+    print_function = print
 
-
-def import_file(filepath, messages=None):
+def import_file(filepath, messages):
     """import the Python source file as a Python module.
 
     :param filepath: absolute path of the Python module
@@ -58,30 +59,53 @@ def import_file(filepath, messages=None):
         if dirname not in sys.path:
             sys.path.insert(0, dirname)
         conf_module = os.path.splitext(os.path.basename(filepath))[0]
-        if messages:
-            print(messages[2])
+        print_function(messages[2])
         module_ = import_module(conf_module)
     elif filepath:
-        if messages:
-            print(messages[1])
+        print_function(messages[1])
         import djangofloor.empty
         module_ = djangofloor.empty
     else:
-        if messages:
-            print(messages[0])
+        print_function(messages[0])
         import djangofloor.empty
         module_ = djangofloor.empty
     return module_
 
+
 if PROJECT_SETTINGS_MODULE_NAME:
+    print_function('DjangoFloor version %s, using %s as project defaults' % (version, PROJECT_SETTINGS_MODULE_NAME))
     project_settings = import_module(PROJECT_SETTINGS_MODULE_NAME)
 else:
+    print_function('"DJANGOFLOOR_PROJECT_SETTINGS" environment variable should be set to the '
+                   'dotted path of your project defaults')
     import djangofloor.empty
     project_settings = djangofloor.empty
+
 user_settings = import_file(USER_SETTINGS_PATH,
                             ('No specific settings file defined in DJANGOFLOOR_USER_SETTINGS',
                              'User-defined settings are expected in module %s' % USER_SETTINGS_PATH,
                              'User-defined settings found in module %s' % USER_SETTINGS_PATH, ))
+ini_config_mapping = {}
+if DJANGOFLOOR_MAPPING:
+    module_name, __, mapping_name = DJANGOFLOOR_MAPPING.partition(':')
+    try:
+        module = import_module(module_name)
+        mapping = getattr(module, mapping_name)
+        assert isinstance(mapping, dict)
+        if os.path.isfile(DJANGOFLOOR_CONFIG):
+            print_function('Config. file is found in %s' % DJANGOFLOOR_CONFIG)
+            parser = ConfigParser()
+            parser.read([DJANGOFLOOR_CONFIG])
+            for k, v in mapping.items():
+                section, __, option = v.partition('.')
+                if parser.has_option(section=section, option=option):
+                    ini_config_mapping[k] = parser.get(section=section, option=option)
+        else:
+            print_function('Configuration file is expected in %s' % DJANGOFLOOR_CONFIG)
+    except ImportError:
+        pass
+    except AttributeError:
+        pass
 
 
 __settings = globals()
@@ -127,13 +151,16 @@ def __setting_value(setting_name_):
         return __settings[setting_name_]
     if hasattr(user_settings, setting_name_):
         value = getattr(user_settings, setting_name_)
-        __settings_origin[setting_name_] = 'user'
+        __settings_origin[setting_name_] = USER_SETTINGS_PATH
+    elif setting_name_ in ini_config_mapping:
+        value = ini_config_mapping[setting_name_]
+        __settings_origin[setting_name_] = DJANGOFLOOR_CONFIG
     elif hasattr(project_settings, setting_name_):
         value = getattr(project_settings, setting_name_)
-        __settings_origin[setting_name_] = 'project'
+        __settings_origin[setting_name_] = 'project\'s defaults'
     else:
         value = getattr(floor_settings, setting_name_)
-        __settings_origin[setting_name_] = 'default'
+        __settings_origin[setting_name_] = 'djangofloor\'s defaults'
     __settings[setting_name_] = __parse_setting(value)
     return __settings[setting_name_]
 
@@ -147,6 +174,7 @@ def __ensure_dir(path_, parent_=True):
         except IOError:
             print('Unable to create directory %s.' % dirname_)
 
+
 for module in floor_settings, project_settings, user_settings:
     for setting_name in module.__dict__:
         if setting_name == setting_name.upper():
@@ -157,7 +185,6 @@ for module in floor_settings, project_settings, user_settings:
 INSTALLED_APPS += list(filter(lambda x: x not in INSTALLED_APPS, OTHER_ALLAUTH))
 # noinspection PyUnresolvedReferences
 INSTALLED_APPS += list(filter(lambda x: x not in INSTALLED_APPS, FLOOR_INSTALLED_APPS))
-
 
 if __name__ == '__main__':
     import doctest

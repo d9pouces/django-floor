@@ -1,5 +1,6 @@
 # coding=utf-8
 from __future__ import unicode_literals
+import os
 import sys
 
 """ Django settings for DjangoFloor project. """
@@ -20,8 +21,13 @@ try:
 except ImportError:
     scss = None
     USE_SCSS = False
+
 # define a root path for misc. Django data (SQLite database, static files, ...)
 LOCAL_PATH = abspath(join(dirname(dirname(__file__)), 'django_data'))
+splitted_path = __file__.split(os.path.sep)
+if 'lib' in splitted_path:
+    LOCAL_PATH = DirectoryPath('%s/var/{PROJECT_NAME}')
+LOCAL_PATH_HELP = 'Base path for all data'
 SERVER_NAME = 'localhost'
 LOG_PATH = DirectoryPath('{LOCAL_PATH}/log')
 DATA_PATH = DirectoryPath('{LOCAL_PATH}/data')
@@ -37,15 +43,22 @@ MANAGERS_HELP = ('A tuple in the same format as ADMINS that specifies who should
 DEFAULT_FROM_EMAIL = 'admin@{SERVER_NAME}'
 DEFAULT_FROM_EMAIL_HELP = 'Default email address to use for various automated correspondence from the site manager(s).'
 # noinspection PyUnresolvedReferences
+
+DATABASE_ENGINE = 'django.db.backends.sqlite3'
+DATABASE_NAME = FilePath('{DATA_PATH}/database.sqlite3')
+DATABASE_USER = ''
+DATABASE_PASSWORD = ''
+DATABASE_HOST = ''
+DATABASE_PORT = ''
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',  # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': FilePath('{DATA_PATH}/database.sqlite3'),  # Or path to database file if using sqlite3.
+        'ENGINE': '{DATABASE_ENGINE}',  # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
+        'NAME': '{DATABASE_NAME}',  # Or path to database file if using sqlite3.
         # The following settings are not used with sqlite3:
-        'USER': '',
-        'PASSWORD': '',
-        'HOST': '',  # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
-        'PORT': '',  # Set to empty string for default.
+        'USER': '{DATABASE_USER}',
+        'PASSWORD': '{DATABASE_PASSWORD}',
+        'HOST': '{DATABASE_HOST}',  # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
+        'PORT': '{DATABASE_PORT}',  # Set to empty string for default.
     },
 }
 DATABASES_HELP = 'A dictionary containing the settings for all databases to be used with Django.'

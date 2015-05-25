@@ -10,30 +10,12 @@ import re
 import os
 import sys
 
-from setuptools import Command
-
-
 __author__ = 'flanker'
-
-
-class TestCommand(Command):
-    description = 'Run all Django tests from setup.py'
-    user_options = []
-
-    def initialize_options(self):
-        pass
-
-    def finalize_options(self):
-        pass
-
-    # noinspection PyMethodMayBeStatic
-    def run(self):
-        manage()
 
 
 # noinspection PyShadowingBuiltins
 def check_extra_option(name, default, *argnames):
-    parser = ArgumentParser(usage="%(prog)s subcommand [options] [args]")
+    parser = ArgumentParser(usage="%(prog)s subcommand [options] [args]", add_help=False)
     parser.add_argument(*argnames, action='store', default=default)
     options, extra_args = parser.parse_known_args()
     sys.argv[1:] = extra_args
@@ -91,30 +73,18 @@ def set_env():
 
     conf_path = os.path.abspath(os.path.join('.', '%s_configuration.py' % project_name))
     if not os.path.isfile(conf_path):
-        splitted_path = __file__.split(os.path.sep)
-        if 'lib' in splitted_path:
-            splitted_path = splitted_path[:splitted_path.index('lib')] + ['etc', project_name, 'settings.py']
-            conf_path = os.path.sep.join(splitted_path)
-            if not os.path.isfile(conf_path):
-                conf_path = ''
+        conf_path = '%s/etc/%s/settings.py' % (sys.prefix, project_name)
+    ini_path = os.path.abspath(os.path.join('.', '%s_configuration.ini' % project_name))
+    if not os.path.isfile(ini_path):
+        ini_path = '%s/etc/%s/settings.ini' % (sys.prefix, project_name)
 
-    conf_path = check_extra_option('dfconf', conf_path, '--dfconf')
+    conf_path = check_extra_option('dfconf', os.path.abspath(conf_path), '--dfconf')
+    quiet = check_extra_option('dfquiet', '0', '--dfquiet')
     os.environ.setdefault("DJANGOFLOOR_USER_SETTINGS", conf_path)
+    os.environ.setdefault("DJANGOFLOOR_QUIET", quiet)
+    os.environ.setdefault("DJANGOFLOOR_CONFIG", os.path.abspath(ini_path))
+    os.environ.setdefault("DJANGOFLOOR_MAPPING", '%s.iniconf:INI_MAPPING' % project_name)
     return project_name
-
-
-def manage():
-    """
-    Main function, calling Django code for management commands. Retrieve some default values from Django settings.
-    """
-    set_env()
-    from django.conf import settings
-    from django.core.management import execute_from_command_line
-    parser = ArgumentParser(usage="%(prog)s subcommand [options] [args]")
-    options, extra_args = parser.parse_known_args()
-    if len(extra_args) == 1 and extra_args[0] == 'runserver':
-        sys.argv += [settings.BIND_ADDRESS]
-    return execute_from_command_line(sys.argv)
 
 
 def load_celery():
@@ -129,6 +99,20 @@ def load_celery():
     return app
 
 
+def manage():
+    """
+    Main function, calling Django code for management commands. Retrieve some default values from Django settings.
+    """
+    set_env()
+    from django.conf import settings
+    from django.core.management import execute_from_command_line
+    parser = ArgumentParser(usage="%(prog)s subcommand [options] [args]", add_help=False)
+    options, extra_args = parser.parse_known_args()
+    if len(extra_args) == 1 and extra_args[0] == 'runserver':
+        sys.argv += [settings.BIND_ADDRESS]
+    return execute_from_command_line(sys.argv)
+
+
 def gunicorn():
     """ wrapper around gunicorn. Retrieve some default values from Django settings.
 
@@ -138,7 +122,7 @@ def gunicorn():
 
     set_env()
     from django.conf import settings
-    parser = ArgumentParser(usage="%(prog)s subcommand [options] [args]")
+    parser = ArgumentParser(usage="%(prog)s subcommand [options] [args]", add_help=False)
     parser.add_argument('-b', '--bind', action='store', default=settings.BIND_ADDRESS, help=settings.BIND_ADDRESS_HELP)
     parser.add_argument('-p', '--pid', action='store', default=settings.GUNICORN_PID_FILE, help=settings.GUNICORN_PID_FILE_HELP)
     parser.add_argument('--forwarded-allow-ips', action='store', default=','.join(settings.REVERSE_PROXY_IPS))
@@ -169,7 +153,7 @@ def celery():
     set_env()
     from celery.bin.celery import main as celery_main
     from django.conf import settings
-    parser = ArgumentParser(usage="%(prog)s subcommand [options] [args]")
+    parser = ArgumentParser(usage="%(prog)s subcommand [options] [args]", add_help=False)
     parser.add_argument('-A', '--app', action='store', default='djangofloor', help=settings.BIND_ADDRESS_HELP)
     parser.add_argument('--pidfile', action='store', default=settings.GUNICORN_PID_FILE, help=settings.GUNICORN_PID_FILE_HELP)
     parser.add_argument('--logfile', action='store', default=settings.CELERY_LOG_FILE)
@@ -185,7 +169,7 @@ def uwsgi():
     from django.conf import settings
     parser = ArgumentParser(usage="%(prog)s subcommand [options] [args]")
     parser.add_argument('--mode', default='both', choices=('both', 'http', 'websockets'))
-    parser.add_argument('-b', '--bind', action='store', default=settings.BIND_ADDRESS, help=settings.BIND_ADDRESS_HELP)
+    parser.add_argument('-b', '--bind', action='store', default=settings.BIND_ADDRESS, help=settings.BIND_ADDRESS_HELP, add_help=False)
     options, extra_args = parser.parse_known_args()
     sys.argv[1:] = extra_args
     argv = list(sys.argv)
