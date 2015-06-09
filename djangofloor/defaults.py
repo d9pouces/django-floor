@@ -381,7 +381,10 @@ CACHES_HELP = 'A dictionary containing the settings for all caches to be used wi
 WS4REDIS_CONNECTION = {'host': '{REDIS_HOST}', 'port': '{REDIS_PORT}', 'db': 15, }
 WS4REDIS_CONNECTION_HELP = 'If the Redis datastore uses connection settings other than the defaults.'
 WS4REDIS_EXPIRE = 0
-WS4REDIS_EMULATION_INTERVAL = 1000
+WS4REDIS_EMULATION_INTERVAL = 0
+# number of milliseconds between HTTP requests to emulate websockets
+# should not be less than 1000
+# leave it to 0 to desactivate this behavior
 WS4REDIS_PREFIX = 'ws'
 # Python dotted path to the WSGI application used by Django's runserver.
 # WSGI_APPLICATION = 'djangofloor.wsgi_http.application'
