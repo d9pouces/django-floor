@@ -11,7 +11,6 @@ In a standard web application, you have four kind of codes:
   * Python code in Celery tasks (receives some arguments and often return None, can only call other tasks, cannot communicate with Django, websocket or JS)
   * Python code in the websocket world (can call some Celery tasks but cannot perform any blocking call or call Django views)
 
-
 In DjangoFloor, a signal is a simple name (a unicode string).
 You connect some code (JS or Python) to this name and then you can call this new signal (with some arguments).
 
@@ -62,16 +61,17 @@ If more than one code is connected to the same signal, then all codes will be ca
 Notes
 -----
 
-  - You can prevent specific Python code from being called by JS::
+    - all signals defined in files `signals.py` of each app listed in INSTALLED_APPS are automatically taken into account,
+    - You can prevent specific Python code from being called by JS::
 
         @connect(path='demo.my_signal', allow_from_client=False)
 
-  - You can prevent Python code from calling the javascript side of calls call('demo.my_signal', request, None, \*\*kwargs)
-  - You can propagate Python signals to all sessions of the logged user (use USER instead of SESSION), any logged user (use BROADCAST), or a limited set of users with {USER: ['username']}
-  - Several functions (either JS or Python) can be connected to the same signal
-  - Python calls require a `request`, which can be either a standard `django.http.HttpRequest` or a `djangofloor.decorators.SignalRequest`.
+    - You can prevent Python code from calling the javascript side of calls call('demo.my_signal', request, None, \*\*kwargs)
+    - You can propagate Python signals to all sessions of the logged user (use USER instead of SESSION), any logged user (use BROADCAST), or a limited set of users with {USER: ['username']}
+    - Several functions (either JS or Python) can be connected to the same signal
+    - Python calls require a `request`, which can be either a standard `django.http.HttpRequest` or a `djangofloor.decorators.SignalRequest`.
     `SignalRequest` propagates the username and the session key from call to call and is provided from a JS key.
-  - Required JS files (jquery, ws4redis and djangofloor) are defined in `settings.PIPELINE_JS`
+    - Required JS files (jquery, ws4redis and djangofloor) are defined in `settings.PIPELINE_JS`
 
 
 Degraded mode

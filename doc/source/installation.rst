@@ -5,7 +5,7 @@ Environment
 -----------
 
 We strongly recommend to create a virtualenvironment and the use of `virtualenvwrapper`.
-Go to https://virtualenvwrapper.readthedocs.org/en/latest/ to discover how to use it.::
+Go to the `doc <https://virtualenvwrapper.readthedocs.org/>`_ to discover how to use it.::
 
     mkvirtualenv djangofloor
 

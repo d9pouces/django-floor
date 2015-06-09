@@ -3,7 +3,7 @@ Tutorial
 
 This tutorial shows you how to create a new DjangoFloor-based website.
 
-Basically, there are two ways for creating a new project: from scratch, or with `StarterPyth <https://github.com/d9pouces/StarterPyth>`.
+Basically, there are two ways for creating a new project: from scratch, or with `StarterPyth <https://github.com/d9pouces/StarterPyth>`_.
 
 Creating a new project from scratch
 -----------------------------------
@@ -13,6 +13,7 @@ Let assume that our great idea will be GreatProject.
 As always, we start by creating a new virtualenv::
 
     mkvirtualenv greatproject -p `which python2.7`
+    pip install rcssmin --install-option --without-c-extensions
     pip install djangofloor
 
 We can create required files and directories::
@@ -67,10 +68,28 @@ That's it!
 
 Let's start playing :-) ::
 
-    python manage.py config
-    python manage.py collectstatic --noinput
-    python manage.py migrate
-    python manage.py runserver
+    python greatproject-manage.py config
+    python greatproject-manage.py collectstatic --noinput
+    python greatproject-manage.py migrate
+    python greatproject-manage.py runserver
 
 
 Open your favorite browser and explore http://localhost:9000/.
+
+
+Creating a new project with Starterpyth
+---------------------------------------
+
+It's by far simpler::
+
+    mkvirtualenv greatproject -p `which python2.7`
+    pip install rcssmin --install-option --without-c-extensions
+    pip install starterpyth
+    starterpyth-bin
+    [some questions…]
+    cd GreatProject
+    python greatproject-manage.py config
+    python greatproject-manage.py collectstatic --noinput
+    python greatproject-manage.py migrate
+    python greatproject-manage.py runserver
+

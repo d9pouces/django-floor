@@ -9,7 +9,7 @@ Ok, you should already know Django ;)
 Gunicorn
 --------
 
-`Gunicorn <http://gunicorn.org>` 'Green Unicorn' is a Python WSGI HTTP Server for UNIX.
+`Gunicorn <http://gunicorn.org>`_ 'Green Unicorn' is a Python WSGI HTTP Server for UNIX.
 It's a pre-fork worker model ported from Ruby's Unicorn project.
 The Gunicorn server is broadly compatible with various web frameworks, simply implemented, light on server resources, and fairly speedy.
 
@@ -20,7 +20,7 @@ Gunicorn is in pure Python, very simple to use and allow an easy production depl
 Bootstrap3
 ----------
 
-DjangoFloor comes with Bootstrap3 and JQuery. `Bootstrap3 <http://getbootstrap.com>` is the most popular HTML, CSS, and JS framework for developing responsive, mobile first projects on the web
+DjangoFloor comes with Bootstrap3 and JQuery. `Bootstrap3 <http://getbootstrap.com>`_ is the most popular HTML, CSS, and JS framework for developing responsive, mobile first projects on the web
 You obtain nice pages out-of-box. The drawback is of course that many websites have the same look.
 
 Required dependencies:
@@ -32,7 +32,7 @@ Required dependencies:
 Django-Debug-Toolbar
 --------------------
 
-`Django-Debug-Toolbar <http://django-debug-toolbar.readthedocs.org/>` is a configurable set of panels that display various debug information about the current request/response.
+`Django-Debug-Toolbar <http://django-debug-toolbar.readthedocs.org/>`_ is a configurable set of panels that display various debug information about the current request/response.
 
 Required dependencies:
 
@@ -41,7 +41,7 @@ Required dependencies:
 CSS and JS files
 ----------------
 
-`Pipeline <https://django-pipeline.readthedocs.org/en>` is an asset packaging library for Django, providing both CSS and JavaScript concatenation and compression, built-in JavaScript template support, and optional data-URI image and font embedding.
+`Pipeline <https://django-pipeline.readthedocs.org/en>`_ is an asset packaging library for Django, providing both CSS and JavaScript concatenation and compression, built-in JavaScript template support, and optional data-URI image and font embedding.
 
 Required dependencies:
     * django-pipeline,
@@ -85,7 +85,7 @@ These dependencies are required:
 Celery
 ------
 
-`Celery <http://www.celeryproject.org>`  is an asynchronous task queue/job queue based on distributed message passing.
+`Celery <http://www.celeryproject.org>`_  is an asynchronous task queue/job queue based on distributed message passing.
 It is focused on real-time operation, but supports scheduling as well.
 The execution units, called tasks, are executed concurrently on a single or more worker servers using multiprocessing, Eventlet, or gevent.
 Tasks can execute asynchronously (in the background) or synchronously (wait until ready).
@@ -103,7 +103,7 @@ You should launch a Celery worker::
 Authentication
 --------------
 
-`django-allauth <http://www.intenct.nl/projects/django-allauth/>` is an integrated set of Django applications addressing authentication, registration, account management as well as 3rd party (social) account authentication.
+`django-allauth <http://www.intenct.nl/projects/django-allauth/>`_ is an integrated set of Django applications addressing authentication, registration, account management as well as 3rd party (social) account authentication.
 
 This dependency is required:
 

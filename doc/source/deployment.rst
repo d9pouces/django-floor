@@ -1,11 +1,11 @@
 Deployment
 ==========
 
-Deploying Django is merely complex if we follow the official guide: https://docs.djangoproject.com/en/1.8/howto/deployment/ .
+Deploying Django is merely complex if we follow the `official guide <https://docs.djangoproject.com/en/1.8/howto/deployment/>`_ .
 In this small guide, we only support the wsgi.
 WSGI can be used with two application servers: gunicorn and uwsgi, behind a pure webserver: nginx or apache.
 
-Do not forget to read https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/ !
+Do not forget to read the `official doc <https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/>`_ !
 
 I will only cover the deployment with wsgi through gunicorn (installed as a dependency) or uwsgi (optional).
 Gunicorn is a pure-Python application, but on the other hand uwsgi is maybe more efficient and allows websockets.
@@ -33,6 +33,12 @@ settings for Redis:
 
   * REDIS_HOST = 'localhost'
   * REDIS_PORT = 6379
+
+
+your application
+----------------
+
+
 
 
 gunicorn

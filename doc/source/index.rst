@@ -9,7 +9,7 @@ Welcome to DjangoFloor's documentation!
 Overview:
 
 
-DjangoFloor helps you to easily create new website with the excellent framework `Django <https://www.djangoproject.com>`.
+DjangoFloor helps you to easily create new website with the excellent framework `Django <https://www.djangoproject.com>`_.
 However, we think that Django suffer from different drawbacks:
 
     * websites are complex to deploy,
@@ -24,8 +24,8 @@ We try to solve these problems:
     * some common libraries are set as dependencies,
     * all common code are in a unique library that will be included into your projects.
 
-Default configuration assume that you use `Redis <http://redis.io>` as secondary database, alongside a more classical SQL like PostgreSQL or MySQL.
-It allows you to use `Celery <http://celery.readthedocs.org>` for background tasks out-of-box.
+Default configuration assume that you use `Redis <http://redis.io>`_ as secondary database, alongside a more classical SQL like PostgreSQL or MySQL.
+It allows you to use `Celery <http://celery.readthedocs.org>`_ for background tasks out-of-box.
 
 
 :doc:`installation`

@@ -24,7 +24,7 @@ Add your own URL into a `list`, for example in the file `myproject/urls.py`::
     ]
 
 Then define the setting `FLOOR_URL_CONF` to 'myproject.urls.my_urls'.
-Now, you can define all your views, as explained in `https://docs.djangoproject.com/en/1.8/topics/http/urls/#example`.
+Now, you can define all your views, as explained in the doc `doc <https://docs.djangoproject.com/en/1.8/topics/http/urls/#example>`_.
 
 
 Index view
