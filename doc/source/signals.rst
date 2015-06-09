@@ -79,7 +79,7 @@ Degraded mode
 
 
 Maybe you cannot use websockets (Python 3…). You can still use signals through HTTP requests.
-Set `USE_WS4REDIS` to False. Each Python signal return a list of dict `{'signal': 'signal.name', 'options': kwargs}`.
+Each Python signal return a list of dict `{'signal': 'signal.name', 'options': kwargs}`.
 These dictionnaries will act as regular signals. Of course, you can only propagate JS signals at the end of a signal called by the client.
 
 You can also activate a regular polling by setting `WS4REDIS_EMULATION_INTERVAL` to a positive value. This interval is in milliseconds!

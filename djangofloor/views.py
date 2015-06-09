@@ -42,7 +42,7 @@ def __get_js_mimetype():
 def signals(request):
     import_signals()
     return render_to_response('djangofloor/signals.html',
-                              {'signals': REGISTERED_SIGNALS, 'use_ws4redis': settings.USE_WS4REDIS,
+                              {'signals': REGISTERED_SIGNALS, 'use_ws4redis': settings.FLOOR_USE_WS4REDIS,
                                'WS4REDIS_EMULATION_INTERVAL': settings.WS4REDIS_EMULATION_INTERVAL},
                               RequestContext(request), content_type=__get_js_mimetype())
 

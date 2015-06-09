@@ -11,11 +11,12 @@ from os.path import join, dirname, abspath
 from django.utils.translation import ugettext_lazy as _
 try:
     import ws4redis
-    USE_WS4REDIS = True
+    FLOOR_USE_WS4REDIS = True
 except ImportError:
     ws4redis = None
-    USE_WS4REDIS = False
+    FLOOR_USE_WS4REDIS = False
 try:
+    # noinspection PyPackageRequirements
     import scss
     USE_SCSS = True
 except ImportError:
@@ -285,7 +286,7 @@ TEMPLATE_CONTEXT_PROCESSORS = [
     'djangofloor.context_processors.context_base',
     'allauth.account.context_processors.account',
     'allauth.socialaccount.context_processors.socialaccount', ]
-if USE_WS4REDIS:
+if FLOOR_USE_WS4REDIS:
     # noinspection PyUnresolvedReferences
     TEMPLATE_CONTEXT_PROCESSORS += ['ws4redis.context_processors.default', ]
 ROOT_URLCONF = 'djangofloor.root_urls'
@@ -315,7 +316,7 @@ INSTALLED_APPS = [
     'debug_toolbar',
 ]
 
-if USE_WS4REDIS:
+if FLOOR_USE_WS4REDIS:
     # noinspection PyUnresolvedReferences
     INSTALLED_APPS += ['ws4redis', ]
 
@@ -334,9 +335,9 @@ BOOTSTRAP3 = {
 DAB_FIELD_RENDERER = 'django_admin_bootstrapped.renderers.BootstrapFieldRenderer'
 
 TEST_RUNNER = 'django.test.runner.DiscoverRunner'
-AUTHENTICATION_HEADER = 'HTTP_REMOTE_USER'
-AUTHENTICATION_HEADER_HELP = 'HTTP header corresponding to the username (when using HTTP authentication).' \
-                             ' Set it to None to disable it.'
+FLOOR_AUTHENTICATION_HEADER = 'HTTP_REMOTE_USER'
+FLOOR_AUTHENTICATION_HEADER_HELP = 'HTTP header corresponding to the username (when using HTTP authentication).' \
+                                   ' Set it to None to disable it.'
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 SECURE_PROXY_SSL_HEADER_HELP = 'A tuple representing a HTTP header/value combination that signifies a request is ' \
                                'secure. This controls the behavior of the request object’s is_secure() method.'
@@ -390,7 +391,7 @@ WS4REDIS_PREFIX = 'ws'
 # Python dotted path to the WSGI application used by Django's runserver.
 # WSGI_APPLICATION = 'djangofloor.wsgi_http.application'
 WSGI_APPLICATION = 'djangofloor.wsgi_http.application'
-if USE_WS4REDIS:
+if FLOOR_USE_WS4REDIS:
     WSGI_APPLICATION = 'ws4redis.django_runserver.application'
 WS4REDIS_SUBSCRIBER = 'djangofloor.df_ws4redis.Subscriber'
 DF_WS_FACILITY = 'djangofloor'

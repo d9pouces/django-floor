@@ -97,6 +97,7 @@ DjangoFloor define a few new settings.
     - `FLOOR_FAKE_AUTHENTICATION_USERNAME`: set it to any username you want (allow to fake a HTTP authentication, like Kerberos). Only for debugging purposes,
     - `FLOOR_FAKE_AUTHENTICATION_GROUPS`: set it to the names of the groups you want for the fake user. Only for debugging purposes,
     - `FLOOR_WS_FACILITY`: websocket facility for the signal implementation,
+    - `FLOOR_USE_WS4REDIS`: is automatically set if you installed ws4redis (do not change it in your settings).
 
     - `LOCAL_PATH`: the base directory for all data,
     - `BIND_ADDRESS`: the default bind address for the runserver command, or for gunicorn,

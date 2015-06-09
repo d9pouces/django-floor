@@ -10,7 +10,7 @@ You must use Python 2.7 to play with websockets. Otherwise, DjangoFloor is fully
 Installing
 ----------
 
-
+    pip install rcssmin --install-option --without-c-extensions
     pip install djangofloor
     
     
@@ -30,7 +30,7 @@ Open your brower on `http://localhost:9000/test.html`. To see a more complete de
 In `demo/defaults.py`, uncomment the following lines:
 
     # WSGI_APPLICATION = 'ws4redis.django_runserver.application'
-    # USE_WS4REDIS = True
+    # FLOOR_USE_WS4REDIS = True
     # USE_CELERY = True
 
 Run   
@@ -179,7 +179,7 @@ Notes:
   
   
 **Degraded mode:** Maybe you cannot use websockets (Python 3…). You can still use signals through HTTP requests.
-Set `USE_WS4REDIS` to False. Each Python signal return a list of dict `{'signal': 'signal.name', 'options': kwargs}`.
+Set `FLOOR_USE_WS4REDIS` to False. Each Python signal return a list of dict `{'signal': 'signal.name', 'options': kwargs}`.
 These dictionnaries will act as regular signals. Of course, you can only propagate JS signals at the end of a signal called by the client.
  
  
@@ -230,7 +230,7 @@ Extra stuff
 Authentication:
 
   * All settings required by a proper HTTP authentication (Kerberos, SSO, …) are valid.
-  * AUTHENTICATION_HEADER = 'HTTP_REMOTE_USER', SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https'), USE_X_FORWARDED_HOST = True
+  * FLOOR_AUTHENTICATION_HEADER = 'HTTP_REMOTE_USER', SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https'), USE_X_FORWARDED_HOST = True
   * you just have to correctly set REVERSE_PROXY_IPS
   * DEFAULT_GROUP_NAME can be set to automatically add a default group to new users
   * You can emulate this authentication for dev:
@@ -282,7 +282,7 @@ settings for SSL/HTTPS:
 
 settings for HTTP authentication (Kerberos/Shibboleth/SSO)
   
-  * AUTHENTICATION_HEADER = 'HTTP_REMOTE_USER'
+  * FLOOR_AUTHENTICATION_HEADERAUTHENTICATION_HEADER = 'HTTP_REMOTE_USER'
 
 settings for Redis:
 

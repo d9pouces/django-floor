@@ -77,7 +77,7 @@ def df_call(signal_name, request, sharing, from_client, kwargs):
     result = []
     if isinstance(request, HttpRequest):
         request = SignalRequest.from_request(request)
-    if sharing is not None and settings.USE_WS4REDIS:
+    if sharing is not None and settings.FLOOR_USE_WS4REDIS:
         from djangofloor.df_ws4redis import ws_call
         ws_call(signal_name, request, sharing, kwargs)
     elif sharing:

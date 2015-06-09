@@ -1,14 +1,14 @@
 # coding=utf-8
 from __future__ import unicode_literals
 import codecs
-# noinspection PyPackageRequirementsInspection
+# noinspection PyPackageRequirements
 from pipeline.compilers import CompilerBase
 import base64
 from django.conf import settings
 from django.contrib import auth
 from django.contrib.auth.middleware import RemoteUserMiddleware as BaseRemoteUserMiddleware
 from django.contrib.auth.models import Group
-# noinspection PyPackageRequirementsInspection
+# noinspection PyPackageRequirements
 from pipeline.compressors import CompressorBase
 from rcssmin import cssmin
 
@@ -26,7 +26,7 @@ class IEMiddleware(object):
 
 
 class RemoteUserMiddleware(BaseRemoteUserMiddleware):
-    header = settings.AUTHENTICATION_HEADER
+    header = settings.FLOOR_AUTHENTICATION_HEADER
 
     def process_request(self, request):
         request.df_remote_authenticated = False
@@ -92,7 +92,7 @@ class PyScssCompiler(CompilerBase):
         return filename.endswith('.scss')
 
     def compile_file(self, infile, outfile, outdated=False, force=False):
-        # noinspection PyPackageRequirementsInspection
+        # noinspection PyPackageRequirements
         import scss.compiler
         """Define your middlewares here"""
         if not outdated and not force:

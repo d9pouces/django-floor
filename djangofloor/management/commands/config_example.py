@@ -10,7 +10,7 @@ from django.utils.translation import ugettext as _
 
 
 class Command(BaseCommand):
-    args = '<apache|nginx|supervisor|system>'
+    args = '<apache|nginx|supervisor|systemd>'
     help = _('Display example configurations for Apache, NGinx or Supervisor')
     requires_system_checks = False
 
