@@ -6,6 +6,8 @@ A common base for modern and complete Django websites, with several common tools
 Together the third-party tools shipped with djangofloor, there is two major advantages: settings and signals (with websockets!).
 You must use Python 2.7 to play with websockets. Otherwise, DjangoFloor is fully compatible with Python 3.2+.
 
+You can find a more complete documentation here: http://django-floor.readthedocs.org/en/latest/ .
+
 
 Installing
 ----------
