@@ -1,10 +1,4 @@
 # coding=utf-8
-from __future__ import unicode_literals, print_function
-from configparser import ConfigParser
-
-from django.utils import six
-from django.utils.encoding import force_text
-
 """ Django settings for DjangoFloor.
 
 Settings come from 3 modules:
@@ -22,6 +16,15 @@ Only variables defined in djangofloor.defaults or in project-specific settings a
 If VARIABLE is uppercase and if VARIABLE_HELP exists, then VARIABLE is shown with command `manage.py config`.
 
 """
+from __future__ import unicode_literals, print_function
+try:
+    from configparser import ConfigParser
+except ImportError:
+    from ConfigParser import ConfigParser
+
+from django.utils import six
+from django.utils.encoding import force_text
+
 import os
 import string
 import sys

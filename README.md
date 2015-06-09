@@ -17,7 +17,6 @@ Installing
 Demo
 ----
 
-
     mkvirtualenv djangofloor -p `which python2.7`
     pip install djangofloor[websocket]
     curl -LO https://github.com/d9pouces/django-floor/archive/master.zip

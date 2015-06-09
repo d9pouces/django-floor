@@ -16,6 +16,11 @@ if settings.FLOOR_URL_CONF:
 else:
     extra_urls = []
 
+if settings.FLOOR_INDEX:
+    index_view = settings.FLOOR_INDEX
+else:
+    index_view = 'djangofloor.views.index'
+
 urlpatterns = patterns('',
                        url(r'^accounts/', include('allauth.urls')),
                        url(r'^admin/', include(admin.site.urls)),
@@ -26,7 +31,7 @@ urlpatterns = patterns('',
                        (r'^df/signals.js$', 'djangofloor.views.signals'),
                        (r'^df/ws_emulation.js$', 'djangofloor.views.get_signal_calls'),
                        (r'^robots\.txt$', 'djangofloor.views.robots'),
-                       (r'^$', 'djangofloor.views.index'),
+                       (r'^$', index_view),
                        *extra_urls)
 
 if settings.DEBUG:

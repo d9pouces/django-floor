@@ -32,7 +32,7 @@ def ws_call(signal_name, request, sharing, kwargs):
         sharing = {BROADCAST: True}
     if BROADCAST in sharing:
         sharing[BROADCAST] = True
-    redis_publisher = RedisPublisher(facility=settings.DF_WS_FACILITY, **sharing)
+    redis_publisher = RedisPublisher(facility=settings.FLOOR_WS_FACILITY, **sharing)
     msg = json.dumps({'signal': signal_name, 'options': kwargs})
     redis_publisher.publish_message(RedisMessage(msg.encode('utf-8')))
 
