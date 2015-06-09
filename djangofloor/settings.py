@@ -1,11 +1,13 @@
 # coding=utf-8
 """ Django settings for DjangoFloor.
 
-Settings come from 3 modules:
+Settings come from 3 modules and one .ini file:
 
-  * djangofloor.defaults
-  * project-specific settings, defined in the environment variable DJANGOFLOOR_PROJECT_SETTINGS
-  * user-specific settings, defined in the environment variable DJANGOFLOOR_USER_SETTINGS
+    * djangofloor.defaults
+    * project-specific settings, defined in the environment variable DJANGOFLOOR_PROJECT_SETTINGS
+    * user-specific settings, defined in the environment variable DJANGOFLOOR_USER_SETTINGS
+    * .ini file, whose path is defined in the environment variable DJANGOFLOOR_INI_SETTINGS
+
 
 djangofloor.defaults settings are overridden by project-specific settings, which are of course overridden by
     user-specific settings.
@@ -18,8 +20,10 @@ If VARIABLE is uppercase and if VARIABLE_HELP exists, then VARIABLE is shown wit
 """
 from __future__ import unicode_literals, print_function
 try:
+    # noinspection PyCompatibility
     from configparser import ConfigParser
 except ImportError:
+    # noinspection PyUnresolvedReferences,PyCompatibility
     from ConfigParser import ConfigParser
 
 from django.utils import six
@@ -29,6 +33,7 @@ import os
 import string
 import sys
 from django.utils.importlib import import_module
+# noinspection PyCompatibility
 from pathlib import Path
 from djangofloor import defaults as floor_settings
 from djangofloor.utils import DirectoryPath, FilePath
@@ -40,6 +45,7 @@ USER_SETTINGS_PATH = os.environ.get('DJANGOFLOOR_PYTHON_SETTINGS', '')
 DJANGOFLOOR_CONFIG_PATH = os.environ.get('DJANGOFLOOR_INI_SETTINGS', '')
 DJANGOFLOOR_MAPPING = os.environ.get('DJANGOFLOOR_MAPPING', '')
 PROJECT_NAME = os.environ.get('DJANGOFLOOR_PROJECT_NAME', 'djangofloor')
+
 
 def import_file(filepath):
     """import the Python source file as a Python module.
@@ -72,7 +78,7 @@ else:
 user_settings = import_file(USER_SETTINGS_PATH)
 ini_config_mapping = {}
 if DJANGOFLOOR_MAPPING:
-    module_name, __, mapping_name = DJANGOFLOOR_MAPPING.partition(':')
+    module_name, sep, mapping_name = DJANGOFLOOR_MAPPING.partition(':')
     try:
         module = import_module(module_name)
         mapping = getattr(module, mapping_name)
@@ -81,7 +87,7 @@ if DJANGOFLOOR_MAPPING:
             parser = ConfigParser()
             parser.read([DJANGOFLOOR_CONFIG_PATH])
             for k, v in mapping.items():
-                section, __, option = v.partition('.')
+                section, sep, option = v.partition('.')
                 if parser.has_option(section=section, option=option):
                     ini_config_mapping[k] = parser.get(section=section, option=option)
     except ImportError:
@@ -96,6 +102,17 @@ __settings_origin = {}
 
 
 def __parse_setting(obj):
+    """Parse the object for replacing variables by their values.
+    If `obj` is a string like "THIS_IS_{TEXT}", search for a setting named "TEXT" and replace {TEXT} by its value (say, "VALUE").
+    The returned object is then equal to "THIS_IS_VALUE".
+    If `obj` is a list, a set, a tuple or a dict, their components are recursively parsed.
+    If `obj` is a DirectoryPath or a FilePath, required parent directories are automatically created and the name is returned.
+    Otherwise, `obj` is returned as-is.
+
+
+    :param obj: object to analyze
+    :return: the parsed setting
+    """
     if isinstance(obj, six.text_type):
         values = {'PROJECT_NAME': PROJECT_NAME}
         for (literal_text, field_name, format_spec, conversion) in __formatter.parse(obj):

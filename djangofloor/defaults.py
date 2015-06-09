@@ -1,4 +1,10 @@
 # coding=utf-8
+"""
+Define all DjangoFloor default settings.
+
+The goal is to define valid settings out-of-box.
+
+"""
 from __future__ import unicode_literals
 import os
 import sys

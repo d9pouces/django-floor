@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
 """
 Allow to define Django settings in a .ini configuration file instead of plain Python files.
 
@@ -20,6 +19,7 @@ It is equivalent to::
 
 
 """
+from __future__ import unicode_literals
 __author__ = 'flanker'
 
 INI_MAPPING = {

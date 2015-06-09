@@ -1,7 +1,6 @@
 # coding=utf-8
-from __future__ import unicode_literals
 """
-WSGI config for toto project.
+WSGI config for djangofloor project.
 
 This module contains the WSGI application used by Django's development server
 and any production WSGI deployments. It should expose a module-level variable
@@ -15,6 +14,7 @@ middleware here, or combine a Django application with an application of another
 framework.
 
 """
+from __future__ import unicode_literals
 
 __author__ = 'flanker'
 

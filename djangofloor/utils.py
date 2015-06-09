@@ -1,5 +1,6 @@
 # coding=utf-8
 from __future__ import unicode_literals, absolute_import
+# noinspection PyCompatibility
 from pathlib import PosixPath
 
 __author__ = 'flanker'

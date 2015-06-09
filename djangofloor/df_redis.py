@@ -1,11 +1,15 @@
 # -*- coding: utf-8 -*-
+"""Emulate some functionalities of the websockets.
+
+A call from Python to JavaScript is stored in the Redis database.
+The JS client polls all signals for it.
+
+"""
 from __future__ import unicode_literals
 import json
 from django.http import HttpRequest
 from djangofloor.decorators import SignalRequest
 
-"""The goal is to emulate some functionalities of the websockets.
-"""
 from django.conf import settings
 from redis import ConnectionPool, StrictRedis
 
@@ -36,7 +40,8 @@ def push_signal_call(request, signal_name, kwargs):
 
 def fetch_signal_calls(request):
     """
-    Fetch signal data
+    Fetch signal data for a given client (identified by its session key).
+
     :param request:
     :type request:
     :return:
