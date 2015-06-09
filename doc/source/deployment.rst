@@ -5,7 +5,7 @@ Deploying Django is merely complex if we follow the official guide: https://docs
 In this small guide, we only support the wsgi.
 WSGI can be used with two application servers: gunicorn and uwsgi, behind a pure webserver: nginx or apache.
 
-
+Do not forget to read https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/ !
 
 gunicorn
 --------
@@ -21,8 +21,24 @@ Or, if you wan to daemonize::
 uwsgi
 -----
 
+Since uwsgi requires compilation, it is not installed as DjangoFloor dependency, but it can be installed with pip::
+
+    pip install uwsgi
+
+And then run::
+
+    myproject-uwsgi
+
 apache
 ------
 
 nginx
 -----
+
+
+supervisor
+----------
+
+systemd
+-------
+

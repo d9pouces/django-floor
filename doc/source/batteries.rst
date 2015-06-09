@@ -65,8 +65,9 @@ Redis is performant and very easy to use, and it limits the number of different 
 Several dependencies allow to properly use Redis:
 
     * django-redis,
-    * django-redis-sessions-fork,
-    * django-redis-cache,
+    * django-redis-cache.
+
+If you can use  C extensions, you should also install (and use) django-redis-sessions-fork.
 
 
 Websockets
@@ -79,6 +80,7 @@ These dependencies are required:
     * django-websocket-redis,
     * gevent,
     * uwsgi.
+
 
 Celery
 ------

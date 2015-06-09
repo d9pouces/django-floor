@@ -393,7 +393,7 @@ WSGI_APPLICATION = 'djangofloor.wsgi_http.application'
 if USE_WS4REDIS:
     WSGI_APPLICATION = 'ws4redis.django_runserver.application'
 WS4REDIS_SUBSCRIBER = 'djangofloor.df_ws4redis.Subscriber'
-FLOOR_WS_FACILITY = 'djangofloor'
+DF_WS_FACILITY = 'djangofloor'
 
 ########################################################################################################################
 # celery

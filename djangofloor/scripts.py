@@ -165,9 +165,9 @@ def celery():
 def uwsgi():
     set_env()
     from django.conf import settings
-    parser = ArgumentParser(usage="%(prog)s subcommand [options] [args]")
+    parser = ArgumentParser(usage="%(prog)s subcommand [options] [args]", add_help=False)
     parser.add_argument('--mode', default='both', choices=('both', 'http', 'websockets'))
-    parser.add_argument('-b', '--bind', action='store', default=settings.BIND_ADDRESS, help=settings.BIND_ADDRESS_HELP, add_help=False)
+    parser.add_argument('-b', '--bind', action='store', default=settings.BIND_ADDRESS, help=settings.BIND_ADDRESS_HELP)
     options, extra_args = parser.parse_known_args()
     sys.argv[1:] = extra_args
     argv = list(sys.argv)
