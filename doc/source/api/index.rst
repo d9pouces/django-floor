@@ -22,10 +22,5 @@ Here is the documentation of the complete API.
   djangofloor/tasks
   djangofloor/utils
   djangofloor/views
-  djangofloor/wsgi
-  djangofloor/wsgi_http
-  djangofloor/management
-  djangofloor/templatetags
   djangofloor/templatetags/djangofloor
-  djangofloor/management/commands
   djangofloor/management/commands/config
