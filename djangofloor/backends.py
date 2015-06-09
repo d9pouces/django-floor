@@ -1,4 +1,9 @@
 # coding=utf-8
+"""Authentication backend used for HTTP authentication.
+
+Automatically add specific groups to newly-created users.
+
+"""
 from __future__ import unicode_literals
 from django.conf import settings
 from django.contrib.auth.backends import RemoteUserBackend

@@ -1,4 +1,8 @@
 # coding=utf-8
+"""define ContextProcessors.
+
+The only ContextProcessor defined add some common variables related to DjangoFloor.
+"""
 from __future__ import unicode_literals, absolute_import
 from django.conf import settings
 

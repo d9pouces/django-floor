@@ -1,4 +1,6 @@
 # coding=utf-8
+"""load Celery and discover tasks
+"""
 from __future__ import unicode_literals, absolute_import
 from django.conf import settings
 from djangofloor.scripts import set_env

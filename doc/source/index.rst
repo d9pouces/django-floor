@@ -64,6 +64,12 @@ Full table of contents
 
    installation
    tutorial
+   architecture
+   batteries
+   views
+   signals
+   settings
+   deployment
    api/index
 
 Indices and tables

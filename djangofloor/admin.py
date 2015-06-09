@@ -1,4 +1,10 @@
 # coding=utf-8
+"""
+Admin module.
+
+Only overwrite the title of the admin site (since DjangoFloor does not define any model).
+
+"""
 from __future__ import unicode_literals
 from django.conf import settings
 
