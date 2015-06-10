@@ -6,7 +6,8 @@
 Welcome to DjangoFloor's documentation!
 =======================================
 
-Overview:
+Overview
+--------
 
 
 DjangoFloor helps you to easily create new website with the excellent framework `Django <https://www.djangoproject.com>`_.

@@ -29,10 +29,7 @@ def set_default_option(options, name):
 
 
 def set_env():
-    """
-    Determine project-specific and user-specific settings.
-    Set several environment variable, update sys.argv and return the name of current djangofloor project.
-
+    """Determine project-specific and user-specific settings and set several environment variable, update sys.argv and return the name of current djangofloor project.
 
     1) determine the project name
 

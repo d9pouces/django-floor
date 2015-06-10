@@ -1,4 +1,41 @@
 # coding=utf-8
+"""Define the decorator for connecting Python code to signals, a `SignalRequest` which can be easily serialized and is lighter than a `django.http.HttpRequest`, and some helping code to convert serialized data sent by Javascript to something useful in Python.
+
+Usage of the decorator
+----------------------
+
+The decorator `connect` let you connect any Python function to a signal (which is only a text string).
+Signals are automatically discovered, as soon as there are in files `signals.py` in any app listed in the setting `INSTALLED_APPS` (like `admin.py` or `models.py`).
+
+To use this decorator, create the file `myproject/signals.py`::
+
+    from djangofloor.decorators import connect
+    @connect(path='myproject.signals.demosignal')
+    def my_function(request, arg1, arg2):
+        print(arg1, arg2)
+
+Serialization/deserialization
+-----------------------------
+
+Since all arguments must be serialized (in JSON), only types which are acceptable for JSON can be used as arguments for signals.
+
+
+Using Python3
+-------------
+
+Python3 introduces the notion of function annotations. DjangoFloor can use them to deserialize received data sent by JS::
+
+    @connect(path='myproject.signals.demosignal')
+    def my_function(request, arg1: int, arg2: float):
+            print(arg1, arg2)
+
+The annotation can be any callable, which raise ValueError (in case of error ;)) or a deserialized value.
+DjangoFlor define several callable to handle common cases:
+    * checking if a string matches a regexp: :class:`djangofloor.decorators.RE`,
+    * checking if a value is one of several choices: :class:`djangofloor.decorators.Choice`,
+    * handle form data sent by JS as a plain Django form.
+
+"""
 from __future__ import unicode_literals, absolute_import
 import logging
 import re
@@ -224,6 +261,21 @@ class RedisCallWrapper(CallWrapper):
 
 
 def connect(fn=None, path=None, delayed=False, allow_from_client=True, auth_required=True):
+    """Decorator to use in your Python code.
+
+    :param fn: the Python function to connect to the signal
+    :type fn: any callable
+    :param path: the name of the signal
+    :type path: :class:`unicode` or :class:`str`
+    :param delayed: should this code be called in an asynchronous way (through Celery)? default to `False`
+    :type delayed: :class:`bool`
+    :param allow_from_client: can be called from JavaScript? default to `True`
+    :type allow_from_client: :class:`bool`
+    :param auth_required: can be called only from authenticated client? default to `True`
+    :type auth_required: :class:`bool`
+    :return:
+    :rtype:
+    """
     wrapped = lambda fn_: RedisCallWrapper(fn_, path=path, delayed=delayed, allow_from_client=allow_from_client, auth_required=auth_required)
     if fn is not None:
         wrapped = wrapped(fn)

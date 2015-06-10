@@ -1,4 +1,8 @@
 # coding=utf-8
+""" Define several common exceptions, which can be gracefully handled by DjangoFloor.
+
+You should raise these exceptions, or create new exceptions which derive from these ones. They help to display helpful messages to end-user.
+"""
 from __future__ import unicode_literals
 from django.utils.translation import ugettext as _
 
@@ -6,6 +10,8 @@ __author__ = 'flanker'
 
 
 class ApiException(Exception):
+    """ Base exception, corresponding to a bad request from the client.
+    """
     http_code = 400
 
     @property

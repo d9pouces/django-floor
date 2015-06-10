@@ -46,7 +46,7 @@ CSS and JS files
 Required dependencies:
     * django-pipeline,
     * jsmin,
-    * rcssmin.
+    * rcssmin (directly included in djangofloor.df_pipeline to ease installation - the official package require the compilation of a C extension).
 
 Redis
 -----

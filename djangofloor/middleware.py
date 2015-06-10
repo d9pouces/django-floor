@@ -10,7 +10,7 @@ from django.contrib.auth.middleware import RemoteUserMiddleware as BaseRemoteUse
 from django.contrib.auth.models import Group
 # noinspection PyPackageRequirements
 from pipeline.compressors import CompressorBase
-from rcssmin import cssmin
+from djangofloor.df_pipeline import cssmin
 
 __author__ = 'flanker'
 

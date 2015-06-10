@@ -24,9 +24,6 @@ You can also install with optional dependencies::
 
     pip install djangofloor[websocket,scss]
 
-If you cannot compile C extensions, please run the following command before install DjangoFloor::
-
-    pip install rcssmin --install-option --without-c-extensions
 
 
 Installing from source

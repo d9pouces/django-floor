@@ -4,6 +4,8 @@
 A call from Python to JavaScript is stored in the Redis database.
 The JS client polls all signals for it.
 
+These functions are reserved for private use only.
+
 """
 from __future__ import unicode_literals
 import json

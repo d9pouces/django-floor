@@ -136,8 +136,8 @@ FLOOR_INSTALLED_APPS = []
 FLOOR_INDEX = None
 FLOOR_PROJECT_NAME = _('DjangoFloor')
 
-DEFAULT_GROUP_NAME = _('Users')
-DEFAULT_GROUP_NAME_HELP = 'Name of the default group of newly-created users.'
+FLOOR_DEFAULT_GROUP_NAME = _('Users')
+FLOOR_DEFAULT_GROUP_NAME_HELP = 'Name of the default group of newly-created users.'
 
 EMAIL_SUBJECT_PREFIX = '[{SERVER_NAME}] '
 SERVER_EMAIL = 'root@{SERVER_NAME}'

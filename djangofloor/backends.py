@@ -1,7 +1,9 @@
 # coding=utf-8
 """Authentication backend used for HTTP authentication.
 
-Automatically add specific groups to newly-created users.
+Automatically add a specified group to newly-created users.
+The name of the added group is defined by the setting FLOOR_DEFAULT_GROUP_NAME.
+Set it to `None` if you do not want any group to be added by default.
 
 """
 from __future__ import unicode_literals
@@ -23,7 +25,7 @@ class DefaultGroupRemoteUserBackend(RemoteUserBackend):
 
         By default, returns the user unmodified; only add it to the default group.
         """
-        group_name = settings.DEFAULT_GROUP_NAME
+        group_name = settings.FLOOR_DEFAULT_GROUP_NAME
         if group_name is None:
             return user
         if group_name not in CACHED_GROUPS:

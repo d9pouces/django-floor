@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""Define some helpers functions for using django-websocket-redis with DjangoFloor.
+
+You should not directly use these functions.
+"""
 from __future__ import unicode_literals, absolute_import
 import json
 
@@ -22,6 +26,18 @@ __author__ = 'flanker'
 
 
 def ws_call(signal_name, request, sharing, kwargs):
+    """ Call a JS signal from the Python side.
+
+    :param signal_name: name of signal
+    :type signal_name:
+    :param request: a SignalRequest with session_key and username
+    :type request: :class:`djangofloor.decorators.SignalRequest`
+    :param sharing: the required sharing. Can be SESSION, USER or BROADCAST or any dict which is valid for django-websockets-redis.
+    :type sharing:
+    :param kwargs: options to pass to the JS signal
+    :type kwargs:
+    :return: `None`
+    """
     if isinstance(sharing, binary_type):
         sharing = force_text(sharing)
     if sharing == SESSION:
@@ -38,6 +54,8 @@ def ws_call(signal_name, request, sharing, kwargs):
 
 
 class Subscriber(RedisSubscriber):
+    """ Read messages sent by the client and call its signals.
+    """
 
     internal_publishers = {'%s:%s:%s' % (settings.WS4REDIS_PREFIX, BROADCAST, 'djangofloor')}
 

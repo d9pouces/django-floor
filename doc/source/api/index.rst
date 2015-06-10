@@ -12,7 +12,6 @@ Here is the documentation of the complete API.
   djangofloor/context_processors
   djangofloor/decorators
   djangofloor/defaults
-  djangofloor/df_redis
   djangofloor/exceptions
   djangofloor/iniconf
   djangofloor/log

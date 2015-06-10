@@ -13,7 +13,6 @@ Let assume that our great idea will be GreatProject.
 As always, we start by creating a new virtualenv::
 
     mkvirtualenv greatproject -p `which python2.7`
-    pip install rcssmin --install-option --without-c-extensions
     pip install djangofloor
 
 We can create required files and directories::
@@ -83,7 +82,6 @@ Creating a new project with Starterpyth
 It's by far simpler::
 
     mkvirtualenv greatproject -p `which python2.7`
-    pip install rcssmin --install-option --without-c-extensions
     pip install starterpyth
     starterpyth-bin
     [some questions…]

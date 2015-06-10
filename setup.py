@@ -19,7 +19,7 @@ entry_points = {'console_scripts': ['djangofloor-manage = djangofloor.scripts:ma
                                     'djangofloor-uswgi = djangofloor.scripts:uswgi', ]}
 
 requirements = ['Django>=1.8', 'django-allauth', 'gunicorn', 'django-bootstrap3', 'jsmin',
-                'django-debug-toolbar', 'rcssmin', 'django-admin-bootstrapped',
+                'django-debug-toolbar', 'django-admin-bootstrapped',
                 'django-pipeline', 'celery', 'django-redis', 'django-redis-cache', ]
 PY2 = sys.version_info[0] == 2
 

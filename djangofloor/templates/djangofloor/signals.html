@@ -7,7 +7,7 @@ $(function () {
     });
     {% for name in signals %}df.connect_ws('{{ name }}');
     {% endfor %}{% else %}
-    {% if WS4REDIS_EMULATION_INTERVAL > 0 %}
+    {% if WS4REDIS_EMULATION_INTERVAL > 0 and df_user.is_authenticated %}
     df.ws_emulation_interval = {{ WS4REDIS_EMULATION_INTERVAL }};
     df.connect_ws_emulator('{% url 'djangofloor.views.get_signal_calls' %}');{% endif %}
     {% for name in signals %}df.connect_http('{{ name }}', "{% url 'djangofloor.views.signal_call' signal=name %}");
