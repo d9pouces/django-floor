@@ -14,7 +14,6 @@ Here is the documentation of the complete API.
   djangofloor/log
   djangofloor/middleware
   djangofloor/scripts
-  djangofloor/settings
   djangofloor/tasks
   djangofloor/utils
   djangofloor/views

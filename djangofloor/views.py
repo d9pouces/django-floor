@@ -24,6 +24,13 @@ mimetypes.init()
 
 
 def read_file_in_chunks(fileobj, chunk_size=32768):
+    """ read a file object in chunks of the given size.
+
+    Return an iterator of data
+    :param fileobj:
+    :param chunk_size: max size of each chunk
+    :type chunk_size: `int`
+    """
     while True:
         data = fileobj.read(chunk_size)
         if not data:
@@ -40,6 +47,8 @@ def __get_js_mimetype():
 
 
 def signals(request):
+    """Generate a HttpResponse to register Python signals from the JS side
+    """
     import_signals()
     return render_to_response('djangofloor/signals.html',
                               {'signals': REGISTERED_SIGNALS, 'use_ws4redis': settings.FLOOR_USE_WS4REDIS,
@@ -51,12 +60,9 @@ def signals(request):
 @cache_control(no_cache=True)
 def signal_call(request, signal):
     """ Called by JS code when websockets are not available. Allow to call Python signals from JS.
-    :param request:
-    :type request:
-    :param signal:
-    :type signal:
-    :return:
-    :rtype:
+    Arguments are passed in the request body, serialized as JSON.
+
+    :param signal: name of the called signal
     """
     import_signals()
     if request.body:
@@ -70,35 +76,49 @@ def signal_call(request, signal):
 @cache_control(no_cache=True)
 def get_signal_calls(request):
     """ Regularly called by JS code when websockets are not available. Allow Python code to call JS signals.
-    :param request:
-    :type request:
-    :return:
-    :rtype:
+
+    Return all signals called by Python code as a JSON-list
     """
     return JsonResponse(fetch_signal_calls(request), safe=False)
 
 
-def send_file(xsend_path, mimetype=None):
+def send_file(filepath, mimetype=None, force_download=False):
+    """Send a static file. This is not a Django view, but rather a function that is called at the end of a view.
+
+    If `settings.USE_X_SEND_FILE` (mod_xsendfile is a mod of Apache), then return an empty HttpResponse with the correct header.
+    The file is directly handled by Apache instead of Python (that is more efficient).
+
+    If `settings.X_ACCEL_REDIRECT_ARCHIVE` is defined (as a list of tuple (directory, alias_url)) and filepath is in one of the directories,
+        return an empty HttpResponse with the correct header. This is only available with Nginx.
+
+    Otherwise, return a StreamingHttpResponse to avoid loading the whole file in memory.
+
+    :param filepath: absolute path of the file to send to the client.
+    :param mimetype: MIME type of the file (returned in the response header)
+    :param force_download: always force the client to download the file.
+    :rtype: `StreamingHttpResponse` or `HttpResponse`
+    """
     if mimetype is None:
-        (mimetype, encoding) = mimetypes.guess_type(xsend_path)
+        (mimetype, encoding) = mimetypes.guess_type(filepath)
         if mimetype is None:
             mimetype = 'text/plain'
+    filepath = os.path.abspath(filepath)
     if settings.USE_X_SEND_FILE:
         response = HttpResponse(content_type=mimetype)
-        response['X-SENDFILE'] = xsend_path
+        response['X-SENDFILE'] = filepath
     else:
         for dirpath, alias_url in settings.X_ACCEL_REDIRECT_ARCHIVE:
-            if xsend_path.startswith(dirpath):
+            if filepath.startswith(dirpath):
                 response = HttpResponse(content_type=mimetype)
-                response['Content-Disposition'] = 'attachment; filename={0}'.format(os.path.basename(xsend_path))
-                response['X-Accel-Redirect'] = alias_url + xsend_path
+                response['Content-Disposition'] = 'attachment; filename={0}'.format(os.path.basename(filepath))
+                response['X-Accel-Redirect'] = alias_url + filepath
                 break
         else:
-            fileobj = open(xsend_path, 'rb')
+            fileobj = open(filepath, 'rb')
             response = StreamingHttpResponse(read_file_in_chunks(fileobj), content_type=mimetype)
-            response['Content-Length'] = os.path.getsize(xsend_path)
-    if mimetype[0:4] != 'text' and mimetype[0:5] != 'image':
-        response['Content-Disposition'] = 'attachment; filename={0}'.format(os.path.basename(xsend_path))
+            response['Content-Length'] = os.path.getsize(filepath)
+    if force_download or not (mimetype.startswith('text') or mimetype.startswith('image')):
+        response['Content-Disposition'] = 'attachment; filename={0}'.format(os.path.basename(filepath))
     return response
 
 
