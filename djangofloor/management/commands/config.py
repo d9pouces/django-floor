@@ -61,8 +61,12 @@ class Command(BaseCommand):
         keys = [key for key in merged_settings if (key == key.upper() and key not in ('_', '__') and not key.endswith('_HELP'))]
         keys.sort()
         self.stdout.write('#-*- coding: utf-8 -*-\n')
+        lazy_cls = ugettext_lazy('').__class__
         for key in keys:
-            self.stdout.write('%(key)s = %(value)r\n' % {'key': key, 'value': merged_settings[key], })
+            value = merged_settings[key]
+            if isinstance(value, lazy_cls):
+                value = text_type(value)
+            self.stdout.write('%(key)s = %(value)r\n' % {'key': key, 'value': value, })
 
     def display(self, all_keys):
         # keys defined in DjangoFloor defaults

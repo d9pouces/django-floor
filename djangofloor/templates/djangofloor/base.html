@@ -8,7 +8,8 @@
     <meta name="robots" content="index, follow"/>
     <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
     {% block head_extra %}{% endblock %}
-    {% block head_favicon %}<link rel="shortcut icon" href="{% static 'images/favicon.png' %}">{% endblock %}
+    {% block head_favicon %}
+        <link rel="shortcut icon" href="{% static 'images/favicon.png' %}">{% endblock %}
     {% block head_pipeline %}{% javascript 'default' %}{% stylesheet 'default' %}<!--[if lt IE 9 ]>{% javascript 'ie9' %}<![endif]-->{% endblock %}
     <script type="text/javascript" src="{% url 'djangofloor.views.signals' %}"></script>
 </head>
@@ -16,48 +17,50 @@
 {% block body %}
     {% block bootstrap3_nav %}
         <div class="navbar navbar-inverse" role="navigation">
-            <div class="container">
-                <div class="navbar-header">
-                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-                        <span class="sr-only">{% trans 'Toggle navigation' %}</span>
-                        <span class="icon-bar"></span>
-                        <span class="icon-bar"></span>
-                        <span class="icon-bar"></span>
-                    </button>
-                    <a class="navbar-brand" href="{% url df_index_view %}">{{ df_project_name }}</a>
-                </div>
-                <div class="navbar-collapse collapse">
-                    {% if user.is_authenticated and not df_remote_authenticated %}
-                        <a class="navbar-brand" href="{% url 'account_email' %}">{% fontawesome_icon 'pencil' %}&nbsp;<small>{{ user }}</small></a>
-                        <a class="navbar-brand" href="{% url 'account_logout' %}">{% fontawesome_icon 'sign-out' %}</a>
-                    {% elif user.is_authenticated %}
-                        <a class="navbar-brand">{{ user.username }}</a>
-                    {% elif user.is_anonymous %}
-                        <a class="navbar-brand" href="{% url 'account_login' %}">{% fontawesome_icon 'sign-in' %}</a>
-                    {% endif %}
-                    {% if user.is_staff %}
-                        <a class="navbar-brand" href="{% url 'admin:index' %}">{% fontawesome_icon 'wrench' %}</a>
-                    {% endif %}
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="sr-only">{% trans 'Toggle navigation' %}</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="{% url df_index_view %}">{{ df_project_name }}</a>
+            </div>
+            <div class="navbar-collapse collapse">
+                {% if user.is_authenticated and not df_remote_authenticated %}
+                    <a class="navbar-brand" href="{% url 'account_email' %}">{% fontawesome_icon 'pencil' %}&nbsp;
+                        <small>{{ user }}</small>
+                    </a>
+                    <a class="navbar-brand" href="{% url 'account_logout' %}">{% fontawesome_icon 'sign-out' %}</a>
+                {% elif user.is_authenticated %}
+                    <a class="navbar-brand">{{ user.username }}</a>
+                {% elif user.is_anonymous %}
+                    <a class="navbar-brand" href="{% url 'account_login' %}">{% fontawesome_icon 'sign-in' %}</a>
+                {% endif %}
+                {% if user.is_staff %}
+                    <a class="navbar-brand" href="{% url 'admin:index' %}">{% fontawesome_icon 'wrench' %}</a>
+                {% endif %}
                 {% block navbar %}
                     <form class="navbar-form navbar-right" role="form">
                     </form>
                 {% endblock %}
 
-                </div>
-                <!--/.navbar-collapse -->
             </div>
+            <!--/.navbar-collapse -->
         </div>
     {% endblock %}
     {% block messages %}
         <div id="messages">{% bootstrap_messages %}</div>
     {% endblock messages %}
     {% block breadcrumbs %}{% endblock %}
-
-<div class="container">    {% block content %}
-    {% endblock %}
-</div>    {% block footer %}
+    <div class="container">
+        {% block content %}
+        {% endblock %}
+    </div>
+    {% block footer %}
         <hr>
-        <footer></footer>{% endblock %}
+        <footer></footer>
+    {% endblock %}
 {% endblock %}
 {% block extra_body %}
 {% endblock %}
