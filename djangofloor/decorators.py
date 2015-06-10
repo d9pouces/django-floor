@@ -151,24 +151,50 @@ class SerializedForm(object):
 
 class SignalRequest(object):
     """ Store the username and the session key and must be supplied to any Python signal call.
-    Can be constructed from a plain :class:`django.http.HttpRequest`.
+
+    Can be constructed from a standard :class:`django.http.HttpRequest`.
     """
     def __init__(self, username, session_key, user_pk=None, is_superuser=False, is_staff=False, is_active=False, perms=None):
+        """
+        :param username: should be User.username
+        :type username: :class:`str`
+        :param session_key: the session key, unique to a opened browser window (useful when a user has multiple opened windows)
+        :type session_key: :class:`str`
+        :param user_pk: primary key of the user (for easy ORM queries)
+        :type user_pk: :class:`int`
+        :param is_superuser: is the user a superuser?
+        :type is_superuser: :class:`bool`
+        :param is_staff: belongs the user to the staff?
+        :type is_staff: :class:`bool`
+        :param is_active: is the user active?
+        :type is_active: :class:`bool`
+        :param perms: list of "app_name.permission_name" (optional)
+        :type perms:
+        """
         self.username = username
         self.session_key = session_key
         self.user_pk = user_pk
         self.is_superuser = is_superuser
         self.is_staff = is_staff
         self.is_active = is_active
-        self._perms = perms
+        self._perms = set(perms) if perms is not None else None
         self._template_perms = None
 
     @classmethod
     def from_user(cls, user):
+        """ Create a `SignalRequest` from a valid User. The SessionKey is set to `None`
+
+        :param user: any Django user
+        :rtype: `SignalRequest`
+        """
         return cls(user.get_username(), None, user_pk=user.pk, is_superuser=user.is_superuser, is_staff=user.is_staff,
                    is_active=user.is_active)
 
     def to_dict(self):
+        """Convert this SignalRequest to a dict which can be provided to JSON.
+        :return:
+        :rtype:
+        """
         result = {}
         result.update(self.__dict__)
         if isinstance(self._perms, set):
@@ -180,10 +206,21 @@ class SignalRequest(object):
         return result
 
     def has_perm(self, perm):
+        """ return true is the user has the required perm.
+
+        >>> r = SignalRequest('username', perms=['app_label.codename'])
+        >>> r.has_perm('app_label.codename')
+        True
+
+        :param perm: name of the permission  ("app_label.codename")
+        :return: True if the user has the required perm
+        :rtype: :class:`bool`
+        """
         return perm in self.perms
 
     @property
     def perms(self):
+        """`set` of all perms of the user (set of "app_label.codename")"""
         if not self.user_pk:
             return set()
         elif self._perms is not None:
@@ -192,12 +229,17 @@ class SignalRequest(object):
             query = Permission.objects.all()
         else:
             query = Permission.objects.filter(Q(user__pk=self.user_pk) | Q(group__user__pk=self.user_pk))
-        self._perms = {'%s.%s' % p for p in
-                       query.select_related('content_type').values_list('content_type__app_label', 'codename')}
+        self._perms = set(['%s.%s' % p for p in
+                           query.select_related('content_type').values_list('content_type__app_label', 'codename')])
         return self._perms
 
     @property
     def template_perms(self):
+        """`dict` of perms, to be used in templates.
+
+        Example::
+        {% if request.template_perms.app_label.codename %}...{% endif %}
+        """
         if self._template_perms is None:
             result = {}
             for perm in self.perms:
@@ -208,7 +250,9 @@ class SignalRequest(object):
 
     @classmethod
     def from_request(cls, request):
-        """ return a `SignalRequest` from a Django request
+        """ return a `SignalRequest` from a Django request.
+
+        If the request already is a SignalRequest, then it is returned as-is (not copied).
         :param request: standard Django request
         :type request: :class:`django.http.HttpRequest` or :class:`SignalRequest`
         :return:
