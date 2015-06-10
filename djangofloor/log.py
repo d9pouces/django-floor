@@ -1,4 +1,7 @@
 # coding=utf-8
+"""Define an AdminEmailHandler which
+
+"""
 from __future__ import unicode_literals
 import datetime
 

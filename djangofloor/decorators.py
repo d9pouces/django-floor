@@ -66,9 +66,9 @@ class RE(object):
 
     Example (requires Python 3.2+), for a function that can only handle a string on the form 123a456::
 
-    @connect(path='myproject.signals.test')
-    def test(request, value: RE("\d{3}a\d{3}")):
-        pass
+        @connect(path='myproject.signals.test')
+        def test(request, value: RE("\d{3}a\d{3}")):
+            pass
 
     Your code wan't be called if value has not the right form.
     """
@@ -89,9 +89,9 @@ class Choice(object):
 
     Example (requires Python 3.2+), for a function that can only two values::
 
-    @connect(path='myproject.signals.test')
-    def test(request, value: Choice([True, False])):
-        pass
+        @connect(path='myproject.signals.test')
+        def test(request, value: Choice([True, False])):
+            pass
 
     Your code wan't be called if value is not True or False.
 
@@ -121,9 +121,9 @@ class SerializedForm(object):
     >>> form.is_valid()
     True
 
-    @connect(path='myproject.signals.test')
-    def test(request, value: SerializedForm(SimpleForm), other: int):
-        print(value.is_valid())
+        @connect(path='myproject.signals.test')
+        def test(request, value: SerializedForm(SimpleForm), other: int):
+            print(value.is_valid())
 
     On the JS side, the easiest way is to serialize the form with JQuery::
 
@@ -338,11 +338,11 @@ class RedisCallWrapper(CallWrapper):
 
 
 def connect(fn=None, path=None, delayed=False, allow_from_client=True, auth_required=True):
-    """Decorator to use in your Python code. Use it in any file named `signals.py` in a installed Django app.
+    """Decorator to use in your Python code. Use it in any file named `signals.py` in a installed Django app.::
 
-    @connect(path='myproject.signal.name', allow_from_client=True, delayed=False)
-    def function(request, arg1, arg2, **kwargs):
-        pass
+        @connect(path='myproject.signal.name', allow_from_client=True, delayed=False)
+        def function(request, arg1, arg2, **kwargs):
+            pass
 
     :param fn: the Python function to connect to the signal
     :type fn: any callable

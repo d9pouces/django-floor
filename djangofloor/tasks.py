@@ -48,14 +48,22 @@ def import_signals():
 
 
 def call(signal_name, request, sharing=None, **kwargs):
-    return df_call(signal_name, request, sharing=sharing, from_client=False, kwargs=kwargs)
-
-
-def df_call(signal_name, request, sharing, from_client, kwargs):
     """ Call a signal and all the three kinds of receivers can receive it:
         * standard Python receiverrs
         * Python receivers through Celery (thanks to the `delayed` argument)
         * JavaScript receivers (through websockets)
+
+    Example::
+        from djangofloor.tasks import call, SESSION
+        from djangofloor.decorators import connect
+
+        def any_function(request):
+            call('myproject.signal_name', request, sharing=SESSION, arg1="arg1", arg2=42)
+
+        @connect('myproject.signal_name')
+        def signal_name(request, arg1, arg2):
+            print(arg1, arg2)
+
 
     :param signal_name:
     :type signal_name: :class:`str`
@@ -66,8 +74,32 @@ def df_call(signal_name, request, sharing, from_client, kwargs):
         * `USER`, `SESSION`, `BROADCAST` : propagate to the request user, only to its current session, or to all currently logged-in users
         * {'users': ['username1', 'username2'], 'groups': ['group1', 'group2'], 'broadcast': True} (or any subset of these keys)
         * `RETURN` return result values of signal calls to the caller
-    :param from_client:
-        * this call comes a client
+    :param kwargs: arguments for the receiver
+    :return:`
+        if sharing != `RETURN: return `None`
+        else: call `call` on each element of the call result
+    """
+    return df_call(signal_name, request, sharing=sharing, from_client=False, kwargs=kwargs)
+
+
+def df_call(signal_name, request, sharing, from_client, kwargs):
+    """ Call a signal and all the three kinds of receivers can receive it:
+        * standard Python receiverrs
+        * Python receivers through Celery (thanks to the `delayed` argument)
+        * JavaScript receivers (through websockets)
+
+    Do not use it directly, you should prefer use the `call` function.
+
+    :param signal_name:
+    :type signal_name: :class:`str`
+    :param request: initial request, giving informations about HTTP sessions and its user
+    :type request: :class:`SignalRequest` or :class:`django.http.HttpRequest`
+    :param sharing:
+        * `None` : does not propagate to the JavaScript (client) side
+        * `USER`, `SESSION`, `BROADCAST` : propagate to the request user, only to its current session, or to all currently logged-in users
+        * {'users': ['username1', 'username2'], 'groups': ['group1', 'group2'], 'broadcast': True} (or any subset of these keys)
+        * `RETURN` return result values of signal calls to the caller
+    :param from_client: True if this call comes a JS client
     :param kwargs: arguments for the receiver
     :return:`
         if sharing != `RETURN: return `None`

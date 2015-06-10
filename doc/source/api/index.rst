@@ -6,14 +6,11 @@ Here is the documentation of the complete API.
 .. toctree::
   :maxdepth: 2
   
-  djangofloor
-  djangofloor/admin
   djangofloor/backends
   djangofloor/context_processors
   djangofloor/decorators
   djangofloor/defaults
   djangofloor/exceptions
-  djangofloor/iniconf
   djangofloor/log
   djangofloor/middleware
   djangofloor/scripts
