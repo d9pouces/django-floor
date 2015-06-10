@@ -62,6 +62,16 @@ logger = logging.getLogger('djangofloor.request')
 
 
 class RE(object):
+    """ used to check in a string value match a given regexp.
+
+    Example (requires Python 3.2+), for a function that can only handle a string on the form 123a456::
+
+    @connect(path='myproject.signals.test')
+    def test(request, value: RE("\d{3}a\d{3}")):
+        pass
+
+    Your code wan't be called if value has not the right form.
+    """
     def __init__(self, value, caster=None):
         self.caster = caster
         self.regexp = re.compile(value)
@@ -75,6 +85,18 @@ class RE(object):
 
 
 class Choice(object):
+    """ used to check if a value is among some valid choices.
+
+    Example (requires Python 3.2+), for a function that can only two values::
+
+    @connect(path='myproject.signals.test')
+    def test(request, value: Choice([True, False])):
+        pass
+
+    Your code wan't be called if value is not True or False.
+
+    `caster` is an optional argument (a callable to convert data before checking its validity).
+    """
     def __init__(self, values, caster=None):
         self.values = set(values)
         self.caster = caster
@@ -87,19 +109,30 @@ class Choice(object):
 
 
 class SerializedForm(object):
-    """given a form and a `list` of `dict`, transforms the `dict` into a :class:`django.http.QueryDict` and initialize the form with it.
+    """Transform values sent by JS to a Django form.
 
->>> class SimpleForm(forms.Form):
-...    field = forms.CharField()
-...
->>> x = SerializedForm(SimpleForm)
->>> form = x([{'field': 'object'}])
->>> form.is_valid()
-True
+    Given a form and a `list` of `dict`, transforms the `dict` into a :class:`django.http.QueryDict` and initialize the form with it.
+
+    >>> class SimpleForm(forms.Form):
+    ...    field = forms.CharField()
+    ...
+    >>> x = SerializedForm(SimpleForm)
+    >>> form = x([{'field': 'object'}])
+    >>> form.is_valid()
+    True
+
+    @connect(path='myproject.signals.test')
+    def test(request, value: SerializedForm(SimpleForm), other: int):
+        print(value.is_valid())
+
+    On the JS side, the easiest way is to serialize the form with JQuery::
+
+    <form onsubmit="return df.call('myproject.signals.test', {value: $(this).serializeArray(), other: 42})">
+        <input name='field' value='test' type='text'>
+    </form>
 
 
     """
-
     def __init__(self, form_cls):
         self.form_cls = form_cls
 
@@ -261,7 +294,11 @@ class RedisCallWrapper(CallWrapper):
 
 
 def connect(fn=None, path=None, delayed=False, allow_from_client=True, auth_required=True):
-    """Decorator to use in your Python code.
+    """Decorator to use in your Python code. Use it in any file named `signals.py` in a installed Django app.
+
+    @connect(path='myproject.signal.name', allow_from_client=True, delayed=False)
+    def function(request, arg1, arg2, **kwargs):
+        pass
 
     :param fn: the Python function to connect to the signal
     :type fn: any callable
