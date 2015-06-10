@@ -45,7 +45,7 @@ It allows you to use `Celery <http://celery.readthedocs.org>`_ for background ta
     How to integrate your own views into a DjangoFloor project
 
 :doc:`signals`
-    DjangoFloor Signals, call Python and JS code from Python or JS with the same syntax
+    DjangoFloor Signals, or how to call Python and JS code from Python or JS with the same syntax
 
 :doc:`settings`
     DjangoFloor settings system
@@ -55,6 +55,9 @@ It allows you to use `Celery <http://celery.readthedocs.org>`_ for background ta
 
 :doc:`api/index`
     The complete API documentation, organized by modules
+
+:doc:`javascript`
+    Documentation for the JavaScript functions
 
 
 Full table of contents
@@ -72,6 +75,7 @@ Full table of contents
    settings
    deployment
    api/index
+   javascript
 
 Indices and tables
 ==================

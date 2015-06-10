@@ -14,48 +14,57 @@ In a standard web application, you have four kind of codes:
 In DjangoFloor, a signal is a simple name (a unicode string).
 You connect some code (JS or Python) to this name and then you can call this new signal (with some arguments).
 
+Defining a signal
+-----------------
+
+We want to create a signal named `demo.my_signal`, and we want to display all the arguments provided when this signal is called.
+
 Python example (create a file called `signals.py` in one of the `INSTALLED_APPS`::
 
     from djangofloor.decorators import connect
     @connect(path='demo.my_signal')
-    def my_signal(request, arg):
+    def my_signal(request, arg1, arg2, arg3):
         [ some interesting code ]
-        print('blablabla', arg)
+        print('blablabla', arg1, arg2, arg3)
 
 A lot of computation, and this code must be used through Celery?::
 
     from djangofloor.decorators import connect
     @connect(path='demo.my_signal', delayed=True)
-    def my_signal(request, arg):
+    def my_signal(request, arg1, arg2, arg3):
         [ some interesting code ]
-        print('blablabla', arg)
+        print('blablabla', arg1, arg2, arg3)
 
 Do not forget to run a Celery worker!
 You can allow non-connected users to trigger the signal::
 
     from djangofloor.decorators import connect
     @connect(path='demo.my_signal', auth_required=False)
-    def my_signal(request, arg):
+    def my_signal(request, arg1, arg2, arg3):
         [ some interesting code ]
-        print('blablabla', arg)
+        print('blablabla', arg1, arg2, arg3)
 
 JavaScript example::
 
-    df.connect('demo.my_signal', function (options) { alert(options.arg); });
+    df.connect('demo.my_signal', function (options) { alert('blablabla' + options.arg1 + options.arg2 + options.arg3); });
 
 
-Ok, that is enough to connect any code to a signal. Now, if you want to call this code in Python::
+Ok, that is enough to connect any code to a signal. 
+
+Calling a signal
+----------------
+
+Now, if you want to call this code in Python::
 
     from djangofloor.tasks import call, SESSION
-    call('demo.my_signal', request, SESSION, arg='argument')
+    call('demo.my_signal', request, SESSION, arg1='argument', arg2='other value', arg3=42)
 
 And in JavaScript?::
 
-    df.call('demo.my_signal', {arg: 'argument'})
+    df.call('demo.my_signal', {arg1: 'argument', arg2: 'other value', arg3: 42})
 
 
 *Any Python or Javascript can call any Python or JavaScript signal, with (almost) the same syntax.*
-
 If more than one code is connected to the same signal, then all codes will be called (both JS and Python).
 
 Notes

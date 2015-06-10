@@ -64,7 +64,6 @@ df.connect_ws_emulator = function (url) {
     jqxhr.always(function () { setTimeout(function () { df.connect_ws_emulator(url); }, df.ws_emulation_interval); })
 };
 
-
 df.connect_ws = function (signal) {
     "use strict";
     var wrapper = function (options, from_server) {
@@ -169,7 +168,6 @@ df.connect('df.redirect', function (options) {
     "use strict";
     window.location.href = options.url;
 });
-
 
 $("#body").on('hidden.bs.modal', function () {
     "use strict";

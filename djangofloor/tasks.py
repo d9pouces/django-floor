@@ -54,6 +54,7 @@ def call(signal_name, request, sharing=None, **kwargs):
         * JavaScript receivers (through websockets)
 
     Example::
+
         from djangofloor.tasks import call, SESSION
         from djangofloor.decorators import connect
 
@@ -75,9 +76,6 @@ def call(signal_name, request, sharing=None, **kwargs):
         * {'users': ['username1', 'username2'], 'groups': ['group1', 'group2'], 'broadcast': True} (or any subset of these keys)
         * `RETURN` return result values of signal calls to the caller
     :param kwargs: arguments for the receiver
-    :return:`
-        if sharing != `RETURN: return `None`
-        else: call `call` on each element of the call result
     """
     return df_call(signal_name, request, sharing=sharing, from_client=False, kwargs=kwargs)
 
@@ -101,8 +99,8 @@ def df_call(signal_name, request, sharing, from_client, kwargs):
         * `RETURN` return result values of signal calls to the caller
     :param from_client: True if this call comes a JS client
     :param kwargs: arguments for the receiver
-    :return:`
-        if sharing != `RETURN: return `None`
+    :return:
+        if sharing != `RETURN`: return `None`
         else: call `df_call` on each element of the call result
     """
     import_signals()
