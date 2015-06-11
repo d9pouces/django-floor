@@ -5,7 +5,6 @@ var df = {};
 
 df.registered_signals = {};
 df.__message_count = 0;
-df.ws_emulation_interval = 1000;
 
 /**
  * Call an existing signal
@@ -61,7 +60,6 @@ df.connect_ws_emulator = function (url) {
             df.call(calls[i].signal, calls[i].options, true);
         }
     });
-    jqxhr.always(function () { setTimeout(function () { df.connect_ws_emulator(url); }, df.ws_emulation_interval); })
 };
 
 df.connect_ws = function (signal) {

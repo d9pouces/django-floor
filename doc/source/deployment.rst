@@ -35,11 +35,6 @@ settings for Redis:
   * REDIS_PORT = 6379
 
 
-your application
-----------------
-
-
-
 
 gunicorn
 --------
@@ -109,6 +104,85 @@ Here is a simple configuration file for your project behind Nginx, assuming that
 supervisor
 ----------
 
-systemd
--------
+A single config file for Supervisor can handle all processes to launch::
 
+    PROJECT_NAME=myproject
+    VIRTUAL_ENV=$VIRTUAL_ENV
+    USER=www-data
+    cat << EOF | sudo tee /etc/supervisor.d/$PROJECT_NAME.conf
+    [program:${PROJECT_NAME}_gunicorn]
+    command = $VIRTUAL_ENV/bin/$PROJECT_NAME-gunicorn
+    user = $USER
+    [program:${PROJECT_NAME}_celery]
+    command = $VIRTUAL_ENV/bin/$PROJECT_NAME-celery worker
+    user = $USER
+    EOF
+
+systemd (Linux only)
+--------------------
+
+launchd (Mac OS X only)
+-----------------------
+
+We need to create a config file for each process to launch::
+
+    PROJECT_NAME=myproject
+    VIRTUAL_ENV=$VIRTUAL_ENV
+    cat << EOF > ~/Library/LaunchAgents/$PROJECT_NAME.gunicorn.plist
+    <?xml version="1.0" encoding="UTF-8"?>
+    <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+    <plist version="1.0">
+      <dict>
+        <key>KeepAlive</key>
+        <true/>
+        <key>Label</key>
+        <string>$PROJECT_NAME-gunicorn</string>
+        <key>ProgramArguments</key>
+        <array>
+          <string>$VIRTUAL_ENV/bin/$PROJECT_NAME-gunicorn</string>
+        </array>
+        <key>EnvironmentVariables</key>
+        <dict>
+        </dict>
+        <key>RunAtLoad</key>
+        <true/>
+        <key>WorkingDirectory</key>
+        <string>/usr/local/var</string>
+        <key>StandardErrorPath</key>
+        <string>/dev/null</string>
+        <key>StandardOutPath</key>
+        <string>/dev/null</string>
+      </dict>
+    </plist>
+    EOF
+    cat << EOF > ~/Library/LaunchAgents/$PROJECT_NAME.celery.plist
+    <?xml version="1.0" encoding="UTF-8"?>
+    <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+    <plist version="1.0">
+      <dict>
+        <key>KeepAlive</key>
+        <true/>
+        <key>Label</key>
+        <string>$PROJECT_NAME-celery</string>
+        <key>ProgramArguments</key>
+        <array>
+          <string>$VIRTUAL_ENV/bin/$PROJECT_NAME-celery</string>
+          <string>worker</string>
+        </array>
+        <key>EnvironmentVariables</key>
+        <dict>
+        </dict>
+        <key>RunAtLoad</key>
+        <true/>
+        <key>WorkingDirectory</key>
+        <string>/usr/local/var</string>
+        <key>StandardErrorPath</key>
+        <string>/dev/null</string>
+        <key>StandardOutPath</key>
+        <string>/dev/null</string>
+      </dict>
+    </plist>
+    EOF
+
+
+In this case, your project run as the current logged user. Maybe you should use a dedicated user.
