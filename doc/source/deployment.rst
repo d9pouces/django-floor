@@ -34,6 +34,32 @@ settings for Redis:
   * REDIS_HOST = 'localhost'
   * REDIS_PORT = 6379
 
+application
+-----------
+
+The first thing to do is to create a virtualenv and install your project inside.
+If your project is uploaded to pypi or to an internal mirror::
+
+    mkvirtualenv myproject_prod
+    pip install myproject_prod
+
+Otherwise, you should copy the source (or git clone the project)::
+
+    mkvirtualenv myproject_prod
+    cd myproject/
+    python setup.py install
+
+Then you can configure it::
+
+    myproject-manage config
+    # look on the first lines to check the location of the Python local config file
+    # create this file and set the right settings (database, LOCAL_PATH, …)
+    myproject-manage migrate
+    # create the database and the tables
+    myproject-manage collectstatic --noinput
+    # generate all static files
+    myproject-manage createsuperuser
+    # create a first user with admin rights
 
 
 gunicorn
@@ -43,7 +69,7 @@ Gunicorn is an easy-to-use application server::
 
     myproject-gunicorn
 
-Or, if you wan to daemonize::
+Or, if you wan to daemonize (but you really should prefer to use systemd/supervisor or launchd)::
 
     myproject-gunicorn -D
 

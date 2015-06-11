@@ -2,7 +2,7 @@
 """Define the decorator for connecting Python code to signals, a `SignalRequest` which can be easily serialized and is lighter than a `django.http.HttpRequest`, and some helping code to convert serialized data sent by Javascript to something useful in Python.
 
 Usage of the decorator
-----------------------
+**********************
 
 The decorator `connect` let you connect any Python function to a signal (which is only a text string).
 Signals are automatically discovered, as soon as there are in files `signals.py` in any app listed in the setting `INSTALLED_APPS` (like `admin.py` or `models.py`).
@@ -15,22 +15,24 @@ To use this decorator, create the file `myproject/signals.py`::
         print(arg1, arg2)
 
 Serialization/deserialization
------------------------------
+*****************************
 
 Since all arguments must be serialized (in JSON), only types which are acceptable for JSON can be used as arguments for signals.
 
 
 Using Python3
--------------
+*************
 
 Python3 introduces the notion of function annotations. DjangoFloor can use them to deserialize received data sent by JS::
 
-    @connect(path='myproject.signals.demosignal')
-    def my_function(request, arg1: int, arg2: float):
+        @connect(path='myproject.signals.demosignal')
+        def my_function(request, arg1: int, arg2: float):
             print(arg1, arg2)
+
 
 The annotation can be any callable, which raise ValueError (in case of error ;)) or a deserialized value.
 DjangoFlor define several callable to handle common cases:
+
     * checking if a string matches a regexp: :class:`djangofloor.decorators.RE`,
     * checking if a value is one of several choices: :class:`djangofloor.decorators.Choice`,
     * handle form data sent by JS as a plain Django form.
@@ -121,15 +123,25 @@ class SerializedForm(object):
     >>> form.is_valid()
     True
 
+    How to use it with Python3::
+
         @connect(path='myproject.signals.test')
         def test(request, value: SerializedForm(SimpleForm), other: int):
             print(value.is_valid())
 
+    How to use it with Python2::
+
+        @connect(path='myproject.signals.test')
+        def test(request, value, other):
+            value = SerializedForm(SimpleForm)(value)
+            print(value.is_valid())
+
+
     On the JS side, the easiest way is to serialize the form with JQuery::
 
-    <form onsubmit="return df.call('myproject.signals.test', {value: $(this).serializeArray(), other: 42})">
-        <input name='field' value='test' type='text'>
-    </form>
+        <form onsubmit="return df.call('myproject.signals.test', {value: $(this).serializeArray(), other: 42})">
+            <input name='field' value='test' type='text'>
+        </form>
 
 
     """

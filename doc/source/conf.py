@@ -14,8 +14,8 @@ from __future__ import unicode_literals
 __author__ = 'flanker'
 #
 import sys
-import os.path
-
+import os
+os.environ['DJANGO_SETTINGS_MODULE'] = 'pycharm_settings'
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 from djangofloor import __version__ as version_orig
 # If extensions (or modules to document with autodoc) are in another directory,

@@ -38,16 +38,17 @@ LOCAL_PATH_HELP = 'Base path for all data'
 SERVER_NAME = 'localhost'
 LOG_PATH = DirectoryPath('{LOCAL_PATH}/log')
 DATA_PATH = DirectoryPath('{LOCAL_PATH}/data')
-DEBUG = True
+DEBUG = False
 DEBUG_HELP = 'A boolean that turns on/off debug mode.'
 TEMPLATE_DEBUG = False
 TEMPLATE_DEBUG_HELP = 'A boolean that turns on/off template debug mode.'
-ADMINS = (("admin", "admin@{SERVER_NAME}"), )
+ADMIN_EMAIL = 'admin@{SERVER_NAME}'
+ADMINS = (("admin", "{ADMIN_EMAIL}"), )
 ADMINS_HELP = 'A tuple that lists people who get code error notifications.'
 MANAGERS = ADMINS
 MANAGERS_HELP = ('A tuple in the same format as ADMINS that specifies who should get broken link notifications '
                  'when BrokenLinkEmailsMiddleware is enabled.')
-DEFAULT_FROM_EMAIL = 'admin@{SERVER_NAME}'
+DEFAULT_FROM_EMAIL = '{ADMIN_EMAIL}'
 DEFAULT_FROM_EMAIL_HELP = 'Default email address to use for various automated correspondence from the site manager(s).'
 # noinspection PyUnresolvedReferences
 
@@ -95,8 +96,9 @@ USE_X_SEND_FILE = False
 USE_X_SEND_FILE_HELP = 'Use the XSendFile header in Apache or LightHTTPd for sending large files'
 X_ACCEL_REDIRECT = []
 X_ACCEL_REDIRECT_HELP = 'Use the X-Accel-Redirect header in NGinx. List of tuples (/directory_path/, /alias_url/).'
-INTERNAL_IPS = ('127.0.0.1', )
-ALLOWED_HOSTS = ['127.0.0.1', '{SERVER_NAME}', ]
+s = '127.0.0.1'
+INTERNAL_IPS = (s, )
+ALLOWED_HOSTS = [s, '{SERVER_NAME}', ]
 ALLOWED_HOSTS_HELP = 'A list of strings representing the host/domain names that this Django site can serve.'
 MAX_REQUESTS = 10000
 MAX_REQUESTS_HELP = 'The maximum number of requests a worker will process before restarting.'
@@ -376,10 +378,10 @@ SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 
 ########################################################################################################################
 # caching
-########################################################################################################################
 # CACHES = {'default': {'BACKEND': 'django.core.cache.backends.locmem.LocMemCache', }}
+CACHE_BACKEND = 'django.core.cache.backends.dummy.DummyCache'
 CACHES = {
-    'default': {'BACKEND': 'django.core.cache.backends.dummy.DummyCache', },
+    'default': {'BACKEND': '{CACHE_BACKEND}', },
     }
 CACHES_HELP = 'A dictionary containing the settings for all caches to be used with Django.'
 
