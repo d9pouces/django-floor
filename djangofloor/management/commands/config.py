@@ -63,6 +63,8 @@ class Command(BaseCommand):
         self.stdout.write('#-*- coding: utf-8 -*-\n')
         lazy_cls = ugettext_lazy('').__class__
         for key in keys:
+            if key == 'LOGGING':
+                continue
             value = merged_settings[key]
             if isinstance(value, lazy_cls):
                 value = text_type(value)

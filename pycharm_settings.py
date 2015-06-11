@@ -67,11 +67,6 @@ INSTALLED_APPS = ['django.contrib.auth', 'django.contrib.contenttypes', 'django.
 INTERNAL_IPS = ['127.0.0.1']
 LANGUAGE_CODE = 'fr-fr'
 LOCAL_PATH = './django_data'
-LOGGING = {'loggers': {'django.request': {'level': 'ERROR', 'handlers': ['mail_admins'], 'propagate': True}}, 'version': 1, 'disable_existing_loggers': False, 'handlers': {
-    'rotating_file': {'level': 'INFO', 'maxBytes': 10000000, 'filename': './django_data/log/django.log', 'backupCount': 2,
-                      'class': 'logging.handlers.RotatingFileHandler', 'encoding': 'utf-8', 'filters': ['require_debug_false']},
-    'mail_admins': {'level': 'ERROR', 'class': 'djangofloor.log.FloorAdminEmailHandler', 'filters': ['require_debug_false'], 'min_interval': 600}},
-           'filters': {'require_debug_false': {'()': 'django.utils.log.RequireDebugFalse'}}}
 LOGIN_REDIRECT_URL = '/'
 LOGIN_URL = '/accounts/login/'
 LOGOUT_URL = '/accounts/logout/'

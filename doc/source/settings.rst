@@ -122,19 +122,19 @@ Using flat config files
 -----------------------
 
 If your application has a few settings available to the end-user (typically the coordinates of the database), you can also put them into a .ini file.
-However, this require a mapping (a plain dictionnary).
+However, this require a mapping between the option in the .ini file and the settings.
 
-This dictionnary is expected in the file `myproject/iniconf.py`, with a single variable named `INI_MAPPING` which is a plain dictionnary.
+This dictionnary is expected in the file `myproject/iniconf.py`, with a single variable named `INI_MAPPING` which is a list of :class:`djangofloor.iniconf.OptionParser`.
 For example::
 
-    INI_MAPPING = {
-        'DATABASE_ENGINE': 'database.engine',
-        'DATABASE_NAME': 'database.name',
-        'DATABASE_USER': 'database.user',
-        'DATABASE_PASSWORD': 'database.password',
-        'DATABASE_HOST': 'database.host',
-        'DATABASE_PORT': 'database.port',
-    }
+        INI_MAPPING = [
+            OptionParser('DATABASE_ENGINE', 'database.engine'),
+            OptionParser('DATABASE_NAME', 'database.name'),
+            OptionParser('DATABASE_USER', 'database.user'),
+            OptionParser('DATABASE_PASSWORD', 'database.password'),
+            OptionParser('DATABASE_HOST', 'database.host'),
+            OptionParser('DATABASE_PORT', 'database.port'),
+        ]
 
 In this case, DjangoFloor will look for a file `/etc/myproject/myproject.ini` with a section `database`, with the options `engine`, `name`, `user`, `password`, `host` and `port`::
 

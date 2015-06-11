@@ -41,7 +41,7 @@ DjangoFlor define several callable to handle common cases:
 from __future__ import unicode_literals, absolute_import
 import logging
 import re
-from django.contrib.auth.models import Permission
+
 from django.db.models import Q
 
 from django.http import QueryDict
@@ -237,6 +237,7 @@ class SignalRequest(object):
             return set()
         elif self._perms is not None:
             return self._perms
+        from django.contrib.auth.models import Permission
         if self.is_superuser:
             query = Permission.objects.all()
         else:

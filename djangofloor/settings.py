@@ -19,6 +19,7 @@ If VARIABLE is uppercase and if VARIABLE_HELP exists, then VARIABLE is shown wit
 
 """
 from __future__ import unicode_literals, print_function
+
 try:
     # noinspection PyCompatibility
     from configparser import ConfigParser
@@ -81,15 +82,13 @@ if DJANGOFLOOR_MAPPING:
     module_name, sep, mapping_name = DJANGOFLOOR_MAPPING.partition(':')
     try:
         module = import_module(module_name)
-        mapping = getattr(module, mapping_name)
-        assert isinstance(mapping, dict)
+        ini_values = getattr(module, mapping_name)
+        assert isinstance(ini_values, dict)
         if os.path.isfile(DJANGOFLOOR_CONFIG_PATH):
             parser = ConfigParser()
             parser.read([DJANGOFLOOR_CONFIG_PATH])
-            for k, v in mapping.items():
-                section, sep, option = v.partition('.')
-                if parser.has_option(section=section, option=option):
-                    ini_config_mapping[k] = parser.get(section=section, option=option)
+            for option_parser in ini_values:
+                option_parser(parser, ini_values)
     except ImportError:
         pass
     except AttributeError:
