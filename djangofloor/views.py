@@ -111,7 +111,7 @@ def send_file(filepath, mimetype=None, force_download=False):
         response = HttpResponse(content_type=mimetype)
         response['X-SENDFILE'] = filepath
     else:
-        for dirpath, alias_url in settings.X_ACCEL_REDIRECT_ARCHIVE:
+        for dirpath, alias_url in settings.X_ACCEL_REDIRECT:
             if filepath.startswith(dirpath):
                 response = HttpResponse(content_type=mimetype)
                 response['Content-Disposition'] = 'attachment; filename={0}'.format(os.path.basename(filepath))
