@@ -83,7 +83,6 @@ if DJANGOFLOOR_MAPPING:
     try:
         module = import_module(module_name)
         ini_values = getattr(module, mapping_name)
-        assert isinstance(ini_values, dict)
         if os.path.isfile(DJANGOFLOOR_CONFIG_PATH):
             parser = ConfigParser()
             parser.read([DJANGOFLOOR_CONFIG_PATH])
