@@ -17,6 +17,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 from djangofloor.decorators import REGISTERED_SIGNALS
 from djangofloor.df_redis import fetch_signal_calls
+from djangofloor.exceptions import InvalidRequest
 from djangofloor.tasks import import_signals, df_call, RETURN
 
 __author__ = 'flanker'
@@ -69,7 +70,10 @@ def signal_call(request, signal):
         kwargs = json.loads(request.body.decode('utf-8'))
     else:
         kwargs = {}
-    result = df_call(signal, request, sharing=RETURN, from_client=True, kwargs=kwargs)
+    try:
+        result = df_call(signal, request, sharing=RETURN, from_client=True, kwargs=kwargs)
+    except InvalidRequest:
+        result = []
     return JsonResponse(result, safe=False)
 
 
