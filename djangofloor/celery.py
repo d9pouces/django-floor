@@ -8,6 +8,10 @@ from django.conf import settings
 from djangofloor.scripts import set_env
 
 __author__ = 'flanker'
+import celery
+# used to avoid strange import bug with Python 3.2/3.3
+# noinspection PyStatementEffect
+celery.__file__
 from celery import Celery
 
 project_name = set_env()

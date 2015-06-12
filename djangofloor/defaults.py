@@ -94,7 +94,7 @@ ALLOWED_HOSTS_HELP = 'A list of strings representing the host/domain names that 
 MAX_REQUESTS = 10000
 MAX_REQUESTS_HELP = 'The maximum number of requests a worker will process before restarting.'
 
-REVERSE_PROXY_IPS = []
+REVERSE_PROXY_IPS = ['127.0.0.1', ]
 REVERSE_PROXY_IPS_HELP = 'List of IP addresses of the reverse proxies'
 REVERSE_PROXY_TIMEOUT = 30
 REVERSE_PROXY_TIMEOUT_HELP = 'Timeout for reverse proxy'

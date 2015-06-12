@@ -2,7 +2,7 @@
 from __future__ import unicode_literals, absolute_import
 
 import celery
-# used to avoid strange import bug with Python 3.3
+# used to avoid strange import bug with Python 3.2/3.3
 # noinspection PyStatementEffect
 celery.__file__
 from celery import shared_task
