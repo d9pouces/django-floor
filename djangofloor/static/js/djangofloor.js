@@ -1,7 +1,7 @@
 /**
  * Created by flanker on 16/04/15.
  */
-var df = {};
+df = {};
 
 df.registered_signals = {};
 df.__message_count = 0;

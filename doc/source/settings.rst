@@ -114,7 +114,7 @@ DjangoFloor define a few new settings.
     - `BIND_ADDRESS`: the default bind address for the runserver command, or for gunicorn,
     - `REDIS_HOST` and `REDIS_PORT`: this is self-explained,
 
-    - `THREADS`, `WORKERS`, `GUNICORN_PID_FILE`, `GUNICORN_ERROR_LOG_FILE`, `GUNICORN_ACCESS_LOG_FILE`, `GUNICORN_LOG_LEVEL`, `MAX_REQUESTS`: all these settings are related to gunicorn
+    - `THREADS`, `WORKERS`, `MAX_REQUESTS`: all these settings are related to gunicorn
     - `REVERSE_PROXY_IPS`: the IPs of your reverse proxy, allowing authenticating users by the `REMOTE_USER` header
     - `FLOOR_DEFAULT_GROUP_NAME`: name of the default group for newly created users (when authenticated by the reverse proxy). Leave it to `None` to avoid this behavior.
 
@@ -136,7 +136,7 @@ For example::
             OptionParser('DATABASE_PORT', 'database.port'),
         ]
 
-In this case, DjangoFloor will look for a file `/etc/myproject/myproject.ini` with a section `database`, with the options `engine`, `name`, `user`, `password`, `host` and `port`::
+In this case, DjangoFloor will look for a file `[prefix]/etc/myproject/settings.ini` with a section `database`, with the options `engine`, `name`, `user`, `password`, `host` and `port`::
 
     [database]
     host = localhost

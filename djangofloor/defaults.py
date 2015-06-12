@@ -83,14 +83,6 @@ THREADS = 1
 THREADS_HELP = 'The number of worker threads for handling requests.'
 WORKERS = 1
 WORKERS_HELP = 'The number of worker process for handling requests.'
-GUNICORN_PID_FILE = FilePath('{LOCAL_PATH}/run/{PROJECT_NAME}_gunicorn.pid')
-GUNICORN_PID_FILE_HELP = 'A filename to use for the PID file. '
-GUNICORN_ERROR_LOG_FILE = FilePath('{LOG_PATH}/gunicorn_error.log')
-GUNICORN_ERROR_LOG_FILE_HELP = 'The Error log file to write to (Gunicorn).'
-GUNICORN_ACCESS_LOG_FILE = FilePath('{LOG_PATH}/gunicorn_access.log')
-GUNICORN_ACCESS_LOG_FILE_HELP = 'The Access log file to write to (Gunicorn).'
-GUNICORN_LOG_LEVEL = 'info'
-GUNICORN_LOG_LEVEL_HELP = 'The granularity of Gunicorn Error log outputs.'
 
 USE_X_SEND_FILE = False
 USE_X_SEND_FILE_HELP = 'Use the XSendFile header in Apache or LightHTTPd for sending large files'
@@ -411,11 +403,8 @@ CELERY_TIMEZONE = '{TIME_ZONE}'
 CELERY_RESULT_EXCHANGE = '{PROJECT_NAME}_results'
 CELERY_ACCEPT_CONTENT = ['json', 'yaml', 'msgpack']
 BROKER_URL = 'redis://{REDIS_HOST}:{REDIS_PORT}/13'
-CELERY_PID_FILE = FilePath('{LOCAL_PATH}/run/{PROJECT_NAME}_celery.pid')
-CELERY_PID_FILE_HELP = 'A filename to use for the PID file. '
 CELERY_APP = 'djangofloor'
 CELERY_CREATE_DIRS = True
-CELERY_LOG_FILE = FilePath('{LOG_PATH}/celerybeat.log')
 CELERY_TASK_SERIALIZER = 'json'
 
 ########################################################################################################################
@@ -442,21 +431,17 @@ LOGGING = {
             'class': 'djangofloor.log.FloorAdminEmailHandler',
             'min_interval': 600,
         },
-        'rotating_file': {
-            'level': 'INFO',
+        'stream': {
+            'level': 'WARNING',
             'filters': ['require_debug_false'],
-            'class': 'logging.handlers.RotatingFileHandler',
-            'filename': FilePath('{LOG_PATH}/django.log'),
-            'maxBytes': 10000000,  # 10 MB
-            'backupCount': 2,
-            'encoding': 'utf-8',
+            'class': 'logging.StreamHandler',
         }
     },
     'loggers': {
         'django.request': {
             'handlers': [
                 'mail_admins',
-                # 'rotating_file'
+                'stream'
             ],
             'level': 'ERROR',
             'propagate': True,

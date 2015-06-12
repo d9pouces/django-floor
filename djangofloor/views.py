@@ -12,7 +12,7 @@ from django.contrib.syndication.views import add_domain
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.utils.lru_cache import lru_cache
-from django.views.decorators.cache import cache_control
+from django.views.decorators.cache import never_cache
 from django.views.decorators.csrf import csrf_exempt
 
 from djangofloor.decorators import REGISTERED_SIGNALS
@@ -58,7 +58,7 @@ def signals(request):
 
 
 @csrf_exempt
-@cache_control(no_cache=True)
+@never_cache
 def signal_call(request, signal):
     """ Called by JS code when websockets are not available. Allow to call Python signals from JS.
     Arguments are passed in the request body, serialized as JSON.
@@ -77,7 +77,7 @@ def signal_call(request, signal):
     return JsonResponse(result, safe=False)
 
 
-@cache_control(no_cache=True)
+@never_cache
 def get_signal_calls(request):
     """ Regularly called by JS code when websockets are not available. Allow Python code to call JS signals.
 

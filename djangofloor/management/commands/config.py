@@ -7,7 +7,7 @@ from django.core.management import BaseCommand
 from django.utils.six import text_type
 from django.utils.translation import ugettext as _, ugettext_lazy
 
-from djangofloor import defaults, __version__ as version
+from djangofloor import defaults as djangofloor_defaults, __version__ as version
 from djangofloor.settings import project_settings, user_settings, floor_settings, ini_config_mapping, __settings as merged_settings
 
 __author__ = 'flanker'
@@ -38,7 +38,7 @@ class Command(BaseCommand):
         djangofloor_default_conf = floor_settings.__file__
         if djangofloor_default_conf.endswith('.pyc'):
             djangofloor_default_conf = djangofloor_default_conf[:-1]
-        all_keys = defaults.__dict__.copy()
+        all_keys = djangofloor_defaults.__dict__.copy()
         all_keys.update(project_settings.__dict__)
 
         if options['merged']:
@@ -63,8 +63,6 @@ class Command(BaseCommand):
         self.stdout.write('#-*- coding: utf-8 -*-\n')
         lazy_cls = ugettext_lazy('').__class__
         for key in keys:
-            if key == 'LOGGING':
-                continue
             value = merged_settings[key]
             if isinstance(value, lazy_cls):
                 value = text_type(value)
@@ -72,7 +70,7 @@ class Command(BaseCommand):
 
     def display(self, all_keys):
         # keys defined in DjangoFloor defaults
-        keys = set([key for key in defaults.__dict__ if key == key.upper() and key + '_HELP' in all_keys])
+        keys = set([key for key in djangofloor_defaults.__dict__ if key == key.upper() and key + '_HELP' in all_keys])
         # keys defined in project defaults
         keys |= set([key for key in project_settings.__dict__ if key == key.upper() and key + '_HELP' in all_keys])
         # and we sort them
@@ -84,7 +82,7 @@ class Command(BaseCommand):
                 continue
             value = all_keys[key]
             is_redefined = key in user_settings.__dict__ or key in ini_config_mapping
-            is_changed = is_redefined and getattr(settings, key) != defaults.__dict__[key]
+            is_changed = is_redefined and key in djangofloor_defaults.__dict__ and getattr(settings, key) != djangofloor_defaults.__dict__[key]
             if isinstance(value, lazy_cls):
                 value = text_type(value)
             actual_value = (getattr(settings, key))

@@ -87,7 +87,7 @@ if DJANGOFLOOR_MAPPING:
             parser = ConfigParser()
             parser.read([DJANGOFLOOR_CONFIG_PATH])
             for option_parser in ini_values:
-                option_parser(parser, ini_values)
+                option_parser(parser, ini_config_mapping)
     except ImportError:
         pass
     except AttributeError:
@@ -177,11 +177,14 @@ for module in floor_settings, project_settings, user_settings:
         if setting_name == setting_name.upper():
             __setting_value(setting_name)
 
-
-# noinspection PyUnresolvedReferences,PyUnboundLocalVariable
-INSTALLED_APPS += list(filter(lambda x: x not in INSTALLED_APPS, OTHER_ALLAUTH))
+# add extra installed app
 # noinspection PyUnresolvedReferences
-INSTALLED_APPS += list(filter(lambda x: x not in INSTALLED_APPS, FLOOR_INSTALLED_APPS))
+for y in OTHER_ALLAUTH, FLOOR_INSTALLED_APPS:
+    for x in y:
+        # noinspection PyUnresolvedReferences
+        if x and x not in INSTALLED_APPS:
+            # noinspection PyUnresolvedReferences
+            INSTALLED_APPS.append(x)
 
 if __name__ == '__main__':
     import doctest
