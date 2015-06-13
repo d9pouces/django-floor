@@ -47,6 +47,7 @@ def __get_js_mimetype():
     return 'text/javascript'
 
 
+@never_cache
 def signals(request):
     """Generate a HttpResponse to register Python signals from the JS side
     """
