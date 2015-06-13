@@ -34,7 +34,7 @@ LOCAL_PATH = abspath(join(dirname(dirname(__file__)), 'django_data'))
 splitted_path = __file__.split(os.path.sep)
 if 'lib' in splitted_path:
     prefix = os.path.join(*splitted_path[:splitted_path.index('lib')])
-    LOCAL_PATH = DirectoryPath('%s/var/{PROJECT_NAME}' % prefix)
+    LOCAL_PATH = DirectoryPath('/%s/var/{PROJECT_NAME}' % prefix)
 LOCAL_PATH_HELP = 'Base path for all data'
 SERVER_NAME = 'localhost'
 LOG_PATH = DirectoryPath('{LOCAL_PATH}/log')
