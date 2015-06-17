@@ -6,7 +6,7 @@ import os
 
 from django.conf import settings
 from django.core.urlresolvers import reverse
-from django.http import HttpResponse, StreamingHttpResponse, HttpResponsePermanentRedirect, JsonResponse
+from django.http import HttpResponse, StreamingHttpResponse, HttpResponsePermanentRedirect, JsonResponse, HttpResponseRedirect
 from django.contrib.sites.models import get_current_site
 from django.contrib.syndication.views import add_domain
 from django.shortcuts import render_to_response
