@@ -7,4 +7,4 @@ Only define the current version.
 from __future__ import unicode_literals
 
 __author__ = 'flanker'
-__version__ = '0.12.14'
+__version__ = '0.12.15'

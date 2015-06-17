@@ -137,6 +137,6 @@ def robots(request):
 
 def index(request):
     if settings.FLOOR_INDEX is not None:
-        return HttpResponsePermanentRedirect(reverse(settings.FLOOR_INDEX))
+        return HttpResponseRedirect(reverse(settings.FLOOR_INDEX))
     template_values = {}
     return render_to_response('djangofloor/index.html', template_values, RequestContext(request))

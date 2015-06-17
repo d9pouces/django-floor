@@ -64,7 +64,7 @@ Full table of contents
 ======================
 
 .. toctree::
-   :maxdepth: 4
+   :maxdepth: 1
 
    installation
    tutorial
