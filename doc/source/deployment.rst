@@ -147,6 +147,40 @@ A single config file for Supervisor can handle all processes to launch::
 systemd (Linux only)
 --------------------
 
+Most distribution are now using systemd for starting services::
+
+    PROJECT_NAME=myproject
+    VIRTUAL_ENV=$VIRTUAL_ENV
+    USER=www-data
+    cat << EOF | sudo tee /etc/systemd/system/$PROJECT_NAME-gunicorn.service
+    [Unit]
+    Description=$PROJECT_NAME Gunicorn process
+    After=network.target
+    [Service]
+    User=$USER
+    Group=$USER
+    WorkingDirectory=$VIRTUAL_ENV
+    ExecStart=$VIRTUAL_ENV/bin/$PROJECT_NAME-gunicorn
+    [Install]
+    WantedBy=multi-user.target
+    EOF
+    cat << EOF | sudo tee /etc/systemd/system/$PROJECT_NAME-celery.service
+    [Unit]
+    Description=$PROJECT_NAME Celery worker process
+    After=network.target
+    [Service]
+    User=$USER
+    Group=$USER
+    WorkingDirectory=$VIRTUAL_ENV
+    ExecStart=$VIRTUAL_ENV/bin/$PROJECT_NAME-celery worker
+    [Install]
+    WantedBy=multi-user.target
+    EOF
+    sudo systemctl restart $PROJECT_NAME-gunicorn
+    sudo systemctl enable $PROJECT_NAME-gunicorn
+    sudo systemctl restart $PROJECT_NAME-celery
+    sudo systemctl enable $PROJECT_NAME-celery
+
 launchd (Mac OS X only)
 -----------------------
 
