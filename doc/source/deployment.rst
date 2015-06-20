@@ -152,6 +152,7 @@ Most distribution are now using systemd for starting services::
     PROJECT_NAME=myproject
     VIRTUAL_ENV=$VIRTUAL_ENV
     USER=www-data
+
     cat << EOF | sudo tee /etc/systemd/system/$PROJECT_NAME-gunicorn.service
     [Unit]
     Description=$PROJECT_NAME Gunicorn process
@@ -161,9 +162,12 @@ Most distribution are now using systemd for starting services::
     Group=$USER
     WorkingDirectory=$VIRTUAL_ENV
     ExecStart=$VIRTUAL_ENV/bin/$PROJECT_NAME-gunicorn
+    ExecReload=/bin/kill -s HUP $MAINPID
+    ExecStop=/bin/kill -s TERM $MAINPID
     [Install]
     WantedBy=multi-user.target
     EOF
+
     cat << EOF | sudo tee /etc/systemd/system/$PROJECT_NAME-celery.service
     [Unit]
     Description=$PROJECT_NAME Celery worker process
@@ -176,6 +180,7 @@ Most distribution are now using systemd for starting services::
     [Install]
     WantedBy=multi-user.target
     EOF
+
     sudo systemctl restart $PROJECT_NAME-gunicorn
     sudo systemctl enable $PROJECT_NAME-gunicorn
     sudo systemctl restart $PROJECT_NAME-celery
