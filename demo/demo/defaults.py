@@ -1,8 +1,9 @@
 # coding=utf-8
 from __future__ import unicode_literals
+import os
 
 __author__ = 'flanker'
-
+LOCAL_PATH = os.path.abspath(os.path.join(__file__, '..', '..', 'django_data'))
 FLOOR_URL_CONF = 'demo.urls.urls'
 FLOOR_PROJECT_NAME = 'Demo DjangoFloor'
 FLOOR_INSTALLED_APPS = ['demo', ]
