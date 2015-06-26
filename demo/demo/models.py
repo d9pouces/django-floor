@@ -1,3 +1,3 @@
 # coding=utf-8
 from __future__ import unicode_literals
-__author__ = 'flanker'
+__author__ = 'Matthieu Gallet'

@@ -7,7 +7,7 @@ from django.utils.translation import ugettext_lazy as _
 from demo.forms import SimpleForm
 from demo.tasks import add
 
-__author__ = 'flanker'
+__author__ = 'Matthieu Gallet'
 
 
 def test(request):

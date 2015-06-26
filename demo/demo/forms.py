@@ -2,7 +2,7 @@
 from __future__ import unicode_literals
 from django import forms
 
-__author__ = 'flanker'
+__author__ = 'Matthieu Gallet'
 
 
 class SimpleForm(forms.Form):

@@ -12,7 +12,7 @@ from django.core import mail
 from django.utils.log import AdminEmailHandler
 
 
-__author__ = 'flanker'
+__author__ = 'Matthieu Gallet'
 
 LAST_SENDS = {}
 

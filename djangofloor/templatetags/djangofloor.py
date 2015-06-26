@@ -4,7 +4,7 @@ from django.utils.six.moves.urllib.parse import urljoin
 from django import template
 from django.templatetags.static import StaticNode, PrefixNode
 
-__author__ = 'flanker'
+__author__ = 'Matthieu Gallet'
 
 register = template.Library()
 

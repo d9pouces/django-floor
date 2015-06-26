@@ -8,7 +8,7 @@ from __future__ import unicode_literals, absolute_import
 from django.conf import settings
 
 
-__author__ = 'flanker'
+__author__ = 'Matthieu Gallet'
 
 
 def context_base(request):

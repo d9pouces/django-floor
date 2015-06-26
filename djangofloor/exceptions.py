@@ -6,7 +6,7 @@ You should raise these exceptions, or create new exceptions which derive from th
 from __future__ import unicode_literals
 from django.utils.translation import ugettext as _
 
-__author__ = 'flanker'
+__author__ = 'Matthieu Gallet'
 
 
 class ApiException(Exception):

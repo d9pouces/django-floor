@@ -10,7 +10,7 @@ from django.utils.translation import ugettext as _, ugettext_lazy
 from djangofloor import defaults as djangofloor_defaults, __version__ as version
 from djangofloor.settings import project_settings, user_settings, floor_settings, ini_config_mapping, __settings as merged_settings
 
-__author__ = 'flanker'
+__author__ = 'Matthieu Gallet'
 
 
 class Command(BaseCommand):

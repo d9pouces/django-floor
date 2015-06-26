@@ -20,7 +20,7 @@ from djangofloor.df_redis import fetch_signal_calls
 from djangofloor.exceptions import InvalidRequest
 from djangofloor.tasks import import_signals, df_call, RETURN
 
-__author__ = 'flanker'
+__author__ = 'Matthieu Gallet'
 mimetypes.init()
 
 

@@ -8,7 +8,7 @@ from ws4redis.publisher import redis_connection_pool
 from ws4redis.settings import WS4REDIS_PREFIX
 from djangofloor.decorators import SignalRequest
 
-__author__ = 'flanker'
+__author__ = 'Matthieu Gallet'
 
 
 class Sessions(object):

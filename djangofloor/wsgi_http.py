@@ -16,7 +16,7 @@ framework.
 """
 from __future__ import unicode_literals
 
-__author__ = 'flanker'
+__author__ = 'Matthieu Gallet'
 
 # This application object is used by any WSGI server configured to use this
 # file. This includes Django's development server, if the WSGI_APPLICATION

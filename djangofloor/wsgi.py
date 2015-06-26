@@ -15,7 +15,7 @@ framework.
 
 """
 from __future__ import unicode_literals
-__author__ = 'flanker'
+__author__ = 'Matthieu Gallet'
 from django.conf import settings
 from djangofloor.wsgi_http import application as _django_app
 

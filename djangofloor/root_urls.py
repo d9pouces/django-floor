@@ -1,7 +1,7 @@
 # coding=utf-8
 from __future__ import unicode_literals
 """Define mappings from the URL requested by a user to a proper Python view."""
-__author__ = 'flanker'
+__author__ = 'Matthieu Gallet'
 from django.utils.module_loading import import_string
 from django.conf import settings
 from django.conf.urls import patterns, include, url

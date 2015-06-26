@@ -33,13 +33,12 @@ from django.utils.encoding import force_text
 import os
 import string
 import sys
-from django.utils.importlib import import_module
 # noinspection PyCompatibility
 from pathlib import Path
 from djangofloor import defaults as floor_settings
-from djangofloor.utils import DirectoryPath, FilePath
+from djangofloor.utils import DirectoryPath, FilePath, import_module
 
-__author__ = 'flanker'
+__author__ = 'Matthieu Gallet'
 
 PROJECT_SETTINGS_MODULE_NAME = os.environ.get('DJANGOFLOOR_PROJECT_DEFAULTS', '')
 USER_SETTINGS_PATH = os.environ.get('DJANGOFLOOR_PYTHON_SETTINGS', '')

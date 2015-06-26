@@ -12,7 +12,7 @@ from django.contrib.auth.models import Group
 from pipeline.compressors import CompressorBase
 from djangofloor.df_pipeline import cssmin
 
-__author__ = 'flanker'
+__author__ = 'Matthieu Gallet'
 
 
 class IEMiddleware(object):

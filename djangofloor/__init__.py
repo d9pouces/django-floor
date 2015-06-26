@@ -6,5 +6,5 @@ Only define the current version.
 """
 from __future__ import unicode_literals
 
-__author__ = 'flanker'
-__version__ = '0.12.15'
+__author__ = 'Matthieu Gallet'
+__version__ = '0.13.1'

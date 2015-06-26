@@ -1,6 +1,6 @@
 # coding=utf-8
 from __future__ import unicode_literals
-__author__ = 'flanker'
+__author__ = 'Matthieu Gallet'
 import celery
 # used to avoid strange import bug with Python 3.3
 celery.__file__

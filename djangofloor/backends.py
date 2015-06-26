@@ -11,7 +11,7 @@ from django.conf import settings
 from django.contrib.auth.backends import RemoteUserBackend
 from django.contrib.auth.models import Group
 
-__author__ = 'flanker'
+__author__ = 'Matthieu Gallet'
 
 
 CACHED_GROUPS = {}

@@ -58,7 +58,7 @@ from django.utils.translation import ugettext as _
 from djangofloor.exceptions import InvalidRequest
 
 
-__author__ = 'flanker'
+__author__ = 'Matthieu Gallet'
 REGISTERED_SIGNALS = {}
 logger = logging.getLogger('djangofloor.request')
 

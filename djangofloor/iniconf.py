@@ -20,7 +20,7 @@ It is equivalent to::
 
 """
 from __future__ import unicode_literals
-__author__ = 'flanker'
+__author__ = 'Matthieu Gallet'
 
 
 class OptionParser(object):

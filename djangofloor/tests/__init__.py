@@ -9,7 +9,7 @@ You should consider to install :mod:`Distribute` to run all tests with::
 
 """
 
-__author__ = 'flanker'
+__author__ = 'Matthieu Gallet'
 
 import unittest
 

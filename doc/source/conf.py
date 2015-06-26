@@ -11,7 +11,7 @@ All configuration values have a default; values that are commented out
 serve to show the default. """
 from __future__ import unicode_literals
 
-__author__ = 'flanker'
+__author__ = 'Matthieu Gallet'
 #
 import sys
 import os
@@ -50,7 +50,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'DjangoFloor'
-copyright = '2015, flanker'
+copyright = '2015, Matthieu Gallet'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -188,7 +188,7 @@ htmlhelp_basename = 'djangofloordoc'
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
     ('index', 'djangofloor.tex', 'DjangoFloor Documentation',
-     'flanker', 'manual'),
+     'Matthieu Gallet', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -221,7 +221,7 @@ latex_documents = [
 # (source start file, name, description, authors, manual section).
 man_pages = [
     ('index', 'djangofloor', 'DjangoFloor Documentation',
-     ['flanker'], 1)
+     ['Matthieu Gallet'], 1)
 ]
 
 
@@ -229,9 +229,9 @@ man_pages = [
 
 # Bibliographic Dublin Core info.
 epub_title = 'DjangoFloor'
-epub_author = 'flanker'
+epub_author = 'Matthieu Gallet'
 epub_publisher = '19pouces.net'
-epub_copyright = '2015, flanker'
+epub_copyright = '2015, Matthieu Gallet'
 
 # The language of the text. It defaults to the language option
 # or en if the language is not set.

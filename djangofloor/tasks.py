@@ -8,12 +8,12 @@ celery.__file__
 from celery import shared_task
 from django.conf import settings
 from django.http import HttpRequest
-from django.utils.importlib import import_module
+from djangofloor.utils import import_module
 from django.utils.lru_cache import lru_cache
 
 from djangofloor.decorators import REGISTERED_SIGNALS, RedisCallWrapper, SignalRequest
 
-__author__ = 'flanker'
+__author__ = 'Matthieu Gallet'
 
 
 USER = 'users'

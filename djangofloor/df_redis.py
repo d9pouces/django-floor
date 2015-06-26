@@ -15,7 +15,7 @@ from djangofloor.decorators import SignalRequest
 from django.conf import settings
 from redis import ConnectionPool, StrictRedis
 
-__author__ = 'flanker'
+__author__ = 'Matthieu Gallet'
 
 
 redis_connection_pool = ConnectionPool(**settings.WS4REDIS_CONNECTION)

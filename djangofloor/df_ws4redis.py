@@ -22,7 +22,7 @@ from djangofloor.exceptions import ApiException
 from djangofloor.tasks import BROADCAST, df_call, SESSION, USER
 
 
-__author__ = 'flanker'
+__author__ = 'Matthieu Gallet'
 
 
 def ws_call(signal_name, request, sharing, kwargs):

@@ -2,7 +2,7 @@
 from __future__ import unicode_literals
 import os
 
-__author__ = 'flanker'
+__author__ = 'Matthieu Gallet'
 LOCAL_PATH = os.path.abspath(os.path.join(__file__, '..', '..', 'django_data'))
 FLOOR_URL_CONF = 'demo.urls.urls'
 FLOOR_PROJECT_NAME = 'Demo DjangoFloor'

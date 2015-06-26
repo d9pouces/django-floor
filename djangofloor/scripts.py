@@ -10,7 +10,7 @@ import re
 import os
 import sys
 
-__author__ = 'flanker'
+__author__ = 'Matthieu Gallet'
 
 
 # noinspection PyShadowingBuiltins

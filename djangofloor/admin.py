@@ -8,7 +8,7 @@ Only overwrite the title of the admin site (since DjangoFloor does not define an
 from __future__ import unicode_literals
 from django.conf import settings
 
-__author__ = 'flanker'
+__author__ = 'Matthieu Gallet'
 
 from django.contrib.admin import site
 

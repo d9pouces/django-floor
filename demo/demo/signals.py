@@ -4,7 +4,7 @@ from djangofloor.decorators import connect, SerializedForm
 from demo.forms import SimpleForm
 from djangofloor.tasks import call, SESSION, BROADCAST, USER
 
-__author__ = 'flanker'
+__author__ = 'Matthieu Gallet'
 
 
 # noinspection PyUnusedLocal

@@ -7,7 +7,7 @@ from __future__ import unicode_literals, absolute_import
 from django.conf import settings
 from djangofloor.scripts import set_env
 
-__author__ = 'flanker'
+__author__ = 'Matthieu Gallet'
 import celery
 # used to avoid strange import bug with Python 3.2/3.3
 # noinspection PyStatementEffect

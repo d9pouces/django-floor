@@ -12,7 +12,7 @@ import sys
 """ Django settings for DjangoFloor project. """
 from djangofloor.utils import DirectoryPath, FilePath
 
-__author__ = 'flanker'
+__author__ = 'Matthieu Gallet'
 from os.path import join, dirname, abspath
 from django.utils.translation import ugettext_lazy as _
 try:
@@ -30,7 +30,7 @@ except ImportError:
     USE_SCSS = False
 
 # define a root path for misc. Django data (SQLite database, static files, ...)
-LOCAL_PATH = abspath(join(dirname(dirname(__file__)), 'django_data'))
+LOCAL_PATH = './django_data'
 splitted_path = __file__.split(os.path.sep)
 if 'lib' in splitted_path:
     prefix = os.path.join(*splitted_path[:splitted_path.index('lib')])
@@ -72,6 +72,7 @@ DATABASES = {
 }
 DATABASES_HELP = 'A dictionary containing the settings for all databases to be used with Django.'
 CONN_MAX_AGE = 600
+FLOOR_BACKUP_SINGLE_TRANSACTION = False
 TIME_ZONE = 'Europe/Paris'
 TIME_ZONE_HELP = 'A string representing the time zone for this installation, or None. '
 BIND_ADDRESS = '127.0.0.1:9000'
