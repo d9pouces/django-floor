@@ -61,6 +61,65 @@ Then you can configure it::
     myproject-manage createsuperuser
     # create a first user with admin rights
 
+backup
+------
+
+A basic DjangoFloor application a different kinds of files:
+
+    * the code of your application and its dependencies (you should not have to backup them),
+    * static files (as they are provided by the code, you can lost them),
+    * configuration files (you can easily recreate it, or you must backup it),
+    * database content (you must backup it),
+    * media files (you also must backup them).
+
+database backup
+###############
+
+DjangoFloor comes with a command to dump the database. You can combine it with the `logrotate` utility. ::
+
+    cat << EOF > [prefix]/etc/myproject/dbrotate.conf
+    /backupdirectory/dbbackup.sql.gz {
+        rotate 5
+        nocompress
+        dateext
+        dateformat _%Y-%m-%d
+        extension .sql.gz
+        missingok
+    }
+    EOF
+    mkdir -p [prefix]/var/myproject/
+
+    myproject-manage dumpdb | gzip > /backupdirectory/dbbackup.sql.gz && logrotate -s [prefix]/var/myproject/dbrotate.state [prefix]/etc/myproject/dbrotate.conf
+
+The last command should be in crontab to be regularly launched.
+
+media files backup
+##################
+
+Media files can be backuped with two distinct strategies:
+
+    * generate a single tar.gz archive (takes a lot of disk space),
+    * synchronize the folder with another one (say, on a NFS) with `rsync`.
+
+A good strategy is to daily run the rsync command, and to monthly create a full tar.gz archive. ::
+
+    cat << EOF > [prefix]/etc/myproject/mediarotate.conf
+    /backupdirectory/mediabackup.tar.gz {
+        rotate 5
+        nocompress
+        dateext
+        dateformat _%Y-%m-%d
+        extension .tar.gz
+        missingok
+    }
+    EOF
+    mkdir -p [prefix]/var/myproject/
+    SRC=`python manage.py config -m | grep MEDIA_ROOT | cut -f 3 -d ' '`
+
+    tar -C $SRC -czf /backupdirectory/mediabackup.tar.gz . && logrotate -s [prefix]/var/myproject/mediarotate.state [prefix]/etc/myproject/mediarotate.conf
+
+    rsync -arltDE $SRC /backupdirectory/media
+
 
 gunicorn
 --------
