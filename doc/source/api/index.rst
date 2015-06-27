@@ -1,5 +1,5 @@
-API Documentation
-=================
+Python API Documentation
+========================
 
 Here is the documentation of the complete API.
 

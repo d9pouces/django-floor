@@ -7,6 +7,7 @@ Together the third-party tools shipped with djangofloor, there is two major adva
 You must use Python 2.7 to play with websockets. Otherwise, DjangoFloor is fully compatible with Python 3.2+.
 
 You can find a more complete documentation here: http://django-floor.readthedocs.org/en/latest/ .
+The source code is available on Github: https://github.com/d9pouces/django-floor .
 
 
 Installing
@@ -255,41 +256,3 @@ Extra setup options
 
 websocket only works with Python 2.7 and requires uwsgi. scss is required to install pyscss, allowing 
 to compile SCSS files (superset of the CSS language) with the collectstatic command (check the django-pipeline documentation).
-
-
-Deployment
-==========
-
-I will only cover the deployment with wsgi through gunicorn (installed as a dependency) or uwsgi (optional).
-Gunicorn is a pure-Python application, but on the other hand uwsgi is maybe more efficient and allows websockets.
-
- 
-  * setup your Redis database server
-  * setup your SQL database server (PostgreSQL is often a good choice)
-  
-settings due to the reverse proxy:
-  
-  * ALLOWED_HOSTS = ('IP of the reverse proxy', 'its DNS name', )
-  * REVERSE_PROXY_IPS = ('IP of the reverse proxy', )
-  * USE_X_SEND_FILE = True if you use Apache, X_ACCEL_REDIRECT if you use nginx
-  * USE_X_FORWARDED_HOST = True
-  * SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-
-settings for SSL/HTTPS:
-
-  * SECURE_SSL_REDIRECT = True
-  * SESSION_COOKIE_SECURE = True
-  * CSRF_COOKIE_SECURE = True
-  * CSRF_COOKIE_HTTPONLY = True
-
-settings for HTTP authentication (Kerberos/Shibboleth/SSO)
-  
-  * FLOOR_AUTHENTICATION_HEADERAUTHENTICATION_HEADER = 'HTTP_REMOTE_USER'
-
-settings for Redis:
-
-  * REDIS_HOST = 'localhost'
-  * REDIS_PORT = 6379
-  
-  * myapp-manage check --deploy
-  
