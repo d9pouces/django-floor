@@ -1,6 +1,8 @@
 Included dependencies
 =====================
 
+Here is a list of the dependencies, with a short description. All these dependencies are plain Python, they can be installed without compiling C extensions.
+
 Django
 ------
 

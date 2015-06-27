@@ -19,3 +19,4 @@ Here is the documentation of the complete API.
   djangofloor/views
   djangofloor/templatetags/djangofloor
   djangofloor/management/commands/config
+  djangofloor/management/commands/dumpdb

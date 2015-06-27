@@ -19,7 +19,9 @@ Defining a signal
 
 We want to create a signal named `demo.my_signal`, and we want to display all the arguments provided when this signal is called.
 
-Python example (create a file called `signals.py` in one of the `INSTALLED_APPS`::
+Python example (create a file called `signals.py` in one of the `INSTALLED_APPS`:
+
+.. code-block:: python
 
     from djangofloor.decorators import connect
     @connect(path='demo.my_signal')
@@ -27,7 +29,9 @@ Python example (create a file called `signals.py` in one of the `INSTALLED_APPS`
         [ some interesting code ]
         print('blablabla', arg1, arg2, arg3)
 
-A lot of computation, and this code must be used through Celery?::
+A lot of computation, and this code must be used through Celery?:
+
+.. code-block:: python
 
     from djangofloor.decorators import connect
     @connect(path='demo.my_signal', delayed=True)
@@ -36,7 +40,9 @@ A lot of computation, and this code must be used through Celery?::
         print('blablabla', arg1, arg2, arg3)
 
 Do not forget to run a Celery worker!
-You can allow non-connected users to trigger the signal::
+You can allow non-connected users to trigger the signal:
+
+.. code-block:: python
 
     from djangofloor.decorators import connect
     @connect(path='demo.my_signal', auth_required=False)
@@ -44,7 +50,9 @@ You can allow non-connected users to trigger the signal::
         [ some interesting code ]
         print('blablabla', arg1, arg2, arg3)
 
-JavaScript example::
+JavaScript example:
+
+.. code-block:: javascript
 
     df.connect('demo.my_signal', function (options) { alert('blablabla' + options.arg1 + options.arg2 + options.arg3); });
 
@@ -54,12 +62,16 @@ Ok, that is enough to connect any code to a signal.
 Calling a signal
 ----------------
 
-Now, if you want to call this code in Python::
+Now, if you want to call this code in Python:
+
+.. code-block:: python
 
     from djangofloor.tasks import call, SESSION
     call('demo.my_signal', request, SESSION, arg1='argument', arg2='other value', arg3=42)
 
-And in JavaScript?::
+And in JavaScript?:
+
+.. code-block:: javascript
 
     df.call('demo.my_signal', {arg1: 'argument', arg2: 'other value', arg3: 42})
 
@@ -71,15 +83,16 @@ Notes
 -----
 
     - all signals defined in files `signals.py` of each app listed in INSTALLED_APPS are automatically taken into account,
-    - You can prevent specific Python code from being called by JS::
+    - You can prevent specific Python code from being called by JS:
 
-        @connect(path='demo.my_signal', allow_from_client=False)
+        .. code-block:: python
 
-    - You can prevent Python code from calling the javascript side of calls call('demo.my_signal', request, None, \*\*kwargs)
-    - You can propagate Python signals to all sessions of the logged user (use USER instead of SESSION), any logged user (use BROADCAST), or a limited set of users with {USER: ['username']}
+            @connect(path='demo.my_signal', allow_from_client=False)
+
+    - You can prevent Python code from calling the javascript side of calls `call('demo.my_signal', request, None, \*\*kwargs)`
+    - You can propagate Python signals to all sessions of the logged user (use `USER` instead of `SESSION`), any logged user (use `BROADCAST`), or a limited set of users with `{USER: ['username']}`
     - Several functions (either JS or Python) can be connected to the same signal
-    - Python calls require a `request`, which can be either a standard `django.http.HttpRequest` or a `djangofloor.decorators.SignalRequest`.
-    `SignalRequest` propagates the username and the session key from call to call and is provided from a JS key.
+    - Python calls require a `request`, which can be either a standard `django.http.HttpRequest` or a `djangofloor.decorators.SignalRequest`. `SignalRequest` propagates the username and the session key from call to call and is provided from a JS key.
     - Required JS files (jquery, ws4redis and djangofloor) are defined in `settings.PIPELINE_JS`
 
 

@@ -14,16 +14,26 @@ from django.utils.translation import ugettext as _
 __author__ = 'Matthieu Gallet'
 
 
-class BaseAdaptater(object):
+class BaseDumper(object):
+    """ base class for a given database engine. An instance is returned by :py:func:`Command.get_dumper` """
     def __init__(self, name, db_options):
         self.name = name
         self.db_options = db_options
 
     def dump(self, filename):
+        """ dump the content of the database to `stdout` or to a `file`.
+
+        If `filename` is given, its parent directory must already exist.
+
+        :param filename: filename, or None if the content is must be dumped to `stdout`
+        :type filename: :class:`str` or `None`
+        :return: `None`
+        """
         raise NotImplementedError
 
 
-class MySQL(BaseAdaptater):
+class MySQL(BaseDumper):
+    """ dump the content of a MySQL database, with `mysqldump`"""
 
     def dump(self, filename):
         cmd = self.dump_cmd_list()
@@ -38,6 +48,9 @@ class MySQL(BaseAdaptater):
         p.communicate()
 
     def dump_cmd_list(self):
+        """ :return:
+        :rtype: :class:`list` of :class:`str`
+        """
         command = ['mysqldump',  '--user', '%(USER)s',  '--password', '%(PASSWORD)s']
         if self.db_options.get('HOST'):
             command += ['--host', '%(HOST)s']
@@ -52,6 +65,7 @@ class MySQL(BaseAdaptater):
 
 
 class PostgreSQL(MySQL):
+    """ dump the content of a PostgreSQL database, with `pg_dump`"""
 
     def dump_cmd_list(self):
         command = ['pg_dump',  '--username', '%(USER)s']
@@ -69,7 +83,8 @@ class PostgreSQL(MySQL):
         return {'PGPASSWORD': '%(PASSWORD)s' % self.db_options}
 
 
-class SQLite(BaseAdaptater):
+class SQLite(BaseDumper):
+    """copy the SQLite database to another file, or write its content to `stdout`"""
 
     def dump(self, filename):
         if filename is None:
@@ -117,18 +132,18 @@ class Command(BaseCommand):
                     filename = '%s-%s.%s' % (filename, name, ext)
                 if not os.path.dirname(filename):
                     os.makedirs(os.path.dirname(filename))
-            adaptater = self.get_adaptater(name, db_options)
+            adaptater = self.get_dumper(name, db_options)
             adaptater.dump(filename=filename)
 
     @staticmethod
-    def get_adaptater(name, db_options):
-        """ return a valid adaptater for the given database.
+    def get_dumper(name, db_options):
+        """ return a valid dumper for the given database, based on the `ENGINE` key.
 
         :param name: name of the database (one of the keys in the `DATABASES` setting)
         :type name: :class:`str`
         :param db_options: dictionnary  (one of the values in the `DATABASES` setting)
         :type db_options: :class:`dict`
-        :rtype: :class:`BaseAdaptater`
+        :rtype: :class:`BaseDumper`
         """
         engine = db_options['ENGINE'].lower()
         if 'mysql' in engine:

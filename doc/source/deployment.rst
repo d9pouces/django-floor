@@ -5,7 +5,7 @@ Deploying Django is merely complex if we follow the `official guide <https://doc
 In this small guide, we only support the wsgi.
 WSGI can be used with two application servers: gunicorn and uwsgi, behind a pure webserver: nginx or apache.
 
-Do not forget to read the `official doc <https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/>`_ !
+Do not forget to read the `official doc <https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/>`_!
 
 I will only cover the deployment with wsgi through gunicorn (installed as a dependency) or uwsgi (optional).
 Gunicorn is a pure-Python application, but on the other hand uwsgi is maybe more efficient and allows websockets.
@@ -32,24 +32,30 @@ settings for HTTP authentication (Kerberos/Shibboleth/SSO/…)
 settings for Redis:
 
   * REDIS_HOST = 'localhost'
-  * REDIS_PORT = 6379
+  * REDIS_PORT = '6379'
 
 application
 -----------
 
 The first thing to do is to create a virtualenv and install your project inside.
-If your project is uploaded to pypi or to an internal mirror::
+If your project is uploaded to pypi or to an internal mirror:
+
+.. code-block:: bash
 
     mkvirtualenv myproject_prod
     pip install myproject_prod
 
-Otherwise, you should copy the source (or git clone the project)::
+Otherwise, you should copy the source (or git clone the project):
+
+.. code-block:: bash
 
     mkvirtualenv myproject_prod
     cd myproject/
     python setup.py install
 
-Then you can configure it::
+Then you can configure it:
+
+.. code-block:: bash
 
     myproject-manage config
     # look on the first lines to check the location of the Python local config file
@@ -75,7 +81,9 @@ A basic DjangoFloor application a different kinds of files:
 database backup
 ###############
 
-DjangoFloor comes with a command to dump the database. You can combine it with the `logrotate` utility. ::
+DjangoFloor comes with a command to dump the database. You can combine it with the `logrotate` utility.
+
+.. code-block:: bash
 
     cat << EOF > [prefix]/etc/myproject/dbrotate.conf
     /backupdirectory/dbbackup.sql.gz {
@@ -101,7 +109,9 @@ Media files can be backuped with two distinct strategies:
     * generate a single tar.gz archive (takes a lot of disk space),
     * synchronize the folder with another one (say, on a NFS) with `rsync`.
 
-A good strategy is to daily run the rsync command, and to monthly create a full tar.gz archive. ::
+A good strategy is to run the rsync command daily with a monthly tar.gz archive:
+
+.. code-block:: bash
 
     cat << EOF > [prefix]/etc/myproject/mediarotate.conf
     /backupdirectory/mediabackup.tar.gz {
@@ -124,29 +134,39 @@ A good strategy is to daily run the rsync command, and to monthly create a full 
 gunicorn
 --------
 
-Gunicorn is an easy-to-use application server::
+Gunicorn is an easy-to-use application server:
+
+.. code-block:: bash
 
     myproject-gunicorn
 
-Or, if you wan to daemonize (but you really should prefer to use systemd/supervisor or launchd)::
+Or, if you wan to daemonize (but you really should prefer to use systemd/supervisor or launchd):
+
+.. code-block:: bash
 
     myproject-gunicorn -D
 
 uwsgi
 -----
 
-Since uwsgi requires compilation, it is not installed as DjangoFloor dependency, but it can be installed with pip::
+Since uwsgi requires compilation, it is not installed as DjangoFloor dependency, but it can be installed with pip:
+
+.. code-block:: bash
 
     pip install uwsgi
 
-And then run::
+And then run:
+
+.. code-block:: bash
 
     myproject-uwsgi
 
 Apache
 ------
 
-Here is a simple configuration file for your project behind Apache, assuming that LOCAL_PATH is set to "/var/www/myproject" in your settings::
+Here is a simple configuration file for your project behind Apache, assuming that LOCAL_PATH is set to "/var/www/myproject" in your settings:
+
+.. code-block:: bash
 
     <VirtualHost *:80>
         ServerName my.project.com
@@ -162,7 +182,9 @@ Here is a simple configuration file for your project behind Apache, assuming tha
 Nginx
 -----
 
-Here is a simple configuration file for your project behind Nginx, assuming that LOCAL_PATH is set to "/var/www/myproject" in your settings::
+Here is a simple configuration file for your project behind Nginx, assuming that LOCAL_PATH is set to "/var/www/myproject" in your settings:
+
+.. code-block:: bash
 
     server {
         listen       80;
@@ -189,7 +211,9 @@ Here is a simple configuration file for your project behind Nginx, assuming that
 supervisor
 ----------
 
-A single config file for Supervisor can handle all processes to launch::
+A single config file for Supervisor can handle all processes to launch:
+
+.. code-block:: bash
 
     PROJECT_NAME=myproject
     VIRTUAL_ENV=$VIRTUAL_ENV
@@ -206,7 +230,9 @@ A single config file for Supervisor can handle all processes to launch::
 systemd (Linux only)
 --------------------
 
-Most distribution are now using systemd for starting services::
+Most distribution are now using systemd for starting services:
+
+.. code-block:: bash
 
     PROJECT_NAME=myproject
     VIRTUAL_ENV=$VIRTUAL_ENV
@@ -248,7 +274,9 @@ Most distribution are now using systemd for starting services::
 launchd (Mac OS X only)
 -----------------------
 
-We need to create a config file for each process to launch::
+We need to create a config file for each process to launch:
+
+.. code-block:: bash
 
     PROJECT_NAME=myproject
     VIRTUAL_ENV=$VIRTUAL_ENV

@@ -81,7 +81,9 @@ And Pycharm (or other IDEs)?
 PyCharm (and, I guess, many other IDEs) has built-in support for the Django framework and is able to use the settings module for a better auto-completion.
 However, it is not able to use such a complex system.
 
-DjangoFloor can generate a merged settings file for you::
+DjangoFloor can generate a merged settings file for you:
+
+.. code-block:: bash
 
   myproject-manage config --merge > pycharm_settings.py
 
@@ -125,18 +127,22 @@ If your application has a few settings available to the end-user (typically the 
 However, this require a mapping between the option in the .ini file and the settings.
 
 This dictionnary is expected in the file `myproject/iniconf.py`, with a single variable named `INI_MAPPING` which is a list of :class:`djangofloor.iniconf.OptionParser`.
-For example::
+For example:
 
-        INI_MAPPING = [
-            OptionParser('DATABASE_ENGINE', 'database.engine'),
-            OptionParser('DATABASE_NAME', 'database.name'),
-            OptionParser('DATABASE_USER', 'database.user'),
-            OptionParser('DATABASE_PASSWORD', 'database.password'),
-            OptionParser('DATABASE_HOST', 'database.host'),
-            OptionParser('DATABASE_PORT', 'database.port'),
-        ]
+.. code-block:: python
 
-In this case, DjangoFloor will look for a file `[prefix]/etc/myproject/settings.ini` with a section `database`, with the options `engine`, `name`, `user`, `password`, `host` and `port`::
+    INI_MAPPING = [
+        OptionParser('DATABASE_ENGINE', 'database.engine'),
+        OptionParser('DATABASE_NAME', 'database.name'),
+        OptionParser('DATABASE_USER', 'database.user'),
+        OptionParser('DATABASE_PASSWORD', 'database.password'),
+        OptionParser('DATABASE_HOST', 'database.host'),
+        OptionParser('DATABASE_PORT', 'database.port'),
+    ]
+
+In this case, DjangoFloor will look for a file `[prefix]/etc/myproject/settings.ini` with a section `database`, with the options `engine`, `name`, `user`, `password`, `host` and `port`:
+
+.. code-block:: ini
 
     [database]
     host = localhost

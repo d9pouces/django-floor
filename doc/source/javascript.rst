@@ -11,18 +11,21 @@ First, you must include the following JavaScript files:
     * `djangofloor.js`,
     * `ws4redis.js` (required for using websockets).
 
-You HTML also requires some code, just before the closing body tag::
+You HTML also requires some code, just before the closing body tag:
 
+    .. code-block:: html
 
-    <div class="modal fade" id="df_modal" tabindex="-1" role="dialog" aria-labelledby="df_modal" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content"></div>
+        <div class="modal fade" id="df_modal" tabindex="-1" role="dialog" aria-labelledby="df_modal" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content"></div>
+            </div>
         </div>
-    </div>
 
-And probably on the top of your page::
+And probably on the top of your page:
 
-    <div id="messages"></div>
+    .. code-block:: html
+
+        <div id="messages"></div>
 
 
 Javascript API
@@ -45,11 +48,15 @@ Display a message to the user in a warning box (call "df.messages.show" with `le
     * `html`: HTML content of a message to display
     * `duration` (optional): default to 10000 ms: duration for which the message must be displayed. Set it to 0 to keep it.
 
-    JavaScript example::
+    JavaScript example:
+
+    .. code-block:: javascript
 
         df.call('df.messages.warning', {html: "This is a message"});
 
-    Python example::
+    Python example:
+
+    .. code-block:: python
 
         from djangofloor.tasks import call
         def my_view(request):
