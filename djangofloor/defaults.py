@@ -101,10 +101,6 @@ REVERSE_PROXY_IPS_HELP = 'List of IP addresses of the reverse proxies'
 REVERSE_PROXY_TIMEOUT = 30
 REVERSE_PROXY_TIMEOUT_HELP = 'Timeout for reverse proxy'
 # Workers silent for more than this many seconds are killed and restarted.
-REVERSE_PROXY_ERROR_LOG_FILE = FilePath('{LOG_PATH}/error.log')
-REVERSE_PROXY_ERROR_LOG_FILE_HELP = 'Error log file to write to (Reverse proxy).'
-REVERSE_PROXY_ACCESS_LOG_FILE = FilePath('{LOG_PATH}/access.log')
-REVERSE_PROXY_ACCESS_LOG_FILE_HELP = 'The Access log file to write to (reverse_proxy).'
 REVERSE_PROXY_SSL_KEY_FILE = None
 REVERSE_PROXY_SSL_KEY_FILE_HELP = 'Key file of reverse proxy (apache/nginx). ' \
                                   'Can be set to None if the key is with the certificate.'
@@ -175,12 +171,7 @@ MEDIA_ROOT_HELP = 'Absolute filesystem path to the directory that will hold user
 STATIC_ROOT = DirectoryPath('{LOCAL_PATH}/static')
 STATIC_ROOT_HELP = 'The absolute path to the directory where collectstatic will collect static files for deployment.'
 # Additional locations of static files
-STATICFILES_DIRS = (
-    abspath(join(dirname(__file__), 'static')),
-    # Put strings here, like "/home/html/static" or "C:/www/django/static".
-    # Always use forward slashes, even on Windows.
-    # Don't forget to use absolute paths, not relative paths.
-)
+STATICFILES_DIRS = []
 
 # List of finder classes that know how to find static files in
 # various locations.
@@ -292,9 +283,7 @@ if FLOOR_USE_WS4REDIS:
     TEMPLATE_CONTEXT_PROCESSORS += ['ws4redis.context_processors.default', ]
 ROOT_URLCONF = 'djangofloor.root_urls'
 
-TEMPLATE_DIRS = (
-    abspath(join(dirname(__file__), 'templates')),
-)
+TEMPLATE_DIRS = []
 
 # noinspection PyUnresolvedReferences
 INSTALLED_APPS = [
