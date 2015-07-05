@@ -170,13 +170,14 @@ Here is a simple configuration file for your project behind Apache, assuming tha
 
     <VirtualHost *:80>
         ServerName my.project.com
-        Alias /static/ /var/www/myproject/static/
-        Alias /media/ /var/www/myproject/media/
-        ProxyPass /static/ !
-        ProxyPass /media/ !
-        ProxyPass / http://localhost:9000/
-        ProxyPassReverse / http://localhost:9000/
-        DocumentRoot /var/www/myproject/static/
+        Alias               /static/    /var/www/myproject/static/
+        Alias               /media/     /var/www/myproject/media/
+        ProxyPass           /static/    !
+        ProxyPass           /media/     !
+        ProxyPass           /           http://localhost:9000/
+        ProxyPassReverse    /           http://localhost:9000/
+        DocumentRoot        /var/www/myproject/static/
+        ServerSignature     off
     </VirtualHost>
 
 Nginx
@@ -199,11 +200,11 @@ Here is a simple configuration file for your project behind Nginx, assuming that
         }
         location / {
             proxy_pass       http://localhost:9091;
-            proxy_set_header Host       $host:$proxy_port;
-            proxy_set_header X-Real-IP $remote_addr;
-            proxy_set_header X-Forwarded-Host $host:$proxy_port;
+            proxy_set_header Host               $host:$proxy_port;
+            proxy_set_header X-Real-IP          $remote_addr;
+            proxy_set_header X-Forwarded-Host   $host:$proxy_port;
             proxy_set_header X-Forwarded-Server $host;
-            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-For    $proxy_add_x_forwarded_for;
         }
     }
 

@@ -1,6 +1,7 @@
 # coding=utf-8
 from __future__ import unicode_literals
 import codecs
+from django.core.exceptions import ImproperlyConfigured
 # noinspection PyPackageRequirements
 from pipeline.compilers import CompilerBase
 import base64
@@ -32,8 +33,41 @@ class RemoteUserMiddleware(BaseRemoteUserMiddleware):
         request.df_remote_authenticated = False
         if request.META['REMOTE_ADDR'] in settings.REVERSE_PROXY_IPS and self.header and self.header in request.META:
             if not request.user.is_authenticated():
-                super(RemoteUserMiddleware, self).process_request(request)
+                self.original_process_request(request)
             request.df_remote_authenticated = request.user.is_authenticated()
+
+    def original_process_request(self, request):
+        # AuthenticationMiddleware is required so that request.user exists.
+        if not hasattr(request, 'user'):
+            raise ImproperlyConfigured(
+                "The Django remote user auth middleware requires the"
+                " authentication middleware to be installed.  Edit your"
+                " MIDDLEWARE_CLASSES setting to insert"
+                " 'django.contrib.auth.middleware.AuthenticationMiddleware'"
+                " before the RemoteUserMiddleware class.")
+        if self.header not in request.META:
+            return
+        username = request.META[self.header]
+        username, sep, domain = username.partition('@')
+        # If the user is already authenticated and that user is the user we are
+        # getting passed in the headers, then the correct user is already
+        # persisted in the session and we don't need to continue.
+        if request.user.is_authenticated():
+            if request.user.get_username() == self.clean_username(username, request):
+                return
+            else:
+                # An authenticated user is associated with the request, but
+                # it does not match the authorized user in the header.
+                self._remove_invalid_user(request)
+
+        # We are seeing this user for the first time in this session, attempt
+        # to authenticate the user.
+        user = auth.authenticate(remote_user=username)
+        if user:
+            # User is valid.  Set request.user and persist user in the session
+            # by logging the user in.
+            request.user = user
+            auth.login(request, user)
 
 
 class FakeAuthenticationMiddleware(object):
