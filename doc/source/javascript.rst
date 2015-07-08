@@ -36,6 +36,11 @@ DjangoFloor offers an object `df` with basically two methods:
     * `df.connect('signal_name', function)`, where `function` is a function taking an object as argument.
     * `df.call('signal_name', options)`, where `options` is an object whose attributes are the arguments.
 
+Form submission
+---------------
+
+You should check the documentation of :class:`djangofloor.decorators.SerializedForm`.
+
 
 Connected signals
 -----------------

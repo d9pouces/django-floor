@@ -37,6 +37,7 @@ if 'lib' in splitted_path:
     LOCAL_PATH = DirectoryPath('/%s/var/{PROJECT_NAME}' % prefix)
 LOCAL_PATH_HELP = 'Base path for all data'
 SERVER_NAME = 'localhost'
+PROTOCOL = 'http'
 LOG_PATH = DirectoryPath('{LOCAL_PATH}/log')
 DATA_PATH = DirectoryPath('{LOCAL_PATH}/data')
 DEBUG = False
@@ -125,12 +126,12 @@ ACCOUNT_EMAIL_SUBJECT_PREFIX = '[{SERVER_NAME}] '
 FLOOR_URL_CONF = None
 FLOOR_INSTALLED_APPS = []
 FLOOR_INDEX = None
-FLOOR_PROJECT_NAME = _('DjangoFloor')
+FLOOR_PROJECT_NAME = 'DjangoFloor'
 
 FLOOR_DEFAULT_GROUP_NAME = _('Users')
 FLOOR_DEFAULT_GROUP_NAME_HELP = 'Name of the default group of newly-created users.'
 
-EMAIL_SUBJECT_PREFIX = '[{SERVER_NAME}] '
+EMAIL_SUBJECT_PREFIX = '[{FLOOR_PROJECT_NAME} / {SERVER_NAME}] '
 SERVER_EMAIL = 'root@{SERVER_NAME}'
 FILE_CHARSET = 'utf-8'
 # The character encoding used to decode any files read from disk. This includes template files and

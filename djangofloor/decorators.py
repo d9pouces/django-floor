@@ -123,13 +123,17 @@ class SerializedForm(object):
     >>> form.is_valid()
     True
 
-    How to use it with Python3::
+    How to use it with Python3:
+
+    .. code-block:: python
 
         @connect(path='myproject.signals.test')
         def test(request, value: SerializedForm(SimpleForm), other: int):
             print(value.is_valid())
 
-    How to use it with Python2::
+    How to use it with Python2:
+
+    .. code-block:: python
 
         @connect(path='myproject.signals.test')
         def test(request, value, other):
@@ -137,7 +141,9 @@ class SerializedForm(object):
             print(value.is_valid())
 
 
-    On the JS side, the easiest way is to serialize the form with JQuery::
+    On the JS side, the easiest way is to serialize the form with JQuery:
+
+    .. code-block:: html
 
         <form onsubmit="return df.call('myproject.signals.test', {value: $(this).serializeArray(), other: 42})">
             <input name='field' value='test' type='text'>
@@ -367,8 +373,8 @@ def connect(fn=None, path=None, delayed=False, allow_from_client=True, auth_requ
     :type allow_from_client: :class:`bool`
     :param auth_required: can be called only from authenticated client? default to `True`
     :type auth_required: :class:`bool`
-    :return:
-    :rtype:
+    :return: a wrapped function
+    :rtype: `callable`
     """
     wrapped = lambda fn_: RedisCallWrapper(fn_, path=path, delayed=delayed, allow_from_client=allow_from_client, auth_required=auth_required)
     if fn is not None:

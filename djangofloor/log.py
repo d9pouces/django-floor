@@ -33,12 +33,3 @@ class FloorAdminEmailHandler(AdminEmailHandler):
             return
         LAST_SENDS[subject] = datetime.datetime.now()
         mail.mail_admins(subject, message, *args, connection=self.connection(), **kwargs)
-
-    def format_subject(self, subject):
-        """
-        Escape CR and LF characters, and limit length.
-        RFC 2822's hard limit is 998 characters per line. So, minus "Subject: "
-        the actual subject must be no longer than 989 characters.
-        """
-        formatted_subject = subject.replace('\n', '\\n').replace('\r', '\\r')
-        return formatted_subject[:989]
