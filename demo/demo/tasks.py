@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 __author__ = 'Matthieu Gallet'
 import celery
 # used to avoid strange import bug with Python 3.3
+# noinspection PyStatementEffect
 celery.__file__
 from celery import shared_task
 
