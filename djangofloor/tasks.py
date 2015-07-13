@@ -107,12 +107,13 @@ def df_call(signal_name, request, sharing, from_client, kwargs):
     result = []
     if isinstance(request, HttpRequest):
         request = SignalRequest.from_request(request)
-    if sharing is not None and settings.FLOOR_USE_WS4REDIS:
-        from djangofloor.df_ws4redis import ws_call
-        ws_call(signal_name, request, sharing, kwargs)
-    elif sharing:
-        from djangofloor.df_redis import push_signal_call
-        push_signal_call(request, signal_name, kwargs=kwargs)
+    if sharing is not None and sharing != RETURN:
+        if settings.FLOOR_USE_WS4REDIS:
+            from djangofloor.df_ws4redis import ws_call
+            ws_call(signal_name, request, sharing, kwargs)
+        else:
+            from djangofloor.df_redis import push_signal_call
+            push_signal_call(request, signal_name, kwargs=kwargs)
 
     must_delay = False
     for wrapper in REGISTERED_SIGNALS.get(signal_name, []):
