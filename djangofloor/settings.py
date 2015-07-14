@@ -19,6 +19,7 @@ If VARIABLE is uppercase and if VARIABLE_HELP exists, then VARIABLE is shown wit
 
 """
 from __future__ import unicode_literals, print_function
+from django.utils.module_loading import import_string
 
 try:
     # noinspection PyCompatibility
@@ -68,28 +69,27 @@ def import_file(filepath):
         module_ = djangofloor.empty
     return module_
 
-
+# default settings for the project
 if PROJECT_SETTINGS_MODULE_NAME:
     project_settings = import_module(PROJECT_SETTINGS_MODULE_NAME)
 else:
     import djangofloor.empty
     project_settings = djangofloor.empty
 
+# settings for the installation
 user_settings = import_file(USER_SETTINGS_PATH)
+
+# load settings from the .ini configuration file
 ini_config_mapping = {}
 if DJANGOFLOOR_MAPPING:
-    module_name, sep, mapping_name = DJANGOFLOOR_MAPPING.partition(':')
     try:
-        module = import_module(module_name)
-        ini_values = getattr(module, mapping_name)
+        ini_values = import_string(DJANGOFLOOR_MAPPING)
         if os.path.isfile(DJANGOFLOOR_CONFIG_PATH):
             parser = ConfigParser()
             parser.read([DJANGOFLOOR_CONFIG_PATH])
             for option_parser in ini_values:
                 option_parser(parser, ini_config_mapping)
     except ImportError:
-        pass
-    except AttributeError:
         pass
 
 
@@ -128,11 +128,11 @@ def __parse_setting(obj):
     elif isinstance(obj, Path):
         return __parse_setting(force_text(obj))
     elif isinstance(obj, list) or isinstance(obj, tuple):
-        return [__parse_setting(x) for x in obj]
+        return [__parse_setting(x_) for x_ in obj]
     elif isinstance(obj, set):
-        return {__parse_setting(x) for x in obj}
+        return {__parse_setting(x_) for x_ in obj}
     elif isinstance(obj, dict):
-        return dict([(__parse_setting(x), __parse_setting(y)) for (x, y) in obj.items()])
+        return dict([(__parse_setting(x_), __parse_setting(y_)) for (x_, y_) in obj.items()])
     return obj
 
 
@@ -162,6 +162,10 @@ def __setting_value(setting_name_):
 
 
 def __ensure_dir(path_, parent_=True):
+    """ ensure that the given directory exists
+    :param path_: the path to check
+    :param parent_: only ensure the existence of the parent directory
+    """
     dirname_ = os.path.dirname(path_) if parent_ else path_
     if not os.path.isdir(dirname_):
         try:

@@ -385,8 +385,9 @@ WSGI_APPLICATION = 'djangofloor.wsgi_http.application'
 if FLOOR_USE_WS4REDIS:
     WSGI_APPLICATION = 'ws4redis.django_runserver.application'
 WS4REDIS_SUBSCRIBER = 'djangofloor.df_ws4redis.Subscriber'
-DF_WS_FACILITY = 'djangofloor'
-
+FLOOR_WS_FACILITY = 'djangofloor'
+FLOOR_SIGNAL_ENCODER = 'django.core.serializers.json.DjangoJSONEncoder'
+FLOOR_SIGNAL_DECODER = 'json.JSONDecoder'
 ########################################################################################################################
 # celery
 ########################################################################################################################

@@ -19,8 +19,7 @@ from ws4redis.redis_store import RedisMessage
 
 from djangofloor.decorators import SignalRequest
 from djangofloor.exceptions import ApiException
-from djangofloor.tasks import BROADCAST, df_call, SESSION, USER
-
+from djangofloor.tasks import BROADCAST, df_call, SESSION, USER, get_signal_encoder, get_signal_decoder
 
 __author__ = 'Matthieu Gallet'
 
@@ -49,7 +48,7 @@ def ws_call(signal_name, request, sharing, kwargs):
     if BROADCAST in sharing:
         sharing[BROADCAST] = True
     redis_publisher = RedisPublisher(facility=settings.FLOOR_WS_FACILITY, **sharing)
-    msg = json.dumps({'signal': signal_name, 'options': kwargs})
+    msg = json.dumps({'signal': signal_name, 'options': kwargs}, cls=get_signal_encoder())
     redis_publisher.publish_message(RedisMessage(msg.encode('utf-8')))
 
 
@@ -61,6 +60,7 @@ class Subscriber(RedisSubscriber):
 
     def __init__(self, connection):
         super(Subscriber, self).__init__(connection)
+        # noinspection PyTypeChecker
         self.request = SignalRequest(None, None, None)
 
     def set_pubsub_channels(self, request, channels):
@@ -74,13 +74,15 @@ class Subscriber(RedisSubscriber):
         published, also be persisted in the Redis datastore. If unset, it defaults to the
         configuration settings ``WS4REDIS_EXPIRE``.
         """
+        # noinspection PyUnusedLocal
+        expire = expire
         if not isinstance(message, RedisMessage):
             raise ValueError('message object is not of type RedisMessage')
         if self._publishers != self.internal_publishers:
             return
         # noinspection PyBroadException
         try:
-            message_dict = json.loads(message.decode('utf-8'))
+            message_dict = json.loads(message.decode('utf-8'), cls=get_signal_decoder())
             df_call(message_dict['signal'], self.request, sharing=None, from_client=True, kwargs=message_dict['options'])
         except ApiException as e:
             df_call('df.messages.error', self.request, sharing=SESSION, from_client=True, kwargs={'html': _('Error: %(msg)s') % {'msg': force_text(e)}})

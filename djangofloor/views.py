@@ -12,15 +12,16 @@ from django.contrib.syndication.views import add_domain
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.utils.lru_cache import lru_cache
+from django.utils.module_loading import import_string
 from django.views.decorators.cache import never_cache
 from django.views.decorators.csrf import csrf_exempt
+
 from django.utils.six import string_types
 
 from djangofloor.decorators import REGISTERED_SIGNALS
 from djangofloor.df_redis import fetch_signal_calls
 from djangofloor.exceptions import InvalidRequest
-from djangofloor.tasks import import_signals, df_call, RETURN
-from djangofloor.utils import import_module
+from djangofloor.tasks import import_signals, df_call, RETURN, get_signal_decoder, get_signal_encoder
 
 __author__ = 'Matthieu Gallet'
 mimetypes.init()
@@ -58,9 +59,7 @@ def signals(request):
     if isinstance(interval, int) and request.user.is_anonymous():
         interval = 0
     elif isinstance(interval, string_types):
-        module_name, sep, attribute_name = interval.partition(':')
-        module = import_module(module_name)
-        interval = getattr(module, attribute_name)
+        interval = import_string(interval)
     if callable(interval):
         interval = interval(request)
     return render_to_response('djangofloor/signals.html',
@@ -79,14 +78,14 @@ def signal_call(request, signal):
     """
     import_signals()
     if request.body:
-        kwargs = json.loads(request.body.decode('utf-8'))
+        kwargs = json.loads(request.body.decode('utf-8'), cls=get_signal_decoder())
     else:
         kwargs = {}
     try:
         result = df_call(signal, request, sharing=RETURN, from_client=True, kwargs=kwargs)
     except InvalidRequest:
         result = []
-    return JsonResponse(result, safe=False)
+    return JsonResponse(result, safe=False, encoder=get_signal_encoder())
 
 
 @never_cache

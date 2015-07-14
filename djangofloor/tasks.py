@@ -4,6 +4,8 @@ from __future__ import unicode_literals, absolute_import
 import celery
 # used to avoid strange import bug with Python 3.2/3.3
 # noinspection PyStatementEffect
+from django.utils.module_loading import import_string
+
 celery.__file__
 from celery import shared_task
 from django.conf import settings
@@ -45,6 +47,16 @@ def import_signals():
             import_module('%s.signals' % app)
         except ImportError:
             pass
+
+
+@lru_cache()
+def get_signal_encoder():
+    return import_string(settings.FLOOR_SIGNAL_ENCODER)
+
+
+@lru_cache()
+def get_signal_decoder():
+    return import_string(settings.FLOOR_SIGNAL_DECODER)
 
 
 def call(signal_name, request, sharing=None, **kwargs):

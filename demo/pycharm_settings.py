@@ -41,7 +41,7 @@ DEBUG_TOOLBAR_PATCH_SETTINGS = False
 DEFAULT_CHARSET = 'utf-8'
 DEFAULT_CONTENT_TYPE = 'text/html'
 DEFAULT_FROM_EMAIL = 'admin@localhost'
-DF_WS_FACILITY = 'djangofloor'
+FLOOR_WS_FACILITY = 'djangofloor'
 DJANGOFLOOR_CONFIG_PATH = './etc/demo/settings.ini'
 DJANGOFLOOR_MAPPING = 'demo.iniconf:INI_MAPPING'
 EMAIL_SUBJECT_PREFIX = '[localhost] '
@@ -56,6 +56,8 @@ FLOOR_INSTALLED_APPS = ['demo']
 FLOOR_PROJECT_NAME = 'Demo DjangoFloor'
 FLOOR_URL_CONF = 'demo.urls.urls'
 FLOOR_USE_WS4REDIS = False
+FLOOR_SIGNAL_ENCODER = 'django.core.serializers.json.DjangoJSONEncoder'
+FLOOR_SIGNAL_DECODER = 'json.JSONDecoder'
 INSTALLED_APPS = ['django.contrib.auth', 'django.contrib.contenttypes', 'django.contrib.sessions', 'django.contrib.messages', 'django.contrib.staticfiles', 'django.contrib.humanize',
                   'django.contrib.sites', 'django.contrib.sitemaps', 'django_admin_bootstrapped', 'django.contrib.admin', 'bootstrap3', 'djangofloor', 'allauth', 'allauth.account',
                   'allauth.socialaccount', 'pipeline', 'debug_toolbar', 'demo']

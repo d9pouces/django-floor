@@ -32,6 +32,7 @@ def _resolve_name(name, package, level):
 
 
 if six.PY3:
+    # noinspection PyUnresolvedReferences
     from importlib import import_module
 else:
     def import_module(name, package=None):

@@ -78,7 +78,7 @@ def set_env():
     python_settings_path = check_extra_option('dfconf', os.path.abspath(python_settings_path), '--dfconf')
     os.environ.setdefault("DJANGOFLOOR_PYTHON_SETTINGS", python_settings_path)
     os.environ.setdefault("DJANGOFLOOR_INI_SETTINGS", os.path.abspath(ini_settings_path))
-    os.environ.setdefault("DJANGOFLOOR_MAPPING", '%s.iniconf:INI_MAPPING' % project_name)
+    os.environ.setdefault("DJANGOFLOOR_MAPPING", '%s.iniconf.INI_MAPPING' % project_name)
     return project_name
 
 

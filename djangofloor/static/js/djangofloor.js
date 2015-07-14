@@ -4,6 +4,7 @@
 df = {};
 
 df.registered_signals = {};
+df.default_message_timeout = 5000;
 df.__message_count = 0;
 
 /**
@@ -75,16 +76,18 @@ df.connect_ws = function (signal) {
 
 df.connect('df.messages.hide', function (options) {
     "use strict";
-    var messages;
+    var message;
     if (options.id) {
-        messages = $('#' + options.id);
-        messages.slideUp();
-        messages.remove();
+        message = $('#' + options.id);
+        message.slideUp();
+        message.remove();
     } else {
-        messages = $('#messages');
-        messages.slideUp();
-        messages.empty();
+        $('#messages').each(function (index, obj) { $(obj).slideUp(); $(obj).remove(); });
     }
+});
+
+$('#messages').each(function (index, obj) {
+    setTimeout(function () { $(obj).slideUp(); $(obj).remove(); }, df.default_message_timeout);
 });
 
 /**
@@ -102,7 +105,7 @@ df.connect('df.messages.show', function (options) {
     }
     content = '<div id="' + mid + '" class="alert alert-' + level + ' fade in"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>' + options.html + '</div>'
     if (options.duration === undefined) {
-        durationMs = 5000;
+        durationMs = df.default_message_timeout;
     } else {
         durationMs = options.duration;
     }
@@ -141,6 +144,9 @@ df.connect('df.messages.success', function (options) {
 df.connect('df.modal.show', function (options) {
     "use strict";
     var baseModal = $('#df_modal');
+    if (baseModal.size() == 0) {
+        $('body').append('<div class="modal fade" id="df_modal" tabindex="-1" role="dialog" aria-labelledby="df_modal" aria-hidden="true"><div class="modal-dialog"><div class="modal-content"></div></div></div>');
+    }
     // TODO : ajouter une option onclose, qui correspond à un appel JS à la fermeture
     // on l'ajoute à une liste d'onclose pour les enchaînements ouverture/fermeture
     baseModal.find(".modal-content").html(options.html);

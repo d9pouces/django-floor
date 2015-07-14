@@ -146,7 +146,7 @@ With this polling, you can emulate an almost complete websocket behaviour (with 
 
 By default, this polling is also deactivated for anonymous users, even if you set it to a positive value.
 
-If `WS4REDIS_EMULATION_INTERVAL` looks like `my_package.my_module:my_callable` or if it is callable, then it will be called with a `django.http.HttpRequest` as argument, and it must return a non-negative integer (interval in milliseconds).
+If `WS4REDIS_EMULATION_INTERVAL` looks like `my_package.my_module.my_callable` or if it is callable, then it will be called with a `django.http.HttpRequest` as argument, and it must return a non-negative integer (interval in milliseconds).
 
 
 
