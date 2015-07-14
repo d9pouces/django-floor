@@ -27,6 +27,11 @@ class IEMiddleware(object):
 
 
 class RemoteUserMiddleware(BaseRemoteUserMiddleware):
+    """`django.contrib.auth.middleware.RemoteUserMiddleware` but:
+
+    can use any header defined in the settings,
+    add a `df_remote_authenticated` attribute to the request (set to `True` if the user has been authenticated via the header)
+    """
     header = settings.FLOOR_AUTHENTICATION_HEADER
 
     def process_request(self, request):
@@ -71,7 +76,10 @@ class RemoteUserMiddleware(BaseRemoteUserMiddleware):
 
 
 class FakeAuthenticationMiddleware(object):
-    """ Only for debugging purpose: emulate a user authenticated by the remote proxy
+    """ Only for dev/debugging purpose: emulate a user authenticated by the remote proxy.
+
+    Use `settings.FLOOR_FAKE_AUTHENTICATION_USERNAME` to create (if needed) a user and authenticate the request.
+    Only works in `settings.DEBUG` mode and if `settings.FLOOR_FAKE_AUTHENTICATION_USERNAME` is set.
     """
     group_cache = {}
 
@@ -96,6 +104,8 @@ class FakeAuthenticationMiddleware(object):
 
 
 class BasicAuthMiddleware(object):
+    """Basic HTTP authentication using Django users to check passwords.
+    """
 
     # noinspection PyMethodMayBeStatic
     def process_request(self, request):

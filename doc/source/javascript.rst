@@ -8,20 +8,10 @@ First, you must include the following JavaScript files:
 
     * `jquery.min.js`,
     * `bootstrap.min.js` (ok, it is only required if you use Bootstrap3),
-    * `djangofloor.js`,
+    * `js/djangofloor.js`,
     * `ws4redis.js` (required for using websockets).
 
-You HTML also requires some code, just before the closing body tag:
-
-    .. code-block:: html
-
-        <div class="modal fade" id="df_modal" tabindex="-1" role="dialog" aria-labelledby="df_modal" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content"></div>
-            </div>
-        </div>
-
-And probably on the top of your page:
+You HTML also requires some code for messages, probably somewhere on the top of your page:
 
     .. code-block:: html
 
@@ -44,6 +34,8 @@ You should check the documentation of :class:`djangofloor.decorators.SerializedF
 
 Connected signals
 -----------------
+
+DjangoFloor provides some signals out of the box, but they only works when you use Bootstrap3.
 
 df.messages.warning
 *******************

@@ -50,6 +50,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'DjangoFloor'
+# noinspection PyShadowingBuiltins
 copyright = '2015, Matthieu Gallet'
 
 # The version info for the project you're documenting, acts as replacement for

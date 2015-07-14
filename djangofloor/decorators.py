@@ -1,5 +1,6 @@
 # coding=utf-8
-"""Define the decorator for connecting Python code to signals, a `SignalRequest` which can be easily serialized and is lighter than a `django.http.HttpRequest`, and some helping code to convert serialized data sent by Javascript to something useful in Python.
+"""Define the decorator for connecting Python code to signals, a `SignalRequest` which can be easily serialized and is lighter than a `django.http.HttpRequest`,
+and some code to convert serialized data sent by Javascript to something useful in Python.
 
 Usage of the decorator
 **********************
@@ -113,7 +114,7 @@ class Choice(object):
 class SerializedForm(object):
     """Transform values sent by JS to a Django form.
 
-    Given a form and a `list` of `dict`, transforms the `dict` into a :class:`django.http.QueryDict` and initialize the form with it.
+    Given a form and a `list` of `dict`, transforms the `list` into a :class:`django.http.QueryDict` and initialize the form with it.
 
     >>> class SimpleForm(forms.Form):
     ...    field = forms.CharField()

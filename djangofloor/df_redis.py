@@ -62,4 +62,3 @@ def fetch_signal_calls(request):
         result.append(json.loads(signal_data.decode('utf-8'), cls=get_signal_decoder()))
         signal_data = connection.lpop('%s-session-%s' % (WS4REDIS_PREFIX, key))
     return result
-

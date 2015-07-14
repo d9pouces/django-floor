@@ -4,10 +4,9 @@ from __future__ import unicode_literals, absolute_import
 import celery
 # used to avoid strange import bug with Python 3.2/3.3
 # noinspection PyStatementEffect
-from django.utils.module_loading import import_string
-
 celery.__file__
 from celery import shared_task
+from django.utils.module_loading import import_string
 from django.conf import settings
 from django.http import HttpRequest
 from djangofloor.utils import import_module
@@ -27,6 +26,10 @@ RETURN = 'return'
 
 @shared_task(serializer='json')
 def signal_task(signal_name, request, from_client, kwargs):
+    """Unique Celery tasks, transparently called for delayed signal calls.
+
+    You should not have to use it.
+    """
     import_signals()
     request = SignalRequest(**request)
     if signal_name not in REGISTERED_SIGNALS:
@@ -51,11 +54,19 @@ def import_signals():
 
 @lru_cache()
 def get_signal_encoder():
+    """ return the class for encoding signal data to JSON. The result is cached.
+
+    Only import `settings.FLOOR_SIGNAL_ENCODER` and cache the results.
+    """
     return import_string(settings.FLOOR_SIGNAL_ENCODER)
 
 
 @lru_cache()
 def get_signal_decoder():
+    """ return the class for decoding signal data to JSON. The result is cached.
+
+    Only import `settings.FLOOR_SIGNAL_DECODER` and cache the results.
+    """
     return import_string(settings.FLOOR_SIGNAL_DECODER)
 
 

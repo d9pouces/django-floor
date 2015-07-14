@@ -2,7 +2,7 @@
 """
 Define all DjangoFloor default settings.
 
-The goal is to define valid settings out-of-box.
+The goal is to define valid settings out-of-the-box.
 
 """
 from __future__ import unicode_literals

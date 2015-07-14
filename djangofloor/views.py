@@ -35,10 +35,7 @@ def read_file_in_chunks(fileobj, chunk_size=32768):
     :param chunk_size: max size of each chunk
     :type chunk_size: `int`
     """
-    while True:
-        data = fileobj.read(chunk_size)
-        if not data:
-            break
+    for data in iter(lambda: fileobj.read(chunk_size), b''):
         yield data
 
 
@@ -102,7 +99,6 @@ def send_file(filepath, mimetype=None, force_download=False):
 
     If `settings.USE_X_SEND_FILE` (mod_xsendfile is a mod of Apache), then return an empty HttpResponse with the correct header.
     The file is directly handled by Apache instead of Python (that is more efficient).
-
     If `settings.X_ACCEL_REDIRECT_ARCHIVE` is defined (as a list of tuple (directory, alias_url)) and filepath is in one of the directories,
         return an empty HttpResponse with the correct header. This is only available with Nginx.
 

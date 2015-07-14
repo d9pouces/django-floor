@@ -56,7 +56,7 @@ class MySQL(BaseDumper):
             command += ['--host', '%(HOST)s']
         if self.db_options.get('PORT'):
             command += ['--port', '%(PORT)s']
-        command += ['%(NAME)']
+        command += ['%(NAME)s']
         return command
 
     def get_env(self):
@@ -75,7 +75,7 @@ class PostgreSQL(MySQL):
             command += ['--port', '%(PORT)s']
         if settings.FLOOR_BACKUP_SINGLE_TRANSACTION:
             command += ['--single-transaction']
-        command += ['%(NAME)']
+        command += ['%(NAME)s']
         return command
 
     def get_env(self):
