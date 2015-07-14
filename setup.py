@@ -1,14 +1,18 @@
 # coding=utf-8
-from __future__ import unicode_literals
-import sys
-
 """Setup file for the DjangoFloor project.
 """
-
+from __future__ import unicode_literals
+import re
+import sys
 import codecs
 import os.path
 from setuptools import setup, find_packages
-from djangofloor import __version__ as version
+
+# avoid a from djangofloor import __version__ as version (that compiles djangofloor.__init__ and is not compatible with bdist_deb)
+version = None
+for line in codecs.open(os.path.join('djangofloor', '__init__.py'), 'r', encoding='utf-8'):
+    matcher = re.match(r"""^__version__\s*=\s*['"](.*)['"]\s*$""", line)
+    version = version or matcher and matcher.group(1)
 
 # get README content from README.rst file
 with codecs.open(os.path.join(os.path.dirname(__file__), 'README.md'), encoding='utf-8') as fd:

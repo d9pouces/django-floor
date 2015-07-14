@@ -5,7 +5,7 @@ First, you must download and unzip the source on `Github <https://github.com/d9p
 
 .. code-block:: bash
 
-  curl -o django-floor.zip https://github.com/d9pouces/django-floor/archive/master.zip
+  curl -L -o django-floor.zip https://github.com/d9pouces/django-floor/archive/master.zip
   unzip django-floor.zip
   cd DjangoFloor/demo
   mkvirtualenv -p `which python2.7` demo
