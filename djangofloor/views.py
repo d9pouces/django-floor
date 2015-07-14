@@ -6,7 +6,7 @@ import os
 
 from django.conf import settings
 from django.core.urlresolvers import reverse
-from django.http import HttpResponse, StreamingHttpResponse, HttpResponsePermanentRedirect, JsonResponse, HttpResponseRedirect
+from django.http import HttpResponse, StreamingHttpResponse, JsonResponse, HttpResponseRedirect
 from django.contrib.sites.models import get_current_site
 from django.contrib.syndication.views import add_domain
 from django.shortcuts import render_to_response
@@ -14,11 +14,13 @@ from django.template import RequestContext
 from django.utils.lru_cache import lru_cache
 from django.views.decorators.cache import never_cache
 from django.views.decorators.csrf import csrf_exempt
+from django.utils.six import string_types
 
 from djangofloor.decorators import REGISTERED_SIGNALS
 from djangofloor.df_redis import fetch_signal_calls
 from djangofloor.exceptions import InvalidRequest
 from djangofloor.tasks import import_signals, df_call, RETURN
+from djangofloor.utils import import_module
 
 __author__ = 'Matthieu Gallet'
 mimetypes.init()
@@ -52,9 +54,18 @@ def signals(request):
     """Generate a HttpResponse to register Python signals from the JS side
     """
     import_signals()
+    interval = settings.WS4REDIS_EMULATION_INTERVAL
+    if isinstance(interval, int) and request.user.is_anonymous():
+        interval = 0
+    elif isinstance(interval, string_types):
+        module_name, sep, attribute_name = interval.partition(':')
+        module = import_module(module_name)
+        interval = getattr(module, attribute_name)
+    if callable(interval):
+        interval = interval(request)
     return render_to_response('djangofloor/signals.html',
                               {'signals': REGISTERED_SIGNALS, 'use_ws4redis': settings.FLOOR_USE_WS4REDIS,
-                               'WS4REDIS_EMULATION_INTERVAL': settings.WS4REDIS_EMULATION_INTERVAL},
+                               'WS4REDIS_EMULATION_INTERVAL': interval},
                               RequestContext(request), content_type=__get_js_mimetype())
 
 
