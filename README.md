@@ -6,43 +6,16 @@ A common base for modern and complete Django websites, with several common tools
 Together the third-party tools shipped with djangofloor, there is two major advantages: settings and signals (with websockets!).
 You must use Python 2.7 to play with websockets. Otherwise, DjangoFloor is fully compatible with Python 3.2+.
 
-You can find a more complete documentation here: http://django-floor.readthedocs.org/en/latest/ .
+You can find a complete documentation here: http://django-floor.readthedocs.org/en/latest/ .
 The source code is available on Github: https://github.com/d9pouces/django-floor .
 
 
 Installing
 ----------
 
-    pip install rcssmin --install-option --without-c-extensions
     pip install djangofloor
     
     
-Demo
-----
-
-    mkvirtualenv djangofloor -p `which python2.7`
-    pip install djangofloor[websocket]
-    curl -LO https://github.com/d9pouces/django-floor/archive/master.zip
-    unzip master.zip
-    cd django-floor-master/demo
-    python setup.py develop
-    djangofloor-manage  --dfproject demo migrate
-    djangofloor-manage  --dfproject demo runserver
-  
-Open your brower on `http://localhost:9000/test.html`. To see a more complete demonstration with websockets (requires a Redis server on its standard port — 6379). 
-In `demo/defaults.py`, uncomment the following lines:
-
-    # WSGI_APPLICATION = 'ws4redis.django_runserver.application'
-    # FLOOR_USE_WS4REDIS = True
-    # USE_CELERY = True
-
-Run   
-
-    djangofloor-manage  --dfproject demo runserver
-    djangofloor-celery  --dfproject demo worker
-
-Go back to `http://localhost:9000/test.html` and try websockets and Celery.
-  
 
 Settings
 --------

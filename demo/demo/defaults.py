@@ -3,11 +3,11 @@ from __future__ import unicode_literals
 import os
 
 __author__ = 'Matthieu Gallet'
-LOCAL_PATH = os.path.abspath(os.path.join(__file__, '..', '..', 'django_data'))
+LOCAL_PATH = '.%sdjango_data' % os.path.sep
 FLOOR_URL_CONF = 'demo.urls.urls'
 FLOOR_PROJECT_NAME = 'Demo DjangoFloor'
 FLOOR_INSTALLED_APPS = ['demo', ]
-
+FLOOR_FAKE_AUTHENTICATION_USERNAME = 'test_user'
 ########################################################################################################################
 # sessions
 ########################################################################################################################
@@ -17,14 +17,8 @@ SESSION_REDIS_HOST = '{REDIS_HOST}'
 SESSION_REDIS_PORT = '{REDIS_PORT}'
 SESSION_REDIS_DB = 10
 
-
-########################################################################################################################
-# caching
-########################################################################################################################
-# CACHES = {
-#     'default': {'BACKEND': 'django_redis.cache.RedisCache', 'LOCATION': 'redis://{REDIS_HOST}:{REDIS_PORT}/11',
-#                 'OPTIONS': {'CLIENT_CLASS': 'django_redis.client.DefaultClient', 'PARSER_CLASS': 'redis.connection.HiredisParser', }, },
-#     }
+WS4REDIS_EMULATION_INTERVAL = 2000
+DEBUG = True
 
 ########################################################################################################################
 # django-redis-websocket
@@ -35,4 +29,4 @@ SESSION_REDIS_DB = 10
 ########################################################################################################################
 # celery
 ########################################################################################################################
-# USE_CELERY = True
+USE_CELERY = False

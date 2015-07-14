@@ -149,7 +149,7 @@ def df_call(signal_name, request, sharing, from_client, kwargs):
             wrapper_result = wrapper.function(request, **prepared_kwargs)
             if wrapper_result:
                 result += list(wrapper_result)
-    if must_delay:
+    if must_delay and settings.USE_CELERY:
         signal_task.delay(signal_name, request.to_dict(), from_client, kwargs)
     if sharing == RETURN:
         return result

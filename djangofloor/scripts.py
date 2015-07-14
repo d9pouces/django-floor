@@ -55,7 +55,6 @@ def set_env():
     """
     # django settings
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "djangofloor.settings")
-
     # project name
     script_re = re.match(r'^([\w_\-\.]+)-(manage|gunicorn|celery|uwsgi)(\.py|\.pyc|)$', os.path.basename(sys.argv[0]))
     if 'DJANGOFLOOR_PROJECT_NAME' in os.environ:
@@ -88,8 +87,6 @@ def load_celery():
     :return:
     """
     from django.conf import settings
-    if not settings.USE_CELERY:
-        return
     from djangofloor.celery import app
     return app
 

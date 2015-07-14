@@ -96,10 +96,12 @@ def _make_cssmin(python_only=False):
 
     if not python_only:
         try:
+            # noinspection PyUnresolvedReferences
             import _rcssmin
         except ImportError:
             pass
         else:
+            # noinspection PyUnresolvedReferences
             return _rcssmin.cssmin
 
     nl = r'(?:[\n\f]|\r\n?)'  # pylint: disable = C0103

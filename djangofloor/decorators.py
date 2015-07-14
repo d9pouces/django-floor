@@ -65,19 +65,29 @@ logger = logging.getLogger('djangofloor.request')
 
 
 class RE(object):
-    """ used to check in a string value match a given regexp.
+    def __init__(self, value, caster=None, flags=0):
+        """ used to check in a string value match a given regexp.
 
-    Example (requires Python 3.2+), for a function that can only handle a string on the form 123a456::
+    Example (requires Python 3.2+), for a function that can only handle a string on the form 123a456:
+
+    .. code-block:: python
 
         @connect(path='myproject.signals.test')
         def test(request, value: RE("\d{3}a\d{3}")):
             pass
 
     Your code wan't be called if value has not the right form.
-    """
-    def __init__(self, value, caster=None):
+
+
+        :param value: the pattern of the regexp
+        :type value: `str`
+        :param caster: if not `None`, any callable applied to the value (if valid)
+        :type caster: `callable` or `None`
+        :param flags: regexp flags passed to `re.compile`
+        :type flags: `int`
+        """
         self.caster = caster
-        self.regexp = re.compile(value)
+        self.regexp = re.compile(value, flags=flags)
 
     def __call__(self, value):
         matcher = self.regexp.match(value)
@@ -90,7 +100,9 @@ class RE(object):
 class Choice(object):
     """ used to check if a value is among some valid choices.
 
-    Example (requires Python 3.2+), for a function that can only two values::
+    Example (requires Python 3.2+), for a function that can only two values:
+
+    .. code-block:: python
 
         @connect(path='myproject.signals.test')
         def test(request, value: Choice([True, False])):
@@ -288,17 +300,17 @@ class SignalRequest(object):
         return cls(None, session_key)
 
 
-class CallWrapper(object):
-    def __init__(self, fn, path=None):
+class RedisCallWrapper(object):
+    def __init__(self, fn, path=None, delayed=False, allow_from_client=True, auth_required=True):
         self.path = path
         self.function = fn
         self.__name__ = fn.__name__ if hasattr(fn, '__name__') else path
 
         # fetch signature to analyze arguments
         sig = signature(fn)
-        self.required_arguments = []
-        self.optional_arguments = []
-        self.accept_kwargs = []
+        self.required_arguments = set()
+        self.optional_arguments = set()
+        self.accept_kwargs = False
         self.argument_types = {}
 
         for key, param in sig.parameters.items():
@@ -309,11 +321,11 @@ class CallWrapper(object):
             elif param.kind == param.VAR_POSITIONAL:  # corresponds to "fn(*args)"
                 self.accept_kwargs = True
             elif param.default == param.empty:  # "fn(foo)" : kind = POSITIONAL_ONLY or POSITIONAL_OR_KEYWORD
-                self.required_arguments.append(key)
+                self.required_arguments.add(key)
                 if param.annotation != param.empty and callable(param.annotation):
                     self.argument_types[key] = param.annotation
             else:
-                self.optional_arguments.append(key)  # "fn(foo=bar)" : kind = POSITIONAL_OR_KEYWORD or KEYWORD_ONLY
+                self.optional_arguments.add(key)  # "fn(foo=bar)" : kind = POSITIONAL_OR_KEYWORD or KEYWORD_ONLY
                 if param.annotation != param.empty and callable(param.annotation):
                     self.argument_types[key] = param.annotation
 
@@ -321,8 +333,12 @@ class CallWrapper(object):
             path = fn.__name__
         self.register(path)
 
+        self.allow_from_client = allow_from_client
+        self.delayed = delayed
+        self.auth_required = auth_required
+
     def register(self, path):
-        raise NotImplementedError
+        REGISTERED_SIGNALS.setdefault(path, []).append(self)
 
     def prepare_kwargs(self, kwargs):
         logger.debug(self.path, kwargs)
@@ -344,17 +360,6 @@ class CallWrapper(object):
 
     def __call__(self, *args, **kwargs):
         return self.function(*args, **kwargs)
-
-
-class RedisCallWrapper(CallWrapper):
-    def __init__(self, fn, path=None, delayed=False, allow_from_client=True, auth_required=True):
-        super(RedisCallWrapper, self).__init__(fn, path=path)
-        self.allow_from_client = allow_from_client
-        self.delayed = delayed
-        self.auth_required = auth_required
-
-    def register(self, path):
-        REGISTERED_SIGNALS.setdefault(path, []).append(self)
 
 
 def connect(fn=None, path=None, delayed=False, allow_from_client=True, auth_required=True):

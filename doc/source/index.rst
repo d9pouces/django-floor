@@ -35,6 +35,9 @@ It allows you to use `Celery <http://celery.readthedocs.org>`_ for background ta
 :doc:`tutorial`
     Start here for a quick overview
 
+:doc:`demo`
+    Use the demo provided in the source
+
 :doc:`architecture`
     Explain the global architecture of a production deployment
 
@@ -67,6 +70,7 @@ Full table of contents
    :maxdepth: 1
 
    installation
+   demo
    tutorial
    architecture
    batteries

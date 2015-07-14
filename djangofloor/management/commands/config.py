@@ -60,7 +60,7 @@ class Command(BaseCommand):
     def merge(self):
         keys = [key for key in merged_settings if (key == key.upper() and key not in ('_', '__') and not key.endswith('_HELP'))]
         keys.sort()
-        self.stdout.write('#-*- coding: utf-8 -*-\n')
+        self.stdout.write('# -*- coding: utf-8 -*-\n')
         lazy_cls = ugettext_lazy('').__class__
         for key in keys:
             value = merged_settings[key]

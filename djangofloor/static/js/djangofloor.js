@@ -42,12 +42,16 @@ df.connect = function (signal, fn) {
 df.connect_http = function (signal, url) {
     "use strict";
     var wrapper = function (options, from_server) {
-        if(from_server) {
+        if (from_server) {
             return;
         }
         var jqxhr;
         jqxhr = $.post(url, JSON.stringify(options));
-        jqxhr.done(function (calls) { for (var i = 0; i < calls.length; i += 1) { df.call(calls[i].signal, calls[i].options); } });
+        jqxhr.done(function (calls) {
+            for (var i = 0; i < calls.length; i += 1) {
+                df.call(calls[i].signal, calls[i].options);
+            }
+        });
     };
     df.connect(signal, wrapper);
 };
@@ -66,7 +70,7 @@ df.connect_ws_emulator = function (url) {
 df.connect_ws = function (signal) {
     "use strict";
     var wrapper = function (options, from_server) {
-        if(from_server) {
+        if (from_server) {
             return;
         }
         df.ws4redis.send_message(JSON.stringify({signal: signal, options: options}));
@@ -76,18 +80,15 @@ df.connect_ws = function (signal) {
 
 df.connect('df.messages.hide', function (options) {
     "use strict";
-    var message;
+    var obj;
     if (options.id) {
-        message = $('#' + options.id);
-        message.slideUp();
-        message.remove();
+        obj = $('#' + options.id);
+        $(obj).slideUp(400, 'swing', function() {$(obj).remove(); });
     } else {
-        $('#messages').each(function (index, obj) { $(obj).slideUp(); $(obj).remove(); });
+        $('#messages').each(function (index, obj) {
+            $(obj).slideUp(400, 'swing', function() {$(obj).remove(); });
+        });
     }
-});
-
-$('#messages').each(function (index, obj) {
-    setTimeout(function () { $(obj).slideUp(); $(obj).remove(); }, df.default_message_timeout);
 });
 
 /**
@@ -173,9 +174,17 @@ df.connect('df.redirect', function (options) {
     window.location.href = options.url;
 });
 
-$("#body").on('hidden.bs.modal', function () {
-    "use strict";
-    var baseModal = $('#df_modal');
-    baseModal.removeData('bs.modal');
-    baseModal.find(".modal-content").html('');
-});
+$(function () {
+    $("#body").on('hidden.bs.modal', function () {
+        "use strict";
+        var baseModal = $('#df_modal');
+        baseModal.removeData('bs.modal');
+        baseModal.find(".modal-content").html('');
+    });
+    $('#messages div').each(function (index, obj) {
+        setTimeout(function () {
+            $(obj).slideUp(400, 'swing', function() {$(obj).remove(); });
+        }, df.default_message_timeout);
+    });
+
+})
