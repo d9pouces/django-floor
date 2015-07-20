@@ -74,7 +74,6 @@ You can specify another local setting files with the option `--dfconf [path/to/s
 If you run `[prefix]/bin/myproject-manage`, then local settings are expected in `[prefix]/etc/myproject/settings.py`.
 If you run directly from the source (without installing), local settings are expected in `working_dir/my_project_configuration.py`.
 
-
 And Pycharm (or other IDEs)?
 ----------------------------
 
@@ -96,7 +95,6 @@ Notes
   - interpolation of settings is also recursively processed for dicts, lists, tuples and sets.
   - You can use `djangofloor.utils.[DirectoryPath|FilePath]('{LOCAL_PATH}/static')`: required directories will be automatically created.
   - If you have a settings MY_SETTING and another called MY_SETTING_HELP, the latter will be used as help for `manage.py config`.
-
 
 Full list of settings
 ---------------------

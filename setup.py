@@ -20,7 +20,8 @@ with codecs.open(os.path.join(os.path.dirname(__file__), 'README.md'), encoding=
 entry_points = {'console_scripts': ['djangofloor-manage = djangofloor.scripts:manage',
                                     'djangofloor-gunicorn = djangofloor.scripts:gunicorn',
                                     'djangofloor-celery = djangofloor.scripts:celery',
-                                    'djangofloor-uswgi = djangofloor.scripts:uswgi', ]}
+                                    'djangofloor-uwsgi = djangofloor.scripts:uwsgi', ],
+                'distutils.commands': ['bdist_deb2 = djangofloor.management.commands.bdist_deb2:BdistDeb2']}
 
 requirements = ['Django>=1.8', 'django-allauth', 'gunicorn', 'django-bootstrap3', 'jsmin',
                 'django-debug-toolbar', 'django-admin-bootstrapped',

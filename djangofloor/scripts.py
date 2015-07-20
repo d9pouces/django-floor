@@ -38,7 +38,7 @@ def set_env():
 
     2) determine project-specific settings
 
-        project-specific settings are expected to be in the module {xxx}.floor_settings
+        project-specific settings are expected to be in the module {xxx}.defaults
         Can be overridden by the DJANGOFLOOR_PROJECT_SETTINGS environment variable.
 
     3) determine user-specific settings
@@ -87,8 +87,10 @@ def load_celery():
     :return:
     """
     from django.conf import settings
-    from djangofloor.celery import app
-    return app
+    if settings.USE_CELERY:
+        from djangofloor.celery import app
+        return app
+    return None
 
 
 def manage():
