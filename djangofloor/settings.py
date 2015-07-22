@@ -182,14 +182,9 @@ for module in floor_settings, project_settings, user_settings:
 
 # add extra installed app
 # noinspection PyUnresolvedReferences
-for y in OTHER_ALLAUTH, FLOOR_INSTALLED_APPS:
+for y in OTHER_ALLAUTH, FLOOR_INSTALLED_APPS, INSTALLED_APPS_SUFFIX:
     for x in y:
         # noinspection PyUnresolvedReferences
         if x and x not in INSTALLED_APPS:
             # noinspection PyUnresolvedReferences
             INSTALLED_APPS.append(x)
-
-if __name__ == '__main__':
-    import doctest
-
-    doctest.testmod()

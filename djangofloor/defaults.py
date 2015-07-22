@@ -7,13 +7,11 @@ The goal is to define valid settings out-of-the-box.
 """
 from __future__ import unicode_literals
 import os
-import sys
 
 """ Django settings for DjangoFloor project. """
 from djangofloor.utils import DirectoryPath, FilePath
 
 __author__ = 'Matthieu Gallet'
-from os.path import join, dirname, abspath
 from django.utils.translation import ugettext_lazy as _
 try:
     import ws4redis
@@ -299,13 +297,13 @@ INSTALLED_APPS = [
     'django_admin_bootstrapped',
     'django.contrib.admin',
     'bootstrap3',
-    'djangofloor',
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
     'pipeline',
     'debug_toolbar',
 ]
+INSTALLED_APPS_SUFFIX = ['djangofloor', ]
 
 if FLOOR_USE_WS4REDIS:
     # noinspection PyUnresolvedReferences
@@ -332,7 +330,7 @@ FLOOR_AUTHENTICATION_HEADER_HELP = 'HTTP header corresponding to the username (w
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 SECURE_PROXY_SSL_HEADER_HELP = 'A tuple representing a HTTP header/value combination that signifies a request is ' \
                                'secure. This controls the behavior of the request object’s is_secure() method.'
-X_FRAME_OPTIONS = 'DENY'
+X_FRAME_OPTIONS = 'SAMEORIGIN'
 SECURE_CONTENT_TYPE_NOSNIFF = True
 SECURE_BROWSER_XSS_FILTER = True
 SECURE_SSL_REDIRECT = False
