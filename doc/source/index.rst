@@ -65,19 +65,20 @@ Full table of contents
 ======================
 
 .. toctree::
-   :maxdepth: 1
+    :maxdepth: 1
 
-   installation
-   demo
-   tutorial
-   architecture
-   batteries
-   views
-   signals
-   settings
-   deployment
-   api/index
-   javascript
+    installation
+    demo
+    tutorial
+    architecture
+    batteries
+    views
+    signals
+    settings
+    deployment
+    packaging
+    api/index
+    javascript
 
 Indices and tables
 ==================
