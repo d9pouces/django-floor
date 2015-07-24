@@ -4,7 +4,6 @@
 """
 from __future__ import unicode_literals, print_function
 import codecs
-import io
 import os
 import shutil
 
@@ -12,7 +11,9 @@ from django.conf import settings
 from django.core.management import BaseCommand, call_command
 from django.template.loader import render_to_string
 from django.utils.module_loading import import_string
+
 from djangofloor.iniconf import OptionParser
+
 try:
     # noinspection PyCompatibility
     from configparser import ConfigParser
@@ -24,6 +25,7 @@ __author__ = 'Matthieu Gallet'
 
 
 class Command(BaseCommand):
+
     def add_arguments(self, parser):
         parser.add_argument('--apache', default=None, help='Generate an Apache configuration file.')
         parser.add_argument('--nginx', default=None, help='Generate a NGinx configuration file.')
@@ -48,10 +50,10 @@ class Command(BaseCommand):
         if static_dst:
             if os.path.isdir(settings.STATIC_ROOT):
                 shutil.rmtree(settings.STATIC_ROOT)
-            # call_command('collectstatic', interactive=False)
+            call_command('collectstatic', interactive=False)
             if os.path.isdir(static_dst):
                 shutil.rmtree(static_dst)
-            # shutil.copytree(settings.STATIC_ROOT, static_dst)
+            shutil.copytree(settings.STATIC_ROOT, static_dst)
             template_values['static_dst'] = static_dst
         for option_key, template_name in (('supervisor', 'djangofloor/commands/supervisor.conf'),
                                           ('apache', 'djangofloor/commands/apache.conf'),

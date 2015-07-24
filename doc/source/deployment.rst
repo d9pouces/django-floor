@@ -25,6 +25,8 @@ settings for SSL/HTTPS:
   * CSRF_COOKIE_SECURE = True
   * CSRF_COOKIE_HTTPONLY = True
 
+You can also check `cipherli <https://cipherli.st>`_ for good configurations.
+
 settings for HTTP authentication (Kerberos/Shibboleth/SSO/…)
 
   * FLOOR_AUTHENTICATION_HEADER = 'HTTP_REMOTE_USER'

@@ -77,12 +77,16 @@ class BdistDeb2(sdist_dsc):
         if stdeb_config.has_option('djangofloor', 'process_manager'):
             process_manager = stdeb_config.get('djangofloor', 'process_manager')
 
+        username = project_name
+        if stdeb_config.has_option('djangofloor', 'username'):
+            username = stdeb_config.get('djangofloor', 'username')
+
         os.environ['DJANGOFLOOR_PROJECT_NAME'] = project_name
         set_env()
         collect_static_dir = os.path.join(target_dir, 'gen_install', 'var', project_name, 'static')
         etc_dir = os.path.join(target_dir, 'gen_install', 'etc')
         gen_install_command = [sys.argv[0], 'gen_install', '--collectstatic', collect_static_dir]
-        gen_install_command += ['--user', project_name]
+        gen_install_command += ['--user', username]
         for extra_process in extra_processes:
             gen_install_command += ['--extra-process', extra_process]
         if frontend == 'nginx':
