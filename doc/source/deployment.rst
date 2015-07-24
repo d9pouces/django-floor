@@ -25,7 +25,7 @@ settings for SSL/HTTPS:
   * CSRF_COOKIE_SECURE = True
   * CSRF_COOKIE_HTTPONLY = True
 
-You can also check `cipherli <https://cipherli.st>`_ for good configurations.
+You can also check `cipherli <https://cipherli.st>`_ for good Apache/nginx configurations.
 
 settings for HTTP authentication (Kerberos/Shibboleth/SSO/…)
 
@@ -127,9 +127,7 @@ A good strategy is to run the rsync command daily with a monthly tar.gz archive:
     EOF
     mkdir -p [prefix]/var/myproject/
     SRC=`python manage.py config -m | grep MEDIA_ROOT | cut -f 3 -d ' '`
-
     tar -C $SRC -czf /backupdirectory/mediabackup.tar.gz . && logrotate -s [prefix]/var/myproject/mediarotate.state [prefix]/etc/myproject/mediarotate.conf
-
     rsync -arltDE $SRC /backupdirectory/media
 
 
@@ -191,17 +189,15 @@ Here is a simple configuration file for your project behind Nginx, assuming that
 
     server {
         listen       80;
-        server_name  my.project.name;
+        server_name  my.project.com;
         location /static/ {
-            autoindex        on;
             alias            /var/www/myproject/static/;
         }
         location /media/ {
-            autoindex        on;
             alias            /var/www/myproject/media/;
         }
         location / {
-            proxy_pass       http://localhost:9091;
+            proxy_pass       http://localhost:9000/;
             proxy_set_header Host               $host:$proxy_port;
             proxy_set_header X-Real-IP          $remote_addr;
             proxy_set_header X-Forwarded-Host   $host:$proxy_port;

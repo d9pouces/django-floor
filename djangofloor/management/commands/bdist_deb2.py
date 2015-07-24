@@ -26,9 +26,17 @@ __author__ = 'Matthieu Gallet'
 
 
 class BdistDeb2(sdist_dsc):
-    # description = "distutils command to create a Debian Django package"
+    description = "distutils command to create a Debian Django package"
 
     def run(self):
+        """Order of operations:
+
+            * create the source package with `sdist_dsc`
+            * update the Python dependencies
+            * run specific DjangoFloor command for extra Debian files (systemd, static files, …)
+            * add postinstall files
+            * build  a .deb package from the modified `sdist_dsc`
+        """
         # generate .dsc source pkg
         sdist_dsc.run(self)
         project_name = self.distribution.metadata.name
@@ -76,11 +84,11 @@ class BdistDeb2(sdist_dsc):
         process_manager = None
         if stdeb_config.has_option('djangofloor', 'process_manager'):
             process_manager = stdeb_config.get('djangofloor', 'process_manager')
-
         username = project_name
         if stdeb_config.has_option('djangofloor', 'username'):
             username = stdeb_config.get('djangofloor', 'username')
 
+        # prepare the use of the gen_install command
         os.environ['DJANGOFLOOR_PROJECT_NAME'] = project_name
         set_env()
         collect_static_dir = os.path.join(target_dir, 'gen_install', 'var', project_name, 'static')
@@ -105,6 +113,7 @@ class BdistDeb2(sdist_dsc):
             print('Invalid value for process manager: %s' % process_manager)
             raise ValueError
         execute_from_command_line(gen_install_command)
+        # add the copy of these new files to the Makefile
         extra_lines = ['\trsync -av gen_install/ %(root)s/']
 
         # rewrite rules file to append djangofloor extra info

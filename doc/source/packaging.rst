@@ -15,8 +15,7 @@ The simplest way for packaging is to use built-in Python tools.
 Debian / Ubuntu
 ---------------
 
-DjangoFloor offers a simple utility based on `stdeb` to package your complete application.
-However, this utility requires to be run on a Debian-based system, with `dh-make`.
+DjangoFloor offers a simple utility based on `stdeb` to package your complete application. First of all, you should look at the original `documentation <https://pypi.python.org/pypi/stdeb>`_. However, this utility requires to be run on a Debian-based system, with `dh-make`.
 
 .. code-block:: bash
 
@@ -39,7 +38,7 @@ However, this utility requires to be run on a Debian-based system, with `dh-make
     # ok, we can go on to build our package
     python setup.py bdist_deb2
 
-This command requires a configuration file, called `stdeb.cfg`. In addition of the options used by the original `bdist_stdeb` command, you can add this
+This command requires a configuration file, called `stdeb.cfg`. In addition to the options used by the original `bdist_stdeb` command, you can add this
 
 .. code-block:: ini
 

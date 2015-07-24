@@ -51,6 +51,9 @@ It allows you to use `Celery <http://celery.readthedocs.org>`_ for background ta
 :doc:`deployment`
     How to deploy a production website
 
+:doc:`packaging`
+    How to create packages for Linux distributions
+
 :doc:`api/index`
     The complete API documentation, organized by modules
 
