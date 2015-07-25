@@ -1,9 +1,10 @@
 # coding=utf-8
 """Authentication backend used for HTTP authentication.
 
-Automatically add a specified group to newly-created users.
-The name of the added group is defined by the setting FLOOR_DEFAULT_GROUP_NAME.
-Set it to `None` if you do not want any group to be added by default.
+Check :class:`django.contrib.auth.backends.RemoteUserBackend` for a more detailed explanation.
+
+Automatically add a specified group to newly-created users. The name of this default group is defined by the setting FLOOR_DEFAULT_GROUP_NAME.
+Set it to `None` if you do not want a default group for new users.
 
 """
 from __future__ import unicode_literals

@@ -47,7 +47,7 @@ If your project is uploaded to pypi or to an internal mirror:
     mkvirtualenv myproject_prod
     pip install myproject_prod
 
-Otherwise, you should copy the source (or git clone the project):
+Otherwise, you can just copy the source (or git clone the project):
 
 .. code-block:: bash
 

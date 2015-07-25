@@ -29,6 +29,12 @@ def signal_task(signal_name, request, from_client, kwargs):
     """Unique Celery tasks, transparently called for delayed signal calls.
 
     You should not have to use it.
+
+    :type signal_name: :class:`str`
+    :param request: a :class:`djangofloor.decorators.SignalRequest` serialized as a :class:`dict` object
+    :type request: :class:`dict`
+    :type from_client: :class:`bool`
+    :type kwargs: :class:`dict`
     """
     import_signals()
     request = SignalRequest(**request)
@@ -45,6 +51,8 @@ def signal_task(signal_name, request, from_client, kwargs):
 
 @lru_cache()
 def import_signals():
+    """Import all `signals.py` files to register signals.
+    """
     for app in settings.INSTALLED_APPS:
         try:
             import_module('%s.signals' % app)
@@ -76,7 +84,9 @@ def call(signal_name, request, sharing=None, **kwargs):
         * Python receivers through Celery (thanks to the `delayed` argument)
         * JavaScript receivers (through websockets)
 
-    Example::
+    Example:
+
+    .. code-block:: python
 
         from djangofloor.tasks import call, SESSION
         from djangofloor.decorators import connect
@@ -92,7 +102,7 @@ def call(signal_name, request, sharing=None, **kwargs):
     :param signal_name:
     :type signal_name: :class:`str`
     :param request: initial request, giving informations about HTTP sessions and its user
-    :type request: :class:`SignalRequest` or :class:`django.http.HttpRequest`
+    :type request: :class:`djangofloor.decorators.SignalRequest` or :class:`django.http.HttpRequest`
     :param sharing:
         * `None` : does not propagate to the JavaScript (client) side
         * `USER`, `SESSION`, `BROADCAST` : propagate to the request user, only to its current session, or to all currently logged-in users
@@ -114,7 +124,7 @@ def df_call(signal_name, request, sharing, from_client, kwargs):
     :param signal_name:
     :type signal_name: :class:`str`
     :param request: initial request, giving informations about HTTP sessions and its user
-    :type request: :class:`SignalRequest` or :class:`django.http.HttpRequest`
+    :type request: :class:`djangofloor.decorators.SignalRequest` or :class:`django.http.HttpRequest`
     :param sharing:
         * `None` : does not propagate to the JavaScript (client) side
         * `USER`, `SESSION`, `BROADCAST` : propagate to the request user, only to its current session, or to all currently logged-in users
@@ -124,7 +134,7 @@ def df_call(signal_name, request, sharing, from_client, kwargs):
     :param kwargs: arguments for the receiver
     :return:
         if sharing != `RETURN`: return `None`
-        else: call `df_call` on each element of the call result
+        else: call `djangofloor.tasks.df_call` on each element of the call result
     """
     import_signals()
     result = []

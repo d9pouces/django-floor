@@ -38,20 +38,20 @@ DjangoFloor offers a simple utility based on `stdeb` to package your complete ap
     # ok, we can go on to build our package
     python setup.py bdist_deb2
 
-This command requires a configuration file, called `stdeb.cfg`. In addition to the options used by the original `bdist_stdeb` command, you can add this
+This command requires a configuration file `stdeb.cfg` at in your project root . In addition to the options used by the original `bdist_stdeb` command, you can add this
 
 .. code-block:: ini
 
     [djangofloor]
-    processes = demo-gunicorn:/usr/bin/demo-gunicorn
-        demo-celery:/usr/bin/demo-celery worker
+    processes = myproject-gunicorn:/usr/bin/myproject-gunicorn
+        myproject-celery:/usr/bin/myproject-celery worker
     frontend = nginx
     process_manager = supervisor
-    username = demo
+    username = myproject
 
 There are basically four available options:
 
-    * `processes`: a list of process to run (like the gunicorn process),
+    * `processes`: a list of processes to run (like the gunicorn process),
     * `frontend`: the frontend server (currently `apache` or `nginx`),
     * `process_manager`: the process manager (currently `supervisor` or `systemd`),
     * `username`: the username used for the process.

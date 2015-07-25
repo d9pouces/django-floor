@@ -60,13 +60,7 @@ class BdistDeb2(sdist_dsc):
 
         stdeb_config = ConfigParser.ConfigParser()
         stdeb_config.read(['stdeb.cfg'])
-        if stdeb_config.has_option('DEFAULT', 'depends'):
-            new_depends = stdeb_config.get('DEFAULT', 'depends')
-            with codecs.open(os.path.join(target_dir, 'debian/control'), 'r', encoding='utf-8') as control_fd:
-                control = control_fd.read()
-            control = control.replace('${misc:Depends}, ${python:Depends}', new_depends)
-            with codecs.open(os.path.join(target_dir, 'debian/control'), 'w', encoding='utf-8') as control_fd:
-                control_fd.write(control)
+
         extra_processes = []
         if stdeb_config.has_option('djangofloor', 'processes'):
             extra_processes = []
@@ -115,6 +109,26 @@ class BdistDeb2(sdist_dsc):
         execute_from_command_line(gen_install_command)
         # add the copy of these new files to the Makefile
         extra_lines = ['\trsync -av gen_install/ %(root)s/']
+
+        # todo : ajouter Apache/nginx/systemd/supervisor en dépendance
+        with codecs.open(os.path.join(target_dir, 'debian/control'), 'r', encoding='utf-8') as control_fd:
+            control = control_fd.read()
+        old_depends = '${misc:Depends}, ${python:Depends}'
+        if stdeb_config.has_option('DEFAULT', 'depends'):
+            new_depends = stdeb_config.get('DEFAULT', 'depends')
+        else:
+            new_depends = old_depends
+        if process_manager == 'supervisor':
+            new_depends += ', supervisor'
+        elif process_manager == 'systemd':
+            new_depends += ', systemd'
+        if frontend == 'apache':
+            new_depends += ', apache2'
+        elif frontend == 'nginx':
+            new_depends += ', nginx'
+        control = control.replace(old_depends, new_depends)
+        with codecs.open(os.path.join(target_dir, 'debian/control'), 'w', encoding='utf-8') as control_fd:
+            control_fd.write(control)
 
         # rewrite rules file to append djangofloor extra info
         rules_filename = os.path.join(target_dir, 'debian', 'rules')

@@ -1,5 +1,5 @@
 # coding=utf-8
-"""Define an AdminEmailHandler that do not send too many e-mails.
+"""Overrides :class:`django.utils.log.AdminEmailHandler` to avoid flooding admin with many e-mails.
 
 If an e-mail with the same object has already been sent in the last 10 minutes, then nothing is done.
 This duration can be configured (argument `min_interval`).

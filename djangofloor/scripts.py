@@ -13,8 +13,7 @@ import sys
 __author__ = 'Matthieu Gallet'
 
 
-# noinspection PyShadowingBuiltins
-def check_extra_option(name, default, *argnames):
+def __check_extra_option(name, default, *argnames):
     parser = ArgumentParser(usage="%(prog)s subcommand [options] [args]", add_help=False)
     parser.add_argument(*argnames, action='store', default=default)
     options, extra_args = parser.parse_known_args()
@@ -22,7 +21,7 @@ def check_extra_option(name, default, *argnames):
     return getattr(options, name)
 
 
-def set_default_option(options, name):
+def __set_default_option(options, name):
     option_name = name.replace('_', '-')
     if getattr(options, name):
         sys.argv += ['--%s' % option_name, getattr(options, name)]
@@ -63,7 +62,7 @@ def set_env():
         project_name = script_re.group(1)
     else:
         project_name = 'djangofloor'
-    project_name = check_extra_option('dfproject', project_name, '--dfproject')
+    project_name = __check_extra_option('dfproject', project_name, '--dfproject')
     os.environ.setdefault('DJANGOFLOOR_PROJECT_DEFAULTS', '%s.defaults' % project_name)
     os.environ.setdefault('DJANGOFLOOR_PROJECT_NAME', project_name)
 
@@ -74,7 +73,7 @@ def set_env():
     if not os.path.isfile(ini_settings_path):
         ini_settings_path = '%s/etc/%s/settings.ini' % (sys.prefix, project_name)
 
-    python_settings_path = check_extra_option('dfconf', os.path.abspath(python_settings_path), '--dfconf')
+    python_settings_path = __check_extra_option('dfconf', os.path.abspath(python_settings_path), '--dfconf')
     os.environ.setdefault("DJANGOFLOOR_PYTHON_SETTINGS", python_settings_path)
     os.environ.setdefault("DJANGOFLOOR_INI_SETTINGS", os.path.abspath(ini_settings_path))
     os.environ.setdefault("DJANGOFLOOR_MAPPING", '%s.iniconf.INI_MAPPING' % project_name)
@@ -84,7 +83,6 @@ def set_env():
 def load_celery():
     """ Import Celery application unless Celery is disabled.
     Allow to automatically load tasks
-    :return:
     """
     from django.conf import settings
     if settings.USE_CELERY:
@@ -125,10 +123,10 @@ def gunicorn():
                         help='Front-end\'s IPs from which allowed accept proxy requests (comma separate)')
     options, extra_args = parser.parse_known_args()
     sys.argv[1:] = extra_args
-    set_default_option(options, 'bind')
-    set_default_option(options, 'forwarded_allow_ips')
-    set_default_option(options, 'timeout')
-    set_default_option(options, 'proxy_allow_from')
+    __set_default_option(options, 'bind')
+    __set_default_option(options, 'forwarded_allow_ips')
+    __set_default_option(options, 'timeout')
+    __set_default_option(options, 'proxy_allow_from')
     application = 'djangofloor.wsgi_http:application'
     if application not in sys.argv:
         sys.argv.append(application)
@@ -143,7 +141,7 @@ def celery():
     parser.add_argument('-A', '--app', action='store', default='djangofloor', help=settings.BIND_ADDRESS_HELP)
     options, extra_args = parser.parse_known_args()
     sys.argv[1:] = extra_args
-    set_default_option(options, 'app')
+    __set_default_option(options, 'app')
     celery_main(sys.argv)
 
 

@@ -7,6 +7,7 @@ from djangofloor.tasks import call, SESSION, BROADCAST, USER
 
 __author__ = 'Matthieu Gallet'
 
+
 # noinspection PyUnusedLocal
 @connect(path='demo.test_signal', auth_required=False)
 def test_signal(request):

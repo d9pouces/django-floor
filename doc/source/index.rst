@@ -6,22 +6,22 @@ Overview
 
 
 DjangoFloor helps you to easily create new website with the excellent framework `Django <https://www.djangoproject.com>`_.
-However, we think that Django suffer from different drawbacks:
+However, Django suffers from different drawbacks:
 
-    * websites are complex to deploy,
+    * websites are complex to deploy in production,
     * JavaScript is somewhat hard to use for integrating dynamic parts in a webpage,
     * several other libraries are almost required,
     * you need a lot of code which will be common to all your projects.
 
 We try to solve these problems:
 
-    * a system of settings using project settings and local configuration file,
+    * a system of settings based on default project settings and local configuration files,
     * an easy-to-use signal system allowing to call Python or Javascript from Python or Javascript,
     * some common libraries are set as dependencies,
     * all common code are in a unique library that will be included into your projects.
 
-Default configuration assume that you use `Redis <http://redis.io>`_ as secondary database, alongside a more classical SQL like PostgreSQL or MySQL.
-It allows you to use `Celery <http://celery.readthedocs.org>`_ for background tasks out-of-box.
+Default configuration assumes that you use `Redis <http://redis.io>`_ as secondary database, alongside a more classical SQL like `PostgreSQL` or `MySQL`.
+Everything is ready to use `Celery <http://celery.readthedocs.org>`_ for background tasks.
 
 
 :doc:`installation`

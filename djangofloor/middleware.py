@@ -27,10 +27,10 @@ class IEMiddleware(object):
 
 
 class RemoteUserMiddleware(BaseRemoteUserMiddleware):
-    """`django.contrib.auth.middleware.RemoteUserMiddleware` but:
+    """Like :class:`django.contrib.auth.middleware.RemoteUserMiddleware` but:
 
-    can use any header defined in the settings,
-    add a `df_remote_authenticated` attribute to the request (set to `True` if the user has been authenticated via the header)
+    * can use any header defined by the setting `FLOOR_AUTHENTICATION_HEADER`,
+    * add a `df_remote_authenticated` attribute to the request (`True` if the user has been authenticated via the header)
     """
     header = settings.FLOOR_AUTHENTICATION_HEADER
 

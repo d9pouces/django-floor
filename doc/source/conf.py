@@ -265,9 +265,8 @@ epub_copyright = '2015, Matthieu Gallet'
 # Allow duplicate toc entries.
 # epub_tocdup = True
 #
-intersphinx_mapping = {}
-
-if __name__ == '__main__':
-    import doctest
-
-    doctest.testmod()
+intersphinx_mapping = {
+    'python': ('http://docs.python.org/3.5/', None),
+    'sphinx': ('http://sphinx.pocoo.org/', None),
+    'django18': ('http://docs.djangoproject.com/en/dev/', 'http://docs.djangoproject.com/en/1.8/_objects/'),
+}

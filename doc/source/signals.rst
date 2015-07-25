@@ -138,7 +138,7 @@ In addition of the degraded mode without Redis, using a Redis server allows to m
 
     * use delayed (Celery) tasks,
     * call Javascript signals anywhere from Python code (including in delayed tasks) by activating a regular polling from JS.
-    However, you can only activate JS signals on a given session (probably the one that sent the first `SignalRequest`).
+      However, you can only activate JS signals on a given session (probably the one that sent the first `SignalRequest`).
 
 You activate a regular polling by setting `WS4REDIS_EMULATION_INTERVAL` to a positive value. This interval is in milliseconds!
 Do not set it below 1000 if you do not want to flood your webserver. Leave it to 0 to desactivate this behaviour.

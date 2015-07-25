@@ -31,6 +31,7 @@ def read_file_in_chunks(fileobj, chunk_size=32768):
     """ read a file object in chunks of the given size.
 
     Return an iterator of data
+
     :param fileobj:
     :param chunk_size: max size of each chunk
     :type chunk_size: `int`
@@ -72,6 +73,7 @@ def signal_call(request, signal):
     Arguments are passed in the request body, serialized as JSON.
 
     :param signal: name of the called signal
+    :type signal: :class:`str`
     """
     import_signals()
     if request.body:
@@ -87,7 +89,9 @@ def signal_call(request, signal):
 
 @never_cache
 def get_signal_calls(request):
-    """ Regularly called by JS code when websockets are not available. Allow Python code to call JS signals.
+    """ Regularly called by JS code when websockets are not available. Allows Python code to call JS signals.
+
+    The polling frequency is set with `WS4REDIS_EMULATION_INTERVAL` (in milliseconds).
 
     Return all signals called by Python code as a JSON-list
     """
@@ -95,12 +99,11 @@ def get_signal_calls(request):
 
 
 def send_file(filepath, mimetype=None, force_download=False):
-    """Send a static file. This is not a Django view, but rather a function that is called at the end of a view.
+    """Send a local file. This is not a Django view, but a function that is called at the end of a view.
 
-    If `settings.USE_X_SEND_FILE` (mod_xsendfile is a mod of Apache), then return an empty HttpResponse with the correct header.
-    The file is directly handled by Apache instead of Python (that is more efficient).
-    If `settings.X_ACCEL_REDIRECT_ARCHIVE` is defined (as a list of tuple (directory, alias_url)) and filepath is in one of the directories,
-        return an empty HttpResponse with the correct header. This is only available with Nginx.
+    If `settings.USE_X_SEND_FILE` (mod_xsendfile is a mod of Apache), then return an empty HttpResponse with the correct header. The file is directly handled by Apache instead of Python.
+    If `settings.X_ACCEL_REDIRECT_ARCHIVE` is defined (as a list of tuple (directory, alias_url)) and filepath is in one of the directories, return an empty HttpResponse with the correct header.
+    This is only available with Nginx.
 
     Otherwise, return a StreamingHttpResponse to avoid loading the whole file in memory.
 

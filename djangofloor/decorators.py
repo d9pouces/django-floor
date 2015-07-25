@@ -1,11 +1,11 @@
 # coding=utf-8
-"""Define the decorator for connecting Python code to signals, a `SignalRequest` which can be easily serialized and is lighter than a `django.http.HttpRequest`,
+"""Define the decorator for connecting Python code to signals, a :class:`djangofloor.decorators.SignalRequest` which can be easily serialized and is lighter than a :class:`django.http.HttpRequest`,
 and some code to convert serialized data sent by Javascript to something useful in Python.
 
-Usage of the decorator
-**********************
+Using the decorator
+*******************
 
-The decorator `connect` let you connect any Python function to a signal (which is only a text string).
+The decorator :func:`djangofloor.decorators.connect` let you connect any Python function to a signal (which is only a text string).
 Signals are automatically discovered, as soon as there are in files `signals.py` in any app listed in the setting `INSTALLED_APPS` (like `admin.py` or `models.py`).
 
 To use this decorator, create the file `myproject/signals.py`::
@@ -65,8 +65,7 @@ logger = logging.getLogger('djangofloor.request')
 
 
 class RE(object):
-    def __init__(self, value, caster=None, flags=0):
-        """ used to check in a string value match a given regexp.
+    """ used to check in a string value match a given regexp.
 
     Example (requires Python 3.2+), for a function that can only handle a string on the form 123a456:
 
@@ -79,13 +78,14 @@ class RE(object):
     Your code wan't be called if value has not the right form.
 
 
-        :param value: the pattern of the regexp
-        :type value: `str`
-        :param caster: if not `None`, any callable applied to the value (if valid)
-        :type caster: `callable` or `None`
-        :param flags: regexp flags passed to `re.compile`
-        :type flags: `int`
-        """
+    :param value: the pattern of the regexp
+    :type value: `str`
+    :param caster: if not `None`, any callable applied to the value (if valid)
+    :type caster: `callable` or `None`
+    :param flags: regexp flags passed to `re.compile`
+    :type flags: `int`
+    """
+    def __init__(self, value, caster=None, flags=0):
         self.caster = caster
         self.regexp = re.compile(value, flags=flags)
 
@@ -110,7 +110,7 @@ class Choice(object):
 
     Your code wan't be called if value is not True or False.
 
-    `caster` is an optional argument (a callable to convert data before checking its validity).
+    :param caster: callable to convert the provided deserialized JSON data before checking its validity.
     """
     def __init__(self, values, caster=None):
         self.values = set(values)
@@ -126,7 +126,7 @@ class Choice(object):
 class SerializedForm(object):
     """Transform values sent by JS to a Django form.
 
-    Given a form and a `list` of `dict`, transforms the `list` into a :class:`django.http.QueryDict` and initialize the form with it.
+    Given a form and a :class:`list` of :class:`dict`, transforms the :class:`list` into a :class:`django.http.QueryDict` and initialize the form with it.
 
     >>> class SimpleForm(forms.Form):
     ...    field = forms.CharField()
@@ -184,24 +184,23 @@ class SignalRequest(object):
     """ Store the username and the session key and must be supplied to any Python signal call.
 
     Can be constructed from a standard :class:`django.http.HttpRequest`.
+
+    :param username: should be User.username
+    :type username: :class:`str`
+    :param session_key: the session key, unique to a opened browser window (useful when a user has multiple opened windows)
+    :type session_key: :class:`str`
+    :param user_pk: primary key of the user (for easy ORM queries)
+    :type user_pk: :class:`int`
+    :param is_superuser: is the user a superuser?
+    :type is_superuser: :class:`bool`
+    :param is_staff: belongs the user to the staff?
+    :type is_staff: :class:`bool`
+    :param is_active: is the user active?
+    :type is_active: :class:`bool`
+    :param perms: list of "app_name.permission_name" (optional)
+    :type perms: :class:`list`
     """
     def __init__(self, username, session_key, user_pk=None, is_superuser=False, is_staff=False, is_active=False, perms=None):
-        """
-        :param username: should be User.username
-        :type username: :class:`str`
-        :param session_key: the session key, unique to a opened browser window (useful when a user has multiple opened windows)
-        :type session_key: :class:`str`
-        :param user_pk: primary key of the user (for easy ORM queries)
-        :type user_pk: :class:`int`
-        :param is_superuser: is the user a superuser?
-        :type is_superuser: :class:`bool`
-        :param is_staff: belongs the user to the staff?
-        :type is_staff: :class:`bool`
-        :param is_active: is the user active?
-        :type is_active: :class:`bool`
-        :param perms: list of "app_name.permission_name" (optional)
-        :type perms:
-        """
         self.username = username
         self.session_key = session_key
         self.user_pk = user_pk
@@ -213,18 +212,20 @@ class SignalRequest(object):
 
     @classmethod
     def from_user(cls, user):
-        """ Create a `SignalRequest` from a valid User. The SessionKey is set to `None`
+        """ Create a :class:`djangofloor.decorators.SignalRequest` from a valid User. The SessionKey is set to `None`
 
         :param user: any Django user
-        :rtype: `SignalRequest`
+        :type user: :class:`django.contrib.auth.models.AbstractUser`
+        :rtype: :class:`djangofloor.decorators.SignalRequest`
         """
         return cls(user.get_username(), None, user_pk=user.pk, is_superuser=user.is_superuser, is_staff=user.is_staff,
                    is_active=user.is_active)
 
     def to_dict(self):
-        """Convert this SignalRequest to a dict which can be provided to JSON.
-        :return:
-        :rtype:
+        """Convert this :class:`djangofloor.decorators.SignalRequest` to a :class:`dict` which can be provided to JSON.
+
+        :return: a dict ready to be serialized in JSON
+        :rtype: :class:`dict`
         """
         result = {}
         result.update(self.__dict__)
@@ -251,7 +252,7 @@ class SignalRequest(object):
 
     @property
     def perms(self):
-        """`set` of all perms of the user (set of "app_label.codename")"""
+        """:class:`set` of all perms of the user (set of "app_label.codename")"""
         if not self.user_pk:
             return set()
         elif self._perms is not None:
@@ -267,10 +268,14 @@ class SignalRequest(object):
 
     @property
     def template_perms(self):
-        """`dict` of perms, to be used in templates.
+        """:class:`dict` of perms, to be used in templates.
 
-        Example::
-        {% if request.template_perms.app_label.codename %}...{% endif %}
+        Example:
+
+        .. code-block:: html
+
+            {% if request.template_perms.app_label.codename %}...{% endif %}
+
         """
         if self._template_perms is None:
             result = {}
@@ -282,12 +287,13 @@ class SignalRequest(object):
 
     @classmethod
     def from_request(cls, request):
-        """ return a `SignalRequest` from a Django request.
+        """ return a :class:`djangofloor.decorators.SignalRequest` from a :class:`django.http.HttpRequest`.
 
-        If the request already is a SignalRequest, then it is returned as-is (not copied).
+        If the request already is a :class:`djangofloor.decorators.SignalRequest`, then it is returned as-is (not copied).
+
         :param request: standard Django request
-        :type request: :class:`django.http.HttpRequest` or :class:`SignalRequest`
-        :return:
+        :type request: :class:`django.http.HttpRequest` or :class:`djangofloor.decorators.SignalRequest`
+        :return: a valid request
         :rtype: :class:`djangofloor.decorators.SignalRequest`
         """
         if isinstance(request, SignalRequest):
@@ -363,14 +369,16 @@ class RedisCallWrapper(object):
 
 
 def connect(fn=None, path=None, delayed=False, allow_from_client=True, auth_required=True):
-    """Decorator to use in your Python code. Use it in any file named `signals.py` in a installed Django app.::
+    """Decorator to use in your Python code. Use it in any file named `signals.py` in a installed Django app.
+
+    .. code-block:: python
 
         @connect(path='myproject.signal.name', allow_from_client=True, delayed=False)
         def function(request, arg1, arg2, **kwargs):
             pass
 
     :param fn: the Python function to connect to the signal
-    :type fn: any callable
+    :type fn: :class:`callable`
     :param path: the name of the signal
     :type path: :class:`unicode` or :class:`str`
     :param delayed: should this code be called in an asynchronous way (through Celery)? default to `False`
@@ -380,7 +388,7 @@ def connect(fn=None, path=None, delayed=False, allow_from_client=True, auth_requ
     :param auth_required: can be called only from authenticated client? default to `True`
     :type auth_required: :class:`bool`
     :return: a wrapped function
-    :rtype: `callable`
+    :rtype: :class:`callable`
     """
     wrapped = lambda fn_: RedisCallWrapper(fn_, path=path, delayed=delayed, allow_from_client=allow_from_client, auth_required=auth_required)
     if fn is not None:

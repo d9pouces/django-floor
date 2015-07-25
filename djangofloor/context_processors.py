@@ -13,11 +13,12 @@ __author__ = 'Matthieu Gallet'
 
 def context_base(request):
     """Provide the following variables to templates when you RequestContext:
-        * 'df_remote_authenticated': True if the user has been authenticated by the `RemoteUserMiddleware` from DjangoFloor
+        * 'df_remote_authenticated': `True` if the user has been authenticated by :class:`djangofloor.middleware.RemoteUserMiddleware`.
         * 'df_project_name': name of your project, as defined in settings.FLOOR_PROJECT_NAME,
-        * 'df_user': the user, of course,
-        * 'df_language_code': settings.LANGUAGE_CODE,
-        * 'df_user_agent': the User Agent or '' if not defined in the request,
+        * 'df_user': the user (:class:`django.contrib.auth.models.AbstractUser`),
+        * 'df_language_code': settings.LANGUAGE_CODE (:class:`str`),
+        * 'df_user_agent': the User Agent or '' if not defined in the request (:class:`str`),
+        * 'df_index_view': the default view name (:class:`str`)
 
     :param request: a HTTP request
     :type request: :class:`django.http.HttpRequest`
