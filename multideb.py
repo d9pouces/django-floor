@@ -139,7 +139,7 @@ def prepare_package(package_name, package_version, deb_dest_dir, multideb_config
             new_config_parser.set('DEFAULT', option_name, option_value)
         with open('stdeb.cfg', 'wb') as fd:
             new_config_parser.write(fd)
-    check_call(['python', 'setup.py', '--command-packages', 'stdeb.command', 'bdist_deb'])
+    check_call(['python', 'setup.py', '--command-packages', 'stdeb.command', 'sdist_dsc'])
 
     # find the actual debian source dir
     directories = [x for x in os.listdir('deb_dist') if x != 'tmp_py2dsc' and os.path.isdir(os.path.join('deb_dist', x))]
@@ -171,6 +171,12 @@ def remove_tests_dir(package_name, package_version, deb_src_dir):
     """ Post source hook for removing `tests` dir """
     if os.path.isdir('tests'):
         shutil.rmtree('tests')
+
+
+# noinspection PyUnusedLocal
+def fix_celery(package_name, package_version, deb_src_dir):
+    basename = 'debian/python-celery/usr/share/doc/python-celery/changelog'
+    shutil.copy(os.path.join(deb_src_dir, basename + '.Debian'), os.path.join(deb_src_dir, basename))
 
 
 if __name__ == '__main__':
