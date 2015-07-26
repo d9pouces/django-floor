@@ -11,7 +11,7 @@ import glob
 from importlib import import_module
 import os
 import shutil
-from tempfile import NamedTemporaryFile, mkdtemp
+from tempfile import mkdtemp
 
 # noinspection PyPackageRequirements
 from pip import get_installed_distributions
@@ -20,7 +20,7 @@ from pip._vendor.pkg_resources import Distribution
 # noinspection PyPackageRequirements
 from stdeb.downloader import get_source_tarball
 # noinspection PyPackageRequirements
-from stdeb.util import check_call
+from stdeb.util import check_call, expand_sdist_file
 
 try:
     import configparser
@@ -48,35 +48,6 @@ def import_string(dotted_path):
         return getattr(module, class_name)
     except AttributeError:
         raise ImportError('Module "%s" does not define a "%s" attribute/class' % (module_path, class_name))
-
-
-class TemporaryDirectory(object):
-    """Create and return a temporary directory.  This has the same
-    behavior as mkdtemp but can be used as a context manager.  For
-    example:
-
-        with TemporaryDirectory() as tmpdir:
-            ...
-
-    Upon exiting the context, the directory and everything contained
-    in it are removed.
-    """
-
-    # noinspection PyShadowingBuiltins
-    def __init__(self, suffix="", prefix='tmp', dir=None, delete=True):
-        self.name = mkdtemp(suffix, prefix, dir)
-        self.delete = delete
-
-    def __repr__(self):
-        return "<{} {!r}>".format(self.__class__.__name__, self.name)
-
-    def __enter__(self):
-        return self.name
-
-    # noinspection PyUnusedLocal
-    def __exit__(self, exc, value, tb):
-        if self.delete:
-            shutil.rmtree(self.name)
 
 
 def main():
@@ -124,16 +95,14 @@ def main():
 
     # create a temp dir and do the work
     cwd = os.getcwd()
-    with TemporaryDirectory(delete=not args.keep_temp) as temp_dir:
-        # simplest way for storing .tar.gz files in a temp dir
+    for package_name, package_version in distribution_list.items():
+        if normalize_package_name(package_name) in excluded_packages:
+            continue
+        temp_dir = mkdtemp()
         os.chdir(temp_dir)
-        for package_name, package_version in distribution_list.items():
-            if normalize_package_name(package_name) in excluded_packages:
-                continue
-            prepare_package(package_name, package_version, deb_dest_dir, config_parser, allow_unsafe_download)
+        prepare_package(package_name, package_version, deb_dest_dir, config_parser, allow_unsafe_download)
+        shutil.rmtree(temp_dir)
     os.chdir(cwd)
-    if args.keep_temp:
-        print('Temporary directory: %s' % temp_dir)
 
 
 def prepare_package(package_name, package_version, deb_dest_dir, multideb_config_parser, allow_unsafe_download):
@@ -152,30 +121,33 @@ def prepare_package(package_name, package_version, deb_dest_dir, multideb_config
     assert isinstance(multideb_config_parser, configparser.ConfigParser)
     print('downloading %s %s' % (package_name, package_version))
     filename = get_source_tarball(package_name, verbose=False, release=package_version, allow_unsafe_download=allow_unsafe_download)
-    # create a Debian source
-    with NamedTemporaryFile() as temp_config_file:
-        # config file for each package?
-        if multideb_config_parser.has_section(package_name):
-            new_config_parser = configparser.ConfigParser()
-            new_config_parser.add_section('DEFAULT')
-            for option_name in multideb_config_parser.options(package_name):
-                option_value = multideb_config_parser.get(package_name, option_name)
-                new_config_parser.set('DEFAULT', option_name, option_value)
-            new_config_parser.write(temp_config_file)
-        temp_config_file.flush()
-        if os.path.isdir('deb_dist'):
-            shutil.rmtree('deb_dist')
-        check_call(['py2dsc', '-x', temp_config_file.name, filename])
+    # expand source file
+    expand_sdist_file(os.path.abspath(filename), cwd=os.getcwd())
+    directories = [x for x in os.listdir(os.getcwd()) if os.path.isdir(os.path.join(os.getcwd(), x))]
+    if len(directories) != 1:
+        raise ValueError('Require a single directory in %s' % os.getcwd())
+    os.chdir(directories[0])
+    run_hook(package_name, package_version, 'pre_source', None, multideb_config_parser)
+
+    # config file for each package?
+    if multideb_config_parser.has_section(package_name):
+        new_config_parser = configparser.ConfigParser()
+        new_config_parser.read(['stdeb.cfg'])
+        # new_config_parser.add_section('DEFAULT')
+        for option_name in multideb_config_parser.options(package_name):
+            option_value = multideb_config_parser.get(package_name, option_name)
+            new_config_parser.set('DEFAULT', option_name, option_value)
+        with open('stdeb.cfg', 'wb') as fd:
+            new_config_parser.write(fd)
+    check_call(['python', 'setup.py', '--command-packages', 'stdeb.command', 'bdist_deb'])
+
     # find the actual debian source dir
-    directories = [x for x in os.listdir('deb_dist') if x != 'tmp_py2dsc']
+    directories = [x for x in os.listdir('deb_dist') if x != 'tmp_py2dsc' and os.path.isdir(os.path.join('deb_dist', x))]
     if len(directories) != 1:
         raise ValueError('Require a single directory in %s/deb_dist' % os.getcwd())
     debian_source_dir = os.path.abspath(os.path.join('deb_dist', directories[0]))
     # check if we have a post-source to execute
-    if multideb_config_parser.has_option(package_name, 'post_source'):
-        post_source_hook = import_string(multideb_config_parser.get(package_name, 'post_source'))
-        post_source_hook(package_name, package_version, debian_source_dir)
-
+    run_hook(package_name, package_version, 'post_source', debian_source_dir, multideb_config_parser)
     # build .deb from the source
     check_call(['dpkg-buildpackage', '-rfakeroot', '-uc', '-b'], cwd=debian_source_dir)
 
@@ -186,12 +158,19 @@ def prepare_package(package_name, package_version, deb_dest_dir, multideb_config
     os.rename(packages[0], os.path.join(deb_dest_dir, os.path.basename(packages[0])))
 
 
+def run_hook(package_name, package_version, hook_name, debian_source_dir, multideb_config_parser):
+    if multideb_config_parser.has_option(package_name, hook_name):
+        post_hook_name = multideb_config_parser.get(package_name, hook_name)
+        print("Using %s as %s hook for %s" % (post_hook_name, hook_name, package_name))
+        post_source_hook = import_string(post_hook_name)
+        post_source_hook(package_name, package_version, debian_source_dir)
+
+
 # noinspection PyUnusedLocal
 def remove_tests_dir(package_name, package_version, deb_src_dir):
     """ Post source hook for removing `tests` dir """
-    test_dir = os.path.join(deb_src_dir, 'tests')
-    if os.path.isdir(test_dir):
-        shutil.rmtree(test_dir)
+    if os.path.isdir('tests'):
+        shutil.rmtree('tests')
 
 
 if __name__ == '__main__':
