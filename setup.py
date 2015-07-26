@@ -23,9 +23,17 @@ entry_points = {'console_scripts': ['djangofloor-manage = djangofloor.scripts:ma
                                     'djangofloor-uwsgi = djangofloor.scripts:uwsgi', ],
                 'distutils.commands': ['bdist_deb2 = djangofloor.management.commands.bdist_deb2:BdistDeb2']}
 
-requirements = ['Django>=1.8.0', 'django-allauth>=0.19.0', 'gunicorn>=19.3.0', 'django-bootstrap3>=5.0.0', 'jsmin>=2.1.1',
-                'django-debug-toolbar>=1.2.0', 'django-admin-bootstrapped>=2.5.0', 'django-pipeline>=1.5.2', 'celery>=3.1.13',
-                'django-redis>=3.8.3', 'django-redis-cache>=0.13.1', ]
+requirements = ['Django>=1.8.0',
+                'django-allauth>=0.19.0',
+                'gunicorn>=0.14.5',
+                'django-bootstrap3>=5.0.0',
+                'jsmin>=2.1.1',
+                'django-debug-toolbar>=1.2.0',
+                'django-admin-bootstrapped>=2.5.0',
+                'django-pipeline>=1.5.2',
+                'celery>=3.1.13',
+                'django-redis>=3.8.3',
+                'django-redis-cache>=0.13.1', ]
 PY2 = sys.version_info[0] == 2
 
 extras_require = {}
