@@ -73,7 +73,6 @@ setup(
     classifiers=['Environment :: Web Environment',
                  'Framework :: Django :: 1.8',
                  'License :: OSI Approved',
-                 'Operating System :: Windows :: Windows',
                  'Operating System :: MacOS :: MacOS X',
                  'Operating System :: POSIX',
                  'Programming Language :: Python :: 2.7',
