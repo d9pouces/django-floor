@@ -116,7 +116,7 @@ def gunicorn():
     from django.conf import settings
     parser = ArgumentParser(usage="%(prog)s subcommand [options] [args]", add_help=False)
     parser.add_argument('-b', '--bind', action='store', default=settings.BIND_ADDRESS, help=settings.BIND_ADDRESS_HELP)
-    parser.add_argument('--forwarded-allow-ips', action='store', default=','.join(settings.REVERSE_PROXY_IPS))
+    # parser.add_argument('--forwarded-allow-ips', action='store', default=','.join(settings.REVERSE_PROXY_IPS))
     parser.add_argument('--debug', action='store_true', default=False)
     parser.add_argument('-t', '--timeout', action='store', default=str(settings.REVERSE_PROXY_TIMEOUT), help=settings.REVERSE_PROXY_TIMEOUT_HELP)
     parser.add_argument('--proxy-allow-from', action='store', default=','.join(settings.REVERSE_PROXY_IPS),
@@ -124,7 +124,7 @@ def gunicorn():
     options, extra_args = parser.parse_known_args()
     sys.argv[1:] = extra_args
     __set_default_option(options, 'bind')
-    __set_default_option(options, 'forwarded_allow_ips')
+    # __set_default_option(options, 'forwarded_allow_ips')
     __set_default_option(options, 'timeout')
     __set_default_option(options, 'proxy_allow_from')
     application = 'djangofloor.wsgi_http:application'
