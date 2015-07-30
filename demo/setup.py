@@ -19,7 +19,7 @@ setup(
     description="No description yet.",
     long_description='no description yet',
     author='Matthieu Gallet',
-    author_email='Matthieu Gallet@19pouces.net',
+    author_email='Gallet.Matthieu@19pouces.net',
     license='CeCILL-b',
     url='',
     entry_points=entry_points,

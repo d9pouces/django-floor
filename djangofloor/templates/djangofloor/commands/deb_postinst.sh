@@ -9,13 +9,17 @@ if which py3compile >/dev/null 2>&1; then
 fi
 {% endif %}
 
-useradd {{ project_name }} -b /var/ -U -r
+USER_EXISTS=`getent passwd {{ project_name }} || :`
+if [ -z "${USER_EXISTS}" ]; then
+    useradd {{ project_name }} -b /var/ -U -r
+fi
 
+
+mkdir -p /var/{{ project_name }}/media
+mkdir -p /var/{{ project_name }}/data
+mkdir -p /var/log/{{ project_name }}
 chown -R {{ project_name }}: /var/{{ project_name }}
-mkdir /var/{{ project_name }}/media
-mkdir /var/{{ project_name }}/data
-mkdir /var/log/{{ project_name }}
-chown {{ project_name }}: /var/log/{{ project_name }}
-
+chown -R {{ project_name }}: /etc/{{ project_name }}
+chown -R {{ project_name }}: /var/log/{{ project_name }}
 {% if use_sqlite %}{{ project_name }}-manage migrate
 {% endif %}

@@ -67,11 +67,14 @@ def set_env():
     os.environ.setdefault('DJANGOFLOOR_PROJECT_NAME', project_name)
 
     python_settings_path = os.path.abspath(os.path.join('.', '%s_configuration.py' % project_name))
+    prefix = sys.prefix
+    if prefix == '/usr':
+        prefix = ''
     if not os.path.isfile(python_settings_path):
-        python_settings_path = '%s/etc/%s/settings.py' % (sys.prefix, project_name)
+        python_settings_path = '%s/etc/%s/settings.py' % (prefix, project_name)
     ini_settings_path = os.path.abspath(os.path.join('.', '%s_configuration.ini' % project_name))
     if not os.path.isfile(ini_settings_path):
-        ini_settings_path = '%s/etc/%s/settings.ini' % (sys.prefix, project_name)
+        ini_settings_path = '%s/etc/%s/settings.ini' % (prefix, project_name)
 
     python_settings_path = __check_extra_option('dfconf', os.path.abspath(python_settings_path), '--dfconf')
     os.environ.setdefault("DJANGOFLOOR_PYTHON_SETTINGS", python_settings_path)
