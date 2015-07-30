@@ -59,7 +59,7 @@ setup(
     description="Base code for Django websites.",
     long_description=long_description,
     author='Matthieu Gallet',
-    author_email='Matthieu Gallet@19pouces.net',
+    author_email='Gallet.Matthieu@19pouces.net',
     license='CeCILL-b',
     url='https://github.com/d9pouces/django-floor',
     entry_points=entry_points,

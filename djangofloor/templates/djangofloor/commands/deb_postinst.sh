@@ -9,7 +9,7 @@ if which py3compile >/dev/null 2>&1; then
 fi
 {% endif %}
 
-useradd {{ project_name }} -b /var/ -U -m -r
+useradd {{ project_name }} -b /var/ -U -r
 
 chown -R {{ project_name }}: /var/{{ project_name }}
 mkdir /var/{{ project_name }}/media
