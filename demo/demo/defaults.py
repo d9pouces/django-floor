@@ -17,8 +17,8 @@ SESSION_REDIS_HOST = '{REDIS_HOST}'
 SESSION_REDIS_PORT = '{REDIS_PORT}'
 SESSION_REDIS_DB = 10
 
-WS4REDIS_EMULATION_INTERVAL = 2000
-DEBUG = True
+WS4REDIS_EMULATION_INTERVAL = 0
+DEBUG = False
 
 ########################################################################################################################
 # django-redis-websocket
