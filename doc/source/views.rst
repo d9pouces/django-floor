@@ -18,7 +18,7 @@ Other Django applications
 -------------------------
 
 Since DjangoFloor comes with several applications, you should rather use `FLOOR_INSTALLED_APPS` in :mod:`myproject.defaults` to add your extra applications.
-The actual `INSTALLED_APPS` will be equal to :attr:`djangofloor.defaults.INSTALLED_APPS` + :attr:`myproject.defaults.FLOOR_INSTALLED_APPS` + :attr:`djangofloor.defaults.INSTALLED_APPS_SUFFIX`.
+The actual `INSTALLED_APPS` will be equal to :attr:`djangofloor.defaults.INSTALLED_APPS` + :attr:`myproject.defaults.OTHER_ALLAUTH` :attr:`myproject.defaults.FLOOR_INSTALLED_APPS`.
 
 URL configuration
 -----------------

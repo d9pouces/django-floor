@@ -1,11 +1,17 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
+import codecs
+import os
+import re
 
 """Setup file for the DjangoFloor project.
 """
 
-from demo import __version__ as version
 from setuptools import setup, find_packages
+version = None
+for line in codecs.open(os.path.join('demo', '__init__.py'), 'r', encoding='utf-8'):
+    matcher = re.match(r"""^__version__\s*=\s*['"](.*)['"]\s*$""", line)
+    version = version or matcher and matcher.group(1)
 
 entry_points = {'console_scripts': ['demo-manage = djangofloor.scripts:manage',
                                     'demo-gunicorn = djangofloor.scripts:gunicorn',

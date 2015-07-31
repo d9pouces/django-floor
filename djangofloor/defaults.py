@@ -13,8 +13,10 @@ from djangofloor.utils import DirectoryPath, FilePath
 
 __author__ = 'Matthieu Gallet'
 from django.utils.translation import ugettext_lazy as _
+
 try:
     import ws4redis
+
     FLOOR_USE_WS4REDIS = True
 except ImportError:
     ws4redis = None
@@ -22,6 +24,7 @@ except ImportError:
 try:
     # noinspection PyPackageRequirements
     import scss
+
     USE_SCSS = True
 except ImportError:
     scss = None
@@ -43,7 +46,7 @@ DEBUG_HELP = 'A boolean that turns on/off debug mode.'
 TEMPLATE_DEBUG = False
 TEMPLATE_DEBUG_HELP = 'A boolean that turns on/off template debug mode.'
 ADMIN_EMAIL = 'admin@{SERVER_NAME}'
-ADMINS = (("admin", "{ADMIN_EMAIL}"), )
+ADMINS = (("admin", "{ADMIN_EMAIL}"),)
 ADMINS_HELP = 'A tuple that lists people who get code error notifications.'
 MANAGERS = ADMINS
 MANAGERS_HELP = ('A tuple in the same format as ADMINS that specifies who should get broken link notifications '
@@ -89,7 +92,7 @@ USE_X_SEND_FILE = False
 USE_X_SEND_FILE_HELP = 'Use the XSendFile header in Apache or LightHTTPd for sending large files'
 X_ACCEL_REDIRECT = []
 X_ACCEL_REDIRECT_HELP = 'Use the X-Accel-Redirect header in NGinx. List of tuples (/directory_path/, /alias_url/).'
-INTERNAL_IPS = ('127.0.0.1', )
+INTERNAL_IPS = ('127.0.0.1',)
 ALLOWED_HOSTS = ['127.0.0.1', '{SERVER_NAME}', ]
 ALLOWED_HOSTS_HELP = 'A list of strings representing the host/domain names that this Django site can serve.'
 MAX_REQUESTS = 10000
@@ -116,7 +119,6 @@ LANGUAGE_CODE_HELP = 'A string representing the language code for this installat
 SECRET_KEY = 'NEZ6ngWX0JihNG2wepl1uxY7bkPOWrTEo27vxPGlUM3eBAYfPT'
 SECRET_KEY_HELP = ('A secret key for a particular Django installation. This is used to provide cryptographic signing, '
                    'and should be set to a unique, unpredictable value.')
-
 
 ACCOUNT_EMAIL_VERIFICATION = None
 ACCOUNT_EMAIL_SUBJECT_PREFIX = '[{SERVER_NAME}] '
@@ -192,7 +194,7 @@ WEBSOCKET_URL = '/ws/'
 
 PIPELINE_CSS = {
     'default': {
-        'source_filenames': ('bootstrap3/css/bootstrap.min.css', 'css/font-awesome.min.css', ),
+        'source_filenames': ('bootstrap3/css/bootstrap.min.css', 'css/font-awesome.min.css',),
         'output_filename': 'css/default.css',
         'extra_context': {
             'media': 'all',
@@ -201,11 +203,11 @@ PIPELINE_CSS = {
 }
 PIPELINE_JS = {
     'default': {
-        'source_filenames': ('js/jquery.min.js', 'bootstrap3/js/bootstrap.min.js', 'js/djangofloor.js', 'js/ws4redis.js', ),
+        'source_filenames': ('js/jquery.min.js', 'bootstrap3/js/bootstrap.min.js', 'js/djangofloor.js', 'js/ws4redis.js',),
         'output_filename': 'js/default.js',
     },
     'ie9': {
-        'source_filenames': ('js/html5shiv.js', 'js/respond.min.js', ),
+        'source_filenames': ('js/html5shiv.js', 'js/respond.min.js',),
         'output_filename': 'js/ie9.js',
     }
 }
@@ -275,8 +277,7 @@ TEMPLATE_CONTEXT_PROCESSORS = [
     'django.core.context_processors.tz',
     'django.contrib.messages.context_processors.messages',
     'djangofloor.context_processors.context_base',
-    'allauth.account.context_processors.account',
-    'allauth.socialaccount.context_processors.socialaccount', ]
+]
 if FLOOR_USE_WS4REDIS:
     # noinspection PyUnresolvedReferences
     TEMPLATE_CONTEXT_PROCESSORS += ['ws4redis.context_processors.default', ]
@@ -296,6 +297,7 @@ INSTALLED_APPS = [
     'django.contrib.sitemaps',
     'django_admin_bootstrapped',
     'django.contrib.admin',
+    'djangofloor',
     'bootstrap3',
     'allauth',
     'allauth.account',
@@ -303,7 +305,6 @@ INSTALLED_APPS = [
     'pipeline',
     'debug_toolbar',
 ]
-INSTALLED_APPS_SUFFIX = ['djangofloor', ]
 
 if FLOOR_USE_WS4REDIS:
     # noinspection PyUnresolvedReferences
@@ -363,7 +364,7 @@ SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 CACHE_BACKEND = 'django.core.cache.backends.dummy.DummyCache'
 CACHES = {
     'default': {'BACKEND': '{CACHE_BACKEND}', },
-    }
+}
 CACHES_HELP = 'A dictionary containing the settings for all caches to be used with Django.'
 
 ########################################################################################################################

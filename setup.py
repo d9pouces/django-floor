@@ -24,7 +24,7 @@ entry_points = {'console_scripts': ['djangofloor-manage = djangofloor.scripts:ma
                 'distutils.commands': ['bdist_deb2 = djangofloor.management.commands.bdist_deb2:BdistDeb2']}
 
 requirements = ['Django>=1.8.0',
-                'django-allauth>=0.19.0',
+                'django-allauth>=0.22.0',
                 'gunicorn>=0.14.5',
                 'django-bootstrap3>=5.0.0',
                 'jsmin>=2.1.1',
