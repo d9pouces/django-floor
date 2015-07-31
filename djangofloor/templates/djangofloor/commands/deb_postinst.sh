@@ -23,3 +23,4 @@ chown -R {{ project_name }}: /etc/{{ project_name }}
 chown -R {{ project_name }}: /var/log/{{ project_name }}
 {% if use_sqlite %}{{ project_name }}-manage migrate
 {% endif %}
+a2enmod proxy proxy_http

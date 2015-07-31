@@ -100,7 +100,7 @@ class BdistDeb2(sdist_dsc):
             raise ValueError
         gen_install_command += ['--conf', os.path.join(etc_dir, project_name)]
         if process_manager == 'supervisor':
-            gen_install_command += ['--supervisor', os.path.join(etc_dir, 'supervisor.d', '%s.conf' % project_name)]
+            gen_install_command += ['--supervisor', os.path.join(etc_dir, 'supervisor', 'conf.d', '%s.conf' % project_name)]
         elif process_manager == 'systemd':
             gen_install_command += ['--systemd', os.path.join(etc_dir, 'systemd', 'system')]
         elif process_manager is not None:

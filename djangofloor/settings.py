@@ -96,6 +96,7 @@ if DJANGOFLOOR_MAPPING:
 __settings = globals()
 __formatter = string.Formatter()
 __settings_origin = {}
+__settings_original_value = {}
 
 
 def __parse_setting(obj):
@@ -153,10 +154,11 @@ def __setting_value(setting_name_):
         __settings_origin[setting_name_] = DJANGOFLOOR_CONFIG_PATH
     elif hasattr(project_settings, setting_name_):
         value = getattr(project_settings, setting_name_)
-        __settings_origin[setting_name_] = 'project\'s defaults'
+        __settings_origin[setting_name_] = PROJECT_SETTINGS_MODULE_NAME
     else:
         value = getattr(floor_settings, setting_name_)
-        __settings_origin[setting_name_] = 'djangofloor\'s defaults'
+        __settings_origin[setting_name_] = 'djangofloor.defaults'
+    __settings_original_value[setting_name_] = value
     __settings[setting_name_] = __parse_setting(value)
     return __settings[setting_name_]
 

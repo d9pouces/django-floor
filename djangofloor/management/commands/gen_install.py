@@ -11,7 +11,7 @@ from django.conf import settings
 from django.core.management import BaseCommand, call_command
 from django.template.loader import render_to_string
 from django.utils.module_loading import import_string
-
+from djangofloor.settings import __settings_original_value as settings_original_values
 from djangofloor.iniconf import OptionParser
 
 try:
@@ -80,7 +80,7 @@ class Command(BaseCommand):
                 parser = ConfigParser()
                 for option_parser in ini_values:
                     assert isinstance(option_parser, OptionParser)
-                    value = str(getattr(settings, option_parser.setting_name))
+                    value = str(settings_original_values.get(option_parser.setting_name, ''))
                     section, sep, option = option_parser.option.partition('.')
                     if not parser.has_section(section):
                         parser.add_section(section)
