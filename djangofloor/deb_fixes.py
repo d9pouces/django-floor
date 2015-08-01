@@ -26,7 +26,7 @@ def fix_msgpack(package_name, package_version, deb_src_dir):
     with codecs.open('MANIFEST.in', 'w', encoding='utf-8') as fd:
         fd.write("include setup.py COPYING msgpack *.txt *.rst\n")
         fd.write("recursive-include docs *.rst *.py make.bat Makefile\n")
-    file_replace('setup.py', "msgpack-python", "msgpack")
+    # file_replace('setup.py', "msgpack-python", "msgpack")
 
 
 def file_replace(filename, pattern_to_replace, replacement):

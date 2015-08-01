@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals, print_function, absolute_import
 import codecs
+from distutils.errors import DistutilsModuleError
 import os
 import re
 import sys
@@ -25,8 +26,44 @@ except ImportError:
 __author__ = 'Matthieu Gallet'
 
 
-class BdistDeb2(sdist_dsc):
+class BdistDebDjango(sdist_dsc):
     description = "distutils command to create a Debian Django package"
+
+    def get_config_files(self):
+        """ Return the list of `stdeb.cfg` paths in the same way as the `sdist_dsc` command
+        :return: list of path (relative or absolute)
+        :rtype: :class:`list` of :class:`str`
+        """
+        cfg_files = []
+        if self.extra_cfg_file is not None:
+            cfg_files.append(self.extra_cfg_file)
+        config_fname = 'stdeb.cfg'
+        # Distutils fails if not run from setup.py dir, so this is OK.
+        if os.path.exists(config_fname):
+            cfg_files.append(config_fname)
+        use_setuptools = True
+        try:
+            ei_cmd = self.distribution.get_command_obj('egg_info')
+        except DistutilsModuleError:
+            use_setuptools = False
+            ei_cmd = None
+        if use_setuptools:
+            self.run_command('egg_info')
+            egg_info_dirname = ei_cmd.egg_info
+            # Pickup old location of stdeb.cfg
+            config_fname = os.path.join(egg_info_dirname, 'stdeb.cfg')
+            if os.path.exists(config_fname):
+                cfg_files.append(config_fname)
+        else:
+            entries = os.listdir(os.curdir)
+            for entry in entries:
+                if not (entry.endswith('.egg-info') and os.path.isdir(entry)):
+                    continue
+                # Pickup old location of stdeb.cfg
+                config_fname = os.path.join(entry, 'stdeb.cfg')
+                if os.path.exists(config_fname):
+                    cfg_files.append(config_fname)
+        return cfg_files
 
     def run(self):
         """Order of operations:
@@ -58,13 +95,14 @@ class BdistDeb2(sdist_dsc):
             raise ValueError('could not find debian source directory')
         target_dir = target_dirs[0]
 
-        stdeb_config = ConfigParser.ConfigParser()
-        stdeb_config.read(['stdeb.cfg'])
+        # noinspection PyAttributeOutsideInit
+        self.config_parser = ConfigParser.ConfigParser()
+        self.config_parser.read(self.get_config_files())
 
         extra_processes = []
-        if stdeb_config.has_option('djangofloor', 'processes'):
+        if self.config_parser.has_option('bdist_deb_django', 'processes'):
             extra_processes = []
-            for process_line in stdeb_config.get('djangofloor', 'processes').splitlines():
+            for process_line in self.config_parser.get('bdist_deb_django', 'processes').splitlines():
                 process_line = process_line.strip()
                 process_name, sep, process_cmd = process_line.partition(':')
                 if process_line and sep != ':':
@@ -72,15 +110,9 @@ class BdistDeb2(sdist_dsc):
                     raise ValueError
                 elif process_line:
                     extra_processes.append(process_line)
-        frontend = None
-        if stdeb_config.has_option('djangofloor', 'frontend'):
-            frontend = stdeb_config.get('djangofloor', 'frontend')
-        process_manager = None
-        if stdeb_config.has_option('djangofloor', 'process_manager'):
-            process_manager = stdeb_config.get('djangofloor', 'process_manager')
-        username = project_name
-        if stdeb_config.has_option('djangofloor', 'username'):
-            username = stdeb_config.get('djangofloor', 'username')
+        frontend = self.config_parser.get('bdist_deb_django', 'frontend', fallback=None)
+        process_manager = self.config_parser.get('bdist_deb_django', 'process_manager', fallback=None)
+        username = self.config_parser.get('bdist_deb_django', 'username', fallback=project_name)
 
         # prepare the use of the gen_install command
         os.environ['DJANGOFLOOR_PROJECT_NAME'] = project_name
@@ -93,8 +125,10 @@ class BdistDeb2(sdist_dsc):
             gen_install_command += ['--extra-process', extra_process]
         if frontend == 'nginx':
             gen_install_command += ['--nginx', os.path.join(etc_dir, 'nginx', 'sites-available', '%s.conf' % project_name)]
-        elif frontend == 'apache':
-            gen_install_command += ['--apache', os.path.join(etc_dir, 'apache2', 'sites-available', '%s.conf' % project_name)]
+        elif frontend == 'apache2.2':
+            gen_install_command += ['--apache22', os.path.join(etc_dir, 'apache2', 'sites-available', '%s.conf' % project_name)]
+        elif frontend == 'apache2.4':
+            gen_install_command += ['--apache24', os.path.join(etc_dir, 'apache2', 'sites-available', '%s.conf' % project_name)]
         elif frontend is not None:
             print('Invalid value for frontend: %s' % frontend)
             raise ValueError
@@ -110,23 +144,22 @@ class BdistDeb2(sdist_dsc):
         # add the copy of these new files to the Makefile
         extra_lines = ['\trsync -av gen_install/ %(root)s/']
 
+        # patch dependencies in control file
         with codecs.open(os.path.join(target_dir, 'debian/control'), 'r', encoding='utf-8') as control_fd:
             control = control_fd.read()
         old_depends2 = '${misc:Depends}, ${python:Depends}'
         old_depends3 = '${misc:Depends}, ${python3:Depends}'
-        if stdeb_config.has_option('DEFAULT', 'depends'):
-            new_depends2 = stdeb_config.get('DEFAULT', 'depends')
-            new_depends3 = new_depends2
-        else:
-            new_depends2 = old_depends2
-            new_depends3 = old_depends3
+        new_depends2 = self.config_parser.get('DEFAULT', 'depends', fallback=old_depends2)
+        new_depends3 = self.config_parser.get('DEFAULT', 'depends3', fallback=old_depends3)
         extra_depends = ''
         if process_manager == 'supervisor':
             extra_depends += ', supervisor'
         elif process_manager == 'systemd':
             extra_depends += ', systemd'
-        if frontend == 'apache':
-            extra_depends += ', apache2'
+        if frontend == 'apache2.2':
+            extra_depends += ', apache2 (>= 2.2)'
+        if frontend in 'apache2.4':
+            extra_depends += ', apache2 (>= 2.4)'
         elif frontend == 'nginx':
             extra_depends += ', nginx'
         control = control.replace(old_depends2, new_depends2 + extra_depends)

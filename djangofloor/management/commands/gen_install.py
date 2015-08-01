@@ -27,7 +27,8 @@ __author__ = 'Matthieu Gallet'
 class Command(BaseCommand):
 
     def add_arguments(self, parser):
-        parser.add_argument('--apache', default=None, help='Generate an Apache configuration file.')
+        parser.add_argument('--apache22', default=None, help='Generate an Apache 2.2 configuration file.')
+        parser.add_argument('--apache24', default=None, help='Generate an Apache 2.4 configuration file.')
         parser.add_argument('--nginx', default=None, help='Generate a NGinx configuration file.')
         parser.add_argument('--systemd', default=None, help='Generate a Systemd configuration file (destination folder).')
         parser.add_argument('--supervisor', default=None, help='Generate a Supervisor configuration file.')
@@ -43,6 +44,8 @@ class Command(BaseCommand):
                            'bind_address': settings.BIND_ADDRESS,
                            'project_name': settings.PROJECT_NAME,
                            'use_celery': settings.USE_CELERY,
+                           'static_url': settings.STATIC_URL,
+                           'media_url': settings.MEDIA_URL,
                            'use_sqlite': settings.DATABASES['default']['ENGINE'] == 'django.db.backends.sqlite3',
                            'static_dst': None,
                            'processes': [x.split(':') for x in options['extra_process']]}
@@ -56,7 +59,8 @@ class Command(BaseCommand):
             shutil.copytree(settings.STATIC_ROOT, static_dst)
             template_values['static_dst'] = static_dst
         for option_key, template_name in (('supervisor', 'djangofloor/commands/supervisor.conf'),
-                                          ('apache', 'djangofloor/commands/apache.conf'),
+                                          ('apache22', 'djangofloor/commands/apache22.conf'),
+                                          ('apache24', 'djangofloor/commands/apache24.conf'),
                                           ('nginx', 'djangofloor/commands/nginx.conf'),
                                           ):
             if options[option_key]:
