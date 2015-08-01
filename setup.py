@@ -34,25 +34,18 @@ requirements = ['Django>=1.8.0',
                 'celery>=3.1.13',
                 'django-redis>=3.8.3',
                 'django-redis-cache>=0.13.1', ]
-PY2 = sys.version_info[0] == 2
 
 extras_require = {}
-try:
-    import pathlib
-except ImportError:
-    pathlib = None
-    requirements.append('pathlib')
-try:
-    from inspect import signature
-except ImportError:
-    signature = None
+version_infos = (sys.version_info[0], sys.version_info[1])
+if version_infos < (3, 3):
     requirements.append('funcsigs')
-if PY2:
+if version_infos < (3, 0):
     extras_require['websocket'] = ['django-websocket-redis', 'gevent', 'uwsgi']
 extras_require['scss'] = ['pyScss', ]
 extras_require['deb'] = ['stdeb>=0.8.5', ]
 extras_require['doc'] = ['Sphinx>=1.3.1', ]
 
+print(version_infos, requirements)
 setup(
     name='djangofloor',
     version=version,

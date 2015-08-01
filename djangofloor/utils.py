@@ -1,21 +1,31 @@
 # coding=utf-8
 from __future__ import unicode_literals, absolute_import
-# noinspection PyCompatibility
-from pathlib import PosixPath
 from django.utils import six
 import sys
 
 __author__ = 'Matthieu Gallet'
 
 
-class DirectoryPath(PosixPath):
+class Path(object):
+    def __init__(self, path):
+        self.path = path
+
     def __repr__(self):
-        return repr(str(self))
+        return repr(str(self.path))
+
+    def __unicode__(self):
+        return six.u(self.path)
+
+    def __str__(self):
+        return six.u(self.path)
 
 
-class FilePath(PosixPath):
-    def __repr__(self):
-        return repr(str(self))
+class DirectoryPath(Path):
+    pass
+
+
+class FilePath(Path):
+    pass
 
 
 def _resolve_name(name, package, level):

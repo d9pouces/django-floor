@@ -34,8 +34,6 @@ from django.utils.encoding import force_text
 import os
 import string
 import sys
-# noinspection PyCompatibility
-from pathlib import Path
 from djangofloor import defaults as floor_settings
 from djangofloor.utils import DirectoryPath, FilePath, import_module
 
@@ -126,8 +124,6 @@ def __parse_setting(obj):
         obj = __parse_setting(force_text(obj))
         __ensure_dir(obj, parent_=True)
         return obj
-    elif isinstance(obj, Path):
-        return __parse_setting(force_text(obj))
     elif isinstance(obj, list) or isinstance(obj, tuple):
         return [__parse_setting(x_) for x_ in obj]
     elif isinstance(obj, set):

@@ -12,4 +12,5 @@ INI_MAPPING = [
     OptionParser('DATABASE_PASSWORD', 'database.password'),
     OptionParser('DATABASE_HOST', 'database.host'),
     OptionParser('DATABASE_PORT', 'database.port'),
+    OptionParser('SERVER_NAME', 'global.server_name'),
 ]
