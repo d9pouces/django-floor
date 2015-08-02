@@ -9,17 +9,28 @@ workon djangofloor3
 pip install setuptools --upgrade
 pip install pip --upgrade
 pip install debtools --upgrade
+# generate packages for all dependencies
 python setup.py install
 python setup.py install
+echo "" > ~/.virtualenvs/djangofloor3/lib/python3.2/site-packages/setuptools.pth
 pip install gunicorn==18.0
 sed -i 's/raise type(self._exception), self._exception, self._traceback/raise type(self._exception)/g' ~/.virtualenvs/djangofloor3/lib/python3.2/site-packages/futures-3.0.3-py3.2.egg/concurrent/futures/_base.py
 cd demo
-multideb -r -v
+multideb -r -v -x stdeb-debian7.cfg
+cd ..
+python setup.py install
+
+# creating package for demo
+cd demo
 rm -rf `find * | grep pyc$`
-python setup.py bdist_deb_django -x stdeb-debian8.cfg
+python setup.py bdist_deb_django -x stdeb-debian7.cfg
 deb-dep-tree deb_dist/*deb
 mv deb_dist/*deb deb
-sudo dpkg -i deb/*.deb
+
+# install all packages
+sudo dpkg -i deb/python3-*.deb
+
+# package configuration
 sudo sed -i "s/localhost/$IP/g" /etc/apache2/sites-available/demo.conf
 sudo sed -i "s/localhost/$IP/g" /etc/demo/settings.ini
 sudo a2ensite demo.conf
@@ -28,25 +39,3 @@ sudo -u demo demo-manage migrate
 sudo service supervisor restart
 sudo service apache2 restart
 exit 0
-
-
-multideb -r -v
-echo "" > ~/.virtualenvs/djangofloor3/lib/python3.2/site-packages/setuptools.pth
-rm -rf `find * | grep pyc$`
-python setup.py --command-packages=stdeb.command bdist_deb
-mv deb_dist/*deb deb
-python setup.py install
-cd demo
-rm -rf `find * | grep pyc$`
-python setup.py bdist_deb_django
-deb-dep-tree deb_dist/*deb
-cd ..
-sudo dpkg -i deb/*.deb
-sudo dpkg -i demo/deb_dist/python3-*.deb
-sudo sed -i "s/localhost/$IP/g" /etc/apache2/sites-available/demo.conf
-sudo sed -i "s/localhost/$IP/g" /etc/demo/settings.ini
-sudo a2ensite demo.conf
-sudo a2dissite default
-sudo -u demo demo-manage migrate
-sudo service supervisor restart
-sudo service apache2 restart

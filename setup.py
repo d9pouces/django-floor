@@ -45,7 +45,6 @@ extras_require['scss'] = ['pyScss', ]
 extras_require['deb'] = ['stdeb>=0.8.5', ]
 extras_require['doc'] = ['Sphinx>=1.3.1', ]
 
-print(version_infos, requirements)
 setup(
     name='djangofloor',
     version=version,

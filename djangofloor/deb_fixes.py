@@ -3,6 +3,7 @@
 """
 from __future__ import unicode_literals
 import codecs
+import os
 import shutil
 import sys
 
@@ -49,3 +50,11 @@ def fix_openid(package_name, package_version, deb_src_dir):
     if sys.version_info[0] == 2:
         return
     file_replace('setup.py', "'futures>=2.1.3',", "")
+
+
+# noinspection PyUnusedLocal
+def fix_allauth(package_name, package_version, deb_src_dir):
+    file_replace(os.path.join(deb_src_dir, 'debian', 'control'), '${misc:Depends}, ${python3:Depends}',
+                 "python3 (>= 3.2), python3-django (>= 1.8.0), python3-requests-oauthlib, python3-requests, python3-openid")
+    file_replace(os.path.join(deb_src_dir, 'debian', 'control'), '${misc:Depends}, ${python:Depends}',
+                 "python (< 2.8), python-django (>= 1.8.0), python-requests-oauthlib, python-requests, python3-openid")
