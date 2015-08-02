@@ -27,7 +27,12 @@ def fix_msgpack(package_name, package_version, deb_src_dir):
     with codecs.open('MANIFEST.in', 'w', encoding='utf-8') as fd:
         fd.write("include setup.py COPYING msgpack *.txt *.rst\n")
         fd.write("recursive-include docs *.rst *.py make.bat Makefile\n")
-    # file_replace('setup.py', "msgpack-python", "msgpack")
+
+
+# noinspection PyUnusedLocal
+def fix_django_redis(package_name, package_version, deb_src_dir):
+    file_replace(os.path.join(deb_src_dir, 'debian', 'control'), '${misc:Depends}, ${python3:Depends}',
+                 "python3 (>= 3.2), python3-msgpack, python3-redis (>= 1.8.0)")
 
 
 def file_replace(filename, pattern_to_replace, replacement):
@@ -50,11 +55,3 @@ def fix_openid(package_name, package_version, deb_src_dir):
     if sys.version_info[0] == 2:
         return
     file_replace('setup.py', "'futures>=2.1.3',", "")
-
-
-# noinspection PyUnusedLocal
-def fix_allauth(package_name, package_version, deb_src_dir):
-    file_replace(os.path.join(deb_src_dir, 'debian', 'control'), '${misc:Depends}, ${python3:Depends}',
-                 "python3 (>= 3.2), python3-django (>= 1.8.0), python3-requests-oauthlib, python3-requests, python3-openid")
-    file_replace(os.path.join(deb_src_dir, 'debian', 'control'), '${misc:Depends}, ${python:Depends}',
-                 "python (< 2.8), python-django (>= 1.8.0), python-requests-oauthlib, python-requests, python3-openid")
