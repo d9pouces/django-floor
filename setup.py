@@ -30,7 +30,7 @@ requirements = ['Django>=1.8.0',
                 'jsmin>=2.1.1',
                 'django-debug-toolbar>=1.2.0',
                 'django-admin-bootstrapped>=2.5.0',
-                'django-pipeline>=1.5.2',
+                'django-pipeline>=1.5.3',
                 'celery>=3.1.13',
                 'django-redis>=3.8.3',
                 'django-redis-cache>=0.13.1', ]
