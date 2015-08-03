@@ -15,34 +15,52 @@ The simplest way for packaging is to use built-in Python tools.
 Debian / Ubuntu
 ---------------
 
-DjangoFloor offers a simple utility based on `stdeb` to package your complete application. First of all, you should look at the original `documentation <https://pypi.python.org/pypi/stdeb>`_. However, this utility requires to be run on a Debian-based system, with `dh-make`.
+Creating a Debian package for a Djangofloor project, like any other Django project, requires to also package all dependencies.
 
-.. code-block:: bash
+packaging dependencies
+~~~~~~~~~~~~~~~~~~~~~~
 
-    cd myproject
-    workon myproject
-    pip install djangofloor[deb]
-    # download and package dependencies to .deb files
-    mkdir -p dependencies/deb
-    cd dependencies
-    for line in `pip freeze|grep '=='`; do
-        name=`echo $line | cut -d '=' -f 1`
-        version=`echo $line | cut -d '=' -f 3`
-        pypi-download --release=$version $name
-    done
-    for archive in *tar.gz; do
-        rm -rf deb_dist
-        py2dsc-deb $archive
-        mv deb_dist/*.deb deb
-    done
-    # ok, we can go on to build our package
-    python setup.py bdist_deb2
+You should use `DebTools <https://github.com/d9pouces/DebTools>`_ to create package for all dependencies in a single command.
+Creating all packages is quite simple:
 
-This command requires a configuration file `stdeb.cfg` at in your project root . In addition to the options used by the original `bdist_stdeb` command, you can add this
+    #. create a virtualenv and install your application (so all your dependencies are also installed),
+    #. create a generic `stdeb.cfg` file for all Debian-based distributions,
+    #. create a `stdeb-distribution.cfg` specific to each distribution,
+    #. in these files, create a section for each Python package requiring specific treatment,
+    #. call `multideb -r -v -x stdeb-distribution.cfg`,
+    #. wait (it takes almost one hour on a slow computer) while all Python modules are packaged.
+
+In the `demo` application, a generic `stdeb.cfg` file and specific files for Debian 7/8 and Ubuntu 14.04+ are provided.
+The following packages require specific treatment to be packaged as .deb files:
+
+    * `djangofloor` (dependencies for Python 3),
+    * `anyjson` (needs to delete the `tests` directory before packaging),
+    * `requests-oauthlib` (needs to delete the `tests` directory before packaging),
+    * `celery`  (needs to delete the `docs` directory before packaging),
+    * `pathlib` (needs to change the `MANIFEST.in` file),
+    * `msgpack-python` (needs to change the package name and to change the `MANIFEST.in` file),
+    * `gunicorn` must be installed in version `18.0` on Debian 7.
+
+If you do not have more dependencies, you can juste reuse the files bundled with the `demo` app. Their names should be explicit enough.
+
+
+packaging your project
+~~~~~~~~~~~~~~~~~~~~~~
+
+Packaging your project cannot be done with the standard `bdist_deb` command, provided by the `stdeb` package:
+
+   * static files must be collected,
+   * configuration file must be prepared in `/etc/my_project/settings.ini`,
+   * configuration file is required for Apache or Nginx,
+   * configuration file is required for Supervisor or Systemd.
+
+Djangofloor provides a new command `bdist_deb_django` that do all these things for you.
+It only requires a new section `bdist_deb_django` in your `stdeb.cfg` file. This section can also be in the files specific to each distribution.
+In addition to the options used by the original `bdist_stdeb` command, you can add this
 
 .. code-block:: ini
 
-    [djangofloor]
+    [bdist_deb_django]
     processes = myproject-gunicorn:/usr/bin/myproject-gunicorn
         myproject-celery:/usr/bin/myproject-celery worker
     frontend = nginx
@@ -51,10 +69,40 @@ This command requires a configuration file `stdeb.cfg` at in your project root .
 
 There are basically four available options:
 
-    * `processes`: a list of processes to run (like the gunicorn process),
-    * `frontend`: the frontend server (currently `apache` or `nginx`),
-    * `process_manager`: the process manager (currently `supervisor` or `systemd`),
-    * `username`: the username used for the process.
+    * `processes`: a list of processes to run (like the gunicorn process, or the celery worker),
+    * `frontend`: the frontend server (valid values are currently `apache2.2`, `apache2.4` or `nginx`),
+    * `process_manager`: the process manager (valid values are currently `supervisor` or `systemd`),
+    * `username`: the username used for the process (can be `my_project`).
+
+Then you can create your .deb:
+
+.. code-block:: bash
+
+    rm -rf `find * | grep pyc$`
+    python setup.py bdist_deb_django -x stdeb-distribution.cfg
+
+Again, you should take a look the files provided with the `demo` application (the same files are used to create .deb packages for the dependencies and for the application).
+
+installing your project
+~~~~~~~~~~~~~~~~~~~~~~~
+
+If you cannot use a private mirror, just put all .deb files on your server and run:
+
+.. code-block:: bash
+
+    sudo dpkg -i deb/python3-*.deb  # for a Python3 project
+    sudo dpkg -i deb/python-*.deb   # for a Python2 project
+
+You should configurate your project by tweaking `/etc/apache2/sites-available/my_project.conf` and `/etc/my_project/settings.ini`.
+
+.. code-block:: bash
+
+    sudo a2ensite my_project.conf
+    sudo a2dissite 000-default
+    sudo -u my_project my_project-manage migrate
+    sudo service supervisor restart
+    sudo service apache2 restart
+
 
 RedHat / CentOS / Scientific Linux
 ----------------------------------

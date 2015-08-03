@@ -113,6 +113,7 @@ class BdistDebDjango(sdist_dsc):
         frontend = self.config_parser.get('bdist_deb_django', 'frontend', fallback=None)
         process_manager = self.config_parser.get('bdist_deb_django', 'process_manager', fallback=None)
         username = self.config_parser.get('bdist_deb_django', 'username', fallback=project_name)
+        extra_depends = ''
 
         # prepare the use of the gen_install command
         os.environ['DJANGOFLOOR_PROJECT_NAME'] = project_name
@@ -125,18 +126,23 @@ class BdistDebDjango(sdist_dsc):
             gen_install_command += ['--extra-process', extra_process]
         if frontend == 'nginx':
             gen_install_command += ['--nginx', os.path.join(etc_dir, 'nginx', 'sites-available', '%s.conf' % project_name)]
+            extra_depends += ', nginx'
         elif frontend == 'apache2.2':
             gen_install_command += ['--apache22', os.path.join(etc_dir, 'apache2', 'sites-available', '%s.conf' % project_name)]
+            extra_depends += ', apache2 (>= 2.2)'
         elif frontend == 'apache2.4':
             gen_install_command += ['--apache24', os.path.join(etc_dir, 'apache2', 'sites-available', '%s.conf' % project_name)]
+            extra_depends += ', apache2 (>= 2.4)'
         elif frontend is not None:
             print('Invalid value for frontend: %s' % frontend)
             raise ValueError
         gen_install_command += ['--conf', os.path.join(etc_dir, project_name)]
         if process_manager == 'supervisor':
             gen_install_command += ['--supervisor', os.path.join(etc_dir, 'supervisor', 'conf.d', '%s.conf' % project_name)]
+            extra_depends += ', supervisor'
         elif process_manager == 'systemd':
             gen_install_command += ['--systemd', os.path.join(etc_dir, 'systemd', 'system')]
+            extra_depends += ', systemd'
         elif process_manager is not None:
             print('Invalid value for process manager: %s' % process_manager)
             raise ValueError
@@ -151,17 +157,6 @@ class BdistDebDjango(sdist_dsc):
         old_depends3 = '${misc:Depends}, ${python3:Depends}'
         new_depends2 = self.config_parser.get('DEFAULT', 'depends', fallback=old_depends2)
         new_depends3 = self.config_parser.get('DEFAULT', 'depends3', fallback=old_depends3)
-        extra_depends = ''
-        if process_manager == 'supervisor':
-            extra_depends += ', supervisor'
-        elif process_manager == 'systemd':
-            extra_depends += ', systemd'
-        if frontend == 'apache2.2':
-            extra_depends += ', apache2 (>= 2.2)'
-        if frontend in 'apache2.4':
-            extra_depends += ', apache2 (>= 2.4)'
-        elif frontend == 'nginx':
-            extra_depends += ', nginx'
         control = control.replace(old_depends2, new_depends2 + extra_depends)
         control = control.replace(old_depends3, new_depends3 + extra_depends)
         with codecs.open(os.path.join(target_dir, 'debian/control'), 'w', encoding='utf-8') as control_fd:

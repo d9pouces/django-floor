@@ -41,17 +41,3 @@ def file_replace(filename, pattern_to_replace, replacement):
     content = content.replace(pattern_to_replace, replacement)
     with codecs.open(filename, 'w', encoding='utf-8') as fd:
         fd.write(content)
-
-
-# noinspection PyUnusedLocal
-def fix_pipeline(package_name, package_version, deb_src_dir):
-    if sys.version_info[0] == 2:
-        return
-    file_replace('setup.py', "'futures>=2.1.3',", "")
-
-
-# noinspection PyUnusedLocal
-def fix_openid(package_name, package_version, deb_src_dir):
-    if sys.version_info[0] == 2:
-        return
-    file_replace('setup.py', "'futures>=2.1.3',", "")

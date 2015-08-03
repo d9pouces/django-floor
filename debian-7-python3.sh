@@ -8,19 +8,12 @@ mkvirtualenv -p `which python3.2` djangofloor3
 workon djangofloor3
 pip install setuptools --upgrade
 pip install pip --upgrade
-pip install debtools --upgrade
+pip install debtools djangofloor gunicorn==18.0
 # generate packages for all dependencies
-python setup.py install
-python setup.py install
-echo "" > ~/.virtualenvs/djangofloor3/lib/python3.2/site-packages/setuptools.pth
-pip install gunicorn==18.0
 cd demo
 multideb -r -v -x stdeb-debian-7.cfg
-cd ..
-python setup.py install
 
 # creating package for demo
-cd demo
 rm -rf `find * | grep pyc$`
 python setup.py bdist_deb_django -x stdeb-debian-7.cfg
 deb-dep-tree deb_dist/*deb
@@ -33,8 +26,7 @@ sudo dpkg -i deb/python3-*.deb
 sudo sed -i "s/localhost/$IP/g" /etc/apache2/sites-available/demo.conf
 sudo sed -i "s/localhost/$IP/g" /etc/demo/settings.ini
 sudo a2ensite demo.conf
-sudo a2dissite 000-default.conf
+sudo a2dissite 000-default
 sudo -u demo demo-manage migrate
 sudo service supervisor restart
 sudo service apache2 restart
-exit 0
