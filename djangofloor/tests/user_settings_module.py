@@ -1,0 +1,10 @@
+# -*- coding: utf-8 -*-
+S_USER = True
+S_PROJECT_USER = True
+S_DEFAULT_USER = True
+S_DEFAULT_PROJECT_USER = True
+
+S_INI_USER = True
+S_PROJECT_INI_USER = True
+S_DEFAULT_INI_USER = True
+S_DEFAULT_PROJECT_INI_USER = True

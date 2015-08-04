@@ -3,7 +3,7 @@
 sudo apt-get update
 sudo apt-get upgrade --yes
 sudo apt-get install --yes vim dh-make ntp rsync liblzma-dev tree
-sudo apt-get install --yes python3-all-dev virtualenvwrapper python3-tz python3-setuptools apache2 apache2-mpm-worker apache2-utils apache2.2-bin apache2.2-common libapr1 libaprutil1 libaprutil1-dbd-sqlite3 libaprutil1-ldap python-medusa python-meld3 ssl-cert supervisor python3-openid
+sudo apt-get install --yes python3-all-dev virtualenvwrapper python3-tz python3-setuptools apache2  libapr1 libaprutil1 libaprutil1-dbd-sqlite3 libaprutil1-ldap python-medusa python-meld3 ssl-cert supervisor
 source /etc/bash_completion.d/virtualenvwrapper
 
 # create the virtual env
@@ -15,11 +15,11 @@ pip install debtools djangofloor
 
 # generate packages for all dependencies
 cd demo
-multideb -r -v -x stdeb-debian-8.cfg
+multideb -r -v -x stdeb-ubuntu-14.04-15.04.cfg
 
 # creating package for demo
 rm -rf `find * | grep pyc$`
-python setup.py bdist_deb_django -x stdeb-debian-8.cfg
+python setup.py bdist_deb_django -x stdeb-ubuntu-14.04-15.04.cfg
 deb-dep-tree deb_dist/*deb
 mv deb_dist/*deb deb
 

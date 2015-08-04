@@ -2,7 +2,8 @@
 # base packages
 sudo apt-get update
 sudo apt-get upgrade --yes
-sudo apt-get install --yes vim python-all-dev dh-make ntp rsync virtualenvwrapper liblzma-dev python-tz python-setuptools tree apache2 apache2-mpm-worker apache2-utils apache2.2-bin apache2.2-common libapr1 libaprutil1 libaprutil1-dbd-sqlite3 libaprutil1-ldap python-medusa python-meld3 ssl-cert supervisor
+sudo apt-get install --yes vim dh-make ntp rsync liblzma-dev tree
+sudo apt-get install --yes python-all-dev virtualenvwrapper python-tz python-setuptools apache2 apache2-mpm-worker apache2-utils apache2.2-bin apache2.2-common libapr1 libaprutil1 libaprutil1-dbd-sqlite3 libaprutil1-ldap python-medusa python-meld3 ssl-cert supervisor
 source /etc/bash_completion.d/virtualenvwrapper
 
 # create the virtual env
@@ -23,7 +24,7 @@ deb-dep-tree deb_dist/*deb
 mv deb_dist/*deb deb
 
 # install all packages
-sudo dpkg -i deb/python3-*.deb
+sudo dpkg -i deb/python-*.deb deb/gunicorn*.deb
 
 # package configuration
 IP=`/sbin/ifconfig | grep -Eo 'inet (addr:|adr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1'`

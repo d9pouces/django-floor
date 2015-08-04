@@ -33,6 +33,8 @@ def fix_msgpack(package_name, package_version, deb_src_dir):
 def fix_django_redis(package_name, package_version, deb_src_dir):
     file_replace(os.path.join(deb_src_dir, 'debian', 'control'), '${misc:Depends}, ${python3:Depends}',
                  "python3 (>= 3.2), python3-msgpack, python3-redis (>= 1.8.0)")
+    file_replace(os.path.join(deb_src_dir, 'debian', 'control'), '${misc:Depends}, ${python:Depends}',
+                 "python (>= 2.7), python (<< 2.8), python-redis (>= 1.8.0), python-msgpack")
 
 
 def file_replace(filename, pattern_to_replace, replacement):

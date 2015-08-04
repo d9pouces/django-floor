@@ -43,6 +43,15 @@ class OptionParser(object):
         return parser.has_option(section=section, option=option)
 
     def __call__(self, parser, ini_values):
+        """ Given a .ini config file and a Python dict, read its value and set the dict with it
+
+        :param parser: ConfigParser that read the .ini config file
+        :type parser: :class:`configparser.ConfigParser`
+        :param ini_values: a dict to fill
+        :type ini_values: :class:`dict`
+        :return: `None`
+        :rtype: :class:`NoneType`
+        """
         section, sep, option = self.option.partition('.')
         if not self.has_value(parser):
             return

@@ -39,7 +39,7 @@ class TestSignature(TestCase):
     def test_1(self):
 
         def func(request, a, b, c=0):
-            print(request, a, b, c)
+            return request, a, b, c
 
         wrapper = RedisCallWrapper(func, path='test')
         self.assertFalse(wrapper.accept_kwargs)
