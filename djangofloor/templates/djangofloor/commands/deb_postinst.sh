@@ -1,11 +1,11 @@
 #!/bin/sh
 set -e
 {% if python_version == 2 %}if which pycompile >/dev/null 2>&1; then
-    pycompile -p python-demo
+    pycompile -p python-{{ project_name }}
 fi
 {% endif %}{% if python_version == 3 %}
 if which py3compile >/dev/null 2>&1; then
-    py3compile -p python3-demo
+    py3compile -p python3-{{ project_name }}
 fi
 {% endif %}
 
