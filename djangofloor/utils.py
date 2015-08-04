@@ -13,12 +13,6 @@ class Path(object):
     def __repr__(self):
         return repr(str(self.path))
 
-    def __unicode__(self):
-        return six.u(self.path)
-
-    def __str__(self):
-        return six.u(self.path)
-
 
 class DirectoryPath(Path):
     pass

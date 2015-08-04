@@ -117,11 +117,11 @@ def __parse_setting(obj):
         if values:
             return __formatter.format(obj, **values)
     elif isinstance(obj, DirectoryPath):
-        obj = __parse_setting(force_text(obj))
+        obj = __parse_setting(force_text(obj.path))
         __ensure_dir(obj, parent_=False)
         return obj
     elif isinstance(obj, FilePath):
-        obj = __parse_setting(force_text(obj))
+        obj = __parse_setting(force_text(obj.path))
         __ensure_dir(obj, parent_=True)
         return obj
     elif isinstance(obj, list) or isinstance(obj, tuple):

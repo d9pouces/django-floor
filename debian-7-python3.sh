@@ -1,14 +1,17 @@
 #!/bin/bash
-IP=`/sbin/ifconfig | grep -Eo 'inet (addr:|adr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1'`
+# base packages
 sudo apt-get update
 sudo apt-get upgrade --yes
 sudo apt-get install --yes vim python3-all-dev dh-make ntp rsync virtualenvwrapper liblzma-dev python3-tz python3-setuptools tree apache2 apache2-mpm-worker apache2-utils apache2.2-bin apache2.2-common libapr1 libaprutil1 libaprutil1-dbd-sqlite3 libaprutil1-ldap python-medusa python-meld3 ssl-cert supervisor
 source /etc/bash_completion.d/virtualenvwrapper
+
+# create the virtual env
 mkvirtualenv -p `which python3.2` djangofloor3
 workon djangofloor3
 pip install setuptools --upgrade
 pip install pip --upgrade
 pip install debtools djangofloor gunicorn==18.0
+
 # generate packages for all dependencies
 cd demo
 multideb -r -v -x stdeb-debian-7.cfg
@@ -23,6 +26,7 @@ mv deb_dist/*deb deb
 sudo dpkg -i deb/python3-*.deb
 
 # package configuration
+IP=`/sbin/ifconfig | grep -Eo 'inet (addr:|adr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1'`
 sudo sed -i "s/localhost/$IP/g" /etc/apache2/sites-available/demo.conf
 sudo sed -i "s/localhost/$IP/g" /etc/demo/settings.ini
 sudo a2ensite demo.conf

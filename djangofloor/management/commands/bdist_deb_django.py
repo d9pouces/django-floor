@@ -64,6 +64,11 @@ class BdistDebDjango(sdist_dsc):
                 if os.path.exists(config_fname):
                     cfg_files.append(config_fname)
         return cfg_files
+    
+    def get_option(self, section, option, fallback=None):
+        if self.config_parser.has_option(section=section, option=option):
+            return self.config_parser.get(section=section, option=option)
+        return fallback
 
     def run(self):
         """Order of operations:
@@ -100,19 +105,17 @@ class BdistDebDjango(sdist_dsc):
         self.config_parser.read(self.get_config_files())
 
         extra_processes = []
-        if self.config_parser.has_option('bdist_deb_django', 'processes'):
-            extra_processes = []
-            for process_line in self.config_parser.get('bdist_deb_django', 'processes').splitlines():
-                process_line = process_line.strip()
-                process_name, sep, process_cmd = process_line.partition(':')
-                if process_line and sep != ':':
-                    print('Extra processes must be of the form "process_name:command_line"')
-                    raise ValueError
-                elif process_line:
-                    extra_processes.append(process_line)
-        frontend = self.config_parser.get('bdist_deb_django', 'frontend', fallback=None)
-        process_manager = self.config_parser.get('bdist_deb_django', 'process_manager', fallback=None)
-        username = self.config_parser.get('bdist_deb_django', 'username', fallback=project_name)
+        for process_line in self.get_option('bdist_deb_django', 'processes', fallback='').splitlines():
+            process_line = process_line.strip()
+            process_name, sep, process_cmd = process_line.partition(':')
+            if process_line and sep != ':':
+                print('Extra processes must be of the form "process_name:command_line"')
+                raise ValueError
+            elif process_line:
+                extra_processes.append(process_line)
+        frontend = self.get_option('bdist_deb_django', 'frontend', fallback=None)
+        process_manager = self.get_option('bdist_deb_django', 'process_manager', fallback=None)
+        username = self.get_option('bdist_deb_django', 'username', fallback=project_name)
         extra_depends = ''
 
         # prepare the use of the gen_install command
@@ -155,8 +158,8 @@ class BdistDebDjango(sdist_dsc):
             control = control_fd.read()
         old_depends2 = '${misc:Depends}, ${python:Depends}'
         old_depends3 = '${misc:Depends}, ${python3:Depends}'
-        new_depends2 = self.config_parser.get('DEFAULT', 'depends', fallback=old_depends2)
-        new_depends3 = self.config_parser.get('DEFAULT', 'depends3', fallback=old_depends3)
+        new_depends2 = self.get_option('DEFAULT', 'depends', fallback=old_depends2)
+        new_depends3 = self.get_option('DEFAULT', 'depends3', fallback=old_depends3)
         control = control.replace(old_depends2, new_depends2 + extra_depends)
         control = control.replace(old_depends3, new_depends3 + extra_depends)
         with codecs.open(os.path.join(target_dir, 'debian/control'), 'w', encoding='utf-8') as control_fd:
