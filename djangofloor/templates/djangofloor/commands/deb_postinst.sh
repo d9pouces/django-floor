@@ -14,11 +14,13 @@ if [ -z "${USER_EXISTS}" ]; then
     useradd {{ project_name }} -b /var/ -U -r
 fi
 
-
 mkdir -p /var/{{ project_name }}/media
 mkdir -p /var/{{ project_name }}/data
 mkdir -p /var/log/{{ project_name }}
 chown -R {{ project_name }}: /var/{{ project_name }}
 chown -R {{ project_name }}: /etc/{{ project_name }}
 chown -R {{ project_name }}: /var/log/{{ project_name }}
-a2enmod proxy proxy_http
+{% if frontend == 'apache2.2' or frontend == 'apache2.4' %}a2enmod proxy proxy_http
+{% endif %}
+
+{{ extra_postinst|safe }}

@@ -55,24 +55,42 @@ Packaging your project cannot be done with the standard `bdist_deb` command, pro
    * configuration file is required for Supervisor or Systemd.
 
 Djangofloor provides a new command `bdist_deb_django` that do all these things for you.
-It only requires a new section `bdist_deb_django` in your `stdeb.cfg` file. This section can also be in the files specific to each distribution.
+It only requires a new section `my_project` in your `stdeb.cfg` file. This section can also be in the files specific to each distribution.
 In addition to the options used by the original `bdist_stdeb` command, you can add this
 
 .. code-block:: ini
 
-    [bdist_deb_django]
+    [my_project]
+    ; a list of processes to run (like the gunicorn process, or the celery worker)
     processes = myproject-gunicorn:/usr/bin/myproject-gunicorn
         myproject-celery:/usr/bin/myproject-celery worker
+    ; the frontend server (valid values are currently apache2.2, apache2.4 or nginx)
     frontend = nginx
+    ; the process manager (valid values are currently supervisor or systemd)
     process_manager = supervisor
+    ; the username used for the process (should be my_project).
     username = myproject
+    ; extra post-inst. script, appended to the default one (Python 2 only)
+    extra_postinst = path_of_postinstallation_script_for_python2.sh
+    ; extra post-inst. script, appended to the default one (Python 3 only)
+    extra_postinst3 = path_of_postinstallation_script_for_python.sh
+    ; uncommon option
+    preinst = path_of_preinstallation_script_for_python2.sh
+    ; uncommon option
+    preinst3 = path_of_preinstallation_script_for_python3.sh
+    ; uncommon option
+    postinst = path_of_postinstallation_script_for_python2.sh
+    ; uncommon option
+    postinst3 = path_of_postinstallation_script_for_python3.sh
+    ; uncommon option
+    prerm = path_of_preremove_script_for_python2.sh
+    ; uncommon option
+    prerm3 = path_of_preremove_script_for_python3.sh
+    ; uncommon option; override the default postinst script
+    postrm = path_of_postremove_script_for_python2.sh
+    ; uncommon option; override the default postinst script
+    postrm3 = path_of_postremove_script_for_python3.sh
 
-There are basically four available options:
-
-    * `processes`: a list of processes to run (like the gunicorn process, or the celery worker),
-    * `frontend`: the frontend server (valid values are currently `apache2.2`, `apache2.4` or `nginx`),
-    * `process_manager`: the process manager (valid values are currently `supervisor` or `systemd`),
-    * `username`: the username used for the process (can be `my_project`).
 
 Then you can create your .deb:
 

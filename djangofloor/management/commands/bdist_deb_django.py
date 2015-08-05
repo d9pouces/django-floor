@@ -64,7 +64,7 @@ class BdistDebDjango(sdist_dsc):
                 if os.path.exists(config_fname):
                     cfg_files.append(config_fname)
         return cfg_files
-    
+
     def get_option(self, section, option, fallback=None):
         if self.config_parser.has_option(section=section, option=option):
             return self.config_parser.get(section=section, option=option)
@@ -105,7 +105,7 @@ class BdistDebDjango(sdist_dsc):
         self.config_parser.read(self.get_config_files())
 
         extra_processes = []
-        for process_line in self.get_option('bdist_deb_django', 'processes', fallback='').splitlines():
+        for process_line in self.get_option(project_name, 'processes', fallback='').splitlines():
             process_line = process_line.strip()
             process_name, sep, process_cmd = process_line.partition(':')
             if process_line and sep != ':':
@@ -113,9 +113,9 @@ class BdistDebDjango(sdist_dsc):
                 raise ValueError
             elif process_line:
                 extra_processes.append(process_line)
-        frontend = self.get_option('bdist_deb_django', 'frontend', fallback=None)
-        process_manager = self.get_option('bdist_deb_django', 'process_manager', fallback=None)
-        username = self.get_option('bdist_deb_django', 'username', fallback=project_name)
+        frontend = self.get_option(project_name, 'frontend', fallback=None)
+        process_manager = self.get_option(project_name, 'process_manager', fallback=None)
+        username = self.get_option(project_name, 'username', fallback=project_name)
         extra_depends = ''
 
         # prepare the use of the gen_install command
@@ -158,8 +158,8 @@ class BdistDebDjango(sdist_dsc):
             control = control_fd.read()
         old_depends2 = '${misc:Depends}, ${python:Depends}'
         old_depends3 = '${misc:Depends}, ${python3:Depends}'
-        new_depends2 = self.get_option('DEFAULT', 'depends', fallback=old_depends2)
-        new_depends3 = self.get_option('DEFAULT', 'depends3', fallback=old_depends3)
+        new_depends2 = self.get_option(project_name, 'depends', fallback=old_depends2)
+        new_depends3 = self.get_option(project_name, 'depends3', fallback=old_depends3)
         control = control.replace(old_depends2, new_depends2 + extra_depends)
         control = control.replace(old_depends3, new_depends3 + extra_depends)
         with codecs.open(os.path.join(target_dir, 'debian/control'), 'w', encoding='utf-8') as control_fd:
@@ -171,6 +171,7 @@ class BdistDebDjango(sdist_dsc):
         python2_re = re.compile(r'^\s*python setup.py install --force --root=debian/([^/\s]+) .*$')
         python3_re = re.compile(r'^\s*python3 setup.py install --force --root=debian/([^/\s]+) .*$')
         debian_names = {}
+        # debian_names[2] = 'python-my_project', debian_names[3] = 'python3-my_project'
         with codecs.open(rules_filename, 'r', encoding='utf-8') as rules_fd:
             for line in rules_fd:
                 new_rules_content += line
@@ -185,15 +186,36 @@ class BdistDebDjango(sdist_dsc):
         with codecs.open(rules_filename, 'w', encoding='utf-8') as rules_fd:
             rules_fd.write(new_rules_content)
 
-        values = {'project_name': project_name}
+        values = {'project_name': project_name, 'process_manager': process_manager,
+                  'frontend': frontend, }
+        # get options for installation/remove scripts
+        extra_postinst = {2: self.get_option(project_name, 'extra_postinst', fallback=None),
+                          3: self.get_option(project_name, 'extra_postinst3', fallback=None), }
+        scripts = {action: {2: self.get_option(project_name, action, fallback=None),
+                            3: self.get_option(project_name, '%s3' % action, fallback=None), }
+                   for action in ('postinst', 'preinst', 'postrm', 'prerm')}
+        # write the default postinst script and custom scripts
         for python_version in (2, 3):
             if python_version not in debian_names:
                 continue
+            values['extra_postinst'] = ''
+            if extra_postinst[python_version]:
+                with codecs.open(extra_postinst[python_version], 'r', encoding='utf-8') as fd:
+                    values['extra_postinst'] = fd.read()
             values.update({'python_version': python_version, 'debian_name': debian_names[python_version]})
+            content = render_to_string('djangofloor/commands/deb_postinst.sh', values)
             python_postinst = os.path.join(target_dir, 'debian', debian_names[python_version] + '.postinst')
             with codecs.open(python_postinst, 'w', encoding='utf-8') as postinst_fd:
-                content = render_to_string('djangofloor/commands/deb_postinst.sh', values)
                 postinst_fd.write(content)
+            for action, scripts_per_version in scripts.items():
+                if not scripts_per_version[python_version]:
+                    continue
+                with codecs.open(scripts_per_version[python_version], 'r', encoding='utf-8') as fd:
+                    content = fd.read()
+                path = os.path.join(target_dir, 'debian', '%s.%s' % (debian_names[python_version], action))
+                with codecs.open(path, 'w', encoding='utf-8') as fd:
+                    fd.write(content)
 
+        # build the package!
         syscmd = ['dpkg-buildpackage', '-rfakeroot', '-uc', '-b']
         util.process_command(syscmd, cwd=target_dir)
