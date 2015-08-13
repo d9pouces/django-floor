@@ -9,9 +9,8 @@ from django.utils.functional import cached_property
 from django.utils.six import text_type
 from django.utils.translation import ugettext as _, ugettext_lazy
 
-from djangofloor import defaults as djangofloor_defaults, __version__ as version
-from djangofloor.settings import project_settings, user_settings, floor_settings, ini_config_mapping, __settings as merged_settings, \
-    __settings_origin as settings_origin
+from djangofloor import __version__ as version
+from djangofloor.settings import merger
 
 __author__ = 'Matthieu Gallet'
 
@@ -35,14 +34,14 @@ class Command(BaseCommand):
             self.stdout.write(self.style.ERROR(msg))
 
     def handle(self, *args, **options):
-        project_default_conf = project_settings.__file__
+        project_default_conf = merger.project_settings_module.__file__
         if project_default_conf.endswith('.pyc'):
             project_default_conf = project_default_conf[:-1]
-        djangofloor_default_conf = floor_settings.__file__
+        djangofloor_default_conf = merger.default_settings_module.__file__
         if djangofloor_default_conf.endswith('.pyc'):
             djangofloor_default_conf = djangofloor_default_conf[:-1]
-        all_keys = djangofloor_defaults.__dict__.copy()
-        all_keys.update(project_settings.__dict__)
+        all_keys = merger.default_settings_module.__dict__.copy()
+        all_keys.update(merger.project_settings_module.__dict__)
 
         if options['merged']:
             self.merge(djangofloor_default_conf, project_default_conf)
@@ -61,7 +60,7 @@ class Command(BaseCommand):
         self.stdout.write(self.style.MIGRATE_LABEL(_('List of available settings:')))
 
     def merge(self, djangofloor_default_conf, project_default_conf):
-        keys = [key for key in merged_settings if (key == key.upper() and key not in ('_', '__') and not key.endswith('_HELP'))]
+        keys = [key for key in merger.settings if (key == key.upper() and key not in ('_', '__') and not key.endswith('_HELP'))]
         keys.sort()
         self.stdout.write('# -*- coding: utf-8 -*-\n')
         self.stdout.write('\n')
@@ -73,7 +72,7 @@ class Command(BaseCommand):
         self.stdout.write('\n')
         lazy_cls = ugettext_lazy('').__class__
         for key in keys:
-            value = merged_settings[key]
+            value = merger.settings[key]
             if isinstance(value, lazy_cls):
                 value = text_type(value)
             self.stdout.write('%(key)s = %(value)r\n' % {'key': key, 'value': value, })
@@ -93,9 +92,9 @@ class Command(BaseCommand):
         :type all_keys: :class:`dict`
         """
         # keys defined in DjangoFloor defaults
-        keys = set([key for key in djangofloor_defaults.__dict__ if key == key.upper() and key + '_HELP' in all_keys])
+        keys = set([key for key in merger.default_settings_module.__dict__ if key == key.upper() and key + '_HELP' in all_keys])
         # keys defined in project defaults
-        keys |= set([key for key in project_settings.__dict__ if key == key.upper() and key + '_HELP' in all_keys])
+        keys |= set([key for key in merger.project_settings_module.__dict__ if key == key.upper() and key + '_HELP' in all_keys])
         # and we sort them
         keys = list(keys)
         keys.sort()
@@ -105,9 +104,9 @@ class Command(BaseCommand):
                 continue
             default_value = self.force_text(all_keys[key])  # default value
             actual_value = self.force_text(getattr(settings, key))
-            is_redefined = key in user_settings.__dict__ or key in ini_config_mapping
+            is_redefined = key in merger.user_settings_module.__dict__ or key in merger.ini_config_mapping
             is_changed = actual_value != default_value
-            values = {'key': key, 'help': all_keys[key + '_HELP'], 'default': default_value, 'actual': actual_value, 'origin': settings_origin[key], }
+            values = {'key': key, 'help': all_keys[key + '_HELP'], 'default': default_value, 'actual': actual_value, 'origin': merger.settings_origin[key], }
             if is_changed:
                 self.stdout.write(self.style.WARNING('%(key)s = %(actual)r, from %(origin)s:') % values)
             elif is_redefined:
