@@ -1,5 +1,9 @@
 # coding=utf-8
 from __future__ import unicode_literals, absolute_import
+from collections import OrderedDict
+from distutils.version import LooseVersion
+from django import get_version
+
 try:
     # noinspection PyCompatibility
     from configparser import ConfigParser
@@ -16,12 +20,15 @@ from django.utils.module_loading import import_string
 __author__ = 'Matthieu Gallet'
 
 
-class Path(object):
-    def __init__(self, path):
-        self.path = path
+class DjangoFloorConfig(object):
+    def __init__(self, value):
+        self.value = value
+
+
+class Path(DjangoFloorConfig):
 
     def __repr__(self):
-        return str(self.path)
+        return str(self.value)
 
 
 class DirectoryPath(Path):
@@ -30,6 +37,74 @@ class DirectoryPath(Path):
 
 class FilePath(Path):
     pass
+
+
+class SettingReference(DjangoFloorConfig):
+    """Reference any setting object by its name.
+    Allow to reuse a list defined in another setting file.
+
+    in `defaults.py`:
+
+    >>> SETTING_1 = True
+    >>> SETTING_2 = SettingReference('SETTING_1')
+
+    In `local_settings.py`
+
+    >>> SETTING_1 = False
+
+    In your code:
+
+    >>> from django.conf import settings
+
+    Then `settings.SETTING_2` is equal to `False`
+    """
+
+
+class CallableSetting(DjangoFloorConfig):
+    """
+    Require a function(kwargs) as argument, this function will be called with all
+
+    >>> SETTING_1 = True
+    >>> SETTING_2 = CallableSetting(lambda x: not x['SETTING_1'])
+
+    In `local_settings.py`
+
+    >>> SETTING_1 = False
+
+    In your code:
+
+    >>> from django.conf import settings
+
+    Then `settings.SETTING_2` is equal to `True`
+    """
+    def __init__(self, value, *required):
+        super(CallableSetting, self).__init__(value)
+        self.required = required
+
+
+class ExpandIterable(DjangoFloorConfig):
+    """Allow to import an existing list inside a list setting.
+    in `defaults.py`:
+
+    >>> LIST_1 = [0, ]
+    >>> LIST_2 = [1, ExpandIterable('LIST_1'), 2, ]
+    >>> DICT_1 = {0: 0, }
+    >>> DICT_2 = {1: 1, None: ExpandIterable('DICT_1'), 2: 2, }
+
+    In case of dict, the key is ignored when the referenced dict is expanded.
+    In `local_settings.py`
+
+    >>> LIST_1 = [3, ]
+    >>> DICT_1 = {3: 3, }
+
+    In your code:
+
+    >>> from django.conf import settings
+
+    Then `settings.LIST_2` is equal to `[1, 3, 2]`.
+    `settings.DICT_2` is equal to `{1: 1, 2: 2, 3: 3, }`.
+
+    """
 
 
 def _resolve_name(name, package, level):
@@ -71,6 +146,8 @@ else:
 
 
 class SettingMerger(object):
+    """Load different settings modules and config files and merge them.
+    """
 
     def __init__(self, project_name,
                  default_settings_module_name,
@@ -118,9 +195,11 @@ class SettingMerger(object):
 
     @staticmethod
     def ensure_dir(path_, parent_=True):
-        """ ensure that the given directory exists
+        """Ensure that the given directory exists
+
         :param path_: the path to check
         :param parent_: only ensure the existence of the parent directory
+
         """
         dirname_ = os.path.dirname(path_) if parent_ else path_
         if not os.path.isdir(dirname_):
@@ -132,7 +211,9 @@ class SettingMerger(object):
 
     def load_settings(self):
         for module in self.default_settings_module, self.project_settings_module, self.user_settings_module:
-            for setting_name in module.__dict__:
+            keys = list(module.__dict__.keys())
+            keys.sort()
+            for setting_name in keys:
                 if setting_name == setting_name.upper():
                     self.get_setting_value(setting_name)
 
@@ -167,10 +248,11 @@ class SettingMerger(object):
 
     def parse_setting(self, obj):
         """Parse the object for replacing variables by their values.
+
         If `obj` is a string like "THIS_IS_{TEXT}", search for a setting named "TEXT" and replace {TEXT} by its value (say, "VALUE").
         The returned object is then equal to "THIS_IS_VALUE".
-        If `obj` is a list, a set, a tuple or a dict, their components are recursively parsed.
-        If `obj` is a DirectoryPath or a FilePath, required parent directories are automatically created and the name is returned.
+        If `obj` is a list, a set, a tuple or a dict, its components are recursively parsed.
+        If `obj` is a :class:`djangofloor.utils.DirectoryPath` or a :class:`djangofloor.utils.FilePath`, required parent directories are automatically created and the name is returned.
         Otherwise, `obj` is returned as-is.
 
 
@@ -185,24 +267,49 @@ class SettingMerger(object):
             if values:
                 return self.__formatter.format(obj, **values)
         elif isinstance(obj, DirectoryPath):
-            obj = self.parse_setting(obj.path)
+            obj = self.parse_setting(obj.value)
             self.ensure_dir(obj, parent_=False)
             return obj
         elif isinstance(obj, FilePath):
-            obj = self.parse_setting(obj.path)
+            obj = self.parse_setting(obj.value)
             self.ensure_dir(obj, parent_=True)
             return obj
+        elif isinstance(obj, SettingReference):
+            return self.get_setting_value(obj.value)
+        elif isinstance(obj, CallableSetting):
+            for required in obj.required:
+                self.get_setting_value(required)
+            return obj.value(self.settings)
         elif isinstance(obj, list) or isinstance(obj, tuple):
-            return [self.parse_setting(x_) for x_ in obj]
+            result = []
+            for sub_obj in obj:
+                if isinstance(sub_obj, ExpandIterable):
+                    result += self.get_setting_value(sub_obj.value)
+                else:
+                    result.append(self.parse_setting(sub_obj))
+            if isinstance(obj, tuple):
+                return tuple(result)
+            return result
         elif isinstance(obj, set):
-            return {self.parse_setting(x_) for x_ in obj}
+            result = set()
+            for sub_obj in obj:
+                if isinstance(sub_obj, ExpandIterable):
+                    result |= self.get_setting_value(sub_obj.value)
+                else:
+                    result.add(self.parse_setting(sub_obj))
+            return result
         elif isinstance(obj, dict):
-            return dict([(self.parse_setting(x_), self.parse_setting(y_)) for (x_, y_) in obj.items()])
+            result = {}
+            for sub_key, sub_obj in obj.items():
+                if isinstance(sub_obj, ExpandIterable):
+                    result.update(self.get_setting_value(sub_obj.value))
+                else:
+                    result[self.parse_setting(sub_key)] = (self.parse_setting(sub_obj))
+            return result
         return obj
 
     def get_setting_value(self, setting_name):
-        """ import setting_name_ from user-specific settings, or project-specific settings, or django-floor settings.
-        Also add it to globals(), so this function is idempotent.
+        """import setting_name_ from user-specific settings, or project-specific settings, or django-floor settings. Also add it to globals(), so this function is idempotent.
 
         :param setting_name: name of the setting to import
         :return: the imported setting :)
@@ -228,3 +335,19 @@ class SettingMerger(object):
     def process(self):
         self.load_settings_providers()
         self.load_settings()
+
+    def post_process(self):
+        """Perform some cleaning on settings:
+
+            * remove duplicates in `INSTALLED_APPS` (keeps only the first occurrence)
+
+        """
+        # remove duplicates in INSTALLED_APPS
+        self.settings['INSTALLED_APPS'] = list(OrderedDict.fromkeys(self.settings['INSTALLED_APPS']))
+        django_version = get_version()
+        # remove deprecated settings
+        if LooseVersion(django_version) >= LooseVersion('1.8'):
+            if 'TEMPLATES' in self.settings:
+                for key in 'TEMPLATE_DIRS', 'TEMPLATE_CONTEXT_PROCESSORS', 'TEMPLATE_LOADERS':
+                    if key in self.settings:
+                        del self.settings[key]

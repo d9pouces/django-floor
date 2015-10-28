@@ -20,6 +20,7 @@ If VARIABLE is uppercase and if VARIABLE_HELP exists, then VARIABLE is shown wit
 """
 from __future__ import unicode_literals
 import os
+
 from djangofloor.utils import SettingMerger
 
 __author__ = 'Matthieu Gallet'
@@ -34,17 +35,9 @@ PROJECT_NAME = os.environ.get('DJANGOFLOOR_PROJECT_NAME', 'djangofloor')
 merger = SettingMerger(PROJECT_NAME, 'djangofloor.defaults', PROJECT_SETTINGS_MODULE_NAME, USER_SETTINGS_PATH,
                        DJANGOFLOOR_CONFIG_PATH, DJANGOFLOOR_MAPPING)
 merger.process()
+merger.post_process()
+
 __settings = globals()
 __settings_origin = merger.settings_origin
 __settings_original_value = merger.settings_original_value
 __settings.update(merger.settings)
-
-
-# add extra installed app
-# noinspection PyUnresolvedReferences
-for y in OTHER_ALLAUTH, FLOOR_INSTALLED_APPS:
-    for x in y:
-        # noinspection PyUnresolvedReferences
-        if x and x not in INSTALLED_APPS:
-            # noinspection PyUnresolvedReferences
-            INSTALLED_APPS.append(x)

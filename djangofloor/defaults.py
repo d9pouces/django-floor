@@ -9,7 +9,7 @@ from __future__ import unicode_literals
 import os
 
 """ Django settings for DjangoFloor project. """
-from djangofloor.utils import DirectoryPath, FilePath
+from djangofloor.utils import DirectoryPath, FilePath, SettingReference, ExpandIterable
 
 __author__ = 'Matthieu Gallet'
 from django.utils.translation import ugettext_lazy as _
@@ -43,8 +43,6 @@ LOG_PATH = DirectoryPath('{LOCAL_PATH}/log')
 DATA_PATH = DirectoryPath('{LOCAL_PATH}/data')
 DEBUG = False
 DEBUG_HELP = 'A boolean that turns on/off debug mode.'
-TEMPLATE_DEBUG = False
-TEMPLATE_DEBUG_HELP = 'A boolean that turns on/off template debug mode.'
 ADMIN_EMAIL = 'admin@{SERVER_NAME}'
 ADMINS = (("admin", "{ADMIN_EMAIL}"),)
 ADMINS_HELP = 'A tuple that lists people who get code error notifications.'
@@ -229,12 +227,6 @@ if USE_SCSS:
     PIPELINE_COMPILERS = (
         'djangofloor.middleware.PyScssCompiler',
     )
-# List of callables that know how to import templates from various sources.
-TEMPLATE_LOADERS = [
-    'django.template.loaders.filesystem.Loader',
-    'django.template.loaders.app_directories.Loader',
-    # 'django.template.loaders.eggs.Loader',
-]
 
 MIDDLEWARE_CLASSES = ['django.middleware.cache.UpdateCacheMiddleware',
                       'django.middleware.common.CommonMiddleware',
@@ -267,6 +259,14 @@ DEBUG_TOOLBAR_PANELS = [
 ]
 DEBUG_TOOLBAR_PATCH_SETTINGS = False
 DEBUG_TOOLBAR_CONFIG = {'JQUERY_URL': None, }
+TEMPLATE_DEBUG = False
+TEMPLATE_DEBUG_HELP = 'A boolean that turns on/off template debug mode.'
+# List of callables that know how to import templates from various sources.
+TEMPLATE_LOADERS = [
+    'django.template.loaders.filesystem.Loader',
+    'django.template.loaders.app_directories.Loader',
+    # 'django.template.loaders.eggs.Loader',
+]
 TEMPLATE_CONTEXT_PROCESSORS = [
     'django.contrib.auth.context_processors.auth',
     'django.core.context_processors.debug',
@@ -281,10 +281,21 @@ TEMPLATE_CONTEXT_PROCESSORS = [
 if FLOOR_USE_WS4REDIS:
     # noinspection PyUnresolvedReferences
     TEMPLATE_CONTEXT_PROCESSORS += ['ws4redis.context_processors.default', ]
-ROOT_URLCONF = 'djangofloor.root_urls'
 
 TEMPLATE_DIRS = []
-
+TEMPLATES = [
+    {
+        'NAME': 'default',
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [],
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': SettingReference('TEMPLATE_CONTEXT_PROCESSORS'),
+            'loaders': SettingReference('TEMPLATE_LOADERS'),
+        },
+    },
+]
+ROOT_URLCONF = 'djangofloor.root_urls'
 # noinspection PyUnresolvedReferences
 INSTALLED_APPS = [
     'django.contrib.auth',
@@ -304,11 +315,14 @@ INSTALLED_APPS = [
     'allauth.socialaccount',
     'pipeline',
     'debug_toolbar',
+    ExpandIterable('OTHER_ALLAUTH'),
+    ExpandIterable('FLOOR_INSTALLED_APPS'),
 ]
 
 if FLOOR_USE_WS4REDIS:
     # noinspection PyUnresolvedReferences
     INSTALLED_APPS += ['ws4redis', ]
+
 
 OTHER_ALLAUTH = []
 OTHER_ALLAUTH_HELP = 'Other allauth authentication providers, merely a list of allauth.socialaccount.providers.*'

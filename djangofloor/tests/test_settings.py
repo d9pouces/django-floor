@@ -33,8 +33,18 @@ class TestSettings(TestCase):
                                'djangofloor.tests.project_settings_module', user_settings_module.__file__,
                                ini_filename, 'djangofloor.tests.test_settings.ini_mapping')
         merger.process()
-        self.assertEqual({'PROJECT_NAME': 'test_project', 'S_DEFAULT': True, 'S_USER': True, 'S_PROJECT': True,
-                          'S_PROJECT_USER': True, 'S_DEFAULT_USER': True, 'S_DEFAULT_PROJECT_USER': True,
-                          'S_DEFAULT_PROJECT': True, 'S_DEFAULT_INI': True, 'S_DEFAULT_INI_USER': True,
-                          'S_DEFAULT_PROJECT_INI': True, 'S_DEFAULT_PROJECT_INI_USER': True, 'S_INI_USER': True,
-                          'S_PROJECT_INI': True, 'S_PROJECT_INI_USER': True, }, merger.settings)
+        expected_dict = {'PROJECT_NAME': 'test_project', 'S_DEFAULT': True, 'S_USER': True, 'S_PROJECT': True, 'S_PROJECT_USER': True, 'S_DEFAULT_USER': True, 'S_DEFAULT_PROJECT_USER': True,
+                         'S_DEFAULT_PROJECT': True, 'S_DEFAULT_INI': True, 'S_DEFAULT_INI_USER': True, 'S_DEFAULT_PROJECT_INI': True, 'S_DEFAULT_PROJECT_INI_USER': True, 'S_INI_USER': True,
+                         'S_PROJECT_INI': True, 'S_PROJECT_INI_USER': True,
+                         'S_BASE_LIST': [1], 'S_EXPANDED_LIST': [1, 1, 2],
+                         'S_LIST': [True, True, True, True, ], 'Z_CALLABLE': True,
+                         'S_DICT': {0: 1, True: True}, 'S_SET': {0, 1, True},
+                         'S_TUPLE': (True, True, True, True),
+                         }
+        for key in expected_dict:
+            self.assertTrue(key in merger.settings)
+        for key in merger.settings:
+            self.assertTrue(key in expected_dict)
+        for key in expected_dict:
+            self.assertEqual(expected_dict[key], merger.settings[key])
+        self.assertEqual(expected_dict, merger.settings)
