@@ -32,10 +32,14 @@ class Path(DjangoFloorConfig):
 
 
 class DirectoryPath(Path):
+    """Represent a directory that must be created on startup
+    """
     pass
 
 
 class FilePath(Path):
+    """Represent a file, whose parent directory should be created on startup
+    """
     pass
 
 
