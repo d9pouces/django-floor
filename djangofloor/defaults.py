@@ -220,7 +220,7 @@ PIPELINE_MIMETYPES = (
     ('text/x-scss', '.scss')
 )
 # these two cmpressors are not the best ones, but are installed with DjangoFloor as dependencies
-PIPELINE_JS_COMPRESSOR = 'pipeline.compressors.jsmin.JSMinCompressor'
+PIPELINE_JS_COMPRESSOR = 'pipeline.compressors.slimit.SlimItCompressor'
 PIPELINE_CSS_COMPRESSOR = 'djangofloor.middleware.RCSSMinCompressor'
 STATICFILES_STORAGE = 'pipeline.storage.PipelineCachedStorage'
 if USE_SCSS:
