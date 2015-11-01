@@ -7,12 +7,10 @@ The goal is to define valid settings out-of-the-box.
 """
 from __future__ import unicode_literals
 import os
-
-""" Django settings for DjangoFloor project. """
 from djangofloor.utils import DirectoryPath, FilePath, SettingReference, ExpandIterable
+from django.utils.translation import ugettext_lazy as _
 
 __author__ = 'Matthieu Gallet'
-from django.utils.translation import ugettext_lazy as _
 
 try:
     import ws4redis
@@ -91,7 +89,7 @@ USE_X_SEND_FILE_HELP = 'Use the XSendFile header in Apache or LightHTTPd for sen
 X_ACCEL_REDIRECT = []
 X_ACCEL_REDIRECT_HELP = 'Use the X-Accel-Redirect header in NGinx. List of tuples (/directory_path/, /alias_url/).'
 INTERNAL_IPS = ('127.0.0.1',)
-ALLOWED_HOSTS = ['127.0.0.1', '{SERVER_NAME}', ]
+ALLOWED_HOSTS = ['{SERVER_NAME}', '127.0.0.1', ]
 ALLOWED_HOSTS_HELP = 'A list of strings representing the host/domain names that this Django site can serve.'
 MAX_REQUESTS = 10000
 MAX_REQUESTS_HELP = 'The maximum number of requests a worker will process before restarting.'

@@ -71,4 +71,9 @@ INI_MAPPING = [
     OptionParser('DATABASE_HOST', 'database.host'),
     OptionParser('DATABASE_PORT', 'database.port'),
     OptionParser('SECRET_KEY', 'global.secret_key'),
+    OptionParser('SERVER_NAME', 'global.server_name'),
+    OptionParser('PROTOCOL', 'global.protocol'),
+    OptionParser('DEBUG', 'global.debug', converter=bool_setting),
+    OptionParser('TIME_ZONE', 'global.time_zone'),
+    OptionParser('BIND_ADDRESS', 'global.bind_address'),
 ]
