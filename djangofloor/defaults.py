@@ -286,7 +286,6 @@ TEMPLATES = [
         'NAME': 'default',
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [],
-        'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': SettingReference('TEMPLATE_CONTEXT_PROCESSORS'),
             'loaders': SettingReference('TEMPLATE_LOADERS'),
