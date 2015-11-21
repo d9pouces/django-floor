@@ -23,7 +23,7 @@ entry_points = {'console_scripts': ['djangofloor-manage = djangofloor.scripts:ma
                                     'djangofloor-uwsgi = djangofloor.scripts:uwsgi', ],
                 'distutils.commands': ['bdist_deb_django = djangofloor.management.commands.bdist_deb_django:BdistDebDjango']}
 
-requirements = ['Django>=1.8.0',
+requirements = ['Django>=1.8.0', 'Django<1.9.0',
                 'django-allauth>=0.22.0',
                 'gunicorn>=0.14.5',
                 'django-bootstrap3>=5.0.0',
