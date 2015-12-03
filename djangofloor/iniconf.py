@@ -4,14 +4,18 @@ Allow to define Django settings in a .ini configuration file instead of plain Py
 
 Only define a dictionnary, whose keys are the settings variables, and the values must be of the form [section].[key]
 
-For example, you can write the following configuration file::
+For example, you can write the following configuration file:
+
+.. code-block:: bash
 
   cat /etc/myproject/myproject.ini
   [database]
   engine = django.db.backends.sqlite3
   name = /var/myproject/database.db
 
-It is equivalent to::
+It is equivalent to:
+
+.. code-block:: bash
 
   cat /etc/myproject/myproject.py
   DATABASE_ENGINE = 'django.db.backends.sqlite3'
@@ -24,7 +28,7 @@ __author__ = 'Matthieu Gallet'
 
 
 class OptionParser(object):
-    def __init__(self, setting_name, option, converter=str):
+    def __init__(self, setting_name, option, converter=str, to_str=str):
         """class that maps an option in a .ini file to a setting.
 
         :param setting_name: the name of the setting (like "DATABASE_ENGINE")
@@ -33,10 +37,22 @@ class OptionParser(object):
         :type option: `str`
         :param converter: any callable that takes a text value and returns an object. Default to `str`
         :type converter: `callable`
+        :param to_str: any callable that takes the Python value and that converts it to str
+            only used for writing sample config file
+        :type to_str: `callable`
         """
         self.setting_name = setting_name
         self.option = option
         self.converter = converter
+        self.to_str = to_str
+
+    @property
+    def section(self):
+        return self.option.partition('.')[0]
+
+    @property
+    def key(self):
+        return self.option.partition('.')[2]
 
     def has_value(self, parser):
         section, sep, option = self.option.partition('.')
@@ -60,7 +76,7 @@ class OptionParser(object):
 
 
 def bool_setting(value):
-    return str(value).lower() in {'1', 'ok', 'yes', 'true'}
+    return str(value).lower() in {'1', 'ok', 'yes', 'true', 'on'}
 
 
 INI_MAPPING = [

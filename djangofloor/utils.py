@@ -174,6 +174,7 @@ class SettingMerger(object):
         self.project_settings_module = None
         self.user_settings_module = None
         self.ini_config_mapping = None
+        self.option_parsers = []
 
     @staticmethod
     def import_file(filepath):
@@ -247,6 +248,7 @@ class SettingMerger(object):
                     parser.read([self.djangofloor_config_path])
                     for option_parser in ini_values:
                         option_parser(parser, self.ini_config_mapping)
+                        self.option_parsers.append(option_parser)
             except ImportError:
                 pass
 

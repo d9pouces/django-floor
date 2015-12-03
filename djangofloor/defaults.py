@@ -76,7 +76,7 @@ TIME_ZONE_HELP = 'A string representing the time zone for this installation, or 
 BIND_ADDRESS = '127.0.0.1:9000'
 BIND_ADDRESS_HELP = 'The socket (IP address:port) to bind to.'
 REDIS_HOST = 'localhost'
-REDIS_HOST_HELP = 'hostname of your Redis database for the multiple services using Redis (cache, Celery, websockets, sessions)'
+REDIS_HOST_HELP = 'hostname of your Redis database for Redis-based services (cache, Celery, websockets, sessions)'
 REDIS_PORT = '6379'
 REDIS_PORT_HELP = 'port of your Redis database'
 THREADS = 1
@@ -380,7 +380,8 @@ CACHES_HELP = 'A dictionary containing the settings for all caches to be used wi
 ########################################################################################################################
 # django-redis-websocket
 ########################################################################################################################
-WS4REDIS_CONNECTION = {'host': '{REDIS_HOST}', 'port': '{REDIS_PORT}', 'db': 15, }
+WS4REDIS_DB = 15
+WS4REDIS_CONNECTION = {'host': '{REDIS_HOST}', 'port': '{REDIS_PORT}', 'db': SettingReference('WS4REDIS_DB'), }
 WS4REDIS_CONNECTION_HELP = 'If the Redis datastore uses connection settings other than the defaults.'
 WS4REDIS_EXPIRE = 0
 WS4REDIS_EMULATION_INTERVAL = 0
@@ -404,7 +405,8 @@ USE_CELERY = False
 CELERY_TIMEZONE = '{TIME_ZONE}'
 CELERY_RESULT_EXCHANGE = '{PROJECT_NAME}_results'
 CELERY_ACCEPT_CONTENT = ['json', 'yaml', 'msgpack']
-BROKER_URL = 'redis://{REDIS_HOST}:{REDIS_PORT}/13'
+BROKER_DB = 13
+BROKER_URL = 'redis://{REDIS_HOST}:{REDIS_PORT}/{BROKER_DB}'
 CELERY_APP = 'djangofloor'
 CELERY_CREATE_DIRS = True
 CELERY_TASK_SERIALIZER = 'json'
