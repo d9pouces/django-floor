@@ -6,6 +6,7 @@ df = {};
 df.registered_signals = {};
 df.default_message_timeout = 5000;
 df.__message_count = 0;
+df.window_key = null;
 
 /**
  * Call an existing signal
@@ -45,8 +46,11 @@ df.connect_http = function (signal, url) {
         if (from_server) {
             return;
         }
-        var jqxhr;
-        jqxhr = $.post(url, JSON.stringify(options));
+        var jqxhr, completeUrl = url;
+        if (df.window_key) {
+            completeUrl += '?window_key=' + df.window_key;
+        }
+        jqxhr = $.post(completeUrl, JSON.stringify(options));
         jqxhr.done(function (calls) {
             for (var i = 0; i < calls.length; i += 1) {
                 df.call(calls[i].signal, calls[i].options);
@@ -58,8 +62,11 @@ df.connect_http = function (signal, url) {
 
 df.connect_ws_emulator = function (url) {
     "use strict";
-    var jqxhr;
-    jqxhr = $.get(url);
+    var jqxhr, completeUrl = url;
+    if (df.window_key) {
+        completeUrl += '?window_key=' + df.window_key;
+    }
+    jqxhr = $.get(completeUrl);
     jqxhr.done(function (calls) {
         for (var i = 0; i < calls.length; i += 1) {
             df.call(calls[i].signal, calls[i].options, true);
@@ -83,10 +90,14 @@ df.connect('df.messages.hide', function (options) {
     var obj;
     if (options.id) {
         obj = $('#' + options.id);
-        $(obj).slideUp(400, 'swing', function() {$(obj).remove(); });
+        $(obj).slideUp(400, 'swing', function () {
+            $(obj).remove();
+        });
     } else {
         $('#messages').each(function (index, obj) {
-            $(obj).slideUp(400, 'swing', function() {$(obj).remove(); });
+            $(obj).slideUp(400, 'swing', function () {
+                $(obj).remove();
+            });
         });
     }
 });
@@ -183,7 +194,9 @@ $(function () {
     });
     $('#messages div').each(function (index, obj) {
         setTimeout(function () {
-            $(obj).slideUp(400, 'swing', function() {$(obj).remove(); });
+            $(obj).slideUp(400, 'swing', function () {
+                $(obj).remove();
+            });
         }, df.default_message_timeout);
     });
 

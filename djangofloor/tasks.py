@@ -20,6 +20,7 @@ __author__ = 'Matthieu Gallet'
 USER = 'users'
 SESSION = 'sessions'
 BROADCAST = 'broadcast'
+WINDOW = 'window'
 # special value used for plain HTTP requests
 RETURN = 'return'
 
@@ -104,9 +105,12 @@ def call(signal_name, request, sharing=None, **kwargs):
     :param request: initial request, giving informations about HTTP sessions and its user
     :type request: :class:`djangofloor.decorators.SignalRequest` or :class:`django.http.HttpRequest`
     :param sharing:
-        * `None` : does not propagate to the JavaScript (client) side
-        * `USER`, `SESSION`, `BROADCAST` : propagate to the request user, only to its current session, or to all currently logged-in users
-        * {'users': ['username1', 'username2'], 'groups': ['group1', 'group2'], 'broadcast': True} (or any subset of these keys)
+        * `None`: does not propagate to the JavaScript (client) side
+        * `WINDOW`: only to the browser window that initiated the original request
+        * `USER`, `SESSION`, `BROADCAST`: propagate to the request user, only to its current session,
+            or to all currently logged-in users
+        * {'users': ['username1', 'username2'], 'groups': ['group1', 'group2'], 'broadcast': True}
+         (or any subset of these keys)
         * `RETURN` return result values of signal calls to the caller
     :param kwargs: arguments for the receiver
     """
@@ -126,9 +130,12 @@ def df_call(signal_name, request, sharing, from_client, kwargs):
     :param request: initial request, giving informations about HTTP sessions and its user
     :type request: :class:`djangofloor.decorators.SignalRequest` or :class:`django.http.HttpRequest`
     :param sharing:
-        * `None` : does not propagate to the JavaScript (client) side
-        * `USER`, `SESSION`, `BROADCAST` : propagate to the request user, only to its current session, or to all currently logged-in users
-        * {'users': ['username1', 'username2'], 'groups': ['group1', 'group2'], 'broadcast': True} (or any subset of these keys)
+        * `None`: does not propagate to the JavaScript (client) side
+        * `WINDOW`: only to the browser window that initiated the original request
+        * `USER`, `SESSION`, `BROADCAST`: propagate to the request user, only to its current session,
+            or to all currently logged-in users
+        * {'users': ['username1', 'username2'], 'groups': ['group1', 'group2'], 'broadcast': True}
+            (or any subset of these keys)
         * `RETURN` return result values of signal calls to the caller
     :param from_client: True if this call comes a JS client
     :param kwargs: arguments for the receiver
@@ -146,7 +153,7 @@ def df_call(signal_name, request, sharing, from_client, kwargs):
             ws_call(signal_name, request, sharing, kwargs)
         else:
             from djangofloor.df_redis import push_signal_call
-            push_signal_call(request, signal_name, kwargs=kwargs)
+            push_signal_call(request, signal_name, kwargs=kwargs, sharing=sharing)
 
     must_delay = False
     for wrapper in REGISTERED_SIGNALS.get(signal_name, []):
@@ -164,4 +171,5 @@ def df_call(signal_name, request, sharing, from_client, kwargs):
     if sharing == RETURN:
         return result
     for data in result:
-        df_call(data['signal'], request, sharing=data.get('sharing', SESSION), from_client=False, kwargs=data['options'])
+        df_call(data['signal'], request, sharing=data.get('sharing', SESSION), from_client=False,
+                kwargs=data['options'])

@@ -17,7 +17,7 @@ SESSION_REDIS_HOST = '{REDIS_HOST}'
 SESSION_REDIS_PORT = '{REDIS_PORT}'
 SESSION_REDIS_DB = 10
 
-WS4REDIS_EMULATION_INTERVAL = 0
+WS4REDIS_EMULATION_INTERVAL = 1000
 DEBUG = False
 
 ########################################################################################################################

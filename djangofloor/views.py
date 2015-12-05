@@ -76,6 +76,7 @@ def signal_call(request, signal):
     :type signal: :class:`str`
     """
     import_signals()
+    request.window_key = request.GET.get('window_key')
     if request.body:
         kwargs = json.loads(request.body.decode('utf-8'), cls=get_signal_decoder())
     else:
@@ -95,6 +96,7 @@ def get_signal_calls(request):
 
     Return all signals called by Python code as a JSON-list
     """
+    request.window_key = request.GET.get('window_key')
     return JsonResponse(fetch_signal_calls(request), safe=False)
 
 

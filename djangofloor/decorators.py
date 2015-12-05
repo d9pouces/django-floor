@@ -199,8 +199,11 @@ class SignalRequest(object):
     :type is_active: :class:`bool`
     :param perms: list of "app_name.permission_name" (optional)
     :type perms: :class:`list`
+    :param window_key: a string value specific to each opened browser window/tab
+    :type window_key: :class:`str`
     """
-    def __init__(self, username, session_key, user_pk=None, is_superuser=False, is_staff=False, is_active=False, perms=None):
+    def __init__(self, username, session_key, user_pk=None, is_superuser=False, is_staff=False, is_active=False,
+                 perms=None, window_key=None):
         self.username = username
         self.session_key = session_key
         self.user_pk = user_pk
@@ -209,6 +212,7 @@ class SignalRequest(object):
         self.is_active = is_active
         self._perms = set(perms) if perms is not None else None
         self._template_perms = None
+        self.window_key = window_key
 
     @classmethod
     def from_user(cls, user):
@@ -298,12 +302,14 @@ class SignalRequest(object):
         """
         if isinstance(request, SignalRequest):
             return request
-        session_key = request.session.session_key if request.session else None
+        session_key = request.session.session_key if hasattr(request, 'session') and request.session else None
+        window_key = request.window_key if hasattr(request, 'window_key') else None
         user = request.user
         if user.is_authenticated():
             return cls(username=user.get_username(), session_key=session_key,
-                       user_pk=user.pk, is_superuser=user.is_superuser, is_staff=user.is_staff, is_active=user.is_active)
-        return cls(None, session_key)
+                       user_pk=user.pk, is_superuser=user.is_superuser, is_staff=user.is_staff,
+                       is_active=user.is_active, window_key=window_key)
+        return cls(None, session_key=session_key, window_key=window_key)
 
 
 class RedisCallWrapper(object):

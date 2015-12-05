@@ -19,7 +19,7 @@ from ws4redis.redis_store import RedisMessage
 
 from djangofloor.decorators import SignalRequest
 from djangofloor.exceptions import ApiException
-from djangofloor.tasks import BROADCAST, df_call, SESSION, USER, get_signal_encoder, get_signal_decoder
+from djangofloor.tasks import BROADCAST, df_call, SESSION, USER, get_signal_encoder, get_signal_decoder, WINDOW
 
 __author__ = 'Matthieu Gallet'
 
@@ -40,7 +40,9 @@ def ws_call(signal_name, request, sharing, kwargs):
     if isinstance(sharing, binary_type):
         sharing = force_text(sharing)
     if sharing == SESSION:
-        sharing = {SESSION: [request.session_key, ]}
+        sharing = {SESSION: ['s' + request.session_key, ]}
+    elif sharing == WINDOW:
+        sharing = {SESSION: ['w' + request.csrf_cookie, ]}
     elif sharing == USER:
         sharing = {USER: [request.username, ]}
     elif sharing == BROADCAST:
@@ -85,6 +87,6 @@ class Subscriber(RedisSubscriber):
             message_dict = json.loads(message.decode('utf-8'), cls=get_signal_decoder())
             df_call(message_dict['signal'], self.request, sharing=None, from_client=True, kwargs=message_dict['options'])
         except ApiException as e:
-            df_call('df.messages.error', self.request, sharing=SESSION, from_client=True, kwargs={'html': _('Error: %(msg)s') % {'msg': force_text(e)}})
+            df_call('df.messages.error', self.request, sharing=WINDOW, from_client=True, kwargs={'html': _('Error: %(msg)s') % {'msg': force_text(e)}})
         except Exception as e:
-            df_call('df.messages.error', self.request, sharing=SESSION, from_client=True, kwargs={'html': _('Invalid websocket message: %(msg)s.') % {'msg': force_text(e)}})
+            df_call('df.messages.error', self.request, sharing=WINDOW, from_client=True, kwargs={'html': _('Invalid websocket message: %(msg)s.') % {'msg': force_text(e)}})

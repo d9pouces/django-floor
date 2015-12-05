@@ -1,8 +1,10 @@
 # coding=utf-8
 from __future__ import unicode_literals
 import codecs
+from django.contrib.sessions.backends.base import VALID_KEY_CHARS
 from django.core.exceptions import ImproperlyConfigured
 # noinspection PyPackageRequirements
+from django.utils.crypto import get_random_string
 from pipeline.compilers import CompilerBase
 import base64
 from django.conf import settings
@@ -17,9 +19,14 @@ __author__ = 'Matthieu Gallet'
 
 
 class IEMiddleware(object):
-    """Add a HTTP header for Internet Explorer Compatibility.
+    """required for signals tight to a window
+    Add a HTTP header for Internet Explorer Compatibility.
     Ensure that IE uses the last version of its display engine.
     """
+    # noinspection PyMethodMayBeStatic
+    def process_request(self, request):
+        request.window_key = get_random_string(32, VALID_KEY_CHARS)
+
     # noinspection PyUnusedLocal,PyMethodMayBeStatic
     def process_template_response(self, request, response):
         response['X-UA-Compatible'] = 'IE=edge,chrome=1'

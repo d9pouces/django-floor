@@ -1,9 +1,10 @@
 # coding=utf-8
 from __future__ import unicode_literals
+from django.conf import settings
 from django.template.loader import render_to_string
 from djangofloor.decorators import connect, SerializedForm
 from demo.forms import SimpleForm
-from djangofloor.tasks import call, SESSION, BROADCAST, USER
+from djangofloor.tasks import call, SESSION, BROADCAST, USER, WINDOW
 
 __author__ = 'Matthieu Gallet'
 
@@ -26,14 +27,17 @@ def test_form(request, form):
 
 @connect(path='demo.test_websocket')
 def test_websocket(request):
-    call('df.messages.warning', request, BROADCAST, html='[BROADCAST] This message has been received and sent through websockets.')
-    call('df.messages.error', request, SESSION, html='[SESSION] This message has been received and sent through websockets.')
-    call('df.messages.info', request, USER, html='[USER] This message has been received and sent through websockets.')
+    txt = 'native' if settings.FLOOR_USE_WS4REDIS else 'emulated'
+    call('df.messages.success', request, WINDOW, html='[WINDOW] Message received and sent through %s websockets.' % txt)
+    call('df.messages.warning', request, BROADCAST, html='[BROADCAST] Message received and sent through %s websockets.' % txt)
+    call('df.messages.error', request, SESSION, html='[SESSION] Message received and sent through %s websockets.' % txt)
+    call('df.messages.info', request, USER, html='[USER] Message received and sent through %s websockets.' % txt)
 
 
 @connect(path='demo.test_celery', delayed=True)
 def test_celery(request):
-    print('celery task done')
+    print('Celery demo task done')
+    call('df.messages.success', request, WINDOW, html='[WINDOW] This message has been received and sent through Celery and websockets.')
     call('df.messages.warning', request, BROADCAST, html='[BROADCAST] This message has been received and sent through Celery and websockets.')
     call('df.messages.error', request, SESSION, html='[SESSION] This message has been received and sent through Celery and websockets.')
     call('df.messages.info', request, USER, html='[USER] This message has been received and sent through Celery and websockets.')

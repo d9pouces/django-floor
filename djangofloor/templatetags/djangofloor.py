@@ -58,3 +58,9 @@ def fontawesome_icon(name, large=False, fixed=False, spin=False, li=False, rotat
         border=' fa-border' if border else '',
         color='style="color:%s;"' % color if color else ''
     )
+
+
+@register.simple_tag(takes_context=True)
+def df_window_key(context):
+    window_key = context.get('df_window_key', '[INVALID]')
+    return '<script type="application/javascript">$(function () {df.window_key = "%s";});</script>' % window_key
