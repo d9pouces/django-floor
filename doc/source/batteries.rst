@@ -75,9 +75,10 @@ If you can use  C extensions, you should also install (and use) django-redis-ses
 Some settings are related to Redis:
 
     * all values:
+    .. code-block:: python
 
-        * `REDIS_HOST`
-        * `REDIS_PORT`
+        REDIS_HOST = 'localhost'  # valid by default
+        REDIS_PORT = 6379  # valid by default
 
     * Celery:
     .. code-block:: python
