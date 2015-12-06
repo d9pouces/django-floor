@@ -12,4 +12,5 @@ class SimpleForm(forms.Form):
     test_nboolean = forms.NullBooleanField(label='NullBooleanField')
     test_choice = forms.ChoiceField(label='ChoiceField', choices=(('choice1', 'C1'), ('choice2', 'C2')), required=False)
     test_choice2 = forms.ChoiceField(label='ChoiceField', choices=(('choice1', 'C1'), ('choice2', 'C2')), required=True)
-    test_mchoice = forms.MultipleChoiceField(label='MultipleChoiceField', choices=(('choice1', 'C1'), ('choice2', 'C2')), required=False)
+    test_mchoice = forms.MultipleChoiceField(label='MultipleChoiceField',
+                                             choices=(('choice1', 'C1'), ('choice2', 'C2')), required=False)

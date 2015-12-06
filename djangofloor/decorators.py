@@ -1,12 +1,14 @@
 # coding=utf-8
-"""Define the decorator for connecting Python code to signals, a :class:`djangofloor.decorators.SignalRequest` which can be easily serialized and is lighter than a :class:`django.http.HttpRequest`,
+"""Define the decorator for connecting Python code to signals, a :class:`djangofloor.decorators.SignalRequest`
+which can be easily serialized and is lighter than a :class:`django.http.HttpRequest`,
 and some code to convert serialized data sent by Javascript to something useful in Python.
 
 Using the decorator
 *******************
 
-The decorator :func:`djangofloor.decorators.connect` let you connect any Python function to a signal (which is only a text string).
-Signals are automatically discovered, as soon as there are in files `signals.py` in any app listed in the setting `INSTALLED_APPS` (like `admin.py` or `models.py`).
+The decorator :func:`djangofloor.decorators.connect` let you connect any Python function to a signal (which is only a
+text string). Signals are automatically discovered, as soon as there are in files `signals.py` in any app listed in
+the setting `INSTALLED_APPS` (like `admin.py` or `models.py`).
 
 To use this decorator, create the file `myproject/signals.py`::
 
@@ -18,17 +20,21 @@ To use this decorator, create the file `myproject/signals.py`::
 Serialization/deserialization
 *****************************
 
-Since all arguments must be serialized (in JSON), only types which are acceptable for JSON can be used as arguments for signals.
+Since all arguments must be serialized (in JSON), only types which are acceptable for JSON can be used as arguments
+for signals.
 
 
 Using Python3
 *************
 
-Python3 introduces the notion of function annotations. DjangoFloor can use them to deserialize received data sent by JS::
+Python3 introduces the notion of function annotations. DjangoFloor can use them to deserialize received data sent by JS:
 
-        @connect(path='myproject.signals.demosignal')
-        def my_function(request, arg1: int, arg2: float):
-            print(arg1, arg2)
+
+.. code-block:: python
+
+    @connect(path='myproject.signals.demosignal')
+    def my_function(request, arg1: int, arg2: float):
+        print(arg1, arg2)
 
 
 The annotation can be any callable, which raise ValueError (in case of error ;)) or a deserialized value.
@@ -126,7 +132,8 @@ class Choice(object):
 class SerializedForm(object):
     """Transform values sent by JS to a Django form.
 
-    Given a form and a :class:`list` of :class:`dict`, transforms the :class:`list` into a :class:`django.http.QueryDict` and initialize the form with it.
+    Given a form and a :class:`list` of :class:`dict`, transforms the :class:`list` into a
+    :class:`django.http.QueryDict` and initialize the form with it.
 
     >>> class SimpleForm(forms.Form):
     ...    field = forms.CharField()
@@ -187,7 +194,7 @@ class SignalRequest(object):
 
     :param username: should be User.username
     :type username: :class:`str`
-    :param session_key: the session key, unique to a opened browser window (useful when a user has multiple opened windows)
+    :param session_key: the session key, unique to a opened browser window (useful if a user has multiple windows)
     :type session_key: :class:`str`
     :param user_pk: primary key of the user (for easy ORM queries)
     :type user_pk: :class:`int`
@@ -293,7 +300,8 @@ class SignalRequest(object):
     def from_request(cls, request):
         """ return a :class:`djangofloor.decorators.SignalRequest` from a :class:`django.http.HttpRequest`.
 
-        If the request already is a :class:`djangofloor.decorators.SignalRequest`, then it is returned as-is (not copied).
+        If the request already is a :class:`djangofloor.decorators.SignalRequest`,
+        then it is returned as-is (not copied).
 
         :param request: standard Django request
         :type request: :class:`django.http.HttpRequest` or :class:`djangofloor.decorators.SignalRequest`
@@ -396,7 +404,8 @@ def connect(fn=None, path=None, delayed=False, allow_from_client=True, auth_requ
     :return: a wrapped function
     :rtype: :class:`callable`
     """
-    wrapped = lambda fn_: RedisCallWrapper(fn_, path=path, delayed=delayed, allow_from_client=allow_from_client, auth_required=auth_required)
+    wrapped = lambda fn_: RedisCallWrapper(fn_, path=path, delayed=delayed, allow_from_client=allow_from_client,
+                                           auth_required=auth_required)
     if fn is not None:
         wrapped = wrapped(fn)
     return wrapped

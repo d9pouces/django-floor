@@ -31,7 +31,8 @@ def ws_call(signal_name, request, sharing, kwargs):
     :type signal_name:
     :param request: a SignalRequest with session_key and username
     :type request: :class:`djangofloor.decorators.SignalRequest`
-    :param sharing: the required sharing. Can be SESSION, USER or BROADCAST or any dict which is valid for django-websockets-redis.
+    :param sharing: the required sharing. Can be SESSION, USER or BROADCAST or any dict which is valid
+    for django-websockets-redis.
     :type sharing:
     :param kwargs: options to pass to the JS signal
     :type kwargs:
@@ -85,8 +86,11 @@ class Subscriber(RedisSubscriber):
         # noinspection PyBroadException
         try:
             message_dict = json.loads(message.decode('utf-8'), cls=get_signal_decoder())
-            df_call(message_dict['signal'], self.request, sharing=None, from_client=True, kwargs=message_dict['options'])
+            df_call(message_dict['signal'], self.request, sharing=None, from_client=True,
+                    kwargs=message_dict['options'])
         except ApiException as e:
-            df_call('df.messages.error', self.request, sharing=WINDOW, from_client=True, kwargs={'html': _('Error: %(msg)s') % {'msg': force_text(e)}})
+            df_call('df.messages.error', self.request, sharing=WINDOW, from_client=True,
+                    kwargs={'html': _('Error: %(msg)s') % {'msg': force_text(e)}})
         except Exception as e:
-            df_call('df.messages.error', self.request, sharing=WINDOW, from_client=True, kwargs={'html': _('Invalid websocket message: %(msg)s.') % {'msg': force_text(e)}})
+            df_call('df.messages.error', self.request, sharing=WINDOW, from_client=True,
+                    kwargs={'html': _('Invalid websocket message: %(msg)s.') % {'msg': force_text(e)}})

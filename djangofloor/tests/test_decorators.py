@@ -48,4 +48,5 @@ class TestSignature(TestCase):
 
         self.assertRaises(InvalidRequest, lambda: wrapper.prepare_kwargs({'a': None, 'b': None, 'c': None, 'd': None}))
         self.assertRaises(InvalidRequest, lambda: wrapper.prepare_kwargs({'a': None}))
-        self.assertEqual({'a': None, 'b': None, 'c': None, }, wrapper.prepare_kwargs({'a': None, 'b': None, 'c': None, }))
+        self.assertEqual({'a': None, 'b': None, 'c': None, },
+                         wrapper.prepare_kwargs({'a': None, 'b': None, 'c': None, }))

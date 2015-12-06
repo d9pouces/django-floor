@@ -3,7 +3,8 @@
 
 Check :class:`django.contrib.auth.backends.RemoteUserBackend` for a more detailed explanation.
 
-Automatically add a specified group to newly-created users. The name of this default group is defined by the setting FLOOR_DEFAULT_GROUP_NAME.
+Automatically add a specified group to newly-created users. The name of this default group is defined by the setting
+FLOOR_DEFAULT_GROUP_NAME.
 Set it to `None` if you do not want a default group for new users.
 
 """

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals, absolute_import
+# noinspection PyUnresolvedReferences
 from django.utils.six.moves.urllib.parse import urljoin
 from django import template
 from django.templatetags.static import StaticNode, PrefixNode
