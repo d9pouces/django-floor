@@ -7,6 +7,7 @@ from django.template import RequestContext
 from django.utils.translation import ugettext_lazy as _
 from demo.forms import SimpleForm
 from demo.tasks import add
+from djangofloor.tasks import call
 
 __author__ = 'Matthieu Gallet'
 
@@ -21,4 +22,5 @@ def test(request):
                        'window_key': request.window_key,
                        'session_key': request.session.session_key,
                        }
+    call('demo.test_celery', request)
     return render_to_response('demo/test.html', template_values, RequestContext(request))

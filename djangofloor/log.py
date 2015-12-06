@@ -32,4 +32,15 @@ class FloorAdminEmailHandler(AdminEmailHandler):
         if interval < datetime.timedelta(0, self.min_interval):
             return
         LAST_SENDS[subject] = datetime.datetime.now()
-        mail.mail_admins(subject, message, *args, connection=self.connection(), **kwargs)
+        try:
+            mail.mail_admins(subject, message, *args, connection=self.connection(), **kwargs)
+        except Exception as e:
+            print('<==================================================================================================')
+            print('/!\\ settings.DEBUG = False BUT STILL UNABLE TO SEND MAIL TO ADMIN /!\\')
+            print(e)
+            print('===================================================================================================')
+            print('Content of the original message:')
+            print(subject)
+            print('---------------------------------------------------------------------------------------------------')
+            print(message)
+            print('==================================================================================================>')

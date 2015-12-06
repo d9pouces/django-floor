@@ -3,6 +3,7 @@ from __future__ import unicode_literals, absolute_import
 from django.utils.six.moves.urllib.parse import urljoin
 from django import template
 from django.templatetags.static import StaticNode, PrefixNode
+from django.utils.safestring import mark_safe
 
 __author__ = 'Matthieu Gallet'
 
@@ -48,7 +49,7 @@ def fontawesome_icon(name, large=False, fixed=False, spin=False, li=False, rotat
         large = ' fa-lg'
     else:
         large = ''
-    return '<i class="fa fa-{name}{large}{fixed}{spin}{li}{rotate}{border}"{color}></i>'.format(
+    return mark_safe('<i class="fa fa-{name}{large}{fixed}{spin}{li}{rotate}{border}"{color}></i>'.format(
         name=name,
         large=large,
         fixed=' fa-fw' if fixed else '',
@@ -57,10 +58,11 @@ def fontawesome_icon(name, large=False, fixed=False, spin=False, li=False, rotat
         rotate=' fa-rotate-%s' % str(rotate) if rotate else '',
         border=' fa-border' if border else '',
         color='style="color:%s;"' % color if color else ''
-    )
+    ))
 
 
 @register.simple_tag(takes_context=True)
 def df_window_key(context):
     window_key = context.get('df_window_key', '[INVALID]')
-    return '<script type="application/javascript">$(function () {df.window_key = "%s";});</script>' % window_key
+    return mark_safe('<script type="application/javascript">$(function () {df.window_key = "%s";});</script>'
+                     % window_key)

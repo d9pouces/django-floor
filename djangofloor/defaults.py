@@ -64,7 +64,7 @@ DATABASES = {
         # The following settings are not used with sqlite3:
         'USER': '{DATABASE_USER}',
         'PASSWORD': '{DATABASE_PASSWORD}',
-        'HOST': '{DATABASE_HOST}',  # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
+        'HOST': '{DATABASE_HOST}',  # Empty for localhost through domain sockets or '127.0.0.1' for localhost + TCP.
         'PORT': '{DATABASE_PORT}',  # Set to empty string for default.
     },
 }
@@ -302,7 +302,6 @@ INSTALLED_APPS = [
     'django.contrib.humanize',
     'django.contrib.sites',
     'django.contrib.sitemaps',
-    'django_admin_bootstrapped',
     'django.contrib.admin',
     'djangofloor',
     'bootstrap3',
@@ -332,8 +331,6 @@ BOOTSTRAP3 = {
     'horizontal_label_class': 'col-md-4',
     'horizontal_field_class': 'col-md-8',
 }
-DAB_FIELD_RENDERER = 'django_admin_bootstrapped.renderers.BootstrapFieldRenderer'
-
 TEST_RUNNER = 'django.test.runner.DiscoverRunner'
 FLOOR_AUTHENTICATION_HEADER = 'HTTP_REMOTE_USER'
 FLOOR_AUTHENTICATION_HEADER_HELP = 'HTTP header corresponding to the username (when using HTTP authentication).' \

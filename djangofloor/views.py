@@ -5,9 +5,9 @@ import mimetypes
 import os
 
 from django.conf import settings
+from django.contrib.sites.shortcuts import get_current_site
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse, StreamingHttpResponse, JsonResponse, HttpResponseRedirect
-from django.contrib.sites.models import get_current_site
 from django.contrib.syndication.views import add_domain
 from django.shortcuts import render_to_response
 from django.template import RequestContext
@@ -103,8 +103,10 @@ def get_signal_calls(request):
 def send_file(filepath, mimetype=None, force_download=False):
     """Send a local file. This is not a Django view, but a function that is called at the end of a view.
 
-    If `settings.USE_X_SEND_FILE` (mod_xsendfile is a mod of Apache), then return an empty HttpResponse with the correct header. The file is directly handled by Apache instead of Python.
-    If `settings.X_ACCEL_REDIRECT_ARCHIVE` is defined (as a list of tuple (directory, alias_url)) and filepath is in one of the directories, return an empty HttpResponse with the correct header.
+    If `settings.USE_X_SEND_FILE` (mod_xsendfile is a mod of Apache), then return an empty HttpResponse with the
+    correct header. The file is directly handled by Apache instead of Python.
+    If `settings.X_ACCEL_REDIRECT_ARCHIVE` is defined (as a list of tuple (directory, alias_url)) and filepath is
+    in one of the directories, return an empty HttpResponse with the correct header.
     This is only available with Nginx.
 
     Otherwise, return a StreamingHttpResponse to avoid loading the whole file in memory.

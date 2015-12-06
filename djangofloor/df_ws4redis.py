@@ -42,7 +42,7 @@ def ws_call(signal_name, request, sharing, kwargs):
     if sharing == SESSION:
         sharing = {SESSION: ['s' + request.session_key, ]}
     elif sharing == WINDOW:
-        sharing = {SESSION: ['w' + request.csrf_cookie, ]}
+        sharing = {SESSION: ['w' + request.window_key, ]}
     elif sharing == USER:
         sharing = {USER: [request.username, ]}
     elif sharing == BROADCAST:

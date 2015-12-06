@@ -8,7 +8,7 @@ import codecs
 import os.path
 from setuptools import setup, find_packages
 
-# avoid a from djangofloor import __version__ as version (that compiles djangofloor.__init__ and is not compatible with bdist_deb)
+# avoid 'from djangofloor import __version__ as version' (compiles djangofloor.__init__, not compatible with bdist_deb)
 version = None
 for line in codecs.open(os.path.join('djangofloor', '__init__.py'), 'r', encoding='utf-8'):
     matcher = re.match(r"""^__version__\s*=\s*['"](.*)['"]\s*$""", line)
@@ -21,15 +21,15 @@ entry_points = {'console_scripts': ['djangofloor-manage = djangofloor.scripts:ma
                                     'djangofloor-gunicorn = djangofloor.scripts:gunicorn',
                                     'djangofloor-celery = djangofloor.scripts:celery',
                                     'djangofloor-uwsgi = djangofloor.scripts:uwsgi', ],
-                'distutils.commands': ['bdist_deb_django = djangofloor.management.commands.bdist_deb_django:BdistDebDjango']}
+                'distutils.commands': ['bdist_deb_django = '
+                                       'djangofloor.management.commands.bdist_deb_django:BdistDebDjango']}
 
-requirements = ['Django>=1.8.0', 'Django<1.9.0',
-                'django-allauth>=0.22.0',
+requirements = ['Django>=1.9.0',
+                'django-allauth>=0.24.0',
                 'gunicorn>=0.14.5',
                 'django-bootstrap3>=5.0.0',
                 'slimit>=0.8.1',
-                'django-debug-toolbar>=1.2.0',
-                'django-admin-bootstrapped>=2.5.0',
+                'django-debug-toolbar>=1.4',
                 'django-pipeline>=1.5.3',
                 'celery>=3.1.13',
                 'django-redis>=3.8.3',
