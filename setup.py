@@ -27,7 +27,7 @@ entry_points = {'console_scripts': ['djangofloor-manage = djangofloor.scripts:ma
 requirements = ['Django>=1.9.0',
                 'django-allauth>=0.24.0',
                 'gunicorn>=0.14.5',
-                'django-bootstrap3>=5.0.0',
+                'django-bootstrap3>=6.2.0',
                 'slimit>=0.8.1',
                 'django-debug-toolbar>=1.4',
                 'django-pipeline>=1.5.3',

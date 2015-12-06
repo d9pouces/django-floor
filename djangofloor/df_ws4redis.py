@@ -40,17 +40,19 @@ def ws_call(signal_name, request, sharing, kwargs):
     """
     if isinstance(sharing, binary_type):
         sharing = force_text(sharing)
+    facility = settings.FLOOR_WS_FACILITY
     if sharing == SESSION:
-        sharing = {SESSION: ['s' + request.session_key, ]}
+        sharing = {SESSION: [request.session_key, ]}
     elif sharing == WINDOW:
-        sharing = {SESSION: ['w' + request.window_key, ]}
+        sharing = {BROADCAST: True}
+        facility = request.window_key
     elif sharing == USER:
         sharing = {USER: [request.username, ]}
     elif sharing == BROADCAST:
         sharing = {BROADCAST: True}
     if BROADCAST in sharing:
         sharing[BROADCAST] = True
-    redis_publisher = RedisPublisher(facility=settings.FLOOR_WS_FACILITY, **sharing)
+    redis_publisher = RedisPublisher(facility=facility, **sharing)
     msg = json.dumps({'signal': signal_name, 'options': kwargs}, cls=get_signal_encoder())
     redis_publisher.publish_message(RedisMessage(msg.encode('utf-8')))
 
@@ -86,6 +88,7 @@ class Subscriber(RedisSubscriber):
         # noinspection PyBroadException
         try:
             message_dict = json.loads(message.decode('utf-8'), cls=get_signal_decoder())
+            self.request.window_key = message_dict['window_key']
             df_call(message_dict['signal'], self.request, sharing=None, from_client=True,
                     kwargs=message_dict['options'])
         except ApiException as e:

@@ -7,7 +7,7 @@ df.registered_signals = {};
 df.default_message_timeout = 5000;
 df.__message_count = 0;
 df.window_key = null;
-
+df.ws4redis = null;
 /**
  * Call an existing signal
  * @param signal
@@ -17,6 +17,9 @@ df.window_key = null;
 df.call = function (signal, options, from_server) {
     "use strict";
     var i;
+    if (df.ws4redis === null) {
+        df.ws4redis_connect(null);
+    }
     if (this.registered_signals[signal] === undefined) {
         return false;
     }
@@ -80,7 +83,7 @@ df.connect_ws = function (signal) {
         if (from_server) {
             return;
         }
-        df.ws4redis.send_message(JSON.stringify({signal: signal, options: options}));
+        df.ws4redis.send_message(JSON.stringify({signal: signal, options: options, window_key: df.window_key}));
     };
     df.connect(signal, wrapper);
 };

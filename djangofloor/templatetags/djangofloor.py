@@ -65,5 +65,5 @@ def fontawesome_icon(name, large=False, fixed=False, spin=False, li=False, rotat
 @register.simple_tag(takes_context=True)
 def df_window_key(context):
     window_key = context.get('df_window_key', '[INVALID]')
-    return mark_safe('<script type="application/javascript">$(function () {df.window_key = "%s";});</script>'
+    return mark_safe('<script type="application/javascript">$(function () {df.ws4redis_connect("%s");});</script>'
                      % window_key)
