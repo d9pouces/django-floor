@@ -386,6 +386,7 @@ WS4REDIS_EMULATION_INTERVAL = 0
 # should not be less than 1000
 # leave it to 0 to desactivate this behavior
 WS4REDIS_PREFIX = 'ws'
+WS4REDIS_HEARTBEAT = '--HEARTBEAT--'
 # Python dotted path to the WSGI application used by Django's runserver.
 # WSGI_APPLICATION = 'djangofloor.wsgi_http.application'
 WSGI_APPLICATION = 'djangofloor.wsgi_http.application'
