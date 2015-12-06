@@ -75,8 +75,8 @@ This is the simplest case: if you want to call this code in Python:
 
 .. code-block:: python
 
-    from djangofloor.tasks import call, SESSION
-    call('demo.my_signal', request, SESSION, arg1='argument', arg2='other value', arg3=42)
+    from djangofloor.tasks import call, WINDOW
+    call('demo.my_signal', request, WINDOW, arg1='argument', arg2='other value', arg3=42)
 
 And in Javascript?:
 
@@ -98,12 +98,15 @@ When Javascript calls a signal, it is called on client-side and on server-side (
 When Python calls a signal, there are more possibilities to propagate it with the `sharing` argument:
 
     * only to Python with `sharing=None`,
+    * to Python and only to the original Javascript window with `sharing=WINDOW`,
     * to Python and only to the original Javascript session with `sharing=SESSION`,
     * to Python and to all connected users with `sharing=BROADCAST`,
     * to Python and to the original user with `sharing=USER` (he can receive multiple instances of this signal with multiple browser windows),
     * to Python and to a limited set of users with `sharing={USER: ['username1', 'username2', ]}`.
 
 You can prevent Python code from calling the javascript side of calls `call('demo.my_signal', request, None, \*\*kwargs)`
+
+Note: sometimes, signals are to properly propagated to client when using USER or SESSION.
 
 Without Redis nor websockets
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
