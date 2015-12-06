@@ -144,7 +144,7 @@ In addition of the degraded mode without Redis, using a Redis server allows to m
       However, you can only activate JS signals on a given session (probably the one that sent the first `SignalRequest`).
 
 You activate a regular polling by setting `WS4REDIS_EMULATION_INTERVAL` to a positive value. This interval is in milliseconds!
-Do not set it below 1000 if you do not want to flood your webserver. Leave it to 0 to desactivate this behaviour.
+Do not set it below 500 or 1,000 if you do not want to flood your webserver. Leave it to 0 to desactivate this behaviour.
 With this polling, you can emulate an almost complete websocket behaviour (with celery tasks sending signals to the client).
 
 By default, this polling is also deactivated for anonymous users, even if you set it to a positive value.

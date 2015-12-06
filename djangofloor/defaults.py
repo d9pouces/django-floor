@@ -27,7 +27,6 @@ try:
 except ImportError:
     scss = None
     USE_SCSS = False
-
 # define a root path for misc. Django data (SQLite database, static files, ...)
 LOCAL_PATH = './django_data'
 splitted_path = __file__.split(os.path.sep)
@@ -199,7 +198,8 @@ PIPELINE_CSS = {
 }
 PIPELINE_JS = {
     'default': {
-        'source_filenames': ('js/jquery.min.js', 'bootstrap3/js/bootstrap.min.js', 'js/djangofloor.js', 'js/ws4redis.js',),
+        'source_filenames': ('js/jquery.min.js', 'bootstrap3/js/bootstrap.min.js', 'js/djangofloor.js',
+                             'js/ws4redis.js',),
         'output_filename': 'js/default.js',
     },
     'ie9': {
@@ -380,7 +380,7 @@ CACHES_HELP = 'A dictionary containing the settings for all caches to be used wi
 WS4REDIS_DB = 15
 WS4REDIS_CONNECTION = {'host': '{REDIS_HOST}', 'port': '{REDIS_PORT}', 'db': SettingReference('WS4REDIS_DB'), }
 WS4REDIS_CONNECTION_HELP = 'If the Redis datastore uses connection settings other than the defaults.'
-WS4REDIS_EXPIRE = 600
+WS4REDIS_EXPIRE = 0
 WS4REDIS_EMULATION_INTERVAL = 0
 # number of milliseconds between HTTP requests to emulate websockets
 # should not be less than 1000

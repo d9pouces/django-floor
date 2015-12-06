@@ -107,15 +107,21 @@ DjangoFloor define a few new settings.
     - `FLOOR_FAKE_AUTHENTICATION_USERNAME`: set it to any username you want (allow to fake a HTTP authentication, like Kerberos). Only for debugging purposes,
     - `FLOOR_FAKE_AUTHENTICATION_GROUPS`: set it to the names of the groups you want for the fake user. Only for debugging purposes,
     - `FLOOR_WS_FACILITY`: websocket facility for the signal implementation,
-    - `FLOOR_USE_WS4REDIS`: is automatically set if you installed ws4redis (do not change it in your settings).
+    - `FLOOR_USE_WS4REDIS`: automatically set if you installed ws4redis. If you manually change it:
 
+        * add `ws4redis` in `INSTALLED_APPS`
+        * add `ws4redis.context_processors.default` in `TEMPLATE_CONTEXT_PROCESSORS`
+        * set `WSGI_APPLICATION` to `ws4redis.django_runserver.application`
+
+    - `FLOOR_DEFAULT_GROUP_NAME`: name of the default group for newly created users (when authenticated by the reverse proxy). Leave it to `None` to avoid this behavior.
+
+    - `USE_SCSS`: use SCSS scss compiler with Pipeline
     - `LOCAL_PATH`: the base directory for all data,
     - `BIND_ADDRESS`: the default bind address for the runserver command, or for gunicorn,
     - `REDIS_HOST` and `REDIS_PORT`: this is self-explained,
 
     - `THREADS`, `WORKERS`, `MAX_REQUESTS`: all these settings are related to gunicorn
     - `REVERSE_PROXY_IPS`: the IPs of your reverse proxy, allowing authenticating users by the `REMOTE_USER` header
-    - `FLOOR_DEFAULT_GROUP_NAME`: name of the default group for newly created users (when authenticated by the reverse proxy). Leave it to `None` to avoid this behavior.
 
 Using flat config files
 -----------------------

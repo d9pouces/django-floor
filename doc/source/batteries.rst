@@ -27,8 +27,7 @@ You obtain nice pages out-of-box. The drawback is of course that many websites h
 
 Required dependencies:
 
-    * django-bootstrap3,
-    * django-admin-bootstrapped.
+    * django-bootstrap3.
 
 
 Django-Debug-Toolbar
@@ -47,8 +46,10 @@ CSS and JS files
 
 Required dependencies:
     * django-pipeline,
-    * jsmin,
+    * slimit,
     * rcssmin (directly included in djangofloor.df_pipeline to ease installation - the official package require the compilation of a C extension).
+
+By default, `PIPELINE_ENABLED` is set to `False`, as some bugs can appear in JS.
 
 Redis
 -----
@@ -70,6 +71,62 @@ Several dependencies allow to properly use Redis:
     * django-redis-cache.
 
 If you can use  C extensions, you should also install (and use) django-redis-sessions-fork.
+
+Some settings are related to Redis:
+
+    * all values:
+
+        * `REDIS_HOST`
+        * `REDIS_PORT`
+
+    * Celery:
+    .. code-block:: python
+
+        USE_CELERY = True
+        CELERY_TIMEZONE = '{TIME_ZONE}'  # valid by default
+        BROKER_DB = 13
+        BROKER_URL = 'redis://{REDIS_HOST}:{REDIS_PORT}/{BROKER_DB}'  # valid by default
+        CELERY_APP = 'djangofloor'  # valid by default
+        CELERY_CREATE_DIRS = True  # valid by default
+
+    * cache:
+    .. code-block:: python
+
+        CACHES = {
+            'default': {
+                'BACKEND': 'redis_cache.RedisCache',
+                'LOCATION': '{REDIS_HOST}:{REDIS_PORT}',
+            },
+        }
+
+    * sessions:
+    .. code-block:: python
+
+        SESSION_ENGINE = 'redis_sessions.session'
+        SESSION_REDIS_PREFIX = 'session'  # valid by default
+        SESSION_REDIS_HOST = '{REDIS_HOST}'  # valid by default
+        SESSION_REDIS_PORT = '{REDIS_PORT}'  # valid by default
+        SESSION_REDIS_DB = 10  # valid by default
+
+    * websockets emulation (if you cannot use native websockets):
+    .. code-block:: python
+
+        WS4REDIS_EMULATION_INTERVAL = 1000  # (in ms, you should not set it below 500 or 1,000)
+        WEBSOCKET_URL = '/ws/'  # valid by default
+
+    * websockets:
+    .. code-block:: python
+
+        FLOOR_USE_WS4REDIS  # should automatically set to `True`
+        WEBSOCKET_URL = '/ws/'  # valid by default
+        WS4REDIS_DB = 15
+        WS4REDIS_CONNECTION = {'host': '{REDIS_HOST}', 'port': '{REDIS_PORT}', 'db': WS4REDIS_DB, }
+        WS4REDIS_EXPIRE = 0  # valid by default
+        WS4REDIS_PREFIX = 'ws'  # valid by default
+        WS4REDIS_HEARTBEAT = '--HEARTBEAT--'  # valid by default
+        WSGI_APPLICATION = 'ws4redis.django_runserver.application'  # valid by default
+        WS4REDIS_SUBSCRIBER = 'djangofloor.df_ws4redis.Subscriber'  # valid by default
+        FLOOR_WS_FACILITY = 'djangofloor'  # valid by default
 
 
 Websockets
@@ -97,7 +154,7 @@ This dependency is required:
     * celery.
 
 
-You should launch a Celery worker::
+You must launch a Celery worker::
 
     djangofloor-celery --dfproject myproject worker
     myproject-celery worker
