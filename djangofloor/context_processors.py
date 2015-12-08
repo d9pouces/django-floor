@@ -36,7 +36,7 @@ def context_base(request):
         'df_user': request.user,
         'df_language_code': settings.LANGUAGE_CODE,
         'df_user_agent': request.META.get('HTTP_USER_AGENT', ''),
-        'df_index_view': settings.FLOOR_INDEX or 'djangofloor.views.index',
+        'df_index_view': 'index',
         'df_window_key': request.GET.get('df_window_key',
                                          request.window_key if hasattr(request, 'window_key') else None),
     }

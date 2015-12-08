@@ -16,8 +16,8 @@ $(function () {
     {% for name in signals %}df.connect_ws('{{ name }}');
     {% endfor %}{% else %}
     {% if WS4REDIS_EMULATION_INTERVAL > 0 %}
-    setInterval(function () { df.connect_ws_emulator('{% url 'djangofloor.views.get_signal_calls' %}'); }, {{ WS4REDIS_EMULATION_INTERVAL }});{% endif %}
-    {% for name in signals %}df.connect_http('{{ name }}', "{% url 'djangofloor.views.signal_call' signal=name %}");
+    setInterval(function () { df.connect_ws_emulator('{% url 'df_get_signal_calls' %}'); }, {{ WS4REDIS_EMULATION_INTERVAL }});{% endif %}
+    {% for name in signals %}df.connect_http('{{ name }}', "{% url 'df_signal_call' signal=name %}");
     {% endfor %}{% endif %}
 });
 

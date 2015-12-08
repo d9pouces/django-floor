@@ -27,17 +27,18 @@ if settings.FLOOR_INDEX:
     index_view = settings.FLOOR_INDEX
 else:
     index_view = 'djangofloor.views.index'
+index_view = import_string(index_view)
 
 urlpatterns = [url(r'^accounts/', include('allauth.urls')),
                url(r'^admin/', include(admin.site.urls)),
                url(r'^jsi18n/$', javascript_catalog, {'packages': ('djangofloor', 'django.contrib.admin', ), }),
                url(r'^' + settings.MEDIA_URL[1:] + '(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),
                url(r'^' + settings.STATIC_URL[1:] + '(?P<path>.*)$', serve, {'document_root': settings.STATIC_ROOT}),
-               url(r'^df/signal/(?P<signal>[\w\.\-_]+)\.json$', signal_call),
+               url(r'^df/signal/(?P<signal>[\w\.\-_]+)\.json$', signal_call, name='df_signal_call'),
                url(r'^df/signals.js$', signals),
-               url(r'^df/ws_emulation.js$', get_signal_calls),
+               url(r'^df/ws_emulation.js$', get_signal_calls, name='df_get_signal_calls'),
                url(r'^robots\.txt$', robots),
-               url(r'^$', index_view),
+               url(r'^$', index_view, name='index'),
                ] + list(extra_urls)
 
 if settings.DEBUG:
