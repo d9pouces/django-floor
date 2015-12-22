@@ -208,13 +208,21 @@ PIPELINE_JS = {
     }
 }
 PIPELINE_ENABLED = False
+PIPELINE = {
+    'PIPELINE_ENABLED': SettingReference('PIPELINE_ENABLED'),
+    'JAVASCRIPT': SettingReference('PIPELINE_JS'),
+    'STYLESHEETS': SettingReference('PIPELINE_CSS'),
+    'CSS_COMPRESSOR': SettingReference('PIPELINE_CSS_COMPRESSOR'),
+    'JS_COMPRESSOR': SettingReference('PIPELINE_JS_COMPRESSOR'),
+    'MIMETYPES': SettingReference('PIPELINE_MIMETYPES'),
+}
 
 PIPELINE_MIMETYPES = (
-    ('text/coffeescript', '.coffee'),
-    ('text/less', '.less'),
-    ('text/javascript', '.js'),
-    ('text/x-sass', '.sass'),
-    ('text/x-scss', '.scss')
+    (b'text/coffeescript', '.coffee'),
+    (b'text/less', '.less'),
+    (b'text/javascript', '.js'),
+    (b'text/x-sass', '.sass'),
+    (b'text/x-scss', '.scss')
 )
 # these two cmpressors are not the best ones, but are installed with DjangoFloor as dependencies
 PIPELINE_JS_COMPRESSOR = 'pipeline.compressors.slimit.SlimItCompressor'
