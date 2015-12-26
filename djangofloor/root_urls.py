@@ -27,8 +27,7 @@ if settings.FLOOR_INDEX:
     index_view = settings.FLOOR_INDEX
 else:
     index_view = 'djangofloor.views.index'
-# index_view = import_string(index_view)
-# TODO : uncomment the previous line
+index_view = import_string(index_view)
 
 urlpatterns = [url(r'^accounts/', include('allauth.urls')),
                url(r'^admin/', include(admin.site.urls)),
