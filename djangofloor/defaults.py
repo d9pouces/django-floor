@@ -187,20 +187,23 @@ LOGOUT_URL = '/accounts/logout/'
 LOGIN_REDIRECT_URL = '/'
 WEBSOCKET_URL = '/ws/'
 
+FLOOR_EXTRA_CSS = []
 PIPELINE_CSS = {
     'default': {
-        'source_filenames': ('bootstrap3/css/bootstrap.min.css', 'css/font-awesome.min.css', 'css/djangofloor.css', ),
+        'source_filenames': ['bootstrap3/css/bootstrap.min.css', 'css/font-awesome.min.css',
+                             'css/djangofloor.css', ExpandIterable('FLOOR_EXTRA_CSS'), ],
         'output_filename': 'css/default.css',
         'extra_context': {
             'media': 'all',
         },
     },
 }
+FLOOR_EXTRA_JS = []
 PIPELINE_JS = {
     'default': {
-        'source_filenames': ('js/jquery.min.js', 'bootstrap3/js/bootstrap.min.js',
+        'source_filenames': ['js/jquery.min.js', 'bootstrap3/js/bootstrap.min.js',
                              'js/bootstrap-notify.min.js', 'js/djangofloor.js',
-                             'js/ws4redis.js',),
+                             'js/ws4redis.js', ExpandIterable('FLOOR_EXTRA_JS'), ],
         'output_filename': 'js/default.js',
     },
     'ie9': {
