@@ -15,6 +15,9 @@ $(function () {
     };
     {% for name in signals %}df.connect_ws('{{ name }}');
     {% endfor %}{% else %}
+    df.ws4redis_connect = function (window_key) {
+        df.window_key = window_key;
+    };
     {% if WS4REDIS_EMULATION_INTERVAL > 0 %}
     setInterval(function () { df.connect_ws_emulator('{% url 'df_get_signal_calls' %}'); }, {{ WS4REDIS_EMULATION_INTERVAL }});{% endif %}
     {% for name in signals %}df.connect_http('{{ name }}', "{% url 'df_signal_call' signal=name %}");
