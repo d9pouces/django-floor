@@ -153,6 +153,39 @@ df.connect('df.messages.success', function (options) {
     df.call('df.messages.show', options);
 });
 
+df.connect('df.notify.show', function (options) {
+    if (options.title) {
+        options.title = '<strong>' + options.title + '</strong>';
+    }
+    var content = {icon: options.icon, title: options.title, message: options.message,
+        url: options.url, target: options.target};
+    $.notify(content, options);
+});
+
+df.connect('df.notify.warning', function (options) {
+        options.type = 'warning';
+        df.call('df.notify.show', options);
+    }
+);
+
+df.connect('df.notify.info', function (options) {
+        options.type = 'info';
+        df.call('df.notify.show', options);
+    }
+);
+
+df.connect('df.notify.error', function (options) {
+        options.type = 'error';
+        df.call('df.notify.show', options);
+    }
+);
+
+df.connect('df.notify.success', function (options) {
+        options.type = 'success';
+        df.call('df.notify.show', options);
+    }
+);
+
 /**
  * {html: 'nice message', width: '1200px'}
  */

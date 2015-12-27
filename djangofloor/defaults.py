@@ -189,7 +189,7 @@ WEBSOCKET_URL = '/ws/'
 
 PIPELINE_CSS = {
     'default': {
-        'source_filenames': ('bootstrap3/css/bootstrap.min.css', 'css/font-awesome.min.css',),
+        'source_filenames': ('bootstrap3/css/bootstrap.min.css', 'css/font-awesome.min.css', 'css/djangofloor.css', ),
         'output_filename': 'css/default.css',
         'extra_context': {
             'media': 'all',
@@ -198,7 +198,8 @@ PIPELINE_CSS = {
 }
 PIPELINE_JS = {
     'default': {
-        'source_filenames': ('js/jquery.min.js', 'bootstrap3/js/bootstrap.min.js', 'js/djangofloor.js',
+        'source_filenames': ('js/jquery.min.js', 'bootstrap3/js/bootstrap.min.js',
+                             'js/bootstrap-notify.min.js', 'js/djangofloor.js',
                              'js/ws4redis.js',),
         'output_filename': 'js/default.js',
     },

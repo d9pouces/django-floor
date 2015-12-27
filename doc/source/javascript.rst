@@ -124,4 +124,40 @@ Remove displayed messages.
 
     * `id` (optional): id of the message to remove. If not provided, all messages are removed.
 
+df.notify.warning
+*****************
 
+Show a Growl-like notification (by default on the top-right of the screen).
+See all settings on `Bootstrap-Notify<http://bootstrap-notify.remabledesigns.com>`_. Settings and options are merged in
+the same dict.
+
+    JavaScript example:
+
+    .. code-block:: javascript
+
+        df.call('df.notify.warning', {message: "This is a message", delay: 1000, allow_dismiss: true});
+
+    Python example:
+
+    .. code-block:: python
+
+        from djangofloor.tasks import call
+        def my_view(request):
+            call('df.notify.warning', request, message="This is a message", title="Notification: ")
+
+
+df.notify.info
+**************
+
+Show a Growl-like notification with info style.
+
+df.notify.error
+***************
+
+Show a Growl-like notification with error style.
+
+
+df.notify.success
+*****************
+
+Show a Growl-like notification with success style.
