@@ -18,7 +18,7 @@ df.call = function (signal, options, from_server) {
     "use strict";
     var i;
     if (df.ws4redis === null) {
-        df.ws4redis_connect(null);
+        df.ws4redis_connect(df.window_key);
     }
     if (this.registered_signals[signal] === undefined) {
         return false;
