@@ -157,6 +157,9 @@ df.connect('df.notify.show', function (options) {
     if (options.title) {
         options.title = '<strong>' + options.title + '</strong>';
     }
+    if (options.type === undefined) {
+        options.type = 'default';
+    }
     var content = {icon: options.icon, title: options.title, message: options.message,
         url: options.url, target: options.target};
     $.notify(content, options);
@@ -175,7 +178,7 @@ df.connect('df.notify.info', function (options) {
 );
 
 df.connect('df.notify.error', function (options) {
-        options.type = 'error';
+        options.type = 'danger';
         df.call('df.notify.show', options);
     }
 );
