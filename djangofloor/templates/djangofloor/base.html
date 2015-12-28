@@ -14,7 +14,7 @@
     <script type="text/javascript" src="{% url 'djangofloor.views.signals' %}"></script>
 </head>
 <body>
-{% block body %}
+{% df_window_key %}{% block body %}
     {% block bootstrap3_nav %}
         <div class="navbar navbar-inverse" role="navigation">
             <div class="navbar-header">
@@ -69,6 +69,5 @@
         <div class="modal-content"></div>
     </div>
 </div>
-{% df_window_key %}
 </body>
 </html>
