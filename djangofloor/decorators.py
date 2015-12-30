@@ -52,6 +52,7 @@ import re
 from django.db.models import Q
 
 from django.http import QueryDict
+from six import text_type
 
 
 try:
@@ -60,8 +61,7 @@ except ImportError:
     # noinspection PyUnresolvedReferences,PyPackageRequirements
     from funcsigs import signature
 from django import forms
-from django.utils.translation import ugettext as _
-
+from django.utils.translation import ugettext_lazy as _
 from djangofloor.exceptions import InvalidRequest
 
 
@@ -174,7 +174,7 @@ class SerializedForm(object):
     def __init__(self, form_cls):
         self.form_cls = form_cls
 
-    def __call__(self, value):
+    def __call__(self, value, *args, **kwargs):
         """
         :param value:
         :type value: :class:`list` of :class:`dict`
@@ -184,7 +184,7 @@ class SerializedForm(object):
         query_dict = QueryDict('', mutable=True)
         for obj in value:
             query_dict.update({obj['name']: obj['value']})
-        return self.form_cls(query_dict)
+        return self.form_cls(query_dict, *args, **kwargs)
 
 
 class SignalRequest(object):
@@ -366,16 +366,16 @@ class RedisCallWrapper(object):
         if not self.accept_kwargs:
             for arg_name in kwargs:
                 if arg_name not in self.required_arguments and arg_name not in self.optional_arguments:
-                    raise InvalidRequest(_('Unexpected argument: %(arg)s') % {'arg': arg_name})
+                    raise InvalidRequest(text_type(_('Unexpected argument: %(arg)s')) % {'arg': arg_name})
         for arg_name in self.required_arguments:
             if arg_name not in kwargs:
-                raise InvalidRequest(_('Required argument: %(arg)s') % {'arg': arg_name})
+                raise InvalidRequest(text_type(_('Required argument: %(arg)s')) % {'arg': arg_name})
         for k, v in self.argument_types.items():
             try:
                 if k in kwargs:
                     kwargs[k] = v(kwargs[k])
             except ValueError:
-                raise InvalidRequest(_('Invalid value %(value)s for argument %(arg)s.') % {'arg': 'k', 'value': v})
+                raise InvalidRequest(text_type(_('Invalid value %(value)s for argument %(arg)s.')) % {'arg': 'k', 'value': v})
         return kwargs
 
     def __call__(self, *args, **kwargs):
