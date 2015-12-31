@@ -52,7 +52,7 @@ import re
 from django.db.models import Q
 
 from django.http import QueryDict
-from six import text_type
+from django.utils.six import text_type
 
 
 try:
