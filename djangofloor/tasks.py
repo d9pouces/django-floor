@@ -1,13 +1,10 @@
 # coding=utf-8
 from __future__ import unicode_literals, absolute_import
 import logging
-import traceback
 
 import celery
 # used to avoid strange import bug with Python 3.2/3.3
 # noinspection PyStatementEffect
-from django.utils import six
-
 celery.__file__
 from celery import shared_task
 from django.utils.module_loading import import_string
