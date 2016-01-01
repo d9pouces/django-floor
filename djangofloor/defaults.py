@@ -437,7 +437,10 @@ LOGGING = {
     'filters': {
         'require_debug_false': {
             '()': 'django.utils.log.RequireDebugFalse'
-        }
+        },
+        'require_debug_true': {
+            '()': 'django.utils.log.RequireDebugTrue'
+        },
     },
     'handlers': {
         'mail_admins': {
@@ -450,17 +453,29 @@ LOGGING = {
             'level': 'WARNING',
             'filters': ['require_debug_false'],
             'class': 'logging.StreamHandler',
-        }
+        },
+        'debug': {
+            'level': 'DEBUG',
+            'filters': ['require_debug_true'],
+            'class': 'logging.StreamHandler',
+        },
     },
     'loggers': {
         'django.request': {
             'handlers': [
                 'mail_admins',
-                'stream'
+                'stream',
             ],
             'level': 'ERROR',
             'propagate': True,
         },
+        'djangofloor.signals': {
+            'handlers': [
+                'debug',
+                ],
+            'level': 'DEBUG',
+            'propagate': True,
+        }
     }
 }
 LOGGING_HELP = 'A data structure containing configuration information.' \

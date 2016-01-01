@@ -1,9 +1,13 @@
 # coding=utf-8
 from __future__ import unicode_literals, absolute_import
+import logging
+import traceback
 
 import celery
 # used to avoid strange import bug with Python 3.2/3.3
 # noinspection PyStatementEffect
+from django.utils import six
+
 celery.__file__
 from celery import shared_task
 from django.utils.module_loading import import_string
@@ -11,11 +15,10 @@ from django.conf import settings
 from django.http import HttpRequest
 from djangofloor.utils import import_module
 from django.utils.lru_cache import lru_cache
-
 from djangofloor.decorators import REGISTERED_SIGNALS, RedisCallWrapper, SignalRequest
 
 __author__ = 'Matthieu Gallet'
-
+logger = logging.getLogger('djangofloor.signals')
 
 USER = 'users'
 SESSION = 'sessions'
@@ -39,15 +42,21 @@ def signal_task(signal_name, request, from_client, kwargs):
     """
     import_signals()
     request = SignalRequest(**request)
+    logger.debug('delayed signal %s called' % signal_name)
     if signal_name not in REGISTERED_SIGNALS:
         return
-    for wrapper in REGISTERED_SIGNALS[signal_name]:
-        if not isinstance(wrapper, RedisCallWrapper) or not wrapper.delayed:
-            continue
-        if (from_client and not wrapper.allow_from_client) or (wrapper.auth_required and not request.session_key):
-            continue
-        prepared_kwargs = wrapper.prepare_kwargs(kwargs)
-        wrapper.function(request, **prepared_kwargs)
+    # noinspection PyBroadException
+    try:
+        for wrapper in REGISTERED_SIGNALS[signal_name]:
+            if not isinstance(wrapper, RedisCallWrapper) or not wrapper.delayed:
+                continue
+            if (from_client and not wrapper.allow_from_client) or (wrapper.auth_required and not request.session_key):
+                continue
+            prepared_kwargs = wrapper.prepare_kwargs(kwargs)
+            wrapper.function(request, **prepared_kwargs)
+    except Exception as e:
+        logger.error('Exception encountered in signal %s' % signal_name, exc_info=1)
+        raise e
 
 
 @lru_cache()
@@ -148,6 +157,7 @@ def df_call(signal_name, request, sharing, from_client, kwargs):
     if isinstance(request, HttpRequest):
         request = SignalRequest.from_request(request)
     if sharing is not None and sharing != RETURN:
+        logger.debug('JS signal %s called' % signal_name)
         if settings.FLOOR_USE_WS4REDIS:
             from djangofloor.df_ws4redis import ws_call
             ws_call(signal_name, request, sharing, kwargs)
@@ -156,17 +166,22 @@ def df_call(signal_name, request, sharing, from_client, kwargs):
             push_signal_call(request, signal_name, kwargs=kwargs, sharing=sharing)
 
     must_delay = False
+    synchroneous = False
     for wrapper in REGISTERED_SIGNALS.get(signal_name, []):
         if (not wrapper.allow_from_client and from_client) or (wrapper.auth_required and not request.session_key):
             continue
         if wrapper.delayed:
             must_delay = True
         else:
+            synchroneous = True
             prepared_kwargs = wrapper.prepare_kwargs(kwargs)
             wrapper_result = wrapper.function(request, **prepared_kwargs)
             if wrapper_result:
                 result += list(wrapper_result)
+    if synchroneous:
+        logger.debug('synchroneous signal %s called' % signal_name)
     if must_delay and settings.USE_CELERY:
+        logger.debug('delayed signal %s called' % signal_name)
         signal_task.delay(signal_name, request.to_dict(), from_client, kwargs)
     if sharing == RETURN:
         return result
