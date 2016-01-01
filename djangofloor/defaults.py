@@ -191,7 +191,8 @@ FLOOR_EXTRA_CSS = []
 PIPELINE_CSS = {
     'default': {
         'source_filenames': ['bootstrap3/css/bootstrap.min.css', 'css/font-awesome.min.css',
-                             'css/djangofloor.css', ExpandIterable('FLOOR_EXTRA_CSS'), ],
+                             'css/bootstrap-select.min.css', 'css/djangofloor.css',
+                             ExpandIterable('FLOOR_EXTRA_CSS'), ],
         'output_filename': 'css/default.css',
         'extra_context': {
             'media': 'all',
@@ -202,7 +203,7 @@ FLOOR_EXTRA_JS = []
 PIPELINE_JS = {
     'default': {
         'source_filenames': ['js/jquery.min.js', 'bootstrap3/js/bootstrap.min.js',
-                             'js/bootstrap-notify.min.js', 'js/djangofloor.js',
+                             'js/bootstrap-notify.min.js', 'js/djangofloor.js', 'js/bootstrap-select.min.js',
                              'js/ws4redis.js', ExpandIterable('FLOOR_EXTRA_JS'), ],
         'output_filename': 'js/default.js',
     },
