@@ -375,7 +375,8 @@ class RedisCallWrapper(object):
                 if k in kwargs:
                     kwargs[k] = v(kwargs[k])
             except ValueError:
-                raise InvalidRequest(text_type(_('Invalid value %(value)s for argument %(arg)s.')) % {'arg': 'k', 'value': v})
+                raise InvalidRequest(text_type(_('Invalid value %(value)s for argument %(arg)s.')) %
+                                     {'arg': 'k', 'value': v})
         return kwargs
 
     def __call__(self, *args, **kwargs):

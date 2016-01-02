@@ -24,6 +24,27 @@ WINDOW = 'window'
 # special value used for plain HTTP requests
 RETURN = 'return'
 
+__internal_state = {'accumulate': False, 'called_signals': []}
+
+
+def set_test_mode(test=True):
+    """ Activate (or deactivate) test mode, allowing to gather all signals calls (instead of actually calling them)
+    :param test:
+    :type test: :class:`bool`
+    """
+    __internal_state['accumulate'] = test
+
+
+def pop_called_signals():
+    """ return the list of called signals with their requests and arguments when `test_mode` is set to `True`.
+
+    :return: list of `(signal_name, request, sharing, kwargs)`
+    :rtype: :class:`list`
+    """
+    values = __internal_state['called_signals']
+    __internal_state['called_signals'] = []
+    return values
+
 
 @shared_task(serializer='json')
 def signal_task(signal_name, request, from_client, kwargs):
@@ -150,6 +171,9 @@ def df_call(signal_name, request, sharing, from_client, kwargs):
         else: call `djangofloor.tasks.df_call` on each element of the call result
     """
     import_signals()
+    if __internal_state['accumulate']:
+        __internal_state['called_signals'].append((signal_name, request, sharing, kwargs))
+        return
     result = []
     if isinstance(request, HttpRequest):
         request = SignalRequest.from_request(request)

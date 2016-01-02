@@ -474,7 +474,7 @@ LOGGING = {
                 'debug',
                 ],
             'level': 'DEBUG',
-            'propagate': True,
+            'propagate': False,
         }
     }
 }
