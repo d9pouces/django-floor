@@ -1,8 +1,8 @@
 # coding=utf-8
-"""
-Define all DjangoFloor default settings.
+"""Default values for your Django project
+======================================
 
-The goal is to define valid settings out-of-the-box.
+Define all DjangoFloor default settings. The goal is to define valid settings out-of-the-box.
 
 """
 from __future__ import unicode_literals
@@ -22,16 +22,15 @@ except ImportError:
 try:
     # noinspection PyPackageRequirements
     import scss
-
     USE_SCSS = True
 except ImportError:
     scss = None
     USE_SCSS = False
 # define a root path for misc. Django data (SQLite database, static files, ...)
 LOCAL_PATH = './django_data'
-splitted_path = __file__.split(os.path.sep)
-if 'lib' in splitted_path:
-    prefix = os.path.join(*splitted_path[:splitted_path.index('lib')])
+split_path = __file__.split(os.path.sep)
+if 'lib' in split_path:
+    prefix = os.path.join(*split_path[:split_path.index('lib')])
     LOCAL_PATH = DirectoryPath('/%s/var/{PROJECT_NAME}' % prefix)
 LOCAL_PATH_HELP = 'Base path for all data'
 SERVER_NAME = 'localhost'

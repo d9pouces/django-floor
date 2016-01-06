@@ -75,59 +75,59 @@ If you can use  C extensions, you should also install (and use) django-redis-ses
 Some settings are related to Redis:
 
     * all values:
-    .. code-block:: python
+        .. code-block:: python
 
-        REDIS_HOST = 'localhost'  # valid by default
-        REDIS_PORT = 6379  # valid by default
+            REDIS_HOST = 'localhost'  # valid by default
+            REDIS_PORT = 6379  # valid by default
 
     * Celery:
-    .. code-block:: python
+        .. code-block:: python
 
-        USE_CELERY = True
-        CELERY_TIMEZONE = '{TIME_ZONE}'  # valid by default
-        BROKER_DB = 13
-        BROKER_URL = 'redis://{REDIS_HOST}:{REDIS_PORT}/{BROKER_DB}'  # valid by default
-        CELERY_APP = 'djangofloor'  # valid by default
-        CELERY_CREATE_DIRS = True  # valid by default
+            USE_CELERY = True
+            CELERY_TIMEZONE = '{TIME_ZONE}'  # valid by default
+            BROKER_DB = 13
+            BROKER_URL = 'redis://{REDIS_HOST}:{REDIS_PORT}/{BROKER_DB}'  # valid by default
+            CELERY_APP = 'djangofloor'  # valid by default
+            CELERY_CREATE_DIRS = True  # valid by default
 
     * cache:
-    .. code-block:: python
+        .. code-block:: python
 
-        CACHES = {
-            'default': {
-                'BACKEND': 'redis_cache.RedisCache',
-                'LOCATION': '{REDIS_HOST}:{REDIS_PORT}',
-            },
-        }
+            CACHES = {
+                'default': {
+                    'BACKEND': 'redis_cache.RedisCache',
+                    'LOCATION': '{REDIS_HOST}:{REDIS_PORT}',
+                },
+            }
 
     * sessions:
-    .. code-block:: python
+        .. code-block:: python
 
-        SESSION_ENGINE = 'redis_sessions.session'
-        SESSION_REDIS_PREFIX = 'session'  # valid by default
-        SESSION_REDIS_HOST = '{REDIS_HOST}'  # valid by default
-        SESSION_REDIS_PORT = '{REDIS_PORT}'  # valid by default
-        SESSION_REDIS_DB = 10  # valid by default
+            SESSION_ENGINE = 'redis_sessions.session'
+            SESSION_REDIS_PREFIX = 'session'  # valid by default
+            SESSION_REDIS_HOST = '{REDIS_HOST}'  # valid by default
+            SESSION_REDIS_PORT = '{REDIS_PORT}'  # valid by default
+            SESSION_REDIS_DB = 10  # valid by default
 
     * websockets emulation (if you cannot use native websockets):
-    .. code-block:: python
+        .. code-block:: python
 
-        WS4REDIS_EMULATION_INTERVAL = 1000  # (in ms, you should not set it below 500 or 1,000)
-        WEBSOCKET_URL = '/ws/'  # valid by default
+            WS4REDIS_EMULATION_INTERVAL = 1000  # (in ms, you should not set it below 500 or 1,000)
+            WEBSOCKET_URL = '/ws/'  # valid by default
 
     * websockets:
-    .. code-block:: python
+        .. code-block:: python
 
-        FLOOR_USE_WS4REDIS  # should automatically set to `True`
-        WEBSOCKET_URL = '/ws/'  # valid by default
-        WS4REDIS_DB = 15
-        WS4REDIS_CONNECTION = {'host': '{REDIS_HOST}', 'port': '{REDIS_PORT}', 'db': WS4REDIS_DB, }
-        WS4REDIS_EXPIRE = 0  # valid by default
-        WS4REDIS_PREFIX = 'ws'  # valid by default
-        WS4REDIS_HEARTBEAT = '--HEARTBEAT--'  # valid by default
-        WSGI_APPLICATION = 'ws4redis.django_runserver.application'  # valid by default
-        WS4REDIS_SUBSCRIBER = 'djangofloor.df_ws4redis.Subscriber'  # valid by default
-        FLOOR_WS_FACILITY = 'djangofloor'  # valid by default
+            FLOOR_USE_WS4REDIS  # should automatically set to `True`
+            WEBSOCKET_URL = '/ws/'  # valid by default
+            WS4REDIS_DB = 15
+            WS4REDIS_CONNECTION = {'host': '{REDIS_HOST}', 'port': '{REDIS_PORT}', 'db': WS4REDIS_DB, }
+            WS4REDIS_EXPIRE = 0  # valid by default
+            WS4REDIS_PREFIX = 'ws'  # valid by default
+            WS4REDIS_HEARTBEAT = '--HEARTBEAT--'  # valid by default
+            WSGI_APPLICATION = 'ws4redis.django_runserver.application'  # valid by default
+            WS4REDIS_SUBSCRIBER = 'djangofloor.df_ws4redis.Subscriber'  # valid by default
+            FLOOR_WS_FACILITY = 'djangofloor'  # valid by default
 
 
 Websockets

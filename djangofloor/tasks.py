@@ -1,5 +1,20 @@
 # coding=utf-8
-"""
+"""Calling DjangoFloor signals
+===========================
+
+Public functions
+****************
+
+Define the `df_call` function for calling signals and its shortcut `call`.
+Can activate the test mode, allowing to retain signal calls (simplifying tests).
+Activate this mode with `set_test_mode(True)` and fetch called signals with `pop_called_signals()`.
+
+
+Internal functions
+******************
+
+Define several Celery tasks, get signals encoders/decoders (JSON by default) and a function for automatically discover
+all signals.
 """
 from __future__ import unicode_literals, absolute_import
 import logging
@@ -155,11 +170,10 @@ def call(signal_name, request, sharing=None, **kwargs):
     :param sharing:
         * `None`: does not propagate to the JavaScript (client) side
         * `WINDOW`: only to the browser window that initiated the original request
-        * `USER`, `SESSION`, `BROADCAST`: propagate to the request user, only to its current session,
-            or to all currently logged-in users
-        * {'users': ['username1', 'username2'], 'groups': ['group1', 'group2'], 'broadcast': True}
-         (or any subset of these keys)
+        * `USER`, `SESSION`, `BROADCAST`: propagate to the request user, only to its current session, or to all currently logged-in users
+        * {'users': ['username1', 'username2'], 'groups': ['group1', 'group2'], 'broadcast': True} (or any subset of these keys)
         * `RETURN` return result values of signal calls to the caller
+
     :param kwargs: arguments for the receiver
     """
     return df_call(signal_name, request, sharing=sharing, from_client=False, kwargs=kwargs)
@@ -185,6 +199,7 @@ def df_call(signal_name, request, sharing=None, from_client=False, kwargs=None, 
         * {'users': ['username1', 'username2'], 'groups': ['group1', 'group2'], 'broadcast': True}
             (or any subset of these keys)
         * `RETURN` return result values of signal calls to the caller
+
     :param from_client: True if this call comes a JS client
     :param kwargs: arguments for the receiver
     :param countdown: Wait `countdown` seconds before actually calling the signal.
@@ -203,7 +218,7 @@ def df_call(signal_name, request, sharing=None, from_client=False, kwargs=None, 
     import_signals()
     if kwargs is None:
         kwargs = {}
-    if __internal_state['accumulate']:
+    if __internal_state['accumulate']:  # test mode activated
         __internal_state['called_signals'].append((signal_name, request, sharing, kwargs))
         return
     celery_kwargs = {}

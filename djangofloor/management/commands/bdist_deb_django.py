@@ -1,4 +1,9 @@
 # -*- coding: utf-8 -*-
+"""Build a .deb package with binaries and default config
+=====================================================
+
+Require a `stdeb.cfg` at the root of your project.
+"""
 from __future__ import unicode_literals, print_function, absolute_import
 import codecs
 from distutils.errors import DistutilsModuleError
@@ -8,10 +13,14 @@ import sys
 
 from django.core.management import execute_from_command_line
 from django.template.loader import render_to_string
-# noinspection PyPackageRequirements
-from stdeb import util
-# noinspection PyPackageRequirements
-from stdeb.command.sdist_dsc import sdist_dsc
+try:
+    # noinspection PyPackageRequirements
+    from stdeb import util
+    # noinspection PyPackageRequirements
+    from stdeb.command.sdist_dsc import sdist_dsc
+except ImportError:
+    util = None
+    sdist_dsc = None
 
 from djangofloor.scripts import set_env
 
@@ -79,6 +88,9 @@ class BdistDebDjango(sdist_dsc):
             * add postinstall files
             * build  a .deb package from the modified `sdist_dsc`
         """
+        if sdist_dsc is None or util is None:
+            self.stderr.write('Unable to load bdist_deb')
+            return 1
         # generate .dsc source pkg
         sdist_dsc.run(self)
         project_name = self.distribution.metadata.name

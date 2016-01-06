@@ -1,4 +1,9 @@
 # -*- coding: utf-8 -*-
+"""Template tags specific to DjangoFloor
+=====================================
+
+Define a few useful template tags, currently only for the default Django template system.
+"""
 from __future__ import unicode_literals, absolute_import
 # noinspection PyUnresolvedReferences
 from django.utils.six.moves.urllib.parse import urljoin

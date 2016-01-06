@@ -1,4 +1,11 @@
 # coding=utf-8
+"""Display the current config
+==========================
+
+Display the current loaded config.
+Can also generate settings.py (with `-m`) or settings.ini config files (with `--ini`).
+
+"""
 from __future__ import unicode_literals
 try:
     # noinspection PyCompatibility

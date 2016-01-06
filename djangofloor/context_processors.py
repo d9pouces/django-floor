@@ -1,5 +1,6 @@
 # coding=utf-8
-"""define ContextProcessors.
+"""define ContextProcessors
+========================
 
 The only ContextProcessor defined add some common variables related to DjangoFloor.
 
@@ -15,7 +16,7 @@ def context_base(request):
     """Provide the following variables to templates when you RequestContext:
 
         * 'df_remote_authenticated': `True` if the user has been authenticated by
-            :class:`djangofloor.middleware.RemoteUserMiddleware`.
+            `djangofloor.middleware.RemoteUserMiddleware`.
         * 'df_project_name': name of your project, as defined in settings.FLOOR_PROJECT_NAME,
         * 'df_user': the user (:class:`django.contrib.auth.models.AbstractUser`),
         * 'df_language_code': settings.LANGUAGE_CODE (:class:`str`),

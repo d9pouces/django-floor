@@ -20,3 +20,4 @@ Here is the documentation of the complete API.
   djangofloor/templatetags/djangofloor
   djangofloor/management/commands/config
   djangofloor/management/commands/dumpdb
+  djangofloor/management/commands/bdist_deb_django

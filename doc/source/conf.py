@@ -17,6 +17,8 @@ import sys
 import os
 os.environ['DJANGO_SETTINGS_MODULE'] = 'pycharm_settings'
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
+import django
+django.setup()
 from djangofloor import __version__ as version_orig
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the

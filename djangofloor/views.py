@@ -1,4 +1,7 @@
 # coding=utf-8
+"""Default index and views tied to the signal system
+=================================================
+"""
 from __future__ import unicode_literals
 import json
 import mimetypes

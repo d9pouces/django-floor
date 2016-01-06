@@ -1,5 +1,6 @@
 # coding=utf-8
-"""Authentication backend used for HTTP authentication.
+"""Authentication backend used for HTTP authentication
+===================================================
 
 Check :class:`django.contrib.auth.backends.RemoteUserBackend` for a more detailed explanation.
 

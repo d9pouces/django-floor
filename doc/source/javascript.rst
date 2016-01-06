@@ -128,7 +128,7 @@ df.notify.warning
 *****************
 
 Show a Growl-like notification (by default on the top-right of the screen).
-See all settings on `Bootstrap-Notify<http://bootstrap-notify.remabledesigns.com>`_. Settings and options are merged in
+See all settings on `Bootstrap-Notify <http://bootstrap-notify.remabledesigns.com>`_. Settings and options are merged in
 the same dict.
 
     JavaScript example:

@@ -1,9 +1,10 @@
 # coding=utf-8
-from __future__ import unicode_literals, absolute_import
+""" "Main" functions for Django, Celery, Gunicorn and uWSGI
+========================================================
 
+Define "main" functions for your scripts using the Django `manage.py` system or Gunicorn/Celery/uWSGI.
 """
-Define a main() function, allowing you to manage your Django project.
-"""
+from __future__ import unicode_literals, absolute_import
 from argparse import ArgumentParser
 import subprocess
 import re

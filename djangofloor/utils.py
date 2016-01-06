@@ -1,4 +1,10 @@
 # coding=utf-8
+"""Classes and functions used for the DjangoFloor settings system
+==============================================================
+
+Define several helpers classes and internal functions for the DjangoFloor settings system, allowing to merge
+settings from different sources. This file must be importable while Django is not loaded yet.
+"""
 from __future__ import unicode_literals, absolute_import
 from collections import OrderedDict
 from distutils.version import LooseVersion
@@ -315,7 +321,8 @@ class SettingMerger(object):
         return obj
 
     def get_setting_value(self, setting_name):
-        """import setting_name_ from user-specific settings, or project-specific settings, or django-floor settings. Also add it to globals(), so this function is idempotent.
+        """import the required settings from user-specific settings, or project-specific settings, or django-floor settings.
+        Also add it to globals(), so this function is idempotent.
 
         :param setting_name: name of the setting to import
         :return: the imported setting :)

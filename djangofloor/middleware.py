@@ -1,4 +1,8 @@
 # coding=utf-8
+"""Several middleware, for production or debugging purposes
+========================================================
+
+"""
 from __future__ import unicode_literals
 import codecs
 from django.contrib.sessions.backends.base import VALID_KEY_CHARS
