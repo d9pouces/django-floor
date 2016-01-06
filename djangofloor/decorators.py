@@ -313,9 +313,11 @@ class SignalRequest(object):
         """
         if isinstance(request, SignalRequest):
             return request
+        # noinspection PyUnresolvedReferences
         session_key = request.session.session_key if hasattr(request, 'session') and request.session else None
         window_key = request.window_key if hasattr(request, 'window_key') else None
-        user = request.user
+        # noinspection PyUnresolvedReferences
+        user = request.user if hasattr(request, 'user') and request.user else None
         if user.is_authenticated():
             return cls(username=user.get_username(), session_key=session_key,
                        user_pk=user.pk, is_superuser=user.is_superuser, is_staff=user.is_staff,

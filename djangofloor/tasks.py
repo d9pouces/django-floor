@@ -1,18 +1,20 @@
 # coding=utf-8
+"""
+"""
 from __future__ import unicode_literals, absolute_import
 import logging
-
-import celery
-# used to avoid strange import bug with Python 3.2/3.3
-# noinspection PyStatementEffect
-celery.__file__
-from celery import shared_task
 from django.utils.module_loading import import_string
 from django.conf import settings
 from django.http import HttpRequest
 from djangofloor.utils import import_module
 from django.utils.lru_cache import lru_cache
 from djangofloor.decorators import REGISTERED_SIGNALS, RedisCallWrapper, SignalRequest
+
+import celery
+# used to avoid strange import bug with Python 3.2/3.3
+# noinspection PyStatementEffect
+celery.__file__
+from celery import shared_task
 
 __author__ = 'Matthieu Gallet'
 logger = logging.getLogger('djangofloor.signals')
@@ -47,19 +49,19 @@ def pop_called_signals():
 
 
 @shared_task(serializer='json')
-def signal_task(signal_name, request, from_client, kwargs):
+def signal_task(signal_name, request_dict, from_client, kwargs):
     """Unique Celery tasks, transparently called for delayed signal calls.
 
     You should not have to use it.
 
     :type signal_name: :class:`str`
-    :param request: a :class:`djangofloor.decorators.SignalRequest` serialized as a :class:`dict` object
-    :type request: :class:`dict`
+    :param request_dict: a :class:`djangofloor.decorators.SignalRequest` serialized as a :class:`dict` object
+    :type request_dict: :class:`dict`
     :type from_client: :class:`bool`
     :type kwargs: :class:`dict`
     """
     import_signals()
-    request = SignalRequest(**request)
+    request = SignalRequest(**request_dict)
     logger.debug('delayed signal %s called' % signal_name)
     if signal_name not in REGISTERED_SIGNALS:
         return
@@ -75,6 +77,21 @@ def signal_task(signal_name, request, from_client, kwargs):
     except Exception as e:
         logger.error('Exception encountered in signal %s' % signal_name, exc_info=1)
         raise e
+
+
+@shared_task(serializer='json')
+def delayed_task(signal_name, request_dict, sharing, from_client, kwargs):
+    """
+    :param signal_name:
+    :param request_dict:
+    :param sharing:
+    :param from_client:
+    :param kwargs:
+    :return:
+    """
+    import_signals()
+    request = SignalRequest(**request_dict)
+    df_call(signal_name, request, sharing=sharing, from_client=from_client, kwargs=kwargs)
 
 
 @lru_cache()
@@ -108,10 +125,14 @@ def get_signal_decoder():
 
 def call(signal_name, request, sharing=None, **kwargs):
     """ Call a signal and all the three kinds of receivers can receive it:
-        * standard Python receiverrs
+        * standard Python receivers
         * Python receivers through Celery (thanks to the `delayed` argument)
         * JavaScript receivers (through websockets)
 
+
+    This is a shortcut for `djangofloor.tasks.df_call` but that forbids several signal argument names (`signal_name`,
+    `request` and `sharing`. Directly use `djangofloor.tasks.df_call` if you want to use any of the argument names,
+    or if you want to specify more options (like wait some time before executing code).
     Example:
 
     .. code-block:: python
@@ -129,7 +150,7 @@ def call(signal_name, request, sharing=None, **kwargs):
 
     :param signal_name:
     :type signal_name: :class:`str`
-    :param request: initial request, giving informations about HTTP sessions and its user
+    :param request: initial request, giving information about HTTP sessions and its user
     :type request: :class:`djangofloor.decorators.SignalRequest` or :class:`django.http.HttpRequest`
     :param sharing:
         * `None`: does not propagate to the JavaScript (client) side
@@ -146,7 +167,7 @@ def call(signal_name, request, sharing=None, **kwargs):
 
 def df_call(signal_name, request, sharing=None, from_client=False, kwargs=None, countdown=None, expires=None, eta=None):
     """ Call a signal and all the three kinds of receivers can receive it:
-        * standard Python receiverrs
+        * standard Python receivers
         * Python receivers through Celery (thanks to the `delayed` argument)
         * JavaScript receivers (through websockets)
 
@@ -154,7 +175,7 @@ def df_call(signal_name, request, sharing=None, from_client=False, kwargs=None, 
 
     :param signal_name:
     :type signal_name: :class:`str`
-    :param request: initial request, giving informations about HTTP sessions and its user
+    :param request: initial request, giving information about HTTP sessions and its user
     :type request: :class:`djangofloor.decorators.SignalRequest` or :class:`django.http.HttpRequest`
     :param sharing:
         * `None`: does not propagate to the JavaScript (client) side
@@ -166,13 +187,13 @@ def df_call(signal_name, request, sharing=None, from_client=False, kwargs=None, 
         * `RETURN` return result values of signal calls to the caller
     :param from_client: True if this call comes a JS client
     :param kwargs: arguments for the receiver
-    :param countdown: only used for delayed connected code. Wait `countdown` seconds before calling the code
+    :param countdown: Wait `countdown` seconds before actually calling the signal.
         Check `Celery doc <http://docs.celeryproject.org/en/latest/userguide/calling.html#eta-and-countdown>`_
     :type countdown: :class:`int`
-    :param eta: only used for delayed connected code. Wait until `eta` before calling the code
+    :param eta: Wait until `eta` before actually calling the signal.
         Check `Celery doc <http://docs.celeryproject.org/en/latest/userguide/calling.html#eta-and-countdown>`_
     :type eta: :class:`datetime.datetime`
-    :param expires: only used for delayed connected code. Wait until `eta` before calling the code
+    :param expires: Wait until `eta` before actually calling the signal.
         Check `Celery doc <http://docs.celeryproject.org/en/latest/userguide/calling.html#eta-and-countdown>`_
     :type expires: :class:`datetime.datetime` or :class:`int`
     :return:
@@ -185,6 +206,17 @@ def df_call(signal_name, request, sharing=None, from_client=False, kwargs=None, 
     if __internal_state['accumulate']:
         __internal_state['called_signals'].append((signal_name, request, sharing, kwargs))
         return
+    celery_kwargs = {}
+    if expires:
+        celery_kwargs['expires'] = expires
+    if eta:
+        celery_kwargs['eta'] = eta
+    if countdown:
+        celery_kwargs['countdown'] = countdown
+    if celery_kwargs:
+        delayed_task.apply_async([signal_name, request.to_dict(), sharing, from_client, kwargs])
+        return
+
     result = []
     if isinstance(request, HttpRequest):
         request = SignalRequest.from_request(request)
@@ -214,14 +246,7 @@ def df_call(signal_name, request, sharing=None, from_client=False, kwargs=None, 
         logger.debug('synchronous signal %s called' % signal_name)
     if must_delay and settings.USE_CELERY:
         logger.debug('delayed signal %s called' % signal_name)
-        celery_kwargs = {}
-        if expires:
-            celery_kwargs['expires'] = expires
-        if eta:
-            celery_kwargs['eta'] = eta
-        if countdown:
-            celery_kwargs['countdown'] = countdown
-        signal_task.apply_async([signal_name, request.to_dict(), from_client, kwargs], **celery_kwargs)
+        signal_task.apply_async([signal_name, request.to_dict(), from_client, kwargs])
     if sharing == RETURN:
         return result
     for data in result:
