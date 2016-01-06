@@ -144,7 +144,7 @@ def call(signal_name, request, sharing=None, **kwargs):
     return df_call(signal_name, request, sharing=sharing, from_client=False, kwargs=kwargs)
 
 
-def df_call(signal_name, request, sharing, from_client, kwargs):
+def df_call(signal_name, request, sharing=None, from_client=False, kwargs=None, countdown=None, expires=None, eta=None):
     """ Call a signal and all the three kinds of receivers can receive it:
         * standard Python receiverrs
         * Python receivers through Celery (thanks to the `delayed` argument)
@@ -166,11 +166,22 @@ def df_call(signal_name, request, sharing, from_client, kwargs):
         * `RETURN` return result values of signal calls to the caller
     :param from_client: True if this call comes a JS client
     :param kwargs: arguments for the receiver
+    :param countdown: only used for delayed connected code. Wait `countdown` seconds before calling the code
+        Check `Celery doc <http://docs.celeryproject.org/en/latest/userguide/calling.html#eta-and-countdown>`_
+    :type countdown: :class:`int`
+    :param eta: only used for delayed connected code. Wait until `eta` before calling the code
+        Check `Celery doc <http://docs.celeryproject.org/en/latest/userguide/calling.html#eta-and-countdown>`_
+    :type eta: :class:`datetime.datetime`
+    :param expires: only used for delayed connected code. Wait until `eta` before calling the code
+        Check `Celery doc <http://docs.celeryproject.org/en/latest/userguide/calling.html#eta-and-countdown>`_
+    :type expires: :class:`datetime.datetime` or :class:`int`
     :return:
         if sharing != `RETURN`: return `None`
         else: call `djangofloor.tasks.df_call` on each element of the call result
     """
     import_signals()
+    if kwargs is None:
+        kwargs = {}
     if __internal_state['accumulate']:
         __internal_state['called_signals'].append((signal_name, request, sharing, kwargs))
         return
@@ -187,23 +198,30 @@ def df_call(signal_name, request, sharing, from_client, kwargs):
             push_signal_call(request, signal_name, kwargs=kwargs, sharing=sharing)
 
     must_delay = False
-    synchroneous = False
+    synchronous = False
     for wrapper in REGISTERED_SIGNALS.get(signal_name, []):
         if (not wrapper.allow_from_client and from_client) or (wrapper.auth_required and not request.session_key):
             continue
         if wrapper.delayed:
             must_delay = True
         else:
-            synchroneous = True
+            synchronous = True
             prepared_kwargs = wrapper.prepare_kwargs(kwargs)
             wrapper_result = wrapper.function(request, **prepared_kwargs)
             if wrapper_result:
                 result += list(wrapper_result)
-    if synchroneous:
-        logger.debug('synchroneous signal %s called' % signal_name)
+    if synchronous:
+        logger.debug('synchronous signal %s called' % signal_name)
     if must_delay and settings.USE_CELERY:
         logger.debug('delayed signal %s called' % signal_name)
-        signal_task.delay(signal_name, request.to_dict(), from_client, kwargs)
+        celery_kwargs = {}
+        if expires:
+            celery_kwargs['expires'] = expires
+        if eta:
+            celery_kwargs['eta'] = eta
+        if countdown:
+            celery_kwargs['countdown'] = countdown
+        signal_task.apply_async([signal_name, request.to_dict(), from_client, kwargs], **celery_kwargs)
     if sharing == RETURN:
         return result
     for data in result:

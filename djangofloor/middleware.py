@@ -3,8 +3,8 @@ from __future__ import unicode_literals
 import codecs
 from django.contrib.sessions.backends.base import VALID_KEY_CHARS
 from django.core.exceptions import ImproperlyConfigured
-# noinspection PyPackageRequirements
 from django.utils.crypto import get_random_string
+# noinspection PyPackageRequirements
 from pipeline.compilers import CompilerBase
 import base64
 from django.conf import settings

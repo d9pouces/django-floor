@@ -1,5 +1,8 @@
 # coding=utf-8
-"""Define the decorator for connecting Python code to signals, a :class:`djangofloor.decorators.SignalRequest`
+"""Connect Python code to the DjangoFloor signal system
+====================================================
+
+Define the decorator for connecting Python code to signals, a :class:`djangofloor.decorators.SignalRequest`
 which can be easily serialized and is lighter than a :class:`django.http.HttpRequest`,
 and some code to convert serialized data sent by Javascript to something useful in Python.
 
