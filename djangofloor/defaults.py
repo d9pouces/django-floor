@@ -276,6 +276,7 @@ TEMPLATE_LOADERS = [
     'django.template.loaders.app_directories.Loader',
     # 'django.template.loaders.eggs.Loader',
 ]
+FLOOR_TEMPLATE_CONTEXT_PROCESSORS = []
 TEMPLATE_CONTEXT_PROCESSORS = [
     'django.contrib.auth.context_processors.auth',
     'django.core.context_processors.debug',
@@ -286,6 +287,7 @@ TEMPLATE_CONTEXT_PROCESSORS = [
     'django.core.context_processors.tz',
     'django.contrib.messages.context_processors.messages',
     'djangofloor.context_processors.context_base',
+    ExpandIterable('FLOOR_TEMPLATE_CONTEXT_PROCESSORS'),
 ]
 if FLOOR_USE_WS4REDIS:
     # noinspection PyUnresolvedReferences
@@ -432,7 +434,7 @@ CELERY_TASK_SERIALIZER = 'json'
 
 LOGGING = {
     'version': 1,
-    'disable_existing_loggers': False,
+    'disable_existing_loggers': True,
     'filters': {
         'require_debug_false': {
             '()': 'django.utils.log.RequireDebugFalse'
@@ -462,11 +464,11 @@ LOGGING = {
     'loggers': {
         'django.request': {
             'handlers': [
-                'mail_admins',
                 'stream',
+                'mail_admins',
             ],
             'level': 'ERROR',
-            'propagate': True,
+            'propagate': False,
         },
         'djangofloor.signals': {
             'handlers': [

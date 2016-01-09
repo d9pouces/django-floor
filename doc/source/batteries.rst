@@ -45,11 +45,16 @@ CSS and JS files
 `Pipeline <https://django-pipeline.readthedocs.org/en>`_ is an asset packaging library for Django, providing both CSS and JavaScript concatenation and compression, built-in JavaScript template support, and optional data-URI image and font embedding.
 
 Required dependencies:
+
     * django-pipeline,
-    * slimit,
     * rcssmin (directly included in djangofloor.df_pipeline to ease installation - the official package require the compilation of a C extension).
 
 By default, `PIPELINE_ENABLED` is set to `False`, as some bugs can appear in JS.
+Several JS minimifiers exist, even pure-Python ones :
+
+    * `jsmin`,
+    * `slimit`,
+    * `css-html-js-minify`.
 
 Redis
 -----

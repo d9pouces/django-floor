@@ -13,6 +13,8 @@ import datetime
 
 from django.core import mail
 from django.utils.log import AdminEmailHandler
+import io
+import sys
 
 
 __author__ = 'Matthieu Gallet'
@@ -35,15 +37,17 @@ class FloorAdminEmailHandler(AdminEmailHandler):
         if interval < datetime.timedelta(0, self.min_interval):
             return
         LAST_SENDS[subject] = datetime.datetime.now()
+        original_std = sys.stdout, sys.stderr
+        # sys.stdout = io.StringIO()
+        sys.stderr = io.StringIO()
         try:
+            pass
             mail.mail_admins(subject, message, *args, connection=self.connection(), **kwargs)
         except Exception as e:
             print('<==================================================================================================')
-            print('/!\\ settings.DEBUG = False BUT STILL UNABLE TO SEND MAIL TO ADMIN /!\\')
-            print(e)
-            print('===================================================================================================')
-            print('Content of the original message:')
+            print('Unable to send the mail: %s' % e)
             print(subject)
-            print('---------------------------------------------------------------------------------------------------')
-            print(message)
+            print('===================================================================================================')
+            print('/!\\ settings.DEBUG = False BUT STILL UNABLE TO SEND MAIL TO ADMIN /!\\')
             print('==================================================================================================>')
+        sys.stdout, sys.stdout = original_std

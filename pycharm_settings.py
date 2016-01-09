@@ -113,7 +113,7 @@ PIPELINE = {'CSS_COMPRESSOR': 'djangofloor.middleware.RCSSMinCompressor', 'PIPEL
     (b'text/x-scss', '.scss')), 'STYLESHEETS': {
     'default': {'source_filenames': ('bootstrap3/css/bootstrap.min.css', 'css/font-awesome.min.css'),
                 'output_filename': 'css/default.css', 'extra_context': {'media': 'all'}}},
-    'JS_COMPRESSOR': 'pipeline.compressors.slimit.SlimItCompressor', 'JAVASCRIPT': {
+    'JS_COMPRESSOR': None, 'JAVASCRIPT': {
     'ie9': {'source_filenames': ('js/html5shiv.js', 'js/respond.min.js'), 'output_filename': 'js/ie9.js'}, 'default': {
         'source_filenames': ('js/jquery.min.js', 'bootstrap3/js/bootstrap.min.js', 'js/djangofloor.js',
                              'js/ws4redis.js'),
@@ -127,7 +127,7 @@ PIPELINE_JS = {'ie9': {'source_filenames': ('js/html5shiv.js', 'js/respond.min.j
                'default': {'source_filenames': (
                    'js/jquery.min.js', 'bootstrap3/js/bootstrap.min.js', 'js/djangofloor.js', 'js/ws4redis.js'),
                    'output_filename': 'js/default.js'}}
-PIPELINE_JS_COMPRESSOR = 'pipeline.compressors.slimit.SlimItCompressor'
+PIPELINE_JS_COMPRESSOR = None
 PIPELINE_MIMETYPES = (
     (b'text/coffeescript', '.coffee'), (b'text/less', '.less'), (b'text/javascript', '.js'), (b'text/x-sass', '.sass'),
     (b'text/x-scss', '.scss'))
