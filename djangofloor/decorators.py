@@ -325,8 +325,8 @@ class SignalRequest(object):
         return cls(None, session_key=session_key, window_key=window_key)
 
 
-class RedisCallWrapper(object):
-    def __init__(self, fn, path=None, delayed=False, allow_from_client=True, auth_required=True):
+class ViewWrapper(object):
+    def __init__(self, fn, path=None):
         self.path = path
         self.function = fn
         self.__name__ = fn.__name__ if hasattr(fn, '__name__') else path
@@ -336,28 +336,43 @@ class RedisCallWrapper(object):
         self.required_arguments = set()
         self.optional_arguments = set()
         self.accept_kwargs = False
+        self.accept_args = False
         self.argument_types = {}
+        self.required_arguments_names = []
+        self.optional_arguments_names = []
 
         for key, param in sig.parameters.items():
-            if key in ('request',):
+            if key in ('request', ):
                 continue
             if param.kind == param.VAR_KEYWORD:  # corresponds to "fn(**kwargs)"
                 self.accept_kwargs = True
             elif param.kind == param.VAR_POSITIONAL:  # corresponds to "fn(*args)"
-                self.accept_kwargs = True
+                self.accept_args = True
             elif param.default == param.empty:  # "fn(foo)" : kind = POSITIONAL_ONLY or POSITIONAL_OR_KEYWORD
                 self.required_arguments.add(key)
                 if param.annotation != param.empty and callable(param.annotation):
                     self.argument_types[key] = param.annotation
+                self.required_arguments_names.append(key)
             else:
                 self.optional_arguments.add(key)  # "fn(foo=bar)" : kind = POSITIONAL_OR_KEYWORD or KEYWORD_ONLY
                 if param.annotation != param.empty and callable(param.annotation):
                     self.argument_types[key] = param.annotation
+                self.optional_arguments_names.append(key)
 
         if path is None:
             path = fn.__name__
         self.register(path)
 
+    def register(self, path):
+        raise NotImplementedError
+
+    def __call__(self, *args, **kwargs):
+        return self.function(*args, **kwargs)
+
+
+class RedisCallWrapper(ViewWrapper):
+    def __init__(self, fn, path=None, delayed=False, allow_from_client=True, auth_required=True):
+        super(RedisCallWrapper, self).__init__(fn, path=path)
         self.allow_from_client = allow_from_client
         self.delayed = delayed
         self.auth_required = auth_required
@@ -381,11 +396,8 @@ class RedisCallWrapper(object):
                     kwargs[k] = v(kwargs[k])
             except ValueError:
                 raise InvalidRequest(text_type(_('Invalid value %(value)s for argument %(arg)s.')) %
-                                     {'arg': 'k', 'value': v})
+                                     {'arg': k, 'value': v})
         return kwargs
-
-    def __call__(self, *args, **kwargs):
-        return self.function(*args, **kwargs)
 
 
 def connect(fn=None, path=None, delayed=False, allow_from_client=True, auth_required=True):
