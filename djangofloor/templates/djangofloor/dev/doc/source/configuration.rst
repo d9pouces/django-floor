@@ -7,7 +7,7 @@ You can look current settings with the following command::
 
 Here is the complete list of settings::
 
-    [global]
+{% block ini_configuration %}    [global]
     server_name = {{ PROJECT_NAME }}.example.org
     protocol = https
     bind_address = {{ BIND_ADDRESS }}
@@ -18,14 +18,15 @@ Here is the complete list of settings::
     x_send_file =  true
     x_accel_converter = false
     debug = false
-
-    [database]
+{% block authentication %}remote_user_header = HTTP_REMOTE_USER
+{% endblock %}{% block extra_ini_configuration %}{% endblock %}    [database]
     engine =
     name =
     user =
     password =
     host =
     port =
+{% endblock %}
 
 If you need more complex settings, you can override default values (given in `djangofloor.defaults` and
 `{{ PROJECT_NAME }}.defaults`) by creating a file named `[prefix]/etc/{{ PROJECT_NAME }}/settings.py`.

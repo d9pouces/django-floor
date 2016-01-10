@@ -11,11 +11,11 @@ import codecs
 import re
 
 import sys
-import os.path
+import os
 
 root_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 sys.path.append(root_path)
-
+{% block header %}{% endblock %}
 version = None
 for line in codecs.open(os.path.join(root_path, '{{ PROJECT_NAME }}', '__init__.py'), 'r', encoding='utf-8'):
     matcher = re.match(r"""^__version__\s*=\s*['"](.*)['"]\s*$""", line)
@@ -36,12 +36,12 @@ for line in codecs.open(os.path.join(root_path, '{{ PROJECT_NAME }}', '__init__.
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = [
+{% block extensions %}extensions = [
     'sphinx.ext.autodoc', 'sphinx.ext.doctest', 'sphinx.ext.todo',
     'sphinx.ext.coverage', 'sphinx.ext.ifconfig', 'sphinx.ext.viewcode',
     'sphinx.ext.intersphinx',
 ]
-
+{% endblock %}
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
 
@@ -106,13 +106,13 @@ pygments_style = 'sphinx'
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-html_theme = 'haiku'
+{% block theme %}html_theme = 'haiku'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
 html_theme_options = {}
-
+{% endblock %}
 # Add any paths that contain custom themes here, relative to this directory.
 # html_theme_path = []
 
@@ -194,7 +194,7 @@ htmlhelp_basename = '{{ FLOOR_PROJECT_NAME }} doc'
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
     ('index', '{{ PROJECT_NAME }}.tex', '{{ FLOOR_PROJECT_NAME }}\'s Documentation',
-     'flanker', 'manual'),
+     author, 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -269,7 +269,6 @@ epub_copyright = '{{ year }}, %s' % author
 
 # Allow duplicate toc entries.
 # epub_tocdup = True
-# 
-intersphinx_mapping = {
-    'python': ('http://docs.python.org/3.3/', 'externals/python_3.3.inv'),
-}
+#
+{% block intersphinx_mapping %}intersphinx_mapping = {}
+{% endblock %}
