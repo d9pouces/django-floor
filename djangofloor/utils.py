@@ -9,6 +9,7 @@ from __future__ import unicode_literals, absolute_import
 from collections import OrderedDict
 from distutils.version import LooseVersion
 from django import get_version
+import pkg_resources
 
 try:
     # noinspection PyCompatibility
@@ -261,10 +262,11 @@ class SettingMerger(object):
     def parse_setting(self, obj):
         """Parse the object for replacing variables by their values.
 
-        If `obj` is a string like "THIS_IS_{TEXT}", search for a setting named "TEXT" and replace {TEXT} by its value (say, "VALUE").
-        The returned object is then equal to "THIS_IS_VALUE".
+        If `obj` is a string like "THIS_IS_{TEXT}", search for a setting named "TEXT" and replace {TEXT} by its value
+        (say, "VALUE"). The returned object is then equal to "THIS_IS_VALUE".
         If `obj` is a list, a set, a tuple or a dict, its components are recursively parsed.
-        If `obj` is a :class:`djangofloor.utils.DirectoryPath` or a :class:`djangofloor.utils.FilePath`, required parent directories are automatically created and the name is returned.
+        If `obj` is a :class:`djangofloor.utils.DirectoryPath` or a :class:`djangofloor.utils.FilePath`,
+        required parent directories are automatically created and the name is returned.
         Otherwise, `obj` is returned as-is.
 
 
@@ -364,3 +366,39 @@ class SettingMerger(object):
                 for key in 'TEMPLATE_DIRS', 'TEMPLATE_CONTEXT_PROCESSORS', 'TEMPLATE_LOADERS':
                     if key in self.settings:
                         del self.settings[key]
+
+
+def walk(module_name, dirname, topdown=True):
+    """
+    Copy of :func:`os.walk`, please refer to its doc. The only difference is that we walk in a package_resource
+    instead of a plain directory.
+    :type module_name: basestring
+    :param module_name: module to search in
+    :type dirname: basestring
+    :param dirname: base directory
+    :type topdown: bool
+    :param topdown: if True, perform a topdown search.
+    """
+    def rec_walk(root):
+        """
+        Recursively list subdirectories and filenames from the root.
+        :param root: the root path
+        :type root: basestring
+        """
+        dirnames = []
+        filenames = []
+        for name in pkg_resources.resource_listdir(module_name, root):
+            fullname = root + '/' + name
+            isdir = pkg_resources.resource_isdir(module_name, fullname)
+            if isdir:
+                dirnames.append(name)
+                if not topdown:
+                    rec_walk(fullname)
+            else:
+                filenames.append(name)
+        yield root, dirnames, filenames
+        if topdown:
+            for name in dirnames:
+                for values in rec_walk(root + '/' + name):
+                    yield values
+    return rec_walk(dirname)

@@ -1,0 +1,39 @@
+{% load djangofloor %}.. {{ FLOOR_PROJECT_NAME }} documentation master file, created by
+{% block heading %}
+Welcome to {{ FLOOR_PROJECT_NAME }}'s documentation!
+==========={{ FLOOR_PROJECT_NAME|df_underline }}=================
+{% block description %}
+
+{% endblock %}
+:doc:`installation`
+    Instruction on how to get the distribution
+
+:doc:`configuration`
+    All configuration options
+
+:doc:`debian`
+    Packaging {{ FLOOR_PROJECT_NAME }} for Debian
+
+{% block screenshots %}
+
+{% endblock %}
+{% endblock %}
+
+Full table of contents
+======================
+
+.. toctree::
+   :maxdepth: 1
+
+   installation
+   configuration
+   debian
+{% block extra_table_contents %}{% endblock %}
+
+Indices and tables
+==================
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`
+{% block extra_indices %}{% endblock %}

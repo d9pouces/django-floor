@@ -72,3 +72,7 @@ def df_window_key(context):
     window_key = context.get('df_window_key', '[INVALID]')
     return mark_safe('<script type="application/javascript">$(function () {df.ws4redis_connect("%s");});</script>'
                      % window_key)
+
+@register.filter
+def df_underline(value, kind='='):
+    return kind * len(value)

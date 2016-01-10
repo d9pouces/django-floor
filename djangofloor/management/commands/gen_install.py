@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-"""Command for générating
+"""Command for generating default configuration files for Apache, Nginx, Supervisor or systemd.
+Currently used for creating Debian packages.
 
 """
 from __future__ import unicode_literals, print_function
@@ -30,7 +31,8 @@ class Command(BaseCommand):
         parser.add_argument('--apache22', default=None, help='Generate an Apache 2.2 configuration file.')
         parser.add_argument('--apache24', default=None, help='Generate an Apache 2.4 configuration file.')
         parser.add_argument('--nginx', default=None, help='Generate a NGinx configuration file.')
-        parser.add_argument('--systemd', default=None, help='Generate a Systemd configuration file (destination folder).')
+        parser.add_argument('--systemd', default=None,
+                            help='Generate a Systemd configuration file (destination folder).')
         parser.add_argument('--supervisor', default=None, help='Generate a Supervisor configuration file.')
         parser.add_argument('--collectstatic', default=None, help='Collectstatic and copy them to destination.')
         parser.add_argument('--extra-process', action='append', default=[], help='Extra process for supervisor/systemd.')
