@@ -181,9 +181,9 @@ Now, it's time to install {{ FLOOR_PROJECT_NAME }}:
     x_send_file =  true
     x_accel_converter = false
     debug = false
-    remote_user_header = HTTP_REMOTE_USER
+{% block ini_configuration_kerberos %}    remote_user_header = HTTP_REMOTE_USER
     ; leave it blank if you do not use kerberos
-{% block extra_ini_configuration %}{% endblock %}    [database]
+{% endblock %}{% block extra_ini_configuration %}{% endblock %}    [database]
     engine = django.db.backends.postgresql_psycopg2
     name = {{ PROJECT_NAME }}
     user = {{ PROJECT_NAME }}
