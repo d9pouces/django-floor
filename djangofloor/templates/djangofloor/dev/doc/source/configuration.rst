@@ -18,7 +18,7 @@ Here is the complete list of settings::
     x_send_file =  true
     x_accel_converter = false
     debug = false
-{% block authentication %}remote_user_header = HTTP_REMOTE_USER
+{% block authentication %}    remote_user_header = HTTP_REMOTE_USER
 {% endblock %}{% block extra_ini_configuration %}{% endblock %}    [database]
     engine =
     name =

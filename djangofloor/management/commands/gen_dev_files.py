@@ -8,6 +8,13 @@ Write all files which are in one of these folders. If a file is in both folders,
 directory is ignored.
 
 All these files are assumed to be Django templates. All Django settings are available as template variables.
+If you override a default file by an empty one, this file will be ignored.
+
+Two variables are currently added to the context:
+
+  * `year`
+  * `python_version` (like `python3.4`), corresponding to the current interpreter
+
 """
 from __future__ import unicode_literals
 from argparse import ArgumentParser
@@ -20,6 +27,7 @@ from django.template import TemplateSyntaxError
 from django.template.loader import render_to_string
 from django.utils.six import text_type
 import pkg_resources
+import sys
 
 from djangofloor import settings
 from djangofloor.utils import walk
@@ -67,9 +75,7 @@ class Command(BaseCommand):
                 fd.write(text)
             self.stdout.write(self.style.MIGRATE_LABEL('Written file: %s' % filename))
         else:
-            if os.path.isfile(target_filename):
-                os.remove(target_filename)
-                self.stdout.write(self.style.MIGRATE_LABEL('Removed file: %s' % filename))
+            self.stdout.write(self.style.MIGRATE_LABEL('Skipped file: %s' % filename))
 
     def handle(self, *args, **options):
         target_directory = options['target']
@@ -81,6 +87,7 @@ class Command(BaseCommand):
         context = {key: value for (key, value) in merger.settings.items() if
                    (key == key.upper() and key not in ('_', '__') and not key.endswith('_HELP'))}
         context['year'] = datetime.datetime.now().year
+        context['python_version'] = 'python%s.%s' % (sys.version_info[0], sys.version_info[1])
         for variable in options['extra_context']:
             key, sep, value = variable.partition(':')
             if sep != ':':

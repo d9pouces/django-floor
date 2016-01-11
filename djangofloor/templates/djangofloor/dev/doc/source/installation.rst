@@ -2,10 +2,10 @@ Installation
 ============
 
 As every Python package, you may use several ways to install {{ FLOOR_PROJECT_NAME }}.
-Python 3.3+ is required, with the following packages:
-{% block dependencies %}
-  * setuptools >= 1.0
-  * djangofloor >= 0.17.0
+The following packages are required:
+{% block dependencies %}{% block pre_dependencies %}{% endblock %}
+  * setuptools >= 3.0
+  * djangofloor >= 0.17.0{% block post_dependencies %}{% endblock %}
 {% endblock %}
 Installing or Upgrading
 -----------------------
@@ -13,20 +13,24 @@ Installing or Upgrading
 Here is a simple tutorial to install {{ FLOOR_PROJECT_NAME }} on a basic Debian/Linux installation.
 You should easily adapt it on a different Linux or Unix flavor.
 
+{% block pre_install_step %}{% endblock %}
 
-Database
+{% block database %}Database
 --------
 
 PostgreSQL is often a good choice for Django sites:
 
 .. code-block:: bash
 
-   sudo apt-get install postgresql
+{% block pre_database %}{% endblock %}   sudo apt-get install postgresql
    echo "CREATE USER {{ PROJECT_NAME }}" | sudo -u postgres psql -d postgres
    echo "ALTER USER {{ PROJECT_NAME }} WITH ENCRYPTED PASSWORD '5trongp4ssw0rd'" | sudo -u postgres psql -d postgres
    echo "ALTER ROLE {{ PROJECT_NAME }} CREATEDB" | sudo -u postgres psql -d postgres
    echo "CREATE DATABASE {{ PROJECT_NAME }} OWNER {{ PROJECT_NAME }}" | sudo -u postgres psql -d postgres
+{% block post_database %}{% endblock %}
+{% endblock %}
 
+{% block webserver %}
 Apache
 ------
 
@@ -78,6 +82,7 @@ If you want to use SSL:
     sudo chown www-data $PEM
     sudo chmod 0400 $PEM
 {% block keytab %}
+    sudo apt-get install libapache2-mod-auth-kerb
     KEYTAB=/etc/apache2/http.`hostname -f`.keytab
     # ok, I assume that you already have your keytab
     sudo a2enmod auth_kerb
@@ -128,8 +133,7 @@ If you want to use SSL:
             Allow from all
             Satisfy any
         </Location>
-{% block extra_ssl_apache_conf %}
-{% endblock %}
+{% block extra_ssl_apache_conf %}{% endblock %}
         XSendFile on
         XSendFilePath /var/{{ PROJECT_NAME }}/storage/
         # in older versions of XSendFile (<= 0.9), use XSendFileAllowAbove On
@@ -141,24 +145,24 @@ If you want to use SSL:
     sudo apachectl -t
     sudo apachectl restart
 {% endblock %}
+{% endblock %}
 
-
-Application
+{% block application %}Application
 -----------
 
-Now, it's time to install {{ FLOOR_PROJECT_NAME }} (do not forget to use Python3.2 on Debian 7):
+Now, it's time to install {{ FLOOR_PROJECT_NAME }}:
 
 .. code-block:: bash
 
-    SERVICE_NAME={{ PROJECT_NAME }}.example.org
+{% block pre_application %}{% endblock %}    SERVICE_NAME={{ PROJECT_NAME }}.example.org
     sudo mkdir -p /var/{{ PROJECT_NAME }}
     sudo adduser --disabled-password {{ PROJECT_NAME }}
     sudo chown {{ PROJECT_NAME }}:www-data /var/{{ PROJECT_NAME }}
-    sudo apt-get install virtualenvwrapper python3.4 python3.4-dev build-essential postgresql-client libpq-dev
+    sudo apt-get install virtualenvwrapper {{ python_version }} {{ python_version }}-dev build-essential postgresql-client libpq-dev
     # application
     sudo -u {{ PROJECT_NAME }} -i
     SERVICE_NAME={{ PROJECT_NAME }}.example.org
-    mkvirtualenv {{ PROJECT_NAME }} -p `which python3.4`
+    mkvirtualenv {{ PROJECT_NAME }} -p `which {{ python_version }}`
     workon {{ PROJECT_NAME }}
     pip install setuptools --upgrade
     pip install pip --upgrade
@@ -177,6 +181,7 @@ Now, it's time to install {{ FLOOR_PROJECT_NAME }} (do not forget to use Python3
     x_send_file =  true
     x_accel_converter = false
     debug = false
+    remote_user_header = HTTP_REMOTE_USER
     ; leave it blank if you do not use kerberos
 {% block extra_ini_configuration %}{% endblock %}    [database]
     engine = django.db.backends.postgresql_psycopg2
@@ -188,9 +193,11 @@ Now, it's time to install {{ FLOOR_PROJECT_NAME }} (do not forget to use Python3
 {% endblock %}    EOF
     {{ PROJECT_NAME }}-manage migrate
     {{ PROJECT_NAME }}-manage collectstatic --noinput
-{% block extra_installation_commands %}{% endblock %}
+{% block post_application %}    moneta-manage createsuperuser
+{% endblock %}
+{% endblock %}
 
-supervisor
+{% block supervisor %}supervisor
 ----------
 
 Supervisor is required to automatically launch {{ PROJECT_NAME }}:
@@ -209,8 +216,9 @@ Supervisor is required to automatically launch {{ PROJECT_NAME }}:
     sudo /etc/init.d/supervisor restart
 
 Now, Supervisor should start {{ PROJECT_NAME }} after a reboot.
+{% endblock %}
 
-systemd
+{% block systemd %}systemd
 -------
 
 You can also use systemd to launch {{ PROJECT_NAME }}:
@@ -248,3 +256,5 @@ You can also use systemd to launch {{ PROJECT_NAME }}:
     EOF
     systemctl enable {{ PROJECT_NAME }}-celery.service
 {% endif %}
+{% endblock %}
+{% block post_install_step %}{% endblock %}
