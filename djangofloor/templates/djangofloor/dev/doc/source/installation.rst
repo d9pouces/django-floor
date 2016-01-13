@@ -1,7 +1,7 @@
 Installation
 ============
 
-As every Python package, you may use several ways to install {{ FLOOR_PROJECT_NAME }}.
+Like many Python packages, you can use several methods to install {{ FLOOR_PROJECT_NAME }}.
 The following packages are required:
 {% block dependencies %}{% block pre_dependencies %}{% endblock %}
   * setuptools >= 3.0
@@ -12,7 +12,6 @@ Installing or Upgrading
 
 Here is a simple tutorial to install {{ FLOOR_PROJECT_NAME }} on a basic Debian/Linux installation.
 You should easily adapt it on a different Linux or Unix flavor.
-
 {% block pre_install_step %}{% endblock %}
 
 {% block database %}Database
@@ -27,7 +26,15 @@ PostgreSQL is often a good choice for Django sites:
    echo "ALTER USER {{ PROJECT_NAME }} WITH ENCRYPTED PASSWORD '5trongp4ssw0rd'" | sudo -u postgres psql -d postgres
    echo "ALTER ROLE {{ PROJECT_NAME }} CREATEDB" | sudo -u postgres psql -d postgres
    echo "CREATE DATABASE {{ PROJECT_NAME }} OWNER {{ PROJECT_NAME }}" | sudo -u postgres psql -d postgres
-{% block post_database %}{% endblock %}
+{% if USE_CELERY %}
+
+{{ FLOOR_PROJECT_NAME }} also requires Redis:
+
+.. code-block:: bash
+
+    sudo apt-get install redis-server
+
+{% endif %}{% block post_database %}{% endblock %}
 {% endblock %}
 
 {% block webserver %}
@@ -48,20 +55,18 @@ in the configuration, you cannot use its IP address to access the website.
     cat << EOF | sudo tee /etc/apache2/sites-available/{{ PROJECT_NAME }}.conf
     <VirtualHost *:80>
         ServerName $SERVICE_NAME
-        Alias /static/ /var/{{ PROJECT_NAME }}/static/
+{% block webserver_static %}        Alias /static/ /var/{{ PROJECT_NAME }}/static/
         ProxyPass /static/ !
-        Alias /media/ /var/{{ PROJECT_NAME }}/media/
+{% endblock %}{% block webserver_media %}        Alias /media/ /var/{{ PROJECT_NAME }}/media/
         ProxyPass /media/ !
-        ProxyPass / http://{{ BIND_ADDRESS }}/
+{% endblock %}        ProxyPass / http://{{ BIND_ADDRESS }}/
         ProxyPassReverse / http://{{ BIND_ADDRESS }}/
-        DocumentRoot /var/{{ PROJECT_NAME }}/
+        DocumentRoot /var/{{ PROJECT_NAME }}/static
         ServerSignature off
-        XSendFile on
-        XSendFilePath /var/{{ PROJECT_NAME }}/storage/
+{% block webserver_xsendfilepath %}        XSendFile on
+        XSendFilePath /var/{{ PROJECT_NAME }}/media/
         # in older versions of XSendFile (<= 0.9), use XSendFileAllowAbove On
-{% block extra_apache_conf %}
-{% endblock %}
-    </VirtualHost>
+{% endblock %}{% block webserver_extra %}{% endblock %}    </VirtualHost>
     EOF
     sudo mkdir /var/{{ PROJECT_NAME }}/
     sudo chown -R www-data:www-data /var/{{ PROJECT_NAME }}/
@@ -69,7 +74,7 @@ in the configuration, you cannot use its IP address to access the website.
     sudo apachectl -t
     sudo apachectl restart
 
-{% block ssl_kerberos %}
+{% block webserver_ssl %}
 If you want to use SSL:
 
 .. code-block:: bash
@@ -81,7 +86,7 @@ If you want to use SSL:
     openssl x509 -text -noout < $PEM
     sudo chown www-data $PEM
     sudo chmod 0400 $PEM
-{% block keytab %}
+{% block webserver_ssl_keytab %}
     sudo apt-get install libapache2-mod-auth-kerb
     KEYTAB=/etc/apache2/http.`hostname -f`.keytab
     # ok, I assume that you already have your keytab
@@ -104,18 +109,17 @@ If you want to use SSL:
         ServerName $SERVICE_NAME
         SSLCertificateFile $PEM
         SSLEngine on
-        Alias /static/ /var/{{ PROJECT_NAME }}/static/
+{% block webserver_ssl_static %}        Alias /static/ /var/{{ PROJECT_NAME }}/static/
         ProxyPass /static/ !
-        Alias /media/ /var/{{ PROJECT_NAME }}/media/
+{% endblock %}{% block webserver_ssl_media %}        Alias /media/ /var/{{ PROJECT_NAME }}/media/
         ProxyPass /media/ !
-        ProxyPass / http://{{ BIND_ADDRESS }}/
+{% endblock %}        ProxyPass / http://{{ BIND_ADDRESS }}/
         ProxyPassReverse / http://{{ BIND_ADDRESS }}/
-        DocumentRoot /var/{{ PROJECT_NAME }}/
+        DocumentRoot /var/{{ PROJECT_NAME }}/static
         ServerSignature off
         RequestHeader set X_FORWARDED_PROTO https
-        <Location />
-            Options +FollowSymLinks +Indexes
-{% block kerberos_auth %}            AuthType Kerberos
+{% block webserver_ssl_auth %}        <Location />
+            AuthType Kerberos
             AuthName "{{ FLOOR_PROJECT_NAME }}"
             KrbAuthRealms EXAMPLE.ORG example.org
             Krb5Keytab $KEYTAB
@@ -126,18 +130,16 @@ If you want to use SSL:
             KrbSaveCredentials On
             Require valid-user
             RequestHeader set REMOTE_USER %{REMOTE_USER}s
-{% endblock %}
         </Location>
-        <Location /static/>
+{% endblock %}        <Location /static/>
             Order deny,allow
             Allow from all
             Satisfy any
         </Location>
-{% block extra_ssl_apache_conf %}{% endblock %}
-        XSendFile on
-        XSendFilePath /var/{{ PROJECT_NAME }}/storage/
+{% block webserver_ssl_xsendfilepath %}        XSendFile on
+        XSendFilePath /var/{{ PROJECT_NAME }}/media/
         # in older versions of XSendFile (<= 0.9), use XSendFileAllowAbove On
-    </VirtualHost>
+{% endblock %}{% block webserver_ssl_extra %}{% endblock %}    </VirtualHost>
     EOF
     sudo mkdir /var/{{ PROJECT_NAME }}/
     sudo chown -R www-data:www-data /var/{{ PROJECT_NAME }}/
@@ -147,6 +149,7 @@ If you want to use SSL:
 {% endblock %}
 {% endblock %}
 
+{% block other_application %}{% endblock %}
 {% block application %}Application
 -----------
 
@@ -176,8 +179,8 @@ Now, it's time to install {{ FLOOR_PROJECT_NAME }}:
     bind_address = {{ BIND_ADDRESS }}
     data_path = /var/{{ PROJECT_NAME }}
     admin_email = admin@$SERVICE_NAME
-    time_zone = Europe/Paris
-    language_code = fr-fr
+    time_zone = {{ TIME_ZONE }}
+    language_code = {{ LANGUAGE_CODE }}
     x_send_file =  true
     x_accel_converter = false
     debug = false
@@ -190,7 +193,11 @@ Now, it's time to install {{ FLOOR_PROJECT_NAME }}:
     password = 5trongp4ssw0rd
     host = localhost
     port = 5432
-{% endblock %}    EOF
+{% block ini_redis %}{% if USE_CELERY or FLOOR_USE_WS4REDIS %}    [redis]
+        host = {{ REDIS_HOST }}
+        port = {{ REDIS_PORT }}
+        broker_db = {{ BROKER_DB }}
+{% endif %}{% endblock %}{% endblock %}    EOF
     {{ PROJECT_NAME }}-manage migrate
     {{ PROJECT_NAME }}-manage collectstatic --noinput
 {% block post_application %}    moneta-manage createsuperuser

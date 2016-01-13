@@ -26,14 +26,18 @@ Here is the complete list of settings::
     password =
     host =
     port =
-{% endblock %}
+{% block ini_redis %}{% if USE_CELERY or FLOOR_USE_WS4REDIS %}    [redis]
+    host = {{ REDIS_HOST }}
+    port = {{ REDIS_PORT }}
+    broker_db = {{ BROKER_DB }}
+{% endif %}{% endblock %}{% endblock %}
 
 If you need more complex settings, you can override default values (given in `djangofloor.defaults` and
 `{{ PROJECT_NAME }}.defaults`) by creating a file named `[prefix]/etc/{{ PROJECT_NAME }}/settings.py`.
 
 Valid engines for your database are:
 
-  - `django.db.backends.sqlite3` (use `name` option for its filepath)
+  - `django.db.backends.sqlite3` (use the `name` option for its filepath)
   - `django.db.backends.postgresql_psycopg2`
   - `django.db.backends.mysql`
   - `django.db.backends.oracle`

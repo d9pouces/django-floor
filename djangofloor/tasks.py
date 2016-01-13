@@ -229,7 +229,7 @@ def df_call(signal_name, request, sharing=None, from_client=False, kwargs=None, 
     if countdown:
         celery_kwargs['countdown'] = countdown
     if celery_kwargs:
-        delayed_task.apply_async([signal_name, request.to_dict(), sharing, from_client, kwargs])
+        delayed_task.apply_async([signal_name, request.to_dict(), sharing, from_client, kwargs], **celery_kwargs)
         return
 
     result = []

@@ -70,6 +70,10 @@ class Command(BaseCommand):
             self.stderr.write(self.style.ERROR('Unable to write %s' % filename))
             self.stderr.write(self.style.ERROR(text_type(e)))
             return
+        except UnicodeDecodeError as e:
+            self.stderr.write(self.style.ERROR('Unable to read template  %s' % template_filename))
+            self.stderr.write(self.style.ERROR(text_type(e)))
+            return
         if text:
             with codecs.open(target_filename, 'w', encoding='utf-8') as fd:
                 fd.write(text)
