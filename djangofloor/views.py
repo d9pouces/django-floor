@@ -19,7 +19,7 @@ from django.utils.module_loading import import_string
 from django.views.decorators.cache import never_cache
 from django.views.decorators.csrf import csrf_exempt
 
-from django.utils.six import string_types
+from django.utils.six import string_types, binary_type
 
 from djangofloor.decorators import REGISTERED_SIGNALS
 from djangofloor.df_redis import fetch_signal_calls
@@ -123,6 +123,8 @@ def send_file(filepath, mimetype=None, force_download=False):
         (mimetype, encoding) = mimetypes.guess_type(filepath)
         if mimetype is None:
             mimetype = 'text/plain'
+    if isinstance(mimetype, binary_type):
+        mimetype = mimetype.decode('utf-8')
     filepath = os.path.abspath(filepath)
     if settings.USE_X_SEND_FILE:
         response = HttpResponse(content_type=mimetype)

@@ -216,7 +216,7 @@ PIPELINE_JS = {
         'output_filename': 'js/default.js',
     },
     'ie9': {
-        'source_filenames': ('js/html5shiv.js', 'js/respond.min.js',),
+        'source_filenames': ['js/html5shiv.js', 'js/respond.min.js', ],
         'output_filename': 'js/ie9.js',
     }
 }
