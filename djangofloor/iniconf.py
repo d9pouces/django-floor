@@ -66,7 +66,8 @@ def strip_split(value):
 
 
 class OptionParser(object):
-    def __init__(self, setting_name, option, converter=str_or_none, to_str=str_or_blank, help_str=None):
+    def __init__(self, setting_name, option, converter=str_or_none, to_str=str_or_blank, help_str=None,
+                 doc_default_value=None):
         """class that maps an option in a .ini file to a setting.
 
         :param setting_name: the name of the setting (like "DATABASE_ENGINE")
@@ -81,6 +82,9 @@ class OptionParser(object):
         :param help_str: any text that can serve has help in documentation.
             If None, then `settings.%s_HELP % setting_name` will be used as help text.
         :type help_str: `str`
+        :param doc_default_value: the value that will be used in documentation.
+        The current setting value will be used if left to `None`.
+        :type doc_default_value: `object`
         """
         self.setting_name = setting_name
         self.option = option
@@ -88,6 +92,7 @@ class OptionParser(object):
         self.to_str = to_str
         self.help_str = help_str
         self.default_value = None
+        self.doc_default_value = doc_default_value
 
     @property
     def section(self):
@@ -103,6 +108,11 @@ class OptionParser(object):
 
     def str_value(self):
         return self.to_str(self.default_value)
+
+    def str_doc_value(self):
+        if self.doc_default_value is not None:
+            return self.to_str(self.doc_default_value)
+        return self.str_value()
 
     @property
     def __name__(self):
@@ -129,21 +139,21 @@ class OptionParser(object):
 
 
 INI_MAPPING = [
-    OptionParser('ADMIN_EMAIL', 'global.admin_email'),
-    OptionParser('BIND_ADDRESS', 'global.bind_address'),
-    OptionParser('DATABASE_ENGINE', 'database.engine'),
-    OptionParser('DATABASE_NAME', 'database.name', to_str=guess_relative_path),
-    OptionParser('DATABASE_USER', 'database.user'),
-    OptionParser('DATABASE_PASSWORD', 'database.password'),
-    OptionParser('DATABASE_HOST', 'database.host'),
-    OptionParser('DATABASE_PORT', 'database.port'),
+    OptionParser('ADMIN_EMAIL', 'global.admin_email', doc_default_value='admin@$SERVICE_NAME'),
+    OptionParser('BIND_ADDRESS', 'global.bind_address', doc_default_value='$BIND_ADDRESS'),
+    OptionParser('DATABASE_ENGINE', 'database.engine', doc_default_value='django.db.backends.postgresql_psycopg2'),
+    OptionParser('DATABASE_NAME', 'database.name', to_str=guess_relative_path, doc_default_value='$PROJECT_NAME'),
+    OptionParser('DATABASE_USER', 'database.user', doc_default_value='$PROJECT_NAME'),
+    OptionParser('DATABASE_PASSWORD', 'database.password', doc_default_value='5trongp4ssw0rd'),
+    OptionParser('DATABASE_HOST', 'database.host', doc_default_value='localhost'),
+    OptionParser('DATABASE_PORT', 'database.port', doc_default_value='5432'),
     OptionParser('DEBUG', 'global.debug', converter=bool_setting),
     OptionParser('FLOOR_DEFAULT_GROUP_NAME', 'global.default_group'),
     OptionParser('LANGUAGE_CODE', 'global.language_code'),
-    OptionParser('LOCAL_PATH', 'global.data_path', to_str=guess_relative_path),
-    OptionParser('PROTOCOL', 'global.protocol'),
+    OptionParser('LOCAL_PATH', 'global.data_path', to_str=guess_relative_path, doc_default_value='/var/$PROJECT_NAME'),
+    OptionParser('PROTOCOL', 'global.protocol', doc_default_value='http'),
     OptionParser('SECRET_KEY', 'global.secret_key'),
-    OptionParser('SERVER_NAME', 'global.server_name'),
+    OptionParser('SERVER_NAME', 'global.server_name', doc_default_value='$SERVICE_NAME'),
     OptionParser('TIME_ZONE', 'global.time_zone'),
     OptionParser('FLOOR_AUTHENTICATION_HEADER', 'global.remote_user_header'),
 ]

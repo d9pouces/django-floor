@@ -52,6 +52,8 @@ in the configuration, you cannot use its IP address to access the website.
     sudo a2dissite 000-default.conf
     # sudo a2dissite 000-default on Debian7
     SERVICE_NAME={{ PROJECT_NAME }}.example.org
+    PROJECT_NAME={{ PROJECT_NAME }}
+    BIND_ADRESS={{ BIND_ADDRESS }}
     cat << EOF | sudo tee /etc/apache2/sites-available/{{ PROJECT_NAME }}.conf
     <VirtualHost *:80>
         ServerName $SERVICE_NAME
@@ -89,6 +91,8 @@ If you want to use SSL:
 {% block webserver_ssl_keytab %}
     sudo apt-get install libapache2-mod-auth-kerb
     KEYTAB=/etc/apache2/http.`hostname -f`.keytab
+    PROJECT_NAME={{ PROJECT_NAME }}
+    BIND_ADRESS={{ BIND_ADDRESS }}
     # ok, I assume that you already have your keytab
     sudo a2enmod auth_kerb
     cat << EOF | sudo ktutil
@@ -158,6 +162,8 @@ Now, it's time to install {{ FLOOR_PROJECT_NAME }}:
 .. code-block:: bash
 
 {% block pre_application %}{% endblock %}    SERVICE_NAME={{ PROJECT_NAME }}.example.org
+    PROJECT_NAME={{ PROJECT_NAME }}
+    BIND_ADRESS={{ BIND_ADDRESS }}
     sudo mkdir -p /var/{{ PROJECT_NAME }}
     sudo adduser --disabled-password {{ PROJECT_NAME }}
     sudo chown {{ PROJECT_NAME }}:www-data /var/{{ PROJECT_NAME }}
@@ -173,7 +179,7 @@ Now, it's time to install {{ FLOOR_PROJECT_NAME }}:
     mkdir -p $VIRTUAL_ENV/etc/{{ PROJECT_NAME }}
     cat << EOF > $VIRTUAL_ENV/etc/{{ PROJECT_NAME }}/settings.ini
 {% block ini_configuration %}{% for section in settings_merger.all_ini_options.items %}    [{{ section.0 }}]
-{% for option_parser in section.1 %}    {{ option_parser.key }} = {{ option_parser.str_value }}
+{% for option_parser in section.1 %}    {{ option_parser.key }} = {{ option_parser.str_doc_value }}
 {% endfor %}{% endfor %}{% endblock %}    EOF
     {{ PROJECT_NAME }}-manage migrate
     {{ PROJECT_NAME }}-manage collectstatic --noinput
