@@ -1,36 +1,21 @@
 Complete configuration
 ======================
 
-You can look current settings with the following command::
+You can look current settings with the following command:
+
+.. code-block:: bash
 
     {{ PROJECT_NAME }}-manage config
 
-Here is the complete list of settings::
+Here is the complete list of settings:
 
-{% block ini_configuration %}    [global]
-    server_name = {{ PROJECT_NAME }}.example.org
-    protocol = https
-    bind_address = {{ BIND_ADDRESS }}
-    data_path = /var/{{ PROJECT_NAME }}
-    admin_email = admin@example.org
-    time_zone = Europe/Paris
-    language_code = fr-fr
-    x_send_file =  true
-    x_accel_converter = false
-    debug = false
-{% block authentication %}    remote_user_header = HTTP_REMOTE_USER
-{% endblock %}{% block extra_ini_configuration %}{% endblock %}    [database]
-    engine =
-    name =
-    user =
-    password =
-    host =
-    port =
-{% block ini_redis %}{% if USE_CELERY or FLOOR_USE_WS4REDIS %}    [redis]
-    host = {{ REDIS_HOST }}
-    port = {{ REDIS_PORT }}
-    broker_db = {{ BROKER_DB }}
-{% endif %}{% endblock %}{% endblock %}
+.. code-block:: ini
+
+{% block ini_configuration %}{% for section in settings_merger.all_ini_options.items %}  [{{ section.0 }}]
+{% for option_parser in section.1 %}  {{ option_parser.key }} = {{ option_parser.str_value }}
+{% if option_parser.help_str %}  # {{ option_parser.help_str|safe }}
+{% endif %}{% endfor %}{% endfor %}
+{% endblock %}
 
 If you need more complex settings, you can override default values (given in `djangofloor.defaults` and
 `{{ PROJECT_NAME }}.defaults`) by creating a file named `[prefix]/etc/{{ PROJECT_NAME }}/settings.py`.

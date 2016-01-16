@@ -50,3 +50,11 @@ class TestSettings(TestCase):
         for key in expected_dict:
             self.assertEqual(expected_dict[key], merger.settings[key])
         self.assertEqual(expected_dict, merger.settings)
+
+    def test_get_ini_options(self):
+        ini_filename = pkg_resources.resource_filename('djangofloor.tests', 'test_conf.ini')
+        merger = SettingMerger('test_project', 'djangofloor.tests.default_settings_module',
+                               'djangofloor.tests.project_settings_module', user_settings_module.__file__,
+                               ini_filename, 'djangofloor.tests.test_settings.ini_mapping')
+        merger.process()
+        print(merger.all_ini_options)

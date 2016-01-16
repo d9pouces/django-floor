@@ -9,7 +9,9 @@ from __future__ import unicode_literals, absolute_import
 from collections import OrderedDict
 from distutils.version import LooseVersion
 from django import get_version
+from django.utils.six import text_type
 import pkg_resources
+from djangofloor.iniconf import OptionParser
 
 try:
     # noinspection PyCompatibility
@@ -254,7 +256,8 @@ class SettingMerger(object):
                     parser = ConfigParser()
                     parser.read([self.djangofloor_config_path])
                     for option_parser in ini_values:
-                        option_parser(parser, self.ini_config_mapping)
+                        assert isinstance(option_parser, OptionParser)
+                        option_parser.set_value(parser, self.ini_config_mapping)
                         self.option_parsers.append(option_parser)
             except ImportError:
                 pass
@@ -350,6 +353,34 @@ class SettingMerger(object):
     def process(self):
         self.load_settings_providers()
         self.load_settings()
+
+    @property
+    def all_ini_options(self):
+        """Return an OrderedDict of list of available options in the .ini configuration file.
+
+        * Keys correspond to the section names
+        * Values are list of OptionParser, with help_str and default_values attributes set
+
+        :return:
+        :rtype:
+        """
+        ini_values = import_string(self.djangofloor_mapping)
+        all_options = {}
+        for option_parser in ini_values:
+            assert isinstance(option_parser, OptionParser)
+            all_options.setdefault(option_parser.section, [])
+            if option_parser.help_str is None and self.settings.get('%s_HELP' % option_parser.setting_name):
+                option_parser.help_str = text_type(self.settings['%s_HELP' % option_parser.setting_name])
+            option_parser.default_value = self.settings[option_parser.setting_name]
+            all_options[option_parser.section].append(option_parser)
+        for options in all_options.values():
+            options.sort(key=lambda x: x.key)
+        section_names = [section_name for section_name in all_options]
+        section_names.sort()
+        result = OrderedDict()
+        for section_name in section_names:
+            result[section_name] = all_options[section_name]
+        return result
 
     def post_process(self):
         """Perform some cleaning on settings:

@@ -172,32 +172,9 @@ Now, it's time to install {{ FLOOR_PROJECT_NAME }}:
     pip install {{ PROJECT_NAME }} psycopg2
     mkdir -p $VIRTUAL_ENV/etc/{{ PROJECT_NAME }}
     cat << EOF > $VIRTUAL_ENV/etc/{{ PROJECT_NAME }}/settings.ini
-{% block ini_configuration %}    [global]
-    server_name = $SERVICE_NAME
-    protocol = http
-    ; use https if your Apache uses SSL
-    bind_address = {{ BIND_ADDRESS }}
-    data_path = /var/{{ PROJECT_NAME }}
-    admin_email = admin@$SERVICE_NAME
-    time_zone = {{ TIME_ZONE }}
-    language_code = {{ LANGUAGE_CODE }}
-    x_send_file =  true
-    x_accel_converter = false
-    debug = false
-{% block ini_configuration_kerberos %}    remote_user_header = HTTP_REMOTE_USER
-    ; leave it blank if you do not use kerberos
-{% endblock %}{% block extra_ini_configuration %}{% endblock %}    [database]
-    engine = django.db.backends.postgresql_psycopg2
-    name = {{ PROJECT_NAME }}
-    user = {{ PROJECT_NAME }}
-    password = 5trongp4ssw0rd
-    host = localhost
-    port = 5432
-{% block ini_redis %}{% if USE_CELERY or FLOOR_USE_WS4REDIS %}    [redis]
-        host = {{ REDIS_HOST }}
-        port = {{ REDIS_PORT }}
-        broker_db = {{ BROKER_DB }}
-{% endif %}{% endblock %}{% endblock %}    EOF
+{% block ini_configuration %}{% for section in settings_merger.all_ini_options.items %}    [{{ section.0 }}]
+{% for option_parser in section.1 %}    {{ option_parser.key }} = {{ option_parser.str_value }}
+{% endfor %}{% endfor %}{% endblock %}    EOF
     {{ PROJECT_NAME }}-manage migrate
     {{ PROJECT_NAME }}-manage collectstatic --noinput
 {% block post_application %}    moneta-manage createsuperuser

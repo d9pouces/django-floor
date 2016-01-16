@@ -34,12 +34,15 @@ if 'lib' in split_path:
     LOCAL_PATH = DirectoryPath('/%s/var/{PROJECT_NAME}' % prefix)
 LOCAL_PATH_HELP = 'Base path for all data'
 SERVER_NAME = 'localhost'
+SERVER_NAME_HELP = 'the name of your webserver (should be a DNS name, but can be an IP address)'
 PROTOCOL = 'http'
+PROTOCOL_HELP = 'Protocol (or scheme) used by your webserver (apache/nginx/…, can be http or https)'
 LOG_PATH = DirectoryPath('{LOCAL_PATH}/log')
 DATA_PATH = DirectoryPath('{LOCAL_PATH}/data')
 DEBUG = False
 DEBUG_HELP = 'A boolean that turns on/off debug mode.'
 ADMIN_EMAIL = 'admin@{SERVER_NAME}'
+ADMIN_EMAIL_HELP = 'error logs are sent to this e-mail address'
 ADMINS = (("admin", "{ADMIN_EMAIL}"),)
 ADMINS_HELP = 'A tuple that lists people who get code error notifications.'
 MANAGERS = ADMINS
@@ -50,20 +53,26 @@ DEFAULT_FROM_EMAIL_HELP = 'Default email address to use for various automated co
 # noinspection PyUnresolvedReferences
 
 DATABASE_ENGINE = 'django.db.backends.sqlite3'
+DATABASE_ENGINE_HELP = "SQL database engine, can be 'django.db.backends.[postgresql_psycopg2|mysql|sqlite3|oracle]'."
 DATABASE_NAME = FilePath('{DATA_PATH}/database.sqlite3')
+DATABASE_NAME_HELP = 'Name of your database, or path to database file if using sqlite3.'
 DATABASE_USER = ''
+DATABASE_USER_HELP = 'Database user (not used with sqlite3)'
 DATABASE_PASSWORD = ''
+DATABASE_PASSWORD_HELP = 'Database password (not used with sqlite3)'
 DATABASE_HOST = ''
+DATABASE_HOST_HELP = 'Empty for localhost through domain sockets or "127.0.0.1" for localhost + TCP'
 DATABASE_PORT = ''
+DATABASE_PORT_HELP = 'Database port, leave it empty for default (not used with sqlite3)'
 DATABASES = {
     'default': {
-        'ENGINE': '{DATABASE_ENGINE}',  # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': '{DATABASE_NAME}',  # Or path to database file if using sqlite3.
+        'ENGINE': '{DATABASE_ENGINE}',
+        'NAME': '{DATABASE_NAME}',
         # The following settings are not used with sqlite3:
         'USER': '{DATABASE_USER}',
         'PASSWORD': '{DATABASE_PASSWORD}',
-        'HOST': '{DATABASE_HOST}',  # Empty for localhost through domain sockets or '127.0.0.1' for localhost + TCP.
-        'PORT': '{DATABASE_PORT}',  # Set to empty string for default.
+        'HOST': '{DATABASE_HOST}',
+        'PORT': '{DATABASE_PORT}',
     },
 }
 DATABASES_HELP = 'A dictionary containing the settings for all databases to be used with Django.'
@@ -83,7 +92,7 @@ WORKERS = 1
 WORKERS_HELP = 'The number of worker process for handling requests.'
 
 USE_X_SEND_FILE = False
-USE_X_SEND_FILE_HELP = 'Use the XSendFile header in Apache or LightHTTPd for sending large files'
+USE_X_SEND_FILE_HELP = 'Apache and LightHTTPd only. Use the XSendFile header for sending large files.'
 X_ACCEL_REDIRECT = []
 X_ACCEL_REDIRECT_HELP = 'Use the X-Accel-Redirect header in NGinx. List of tuples (/directory_path/, /alias_url/).'
 INTERNAL_IPS = ('127.0.0.1',)
@@ -123,7 +132,7 @@ FLOOR_INDEX = None
 FLOOR_PROJECT_NAME = 'DjangoFloor'
 
 FLOOR_DEFAULT_GROUP_NAME = _('Users')
-FLOOR_DEFAULT_GROUP_NAME_HELP = 'Name of the default group of newly-created users.'
+FLOOR_DEFAULT_GROUP_NAME_HELP = 'Name of the default group for newly-created users.'
 
 EMAIL_SUBJECT_PREFIX = '[{FLOOR_PROJECT_NAME} / {SERVER_NAME}] '
 SERVER_EMAIL = 'root@{SERVER_NAME}'
@@ -347,8 +356,8 @@ BOOTSTRAP3 = {
 }
 TEST_RUNNER = 'django.test.runner.DiscoverRunner'
 FLOOR_AUTHENTICATION_HEADER = 'HTTP_REMOTE_USER'
-FLOOR_AUTHENTICATION_HEADER_HELP = 'HTTP header corresponding to the username (when using HTTP authentication).' \
-                                   ' Set it to None to disable it.'
+FLOOR_AUTHENTICATION_HEADER_HELP = 'HTTP header corresponding to the username when using HTTP authentication.' \
+                                   'Should be "HTTP_REMOTE_USER". Leave it empty to disable HTTP authentication.'
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 SECURE_PROXY_SSL_HEADER_HELP = 'A tuple representing a HTTP header/value combination that signifies a request is ' \
                                'secure. This controls the behavior of the request object’s is_secure() method.'
@@ -418,6 +427,7 @@ CELERY_TIMEZONE = '{TIME_ZONE}'
 CELERY_RESULT_EXCHANGE = '{PROJECT_NAME}_results'
 CELERY_ACCEPT_CONTENT = ['json', 'yaml', 'msgpack']
 BROKER_DB = 13
+BROKER_DB_HELP = 'database name of your Celery instance'
 BROKER_URL = 'redis://{REDIS_HOST}:{REDIS_PORT}/{BROKER_DB}'
 CELERY_APP = 'djangofloor'
 CELERY_CREATE_DIRS = True
