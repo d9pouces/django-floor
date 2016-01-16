@@ -21,24 +21,24 @@ def test_signal(request):
 def test_form(request, form):
     form = SerializedForm(SimpleForm)(form)
     if form.is_valid() and form.cleaned_data['first_name']:
-        return [{'signal': 'df.messages.info', 'options': {'html': 'Your name is %s' %
-                                                                   form.cleaned_data['first_name']}}]
-    return [{'signal': 'df.messages.error', 'options': {'html': 'Invalid form. You must fill all fields'}}]
+        return [{'signal': 'df.notify.info', 'options': {'message': 'Your name is %s' %
+                                                         form.cleaned_data['first_name']}}]
+    return [{'signal': 'df.notify.error', 'options': {'message': 'Invalid form. You must fill all fields'}}]
 
 
 @connect(path='demo.test_websocket')
 def test_websocket(request):
     txt = 'native' if settings.FLOOR_USE_WS4REDIS else 'emulated'
-    call('df.messages.success', request, WINDOW, html='[WINDOW] received and sent through %s websockets.' % txt)
-    call('df.messages.warning', request, BROADCAST, html='[BROADCAST] received and sent through %s websockets.' % txt)
-    call('df.messages.error', request, SESSION, html='[SESSION] received and sent through %s websockets.' % txt)
-    call('df.messages.info', request, USER, html='[USER] received and sent through %s websockets.' % txt)
+    call('df.notify.success', request, WINDOW, message='[WINDOW] received and sent through %s websockets.' % txt)
+    call('df.notify.warning', request, BROADCAST, message='[BROADCAST] received and sent through %s websockets.' % txt)
+    call('df.notify.error', request, SESSION, message='[SESSION] received and sent through %s websockets.' % txt)
+    call('df.notify.info', request, USER, message='[USER] received and sent through %s websockets.' % txt)
 
 
 @connect(path='demo.test_celery', delayed=True)
 def test_celery(request):
     print('Celery demo task done')
-    call('df.messages.success', request, WINDOW, html='[WINDOW] received and sent through Celery and websockets.')
-    call('df.messages.warning', request, BROADCAST, html='[BROADCAST] received and sent through Celery and websockets.')
-    call('df.messages.error', request, SESSION, html='[SESSION] received and sent through Celery and websockets.')
-    call('df.messages.info', request, USER, html='[USER] received and sent through Celery and websockets.')
+    call('df.notify.success', request, WINDOW, message='[WINDOW] received and sent through Celery and websockets.')
+    call('df.notify.warning', request, BROADCAST, message='[BROADCAST] received and sent through Celery and websockets.')
+    call('df.notify.error', request, SESSION, message='[SESSION] received and sent through Celery and websockets.')
+    call('df.notify.info', request, USER, message='[USER] received and sent through Celery and websockets.')

@@ -65,7 +65,12 @@ in the configuration, you cannot use its IP address to access the website.
         ProxyPassReverse / http://{{ BIND_ADDRESS }}/
         DocumentRoot /var/{{ PROJECT_NAME }}/static
         ServerSignature off
-{% block webserver_xsendfilepath %}        XSendFile on
+{% block webserver_xsendfilepath %}        <Location /static/>
+            Order deny,allow
+            Allow from all
+            Satisfy any
+        </Location>
+        XSendFile on
         XSendFilePath /var/{{ PROJECT_NAME }}/media/
         # in older versions of XSendFile (<= 0.9), use XSendFileAllowAbove On
 {% endblock %}{% block webserver_extra %}{% endblock %}    </VirtualHost>
@@ -159,16 +164,15 @@ Now, it's time to install {{ FLOOR_PROJECT_NAME }}:
 
 .. code-block:: bash
 
-{% block pre_application %}{% endblock %}    SERVICE_NAME={{ PROJECT_NAME }}.example.org
-    PROJECT_NAME={{ PROJECT_NAME }}
-    BIND_ADRESS={{ BIND_ADDRESS }}
-    sudo mkdir -p /var/{{ PROJECT_NAME }}
+{% block pre_application %}{% endblock %}    sudo mkdir -p /var/{{ PROJECT_NAME }}
     sudo adduser --disabled-password {{ PROJECT_NAME }}
     sudo chown {{ PROJECT_NAME }}:www-data /var/{{ PROJECT_NAME }}
     sudo apt-get install virtualenvwrapper {{ python_version }} {{ python_version }}-dev build-essential postgresql-client libpq-dev
     # application
     sudo -u {{ PROJECT_NAME }} -i
     SERVICE_NAME={{ PROJECT_NAME }}.example.org
+    PROJECT_NAME={{ PROJECT_NAME }}
+    BIND_ADRESS={{ BIND_ADDRESS }}
     mkvirtualenv {{ PROJECT_NAME }} -p `which {{ python_version }}`
     workon {{ PROJECT_NAME }}
     pip install setuptools --upgrade

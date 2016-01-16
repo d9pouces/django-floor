@@ -170,8 +170,10 @@ def call(signal_name, request, sharing=None, **kwargs):
     :param sharing:
         * `None`: does not propagate to the JavaScript (client) side
         * `WINDOW`: only to the browser window that initiated the original request
-        * `USER`, `SESSION`, `BROADCAST`: propagate to the request user, only to its current session, or to all currently logged-in users
-        * {'users': ['username1', 'username2'], 'groups': ['group1', 'group2'], 'broadcast': True} (or any subset of these keys)
+        * `USER`, `SESSION`, `BROADCAST`: propagate to the request user, only to its current session, or
+          to all currently logged-in users
+        * {'users': ['username1', 'username2'], 'groups': ['group1', 'group2'], 'broadcast': True}
+          (or any subset of these keys)
         * `RETURN` return result values of signal calls to the caller
 
     :param kwargs: arguments for the receiver

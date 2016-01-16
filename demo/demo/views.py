@@ -7,11 +7,13 @@ from django.template import RequestContext
 from django.utils.translation import ugettext_lazy as _
 from demo.forms import SimpleForm
 from demo.tasks import add
+from django.views.decorators.cache import never_cache
 from djangofloor.tasks import call
 
 __author__ = 'Matthieu Gallet'
 
 
+@never_cache
 def test(request):
     messages.info(request, _('Message test'))
     # add.delay(4, 5)

@@ -24,7 +24,7 @@ DEBUG = False
 # django-redis-websocket
 ########################################################################################################################
 # WSGI_APPLICATION = 'ws4redis.django_runserver.application'
-# FLOOR_USE_WS4REDIS = True
+FLOOR_USE_WS4REDIS = False
 
 ########################################################################################################################
 # celery
