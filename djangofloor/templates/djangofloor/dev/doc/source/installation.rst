@@ -47,13 +47,13 @@ in the configuration, you cannot use its IP address to access the website.
 
 .. code-block:: bash
 
+    SERVICE_NAME={{ PROJECT_NAME }}.example.org
+    PROJECT_NAME={{ PROJECT_NAME }}
+    BIND_ADRESS={{ BIND_ADDRESS }}
     sudo apt-get install apache2 libapache2-mod-xsendfile
     sudo a2enmod headers proxy proxy_http
     sudo a2dissite 000-default.conf
     # sudo a2dissite 000-default on Debian7
-    SERVICE_NAME={{ PROJECT_NAME }}.example.org
-    PROJECT_NAME={{ PROJECT_NAME }}
-    BIND_ADRESS={{ BIND_ADDRESS }}
     cat << EOF | sudo tee /etc/apache2/sites-available/{{ PROJECT_NAME }}.conf
     <VirtualHost *:80>
         ServerName $SERVICE_NAME
@@ -91,8 +91,6 @@ If you want to use SSL:
 {% block webserver_ssl_keytab %}
     sudo apt-get install libapache2-mod-auth-kerb
     KEYTAB=/etc/apache2/http.`hostname -f`.keytab
-    PROJECT_NAME={{ PROJECT_NAME }}
-    BIND_ADRESS={{ BIND_ADDRESS }}
     # ok, I assume that you already have your keytab
     sudo a2enmod auth_kerb
     cat << EOF | sudo ktutil
