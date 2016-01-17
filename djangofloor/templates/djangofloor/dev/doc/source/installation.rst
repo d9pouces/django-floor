@@ -168,8 +168,6 @@ Now, it's time to install {{ FLOOR_PROJECT_NAME }}:
     sudo apt-get install virtualenvwrapper {{ python_version }} {{ python_version }}-dev build-essential postgresql-client libpq-dev
     # application
     sudo -u {{ PROJECT_NAME }} -i
-    SERVICE_NAME={{ PROJECT_NAME }}.example.org
-    PROJECT_NAME={{ PROJECT_NAME }}
     mkvirtualenv {{ PROJECT_NAME }} -p `which {{ python_version }}`
     workon {{ PROJECT_NAME }}
     pip install setuptools --upgrade
