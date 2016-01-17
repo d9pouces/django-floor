@@ -57,17 +57,22 @@ in the configuration, you cannot use its IP address to access the website.
         ServerName $SERVICE_NAME
 {% block webserver_static %}        Alias {{ STATIC_URL }} {{ STATIC_ROOT }}/
         ProxyPass {{ STATIC_URL }} !
-{% endblock %}{% block webserver_media %}        Alias {{ MEDIA_URL }} {{ MEDIA_ROOT }}/
-        ProxyPass {{ MEDIA_URL }} !
-{% endblock %}        ProxyPass / http://{{ BIND_ADDRESS }}/
-        ProxyPassReverse / http://{{ BIND_ADDRESS }}/
-        DocumentRoot {{ STATIC_ROOT }}
-        ServerSignature off
         <Location {{ STATIC_URL }}>
             Order deny,allow
             Allow from all
             Satisfy any
         </Location>
+{% endblock %}{% block webserver_media %}        Alias {{ MEDIA_URL }} {{ MEDIA_ROOT }}/
+        ProxyPass {{ MEDIA_URL }} !
+        <Location {{ MEDIA_URL }}>
+            Order deny,allow
+            Allow from all
+            Satisfy any
+        </Location>
+{% endblock %}        ProxyPass / http://{{ BIND_ADDRESS }}/
+        ProxyPassReverse / http://{{ BIND_ADDRESS }}/
+        DocumentRoot {{ STATIC_ROOT }}
+        ServerSignature off
 {% block webserver_xsendfilepath %}        XSendFile on
         XSendFilePath {{ MEDIA_ROOT }}
         # in older versions of XSendFile (<= 0.9), use XSendFileAllowAbove On
@@ -116,8 +121,18 @@ If you want to use SSL:
         SSLEngine on
 {% block webserver_ssl_static %}        Alias {{ STATIC_URL }} {{ STATIC_ROOT }}/
         ProxyPass {{ STATIC_URL }} !
+        <Location {{ STATIC_URL }}>
+            Order deny,allow
+            Allow from all
+            Satisfy any
+        </Location>
 {% endblock %}{% block webserver_ssl_media %}        Alias {{ MEDIA_URL }} {{ MEDIA_ROOT }}/
         ProxyPass {{ MEDIA_URL }} !
+        <Location {{ MEDIA_URL }}>
+            Order deny,allow
+            Allow from all
+            Satisfy any
+        </Location>
 {% endblock %}        ProxyPass / http://{{ BIND_ADDRESS }}/
         ProxyPassReverse / http://{{ BIND_ADDRESS }}/
         DocumentRoot {{ STATIC_ROOT }}
@@ -136,12 +151,7 @@ If you want to use SSL:
             Require valid-user
             RequestHeader set REMOTE_USER %{REMOTE_USER}s
         </Location>
-{% endblock %}        <Location {{ STATIC_URL }}>
-            Order deny,allow
-            Allow from all
-            Satisfy any
-        </Location>
-{% block webserver_ssl_xsendfilepath %}        XSendFile on
+{% endblock %}{% block webserver_ssl_xsendfilepath %}        XSendFile on
         XSendFilePath {{ MEDIA_ROOT }}
         # in older versions of XSendFile (<= 0.9), use XSendFileAllowAbove On
 {% endblock %}{% block webserver_ssl_extra %}{% endblock %}    </VirtualHost>
