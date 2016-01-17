@@ -202,7 +202,8 @@ Supervisor is required to automatically launch {{ PROJECT_NAME }}:
     command = /home/{{ PROJECT_NAME }}/.virtualenvs/{{ PROJECT_NAME }}/bin/{{ PROJECT_NAME }}-celery worker
     user = {{ PROJECT_NAME }}
 {% endif %}    EOF
-    sudo /etc/init.d/supervisor restart
+    sudo service supervisor stop
+    sudo service supervisor start
 
 Now, Supervisor should start {{ PROJECT_NAME }} after a reboot.
 {% endblock %}
