@@ -372,6 +372,8 @@ class SettingMerger(object):
         ini_values = import_string(self.djangofloor_mapping)
         all_options = {}
         defined_setting_names = set()  # to prevent duplicate OptionParser
+        ini_values = [x for x in ini_values]
+        ini_values.reverse()
         for option_parser in ini_values:
             assert isinstance(option_parser, OptionParser)
             all_options.setdefault(option_parser.section, [])

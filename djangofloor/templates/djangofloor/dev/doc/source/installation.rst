@@ -5,7 +5,7 @@ Like many Python packages, you can use several methods to install {{ FLOOR_PROJE
 The following packages are required:
 {% block dependencies %}{% block pre_dependencies %}{% endblock %}
   * setuptools >= 3.0
-  * djangofloor >= 0.17.0{% block post_dependencies %}{% endblock %}
+  * djangofloor >= 0.18.0{% block post_dependencies %}{% endblock %}
 {% endblock %}
 Installing or Upgrading
 -----------------------
@@ -201,6 +201,7 @@ Supervisor is required to automatically launch {{ PROJECT_NAME }}:
 
 .. code-block:: bash
 
+{% block pre_supervisor %}{% endblock %}
     sudo apt-get install supervisor
     cat << EOF | sudo tee /etc/supervisor/conf.d/{{ PROJECT_NAME }}.conf
     [program:{{ PROJECT_NAME }}_gunicorn]
@@ -209,7 +210,7 @@ Supervisor is required to automatically launch {{ PROJECT_NAME }}:
 {% if USE_CELERY %}    [program:{{ PROJECT_NAME }}_celery]
     command = /home/{{ PROJECT_NAME }}/.virtualenvs/{{ PROJECT_NAME }}/bin/{{ PROJECT_NAME }}-celery worker
     user = {{ PROJECT_NAME }}
-{% endif %}    EOF
+{% endif %}{% block post_supervisor %}{% endblock %}    EOF
     sudo service supervisor stop
     sudo service supervisor start
 
@@ -222,7 +223,7 @@ Now, Supervisor should start {{ PROJECT_NAME }} after a reboot.
 You can also use systemd to launch {{ PROJECT_NAME }}:
 
 .. code-block:: bash
-
+{% block pre_systemd %}{% endblock %}
     cat << EOF | sudo tee /etc/systemd/system/{{ PROJECT_NAME }}-gunicorn.service
     [Unit]
     Description={{ FLOOR_PROJECT_NAME }} Gunicorn process
@@ -254,5 +255,5 @@ You can also use systemd to launch {{ PROJECT_NAME }}:
     EOF
     systemctl enable {{ PROJECT_NAME }}-celery.service
 {% endif %}
-{% endblock %}
+{% block post_systemd %}{% endblock %}{% endblock %}
 {% block post_install_step %}{% endblock %}
