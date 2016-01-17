@@ -48,7 +48,6 @@ in the configuration, you cannot use its IP address to access the website.
 .. code-block:: bash
 
     SERVICE_NAME={{ PROJECT_NAME }}.example.org
-    PROJECT_NAME={{ PROJECT_NAME }}
     sudo apt-get install apache2 libapache2-mod-xsendfile
     sudo a2enmod headers proxy proxy_http
     sudo a2dissite 000-default.conf
