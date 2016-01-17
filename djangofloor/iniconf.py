@@ -65,9 +65,12 @@ def strip_split(value):
     return [x.strip() for x in value.split(',') if x.strip()]
 
 
+MISSING_VALUE = [[]]
+
+
 class OptionParser(object):
-    def __init__(self, setting_name, option, converter=str_or_none, to_str=str_or_blank, help_str=None,
-                 doc_default_value=None):
+    def __init__(self, setting_name, option, converter=str, to_str=str_or_blank, help_str=None,
+                 doc_default_value=MISSING_VALUE):
         """class that maps an option in a .ini file to a setting.
 
         :param setting_name: the name of the setting (like "DATABASE_ENGINE")
@@ -77,7 +80,7 @@ class OptionParser(object):
         :param converter: any callable that takes a text value and returns an object. Default to `str_or_none`
         :type converter: `callable`
         :param to_str: any callable that takes the Python value and that converts it to str
-            only used for writing sample config file. Default to `str_or_blank`
+            only used for writing sample config file. Default to `str`
         :type to_str: `callable`
         :param help_str: any text that can serve has help in documentation.
             If None, then `settings.%s_HELP % setting_name` will be used as help text.
@@ -109,11 +112,6 @@ class OptionParser(object):
     def str_value(self):
         return self.to_str(self.default_value)
 
-    def str_doc_value(self):
-        if self.doc_default_value is not None:
-            return self.to_str(self.doc_default_value)
-        return self.str_value()
-
     @property
     def __name__(self):
         return self.option
@@ -128,32 +126,33 @@ class OptionParser(object):
         :type parser: :class:`configparser.ConfigParser`
         :param ini_values: a dict to fill
         :type ini_values: :class:`dict`
-        :return: `None`
-        :rtype: :class:`NoneType`
+        :return: `True` if this value is defined in the configuration file, `False` otherwise
+        :rtype: :class:`bool`
         """
         section, sep, option = self.option.partition('.')
         if not self.has_value(parser):
-            return
+            return False
         value = parser.get(section=section, option=option)
         ini_values[self.setting_name] = self.converter(value)
+        return True
 
 
 INI_MAPPING = [
-    OptionParser('ADMIN_EMAIL', 'global.admin_email', doc_default_value='admin@$SERVICE_NAME'),
-    OptionParser('BIND_ADDRESS', 'global.bind_address', doc_default_value='$BIND_ADDRESS'),
+    OptionParser('ADMIN_EMAIL', 'global.admin_email', doc_default_value='admin@{SERVER_NAME}'),
+    OptionParser('BIND_ADDRESS', 'global.bind_address', doc_default_value='localhost:9000'),
     OptionParser('DATABASE_ENGINE', 'database.engine', doc_default_value='django.db.backends.postgresql_psycopg2'),
-    OptionParser('DATABASE_NAME', 'database.name', to_str=guess_relative_path, doc_default_value='$PROJECT_NAME'),
-    OptionParser('DATABASE_USER', 'database.user', doc_default_value='$PROJECT_NAME'),
+    OptionParser('DATABASE_NAME', 'database.name', doc_default_value='{PROJECT_NAME}'),
+    OptionParser('DATABASE_USER', 'database.user', doc_default_value='{PROJECT_NAME}'),
     OptionParser('DATABASE_PASSWORD', 'database.password', doc_default_value='5trongp4ssw0rd'),
     OptionParser('DATABASE_HOST', 'database.host', doc_default_value='localhost'),
     OptionParser('DATABASE_PORT', 'database.port', doc_default_value='5432'),
     OptionParser('DEBUG', 'global.debug', converter=bool_setting),
     OptionParser('FLOOR_DEFAULT_GROUP_NAME', 'global.default_group'),
     OptionParser('LANGUAGE_CODE', 'global.language_code'),
-    OptionParser('LOCAL_PATH', 'global.data_path', to_str=guess_relative_path, doc_default_value='/var/$PROJECT_NAME'),
+    OptionParser('LOCAL_PATH', 'global.data_path', to_str=guess_relative_path, doc_default_value='/var/{PROJECT_NAME}'),
     OptionParser('PROTOCOL', 'global.protocol', doc_default_value='http'),
     OptionParser('SECRET_KEY', 'global.secret_key'),
-    OptionParser('SERVER_NAME', 'global.server_name', doc_default_value='$SERVICE_NAME'),
+    OptionParser('SERVER_NAME', 'global.server_name', doc_default_value='{PROJECT_NAME}.example.org'),
     OptionParser('TIME_ZONE', 'global.time_zone'),
-    OptionParser('FLOOR_AUTHENTICATION_HEADER', 'global.remote_user_header'),
+    OptionParser('FLOOR_AUTHENTICATION_HEADER', 'global.remote_user_header', converter=str_or_none),
 ]

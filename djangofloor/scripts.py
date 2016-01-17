@@ -122,7 +122,8 @@ def gunicorn():
     parser.add_argument('-b', '--bind', action='store', default=settings.BIND_ADDRESS, help=settings.BIND_ADDRESS_HELP)
     # parser.add_argument('--forwarded-allow-ips', action='store', default=','.join(settings.REVERSE_PROXY_IPS))
     parser.add_argument('--debug', action='store_true', default=False)
-    parser.add_argument('-t', '--timeout', action='store', default=str(settings.REVERSE_PROXY_TIMEOUT), help=settings.REVERSE_PROXY_TIMEOUT_HELP)
+    parser.add_argument('-t', '--timeout', action='store', default=str(settings.REVERSE_PROXY_TIMEOUT),
+                        help=settings.REVERSE_PROXY_TIMEOUT_HELP)
     parser.add_argument('--proxy-allow-from', action='store', default=','.join(settings.REVERSE_PROXY_IPS),
                         help='Front-end\'s IPs from which allowed accept proxy requests (comma separate)')
     options, extra_args = parser.parse_known_args()

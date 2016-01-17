@@ -49,7 +49,6 @@ in the configuration, you cannot use its IP address to access the website.
 
     SERVICE_NAME={{ PROJECT_NAME }}.example.org
     PROJECT_NAME={{ PROJECT_NAME }}
-    BIND_ADRESS={{ BIND_ADDRESS }}
     sudo apt-get install apache2 libapache2-mod-xsendfile
     sudo a2enmod headers proxy proxy_http
     sudo a2dissite 000-default.conf
@@ -57,26 +56,26 @@ in the configuration, you cannot use its IP address to access the website.
     cat << EOF | sudo tee /etc/apache2/sites-available/{{ PROJECT_NAME }}.conf
     <VirtualHost *:80>
         ServerName $SERVICE_NAME
-{% block webserver_static %}        Alias /static/ /var/{{ PROJECT_NAME }}/static/
-        ProxyPass /static/ !
-{% endblock %}{% block webserver_media %}        Alias /media/ /var/{{ PROJECT_NAME }}/media/
-        ProxyPass /media/ !
+{% block webserver_static %}        Alias {{ STATIC_URL }} {{ STATIC_ROOT }}/
+        ProxyPass {{ STATIC_URL }} !
+{% endblock %}{% block webserver_media %}        Alias {{ MEDIA_URL }} {{ MEDIA_ROOT }}/
+        ProxyPass {{ MEDIA_URL }} !
 {% endblock %}        ProxyPass / http://{{ BIND_ADDRESS }}/
         ProxyPassReverse / http://{{ BIND_ADDRESS }}/
-        DocumentRoot /var/{{ PROJECT_NAME }}/static
+        DocumentRoot {{ STATIC_ROOT }}
         ServerSignature off
-{% block webserver_xsendfilepath %}        <Location /static/>
+{% block webserver_xsendfilepath %}        <Location {{ STATIC_URL }}>
             Order deny,allow
             Allow from all
             Satisfy any
         </Location>
         XSendFile on
-        XSendFilePath /var/{{ PROJECT_NAME }}/media/
+        XSendFilePath {{ MEDIA_ROOT }}
         # in older versions of XSendFile (<= 0.9), use XSendFileAllowAbove On
 {% endblock %}{% block webserver_extra %}{% endblock %}    </VirtualHost>
     EOF
-    sudo mkdir /var/{{ PROJECT_NAME }}/
-    sudo chown -R www-data:www-data /var/{{ PROJECT_NAME }}/
+    sudo mkdir {{ LOCAL_PATH }}
+    sudo chown -R www-data:www-data {{ LOCAL_PATH }}
     sudo a2ensite {{ PROJECT_NAME }}.conf
     sudo apachectl -t
     sudo apachectl restart
@@ -116,13 +115,13 @@ If you want to use SSL:
         ServerName $SERVICE_NAME
         SSLCertificateFile $PEM
         SSLEngine on
-{% block webserver_ssl_static %}        Alias /static/ /var/{{ PROJECT_NAME }}/static/
-        ProxyPass /static/ !
-{% endblock %}{% block webserver_ssl_media %}        Alias /media/ /var/{{ PROJECT_NAME }}/media/
-        ProxyPass /media/ !
+{% block webserver_ssl_static %}        Alias {{ STATIC_URL }} {{ STATIC_ROOT }}/
+        ProxyPass {{ STATIC_URL }} !
+{% endblock %}{% block webserver_ssl_media %}        Alias {{ MEDIA_URL }} {{ MEDIA_ROOT }}/
+        ProxyPass {{ MEDIA_URL }} !
 {% endblock %}        ProxyPass / http://{{ BIND_ADDRESS }}/
         ProxyPassReverse / http://{{ BIND_ADDRESS }}/
-        DocumentRoot /var/{{ PROJECT_NAME }}/static
+        DocumentRoot {{ STATIC_ROOT }}
         ServerSignature off
         RequestHeader set X_FORWARDED_PROTO https
 {% block webserver_ssl_auth %}        <Location />
@@ -138,18 +137,18 @@ If you want to use SSL:
             Require valid-user
             RequestHeader set REMOTE_USER %{REMOTE_USER}s
         </Location>
-{% endblock %}        <Location /static/>
+{% endblock %}        <Location {{ STATIC_URL }}>
             Order deny,allow
             Allow from all
             Satisfy any
         </Location>
 {% block webserver_ssl_xsendfilepath %}        XSendFile on
-        XSendFilePath /var/{{ PROJECT_NAME }}/media/
+        XSendFilePath {{ MEDIA_ROOT }}
         # in older versions of XSendFile (<= 0.9), use XSendFileAllowAbove On
 {% endblock %}{% block webserver_ssl_extra %}{% endblock %}    </VirtualHost>
     EOF
-    sudo mkdir /var/{{ PROJECT_NAME }}/
-    sudo chown -R www-data:www-data /var/{{ PROJECT_NAME }}/
+    sudo mkdir {{ LOCAL_PATH }}
+    sudo chown -R www-data:www-data {{ LOCAL_PATH }}
     sudo a2ensite {{ PROJECT_NAME }}.conf
     sudo apachectl -t
     sudo apachectl restart
@@ -164,15 +163,14 @@ Now, it's time to install {{ FLOOR_PROJECT_NAME }}:
 
 .. code-block:: bash
 
-{% block pre_application %}{% endblock %}    sudo mkdir -p /var/{{ PROJECT_NAME }}
+{% block pre_application %}{% endblock %}    sudo mkdir -p {{ LOCAL_PATH }}
     sudo adduser --disabled-password {{ PROJECT_NAME }}
-    sudo chown {{ PROJECT_NAME }}:www-data /var/{{ PROJECT_NAME }}
+    sudo chown {{ PROJECT_NAME }}:www-data {{ LOCAL_PATH }}
     sudo apt-get install virtualenvwrapper {{ python_version }} {{ python_version }}-dev build-essential postgresql-client libpq-dev
     # application
     sudo -u {{ PROJECT_NAME }} -i
     SERVICE_NAME={{ PROJECT_NAME }}.example.org
     PROJECT_NAME={{ PROJECT_NAME }}
-    BIND_ADRESS={{ BIND_ADDRESS }}
     mkvirtualenv {{ PROJECT_NAME }} -p `which {{ python_version }}`
     workon {{ PROJECT_NAME }}
     pip install setuptools --upgrade
@@ -181,11 +179,11 @@ Now, it's time to install {{ FLOOR_PROJECT_NAME }}:
     mkdir -p $VIRTUAL_ENV/etc/{{ PROJECT_NAME }}
     cat << EOF > $VIRTUAL_ENV/etc/{{ PROJECT_NAME }}/settings.ini
 {% block ini_configuration %}{% for section in settings_merger.all_ini_options.items %}    [{{ section.0 }}]
-{% for option_parser in section.1 %}    {{ option_parser.key }} = {{ option_parser.str_doc_value }}
+{% for option_parser in section.1 %}    {{ option_parser.key }} = {{ option_parser.str_value }}
 {% endfor %}{% endfor %}{% endblock %}    EOF
     {{ PROJECT_NAME }}-manage migrate
     {{ PROJECT_NAME }}-manage collectstatic --noinput
-{% block post_application %}    moneta-manage createsuperuser
+{% block post_application %}    {{ PROJECT_NAME }}-manage createsuperuser
 {% endblock %}
 {% endblock %}
 
@@ -224,7 +222,7 @@ You can also use systemd to launch {{ PROJECT_NAME }}:
     [Service]
     User={{ PROJECT_NAME }}
     Group={{ PROJECT_NAME }}
-    WorkingDirectory=/var/{{ PROJECT_NAME }}/
+    WorkingDirectory={{ LOCAL_PATH }}/
     ExecStart=/home/{{ PROJECT_NAME }}/.virtualenvs/{{ PROJECT_NAME }}/bin/{{ PROJECT_NAME }}-gunicorn
     ExecReload=/bin/kill -s HUP $MAINPID
     ExecStop=/bin/kill -s TERM $MAINPID
@@ -239,7 +237,7 @@ You can also use systemd to launch {{ PROJECT_NAME }}:
     [Service]
     User={{ PROJECT_NAME }}
     Group={{ PROJECT_NAME }}
-    WorkingDirectory=/var/{{ PROJECT_NAME }}/
+    WorkingDirectory={{ LOCAL_PATH }}/
     ExecStart=/home/{{ PROJECT_NAME }}/.virtualenvs/{{ PROJECT_NAME }}/bin/{{ PROJECT_NAME }}-celery worker
     ExecReload=/bin/kill -s HUP $MAINPID
     ExecStop=/bin/kill -s TERM $MAINPID

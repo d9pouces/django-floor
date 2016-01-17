@@ -11,7 +11,7 @@ from distutils.version import LooseVersion
 from django import get_version
 from django.utils.six import text_type
 import pkg_resources
-from djangofloor.iniconf import OptionParser
+from djangofloor.iniconf import OptionParser, MISSING_VALUE
 
 try:
     # noinspection PyCompatibility
@@ -162,11 +162,8 @@ class SettingMerger(object):
     """Load different settings modules and config files and merge them.
     """
 
-    def __init__(self, project_name,
-                 default_settings_module_name,
-                 project_settings_module_name,
-                 user_settings_path,
-                 djangofloor_config_path, djangofloor_mapping):
+    def __init__(self, project_name, default_settings_module_name, project_settings_module_name,
+                 user_settings_path, djangofloor_config_path, djangofloor_mapping, doc_mode=False):
         self.project_name = project_name
         self.project_settings_module_name = project_settings_module_name
         self.default_settings_module_name = default_settings_module_name
@@ -184,6 +181,7 @@ class SettingMerger(object):
         self.user_settings_module = None
         self.ini_config_mapping = None
         self.option_parsers = []
+        self.doc_mode = doc_mode
 
     @staticmethod
     def import_file(filepath):
@@ -252,7 +250,12 @@ class SettingMerger(object):
         if self.djangofloor_mapping:
             try:
                 ini_values = import_string(self.djangofloor_mapping)
-                if os.path.isfile(self.djangofloor_config_path):
+                if self.doc_mode:
+                    for option_parser in ini_values:
+                        assert isinstance(option_parser, OptionParser)
+                        if option_parser.doc_default_value is not MISSING_VALUE:
+                            self.ini_config_mapping[option_parser.setting_name] = option_parser.doc_default_value
+                elif os.path.isfile(self.djangofloor_config_path):
                     parser = ConfigParser()
                     parser.read([self.djangofloor_config_path])
                     for option_parser in ini_values:
@@ -285,11 +288,13 @@ class SettingMerger(object):
                 return self.__formatter.format(obj, **values)
         elif isinstance(obj, DirectoryPath):
             obj = self.parse_setting(obj.value)
-            self.ensure_dir(obj, parent_=False)
+            if not self.doc_mode:
+                self.ensure_dir(obj, parent_=False)
             return obj
         elif isinstance(obj, FilePath):
             obj = self.parse_setting(obj.value)
-            self.ensure_dir(obj, parent_=True)
+            if not self.doc_mode:
+                self.ensure_dir(obj, parent_=True)
             return obj
         elif isinstance(obj, SettingReference):
             return self.get_setting_value(obj.value)
@@ -366,13 +371,16 @@ class SettingMerger(object):
         """
         ini_values = import_string(self.djangofloor_mapping)
         all_options = {}
+        defined_setting_names = set()  # to prevent duplicate OptionParser
         for option_parser in ini_values:
             assert isinstance(option_parser, OptionParser)
             all_options.setdefault(option_parser.section, [])
             if option_parser.help_str is None and self.settings.get('%s_HELP' % option_parser.setting_name):
                 option_parser.help_str = text_type(self.settings['%s_HELP' % option_parser.setting_name])
             option_parser.default_value = self.settings[option_parser.setting_name]
-            all_options[option_parser.section].append(option_parser)
+            if option_parser.setting_name not in defined_setting_names:
+                all_options[option_parser.section].append(option_parser)
+            defined_setting_names.add(option_parser.setting_name)
         for options in all_options.values():
             options.sort(key=lambda x: x.key)
         section_names = [section_name for section_name in all_options]

@@ -103,7 +103,7 @@ MAX_REQUESTS_HELP = 'The maximum number of requests a worker will process before
 
 REVERSE_PROXY_IPS = ['127.0.0.1', ]
 REVERSE_PROXY_IPS_HELP = 'List of IP addresses of the reverse proxies'
-REVERSE_PROXY_TIMEOUT = 30
+REVERSE_PROXY_TIMEOUT = 300
 REVERSE_PROXY_TIMEOUT_HELP = 'Timeout for reverse proxy'
 # Workers silent for more than this many seconds are killed and restarted.
 REVERSE_PROXY_SSL_KEY_FILE = None

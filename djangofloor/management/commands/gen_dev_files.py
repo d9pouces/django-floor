@@ -21,17 +21,17 @@ from argparse import ArgumentParser
 import codecs
 import os
 import datetime
+import sys
 
 from django.core.management import BaseCommand
 from django.template import TemplateSyntaxError
 from django.template.loader import render_to_string
 from django.utils.six import text_type
 import pkg_resources
-import sys
 
 from djangofloor import settings
-from djangofloor.utils import walk
-from djangofloor.settings import merger
+from djangofloor.utils import walk, SettingMerger
+
 
 __author__ = 'Matthieu Gallet'
 
@@ -87,6 +87,17 @@ class Command(BaseCommand):
         extra_template_folder = options['extra_folder']
         all_default_filenames = self.get_relative_filenames('djangofloor', 'templates/' + default_template_folder)
         all_extra_filenames = self.get_relative_filenames(options['extra_module'], 'templates/' + extra_template_folder)
+
+        project_settings_module_name = os.environ.get('DJANGOFLOOR_PROJECT_DEFAULTS', '')
+        user_settings_path = os.environ.get('DJANGOFLOOR_PYTHON_SETTINGS', '')
+        djangofloor_config_path = os.environ.get('DJANGOFLOOR_INI_SETTINGS', '')
+        djangofloor_mapping = os.environ.get('DJANGOFLOOR_MAPPING', '')
+        project_name = os.environ.get('DJANGOFLOOR_PROJECT_NAME', 'djangofloor')
+
+        merger = SettingMerger(project_name, 'djangofloor.defaults', project_settings_module_name, user_settings_path,
+                               djangofloor_config_path, djangofloor_mapping, doc_mode=True)
+        merger.process()
+        merger.post_process()
 
         context = {key: value for (key, value) in merger.settings.items() if
                    (key == key.upper() and key not in ('_', '__') and not key.endswith('_HELP'))}
