@@ -63,12 +63,12 @@ in the configuration, you cannot use its IP address to access the website.
         ProxyPassReverse / http://{{ BIND_ADDRESS }}/
         DocumentRoot {{ STATIC_ROOT }}
         ServerSignature off
-{% block webserver_xsendfilepath %}        <Location {{ STATIC_URL }}>
+        <Location {{ STATIC_URL }}>
             Order deny,allow
             Allow from all
             Satisfy any
         </Location>
-        XSendFile on
+{% block webserver_xsendfilepath %}        XSendFile on
         XSendFilePath {{ MEDIA_ROOT }}
         # in older versions of XSendFile (<= 0.9), use XSendFileAllowAbove On
 {% endblock %}{% block webserver_extra %}{% endblock %}    </VirtualHost>
