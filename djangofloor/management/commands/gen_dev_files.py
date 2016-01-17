@@ -65,7 +65,7 @@ class Command(BaseCommand):
         target_filename = os.path.join(target_directory, filename)
         pkg_resources.ensure_directory(target_filename)
         try:
-            text = render_to_string(template_filename, context)
+            new_content = render_to_string(template_filename, context)
         except TemplateSyntaxError as e:
             self.stderr.write(self.style.ERROR('Unable to write %s' % filename))
             self.stderr.write(self.style.ERROR(text_type(e)))
@@ -74,10 +74,17 @@ class Command(BaseCommand):
             self.stderr.write(self.style.ERROR('Unable to read template  %s' % template_filename))
             self.stderr.write(self.style.ERROR(text_type(e)))
             return
-        if text:
-            with codecs.open(target_filename, 'w', encoding='utf-8') as fd:
-                fd.write(text)
-            self.stdout.write(self.style.MIGRATE_LABEL('Written file: %s' % filename))
+        if new_content:
+            previous_content = None
+            if os.path.isfile(target_filename):
+                with codecs.open(target_filename, 'r', encoding='utf-8') as fd:
+                    previous_content = fd.read()
+            if new_content == previous_content:
+                self.stdout.write(self.style.MIGRATE_LABEL('Unmodified content: %s' % filename))
+            else:
+                with codecs.open(target_filename, 'w', encoding='utf-8') as fd:
+                    fd.write(new_content)
+                self.stdout.write(self.style.MIGRATE_LABEL('Written file: %s' % filename))
         else:
             self.stdout.write(self.style.MIGRATE_LABEL('Skipped file: %s' % filename))
 
