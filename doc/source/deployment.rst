@@ -72,7 +72,7 @@ Then you can configure it:
 backup
 ------
 
-A basic DjangoFloor application a different kinds of files:
+A basic DjangoFloor application is made of different kinds of files:
 
     * the code of your application and its dependencies (you should not have to backup them),
     * static files (as they are provided by the code, you can lost them),

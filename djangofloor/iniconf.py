@@ -139,7 +139,7 @@ class OptionParser(object):
 
 INI_MAPPING = [
     OptionParser('ADMIN_EMAIL', 'global.admin_email', doc_default_value='admin@{SERVER_NAME}'),
-    OptionParser('BIND_ADDRESS', 'global.bind_address', doc_default_value='localhost:9000'),
+    OptionParser('BIND_ADDRESS', 'global.bind_address'),
     OptionParser('DATABASE_ENGINE', 'database.engine', doc_default_value='django.db.backends.postgresql_psycopg2'),
     OptionParser('DATABASE_NAME', 'database.name', doc_default_value='{PROJECT_NAME}'),
     OptionParser('DATABASE_USER', 'database.user', doc_default_value='{PROJECT_NAME}'),
