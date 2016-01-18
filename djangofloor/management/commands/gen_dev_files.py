@@ -47,6 +47,8 @@ class Command(BaseCommand):
                             action='store', help='Python module for finding extra template folder')
         parser.add_argument('--extra-context', nargs='*', help='Extra variable for the template system '
                                                                '(--extra-context=NAME:VALUE)', default=[])
+        parser.add_argument('-t', '--test', default=False, action='store_true',
+                            help='Test mode: do not write any file')
 
     @staticmethod
     def get_relative_filenames(src_module, src_folder):
@@ -60,7 +62,7 @@ class Command(BaseCommand):
                     result.add(os.path.join(root, filename)[len(src_folder) + 1:])
         return result
 
-    def write_template_file(self, default_template_folder, filename, target_directory, context):
+    def write_template_file(self, default_template_folder, filename, target_directory, context, test_mode=False):
         template_filename = '%s/%s' % (default_template_folder, filename)
         target_filename = os.path.join(target_directory, filename)
         pkg_resources.ensure_directory(target_filename)
@@ -81,14 +83,17 @@ class Command(BaseCommand):
                     previous_content = fd.read()
             if new_content == previous_content:
                 self.stdout.write(self.style.MIGRATE_LABEL('Unmodified content: %s' % filename))
-            else:
+            elif not test_mode:
                 with codecs.open(target_filename, 'w', encoding='utf-8') as fd:
                     fd.write(new_content)
                 self.stdout.write(self.style.MIGRATE_LABEL('Written file: %s' % filename))
+            else:
+                self.stdout.write(self.style.MIGRATE_LABEL('File to write: %s' % filename))
         else:
             self.stdout.write(self.style.MIGRATE_LABEL('Skipped file: %s' % filename))
 
     def handle(self, *args, **options):
+        self.stdout.write(self.style.ERROR('[TEST MODE: no file will be written]'))
         target_directory = options['target']
         default_template_folder = 'djangofloor/dev'
         extra_template_folder = options['extra_folder']
@@ -123,8 +128,10 @@ class Command(BaseCommand):
         for filename in all_default_filenames:
             if filename in all_extra_filenames:
                 continue
-            self.write_template_file(default_template_folder, filename, target_directory, context)
+            self.write_template_file(default_template_folder, filename, target_directory, context,
+                                     test_mode=options['test'])
         all_extra_filenames = list(all_extra_filenames)
         all_extra_filenames.sort()
         for filename in all_extra_filenames:
-            self.write_template_file(extra_template_folder, filename, target_directory, context)
+            self.write_template_file(extra_template_folder, filename, target_directory, context,
+                                     test_mode=options['test'])
