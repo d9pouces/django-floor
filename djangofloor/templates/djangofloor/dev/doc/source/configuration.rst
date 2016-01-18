@@ -59,11 +59,13 @@ A complete {{ FLOOR_PROJECT_NAME }} installation is made a different kinds of fi
     * static files (as they are provided by the code, you can lost them),
     * configuration files (you can easily recreate it, or you must backup it),
     * database content (you must backup it),
-    * user-created files (you also must backup them).
+    * user-created files (you must also backup them).
 
-We use logrotate to backup database.
+Many backup stragegies exist, and you must choose one that fits your needs. We can only propose general-purpose strategies.
 
-{% block backup_db %}.. code-block:: bash
+{% block backup_db %}We use logrotate to backup the database, with a new file each day.
+
+.. code-block:: bash
 
   sudo mkdir -p /var/backups/{{ PROJECT_NAME }}
   sudo chown -r {{ PROJECT_NAME }}: /var/backups/{{ PROJECT_NAME }}
@@ -73,7 +75,8 @@ We use logrotate to backup database.
     daily
     rotate 20
     nocompress
-    create 640 root adm
+    missingok
+    create 640 {{ PROJECT_NAME }} {{ PROJECT_NAME }}
     postrotate
     myproject-manage dumpdb | gzip > /var/backups/{{ PROJECT_NAME }}/backup_db.sql.gz
     endscript
@@ -81,22 +84,25 @@ We use logrotate to backup database.
   EOF
   touch /var/backups/{{ PROJECT_NAME }}/backup_db.sql.gz
   crontab -e
+  MAILTO={{ ADMIN_EMAIL }}
   0 1 * * * /home/{{ PROJECT_NAME }}/.virtualenvs/{{ PROJECT_NAME }}/bin/{{ PROJECT_NAME }}-manage clearsessions
   0 2 * * * logrotate -f /home/{{ PROJECT_NAME }}/.virtualenvs/{{ PROJECT_NAME }}/etc/{{ PROJECT_NAME }}/backup_db.conf
 {% endblock %}
 
-Backup of the user-created files can be done with rsync:
+{% block backup_media %}Backup of the user-created files can be done with rsync, with a full backup each month:
+If you have a lot of files to backup, beware of the available disk place!
 
-{% block backup_media %}.. code-block:: bash
+.. code-block:: bash
 
   sudo mkdir -p /var/backups/{{ PROJECT_NAME }}/media
   sudo chown -r {{ PROJECT_NAME }}: /var/backups/{{ PROJECT_NAME }}
   cat << EOF > /home/{{ PROJECT_NAME }}/.virtualenvs/{{ PROJECT_NAME }}/etc/{{ PROJECT_NAME }}/backup_media.conf
   /var/backups/{{ PROJECT_NAME }}/backup_media.tar.gz {
     monthly
-    rotate 20
+    rotate 6
     nocompress
-    create 640 root adm
+    missingok
+    create 640 {{ PROJECT_NAME }} {{ PROJECT_NAME }}
     postrotate
     tar -czf /var/backups/{{ PROJECT_NAME }}/backup_media.tar.gz /var/backups/{{ PROJECT_NAME }}/media/
     endscript
@@ -104,6 +110,7 @@ Backup of the user-created files can be done with rsync:
   EOF
   touch /var/backups/{{ PROJECT_NAME }}/backup_media.tar.gz
   crontab -e
+  MAILTO={{ ADMIN_EMAIL }}
   0 3 * * * rsync -arltDE {{ MEDIA_ROOT }}/ /var/backups/{{ PROJECT_NAME }}/media/
   0 5 0 * * logrotate -f /home/{{ PROJECT_NAME }}/.virtualenvs/{{ PROJECT_NAME }}/etc/{{ PROJECT_NAME }}/backup_media.conf
 {% endblock %}
