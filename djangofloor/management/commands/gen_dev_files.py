@@ -93,7 +93,7 @@ class Command(BaseCommand):
             self.stdout.write(self.style.MIGRATE_LABEL('Skipped file: %s' % filename))
 
     def handle(self, *args, **options):
-        self.stdout.write(self.style.ERROR('[TEST MODE: no file will be written]'))
+        self.stdout.write(self.style.ERROR('[test mode: no file will be written]'))
         target_directory = options['target']
         default_template_folder = 'djangofloor/dev'
         extra_template_folder = options['extra_folder']

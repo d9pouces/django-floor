@@ -41,13 +41,13 @@ Assume that you have the following tree in `my_app/templates/my_app/dev`:
           ├── extra_file.rst
           └── index.rst
 
-Your folder and DjangoFloor's one will be merged following these rules:
+Your folder and DjangoFloor's one will be merged according to these rules:
 
-    * any file existing in one of these folder will be written,
-    * if a file is defined in both folders, then your file overrides DjangoFloor's one,
-    * an empty file will be ignored (so you can skip some default files).
+    * any file existing in only one of these folder (like `doc/source/conf.py` or `doc/source/extra_file.rst`) will be written,
+    * if a file is defined in both folders (like `doc/source/index.rst`), then your file overrides DjangoFloor's one,
+    * an overriden file with an empty content will be ignored (so you can make some default files ignored).
 
-These files are templated using the Django template system. You can override only parts of the default files.
+All files are templated using the Django template system. You can override only parts of the default files.
 
 .. code-block:: templates
 
