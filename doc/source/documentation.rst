@@ -3,6 +3,7 @@ Generating documentation
 
 Documentation is an important part of a software.
 DjangoFloor provides a basic, templated, documentation that can be automatically generated for your project.
+Required files for generating Debian packages are also provides.
 
 .. code-block:: bash
 
@@ -49,7 +50,7 @@ Your folder and DjangoFloor's one will be merged according to these rules:
 
 All files are templated using the Django template system. You can override only parts of the default files.
 
-.. code-block:: templates
+.. code-block:: django
 
   {% extends 'djangofloor/dev/doc/source/index.rst' %}
   {% block description %}

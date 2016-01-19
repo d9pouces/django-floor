@@ -44,6 +44,7 @@ or try to run the server interactively:
   sudo service supervisor stop
   sudo -u {{ PROJECT_NAME }} -i
   workon {{ PROJECT_NAME }}
+  {{ PROJECT_NAME }}-manage config
   {{ PROJECT_NAME }}-manage runserver
   {{ PROJECT_NAME }}-gunicorn
 {% if USE_CELERY %}  {{ PROJECT_NAME }}-celery worker
@@ -118,3 +119,9 @@ If you have a lot of files to backup, beware of the available disk place!
 
 Monitoring
 ----------
+
+LDAP groups
+-----------
+
+LDAP authentication
+-------------------

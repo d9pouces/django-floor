@@ -3,12 +3,12 @@
 sudo apt-get update
 sudo apt-get upgrade --yes
 sudo apt-get install --yes vim dh-make ntp rsync liblzma-dev tree
-sudo apt-get install --yes python3-all-dev virtualenvwrapper python3-tz python3-setuptools apache2 apache2-mpm-worker apache2-utils apache2.2-bin apache2.2-common libapr1 libaprutil1 libaprutil1-dbd-sqlite3 libaprutil1-ldap python-medusa python-meld3 ssl-cert supervisor python3-openid python3-gnupg
+sudo apt-get install --yes python{% if use_python3 %}3{% endif %}-all-dev virtualenvwrapper python{% if use_python3 %}3{% endif %}-tz python{% if use_python3 %}3{% endif %}-setuptools apache2 apache2-mpm-worker apache2-utils apache2.2-bin apache2.2-common libapr1 libaprutil1 libaprutil1-dbd-sqlite3 libaprutil1-ldap python-medusa python-meld3 ssl-cert supervisor python{% if use_python3 %}3{% endif %}-openid python3-gnupg
 source /etc/bash_completion.d/virtualenvwrapper
 
 # create the virtual env
-mkvirtualenv -p `which python3.4` djangofloor3
-workon djangofloor3
+mkvirtualenv -p `which python{% if use_python3 %}3{% endif %}` djangofloor{% if use_python3 %}3{% endif %}
+workon djangofloor{% if use_python3 %}3{% endif %}
 pip install setuptools --upgrade
 pip install pip --upgrade
 pip install debtools djangofloor
@@ -24,7 +24,7 @@ deb-dep-tree deb_dist/*deb
 mv deb_dist/*deb deb
 
 # install all packages
-sudo dpkg -i deb/python3-*.deb
+sudo dpkg -i deb/python{% if use_python3 %}3{% endif %}-*.deb
 
 # package configuration
 IP=`/sbin/ifconfig | grep -Eo 'inet (addr:|adr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1'`

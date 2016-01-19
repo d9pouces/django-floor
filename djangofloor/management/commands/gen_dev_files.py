@@ -117,6 +117,7 @@ class Command(BaseCommand):
                    (key == key.upper() and key not in ('_', '__') and not key.endswith('_HELP'))}
         context['year'] = datetime.datetime.now().year
         context['python_version'] = 'python%s.%s' % (sys.version_info[0], sys.version_info[1])
+        context['use_python3'] = sys.version_info[0] == 3
         context['settings_merger'] = merger
         for variable in options['extra_context']:
             key, sep, value = variable.partition(':')

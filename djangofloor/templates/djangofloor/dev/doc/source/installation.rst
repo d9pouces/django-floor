@@ -182,7 +182,7 @@ Now, it's time to install {{ FLOOR_PROJECT_NAME }}:
     workon {{ PROJECT_NAME }}
     pip install setuptools --upgrade
     pip install pip --upgrade
-    pip install {{ PROJECT_NAME }} psycopg2
+    pip install {{ PROJECT_NAME }} psycopg2 gevent
     mkdir -p $VIRTUAL_ENV/etc/{{ PROJECT_NAME }}
     cat << EOF > $VIRTUAL_ENV/etc/{{ PROJECT_NAME }}/settings.ini
 {% block ini_configuration %}{% for section in settings_merger.all_ini_options.items %}    [{{ section.0 }}]
