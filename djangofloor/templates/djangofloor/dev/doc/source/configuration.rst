@@ -120,8 +120,28 @@ If you have a lot of files to backup, beware of the available disk place!
 Monitoring
 ----------
 
+You need Nagios checks to monitor:
+
+  * connection to the application server (gunicorn or uwsgi),
+  * connection to the database servers (PostgreSQL{% if USE_CELERY %} and Redis{% endif %}),
+  * connection to the reverse-proxy server (apache or nginx),
+  * time of the last backup (database and files),
+  * the validity of the SSL certificate,
+  * living processes for gunicorn{% if USE_CELERY %}, celery, redis{% endif %}, postgresql, apache,
+  * standard checks for RAM, disk, swap…
+
 LDAP groups
 -----------
+
+There are two possibilities to use LDAP groups, with their own pros and cons:
+
+  * on each request, use an extra LDAP connection to retrieve groups instead of looking in the SQL database,
+  * regularly synchronize groups between the LDAP server and the SQL servers.
+
+The second approach can be used without any modification in your code and remove a point of failure
+in the global architecture (if you allow some delay during the synchronization process).
+A tool exists for such synchronization: `MultiSync <https://github.com/d9pouces/Multisync>`_.
+
 
 LDAP authentication
 -------------------

@@ -19,6 +19,7 @@ Two variables are currently added to the context:
 from __future__ import unicode_literals
 from argparse import ArgumentParser
 import codecs
+from difflib import unified_diff
 import os
 import datetime
 import sys
@@ -49,7 +50,6 @@ class Command(BaseCommand):
                                                                '(--extra-context=NAME:VALUE)', default=[])
         parser.add_argument('-t', '--test', default=False, action='store_true',
                             help='Test mode: do not write any file')
-
         # parser.add_argument('-v', '--verbose', default=False, action='store_true',
         #                     help='Test mode: do not write any file')
 
@@ -65,7 +65,8 @@ class Command(BaseCommand):
                     result.add(os.path.join(root, filename)[len(src_folder) + 1:])
         return result
 
-    def write_template_file(self, default_template_folder, filename, target_directory, context, test_mode=False):
+    def write_template_file(self, default_template_folder, filename, target_directory, context, test_mode=False,
+                            verbose_mode=False):
         template_filename = '%s/%s' % (default_template_folder, filename)
         target_filename = os.path.join(target_directory, filename)
         pkg_resources.ensure_directory(target_filename)
@@ -92,10 +93,15 @@ class Command(BaseCommand):
                 self.stdout.write(self.style.MIGRATE_LABEL('Written file: %s' % filename))
             else:
                 self.stdout.write(self.style.MIGRATE_LABEL('File to write: %s' % filename))
+            if verbose_mode and previous_content and new_content != previous_content:
+                for line in unified_diff(previous_content.splitlines(), new_content.splitlines(),
+                                         fromfile='%s-before' % target_filename, tofile='%s-after' % target_filename):
+                    self.stdout.write(line)
         else:
             self.stdout.write(self.style.MIGRATE_LABEL('Skipped file: %s' % filename))
 
     def handle(self, *args, **options):
+        verbose_mode = options['verbosity'] > 1
         test_mode = options['test']
         if test_mode:
             self.stdout.write(self.style.ERROR('[test mode: no file will be written]'))
@@ -135,9 +141,9 @@ class Command(BaseCommand):
             if filename in all_extra_filenames:
                 continue
             self.write_template_file(default_template_folder, filename, target_directory, context,
-                                     test_mode=test_mode)
+                                     test_mode=test_mode, verbose_mode=verbose_mode)
         all_extra_filenames = list(all_extra_filenames)
         all_extra_filenames.sort()
         for filename in all_extra_filenames:
             self.write_template_file(extra_template_folder, filename, target_directory, context,
-                                     test_mode=test_mode)
+                                     test_mode=test_mode, verbose_mode=verbose_mode)
