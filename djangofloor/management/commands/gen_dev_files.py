@@ -50,6 +50,9 @@ class Command(BaseCommand):
         parser.add_argument('-t', '--test', default=False, action='store_true',
                             help='Test mode: do not write any file')
 
+        # parser.add_argument('-v', '--verbose', default=False, action='store_true',
+        #                     help='Test mode: do not write any file')
+
     @staticmethod
     def get_relative_filenames(src_module, src_folder):
         """Return the set of all filenames in the `src_folder` (relative to the `src_module` Python module).

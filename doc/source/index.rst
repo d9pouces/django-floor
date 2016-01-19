@@ -55,7 +55,7 @@ Everything is ready to use `Celery <http://celery.readthedocs.org>`_ for backgro
     How to create packages for Linux distributions
 
 :doc:`documentation`
-    Use DjangoFloor to generate your complete documentation
+    Use DjangoFloor to generate a complete documentation of your project
 
 :doc:`api/index`
     The complete API documentation, organized by modules

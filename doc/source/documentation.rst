@@ -1,4 +1,4 @@
-Generating documentation
+Documentation generation
 ========================
 
 Documentation is an important part of a software.
