@@ -31,8 +31,7 @@ Valid engines for your database are:
   - `django.db.backends.mysql`
   - `django.db.backends.oracle`
 
-Use `x_send_file` with Apache, and `x_accel_converter` with nginx.
-
+{% block debugging %}
 Debugging
 ---------
 
@@ -49,6 +48,9 @@ or try to run the server interactively:
   {{ PROJECT_NAME }}-gunicorn
 {% if USE_CELERY %}  {{ PROJECT_NAME }}-celery worker
 {% endif %}
+
+
+{% endblock %}
 
 {% block backup %}
 Backup
@@ -120,7 +122,7 @@ If you have a lot of files to backup, beware of the available disk place!
 Monitoring
 ----------
 
-You need Nagios checks to monitor:
+You can use Nagios checks to monitor several points:
 
   * connection to the application server (gunicorn or uwsgi),
   * connection to the database servers (PostgreSQL{% if USE_CELERY %} and Redis{% endif %}),
@@ -142,6 +144,6 @@ The second approach can be used without any modification in your code and remove
 in the global architecture (if you allow some delay during the synchronization process).
 A tool exists for such synchronization: `MultiSync <https://github.com/d9pouces/Multisync>`_.
 
-
 LDAP authentication
 -------------------
+
