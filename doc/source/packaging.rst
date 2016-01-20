@@ -20,7 +20,7 @@ Creating a Debian package for a Djangofloor project, like any other Django proje
 packaging dependencies
 ~~~~~~~~~~~~~~~~~~~~~~
 
-You should use `DebTools <https://github.com/d9pouces/DebTools>`_ to create package for all dependencies in a single command.
+You should use `DebTools <https://debtools.readthedocs.org/en/latest/>`_ to create packages for all dependencies in a single command.
 Creating all packages is quite simple:
 
     #. create a virtualenv and install your application (so all your dependencies are also installed),
