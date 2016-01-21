@@ -5,7 +5,6 @@ from __future__ import unicode_literals
 import codecs
 import os
 import shutil
-import sys
 
 __author__ = 'Matthieu Gallet'
 
@@ -35,6 +34,16 @@ def fix_django_redis(package_name, package_version, deb_src_dir):
                  "python3 (>= 3.2), python3-msgpack, python3-redis (>= 1.8.0)")
     file_replace(os.path.join(deb_src_dir, 'debian', 'control'), '${misc:Depends}, ${python:Depends}',
                  "python (>= 2.7), python (<< 2.8), python-redis (>= 1.8.0), python-msgpack")
+
+
+# noinspection PyUnusedLocal
+def fix_django(package_name, package_version, deb_src_dir):
+    file_replace(os.path.join(deb_src_dir, 'django', 'conf', 'app_template', 'apps.py'),
+                 '{{ unicode_literals }}from django.apps import AppConfig',
+                 'from __future__ import unicode_literals\n')
+    file_replace(os.path.join(deb_src_dir, 'django', 'conf', 'app_template', 'models.py'),
+                 '{{ unicode_literals }}from django.apps import AppConfig',
+                 'from __future__ import unicode_literals\n')
 
 
 def file_replace(filename, pattern_to_replace, replacement):
