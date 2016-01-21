@@ -163,7 +163,7 @@ Batteries included
 ------------------
 
   * uwsgi
-  * bootstrap3 (django-bootstrap3 and django-admin-bootstrapped)
+  * bootstrap3 (django-bootstrap3)
   * font-awesome
   * SCSS, CSS and JS minimizing (django-pipeline with pyscss, jsmin and rcssmin)
   * templates for authentication (django-allauth)
