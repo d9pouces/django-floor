@@ -56,3 +56,6 @@ All files are templated using the Django template system. You can override only 
   {% block description %}
   This is a description of a project
   {% endblock %}
+
+If a filename ends with '_tpl', then this suffix is entirely ignored and the file.
+This prevents scripts (like `setup.py`) to compile them.

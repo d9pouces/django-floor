@@ -10,20 +10,23 @@ directory is ignored.
 All these files are assumed to be Django templates. All Django settings are available as template variables.
 If you override a default file by an empty one, this file will be ignored.
 
-Two variables are currently added to the context:
+A few extra variables are currently added to the context:
 
-  * `year`
   * `python_version` (like `python3.4`), corresponding to the current interpreter
+  * `year` : datetime.datetime.now().year
+  * `use_python3` : sys.version_info[0] == 3
+  * `settings_merger` : :class:`djangofloor.utils.SettingMerger` with documentation settings
 
 """
 from __future__ import unicode_literals
 from argparse import ArgumentParser
-import codecs
+from collections import OrderedDict
 from difflib import unified_diff
-import os
 import datetime
 import sys
 
+import codecs
+import os
 from django.core.management import BaseCommand
 from django.template import TemplateSyntaxError
 from django.template.loader import render_to_string
@@ -33,11 +36,11 @@ import pkg_resources
 from djangofloor import settings
 from djangofloor.utils import walk, SettingMerger
 
-
 __author__ = 'Matthieu Gallet'
 
 
 class Command(BaseCommand):
+    template_suffix = '_tpl'
 
     def add_arguments(self, parser):
         assert isinstance(parser, ArgumentParser)
@@ -53,22 +56,29 @@ class Command(BaseCommand):
         # parser.add_argument('-v', '--verbose', default=False, action='store_true',
         #                     help='Test mode: do not write any file')
 
-    @staticmethod
-    def get_relative_filenames(src_module, src_folder):
+    def get_relative_filenames(self, src_module, src_folder):
         """Return the set of all filenames in the `src_folder` (relative to the `src_module` Python module).
+        If the filename ends with '_tpl', this suffix will be removed and the file will be templated.
+
          Returned filenames are relative to this base folder.
         """
-        result = set()
+        result = {}
         if pkg_resources.resource_isdir(src_module, src_folder):
             for (root, dirnames, filenames) in walk(src_module, src_folder):
                 for filename in filenames:
-                    result.add(os.path.join(root, filename)[len(src_folder) + 1:])
+                    path = os.path.join(root, filename)[len(src_folder) + 1:]
+                    if path.endswith(self.template_suffix):
+                        result[path[:-len(self.template_suffix)]] = path
+                    else:
+                        result[path] = path
         return result
 
     def write_template_file(self, default_template_folder, filename, target_directory, context, test_mode=False,
                             verbose_mode=False):
         template_filename = '%s/%s' % (default_template_folder, filename)
         target_filename = os.path.join(target_directory, filename)
+        if target_filename.endswith(self.template_suffix):
+            target_filename = target_filename[:-len(self.template_suffix)]
         pkg_resources.ensure_directory(target_filename)
         try:
             new_content = render_to_string(template_filename, context)
@@ -134,16 +144,16 @@ class Command(BaseCommand):
                 self.stderr.write(self.style.WARNING('Invalid variable %s (should be like KEY:VALUE)' % variable))
                 return
             context[key] = value
-
-        all_default_filenames = list(all_default_filenames)
-        all_default_filenames.sort()
-        for filename in all_default_filenames:
-            if filename in all_extra_filenames:
+        # write files defined by DjangoFloor
+        filenames = OrderedDict(sorted(all_default_filenames.items(), key=lambda y: y[0]))
+        for target_filename, filename in filenames.items():
+            if target_filename in all_extra_filenames:
                 continue
             self.write_template_file(default_template_folder, filename, target_directory, context,
                                      test_mode=test_mode, verbose_mode=verbose_mode)
-        all_extra_filenames = list(all_extra_filenames)
-        all_extra_filenames.sort()
-        for filename in all_extra_filenames:
+        # write files defined by your project
+        filenames = [x for x in all_extra_filenames.values()]
+        filenames.sort()
+        for filename in filenames:
             self.write_template_file(extra_template_folder, filename, target_directory, context,
                                      test_mode=test_mode, verbose_mode=verbose_mode)
