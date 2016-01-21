@@ -12,7 +12,7 @@ Welcome to {{ FLOOR_PROJECT_NAME }}'s documentation!
     All configuration options
 
 :doc:`debian`
-    Packaging {{ FLOOR_PROJECT_NAME }} for Debian
+    Packaging {{ FLOOR_PROJECT_NAME }} for Debian or Ubuntu servers
 
 {% block screenshots %}
 

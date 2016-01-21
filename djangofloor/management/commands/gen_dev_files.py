@@ -139,6 +139,12 @@ class Command(BaseCommand):
         context['python_version'] = 'python%s.%s' % (sys.version_info[0], sys.version_info[1])
         context['use_python3'] = sys.version_info[0] == 3
         context['settings_merger'] = merger
+        context['path_bin_virtualenv'] = '/home/%s/.virtualenvs/%s/bin' % (merger.settings['PROJECT_NAME'],
+                                                                           merger.settings['PROJECT_NAME'])
+        context['path_etc_virtualenv'] = '/home/%s/.virtualenvs/%s/etc' % (merger.settings['PROJECT_NAME'],
+                                                                           merger.settings['PROJECT_NAME'])
+        context['path_bin_debian'] = '/usr/local/bin'
+        context['path_etc_debian'] = '/etc'
         for variable in options['extra_context']:
             key, sep, value = variable.partition(':')
             if sep != ':':
