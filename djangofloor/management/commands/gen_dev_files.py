@@ -53,8 +53,6 @@ class Command(BaseCommand):
                                                                '(--extra-context=NAME:VALUE)', default=[])
         parser.add_argument('-t', '--test', default=False, action='store_true',
                             help='Test mode: do not write any file')
-        # parser.add_argument('-v', '--verbose', default=False, action='store_true',
-        #                     help='Test mode: do not write any file')
 
     def get_relative_filenames(self, src_module, src_folder):
         """Return the set of all filenames in the `src_folder` (relative to the `src_module` Python module).
@@ -67,6 +65,7 @@ class Command(BaseCommand):
             for (root, dirnames, filenames) in walk(src_module, src_folder):
                 for filename in filenames:
                     path = os.path.join(root, filename)[len(src_folder) + 1:]
+                    # noinspection PyTypeChecker
                     if path.endswith(self.template_suffix):
                         result[path[:-len(self.template_suffix)]] = path
                     else:
@@ -77,6 +76,7 @@ class Command(BaseCommand):
                             verbose_mode=False):
         template_filename = '%s/%s' % (default_template_folder, filename)
         target_filename = os.path.join(target_directory, filename)
+        # noinspection PyTypeChecker
         if target_filename.endswith(self.template_suffix):
             target_filename = target_filename[:-len(self.template_suffix)]
         pkg_resources.ensure_directory(target_filename)
@@ -118,6 +118,7 @@ class Command(BaseCommand):
         target_directory = options['target']
         default_template_folder = 'djangofloor/dev'
         extra_template_folder = options['extra_folder']
+        # noinspection PyTypeChecker
         all_default_filenames = self.get_relative_filenames('djangofloor', 'templates/' + default_template_folder)
         all_extra_filenames = self.get_relative_filenames(options['extra_module'], 'templates/' + extra_template_folder)
 
