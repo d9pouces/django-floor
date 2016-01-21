@@ -369,7 +369,11 @@ class SettingMerger(object):
         :return:
         :rtype:
         """
-        ini_values = import_string(self.djangofloor_mapping)
+        result = OrderedDict()
+        try:
+            ini_values = import_string(self.djangofloor_mapping)
+        except ImportError:
+            return result
         all_options = {}
         defined_setting_names = set()  # to prevent duplicate OptionParser
         ini_values = [x for x in ini_values]
@@ -387,7 +391,6 @@ class SettingMerger(object):
             options.sort(key=lambda x: x.key)
         section_names = [section_name for section_name in all_options]
         section_names.sort()
-        result = OrderedDict()
         for section_name in section_names:
             result[section_name] = all_options[section_name]
         return result

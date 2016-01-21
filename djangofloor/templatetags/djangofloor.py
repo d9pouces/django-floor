@@ -6,7 +6,7 @@ Define a few useful template tags, currently only for the default Django templat
 """
 from __future__ import unicode_literals, absolute_import
 # noinspection PyUnresolvedReferences
-from django.utils.six.moves.urllib.parse import urljoin
+from django.utils.six.moves.urllib.parse import urljoin, urlparse
 from django import template
 from django.templatetags.static import StaticNode, PrefixNode
 from django.utils.safestring import mark_safe
@@ -76,3 +76,13 @@ def df_window_key(context):
 @register.filter
 def df_underline(value, kind='='):
     return kind * len(value)
+
+
+@register.filter
+def df_urlparse(value, component='hostname'):
+    x, sep, y = value.partition('://')
+    if sep != '://':
+        value = 'scheme://%s' % value
+    elif not x:
+        value = 'scheme%s' % value
+    return getattr(urlparse(value), component)
