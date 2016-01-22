@@ -60,6 +60,7 @@ class Command(BaseCommand):
 
          Returned filenames are relative to this base folder.
         """
+        self.stdout.write(self.style.SUCCESS('Looking for template files in %s:%s' % (src_module, src_folder)))
         result = {}
         if pkg_resources.resource_isdir(src_module, src_folder):
             for (root, dirnames, filenames) in walk(src_module, src_folder):

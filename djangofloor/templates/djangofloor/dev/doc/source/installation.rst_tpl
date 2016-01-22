@@ -1,12 +1,17 @@
 Installation
 ============
-
+{% block introduction %}
 Like many Python packages, you can use several methods to install {{ FLOOR_PROJECT_NAME }}.
-The following packages are required:
+{{ FLOOR_PROJECT_NAME }} designed to run with {{ python_version }}.x{% if use_python3 %}+{% endif %}.
+The following packages are also required:
 {% block dependencies %}{% block pre_dependencies %}{% endblock %}
   * setuptools >= 3.0
   * djangofloor >= 0.18.0{% block post_dependencies %}{% endblock %}
 {% endblock %}
+
+Of course you can install it from the source, but the preferred way is to install it as a standard Python package, via pip.
+{% endblock %}
+
 Installing or Upgrading
 -----------------------
 
@@ -188,6 +193,8 @@ Now, it's time to install {{ FLOOR_PROJECT_NAME }}:
 {% block ini_configuration %}{% for section in settings_merger.all_ini_options.items %}    [{{ section.0 }}]
 {% for option_parser in section.1 %}    {{ option_parser.key }} = {{ option_parser.str_value }}
 {% endfor %}{% endfor %}{% endblock %}    EOF
+    chmod 0400 $VIRTUAL_ENV/etc/{{ PROJECT_NAME }}/settings.ini
+    # required since there are password in this file
     {{ PROJECT_NAME }}-manage migrate
     {{ PROJECT_NAME }}-manage collectstatic --noinput
 {% block post_application %}    {{ PROJECT_NAME }}-manage createsuperuser
