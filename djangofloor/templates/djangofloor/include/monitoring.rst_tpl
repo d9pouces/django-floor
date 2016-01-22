@@ -8,7 +8,7 @@ You can use Nagios checks to monitor several points:
   * connection to the database servers (PostgreSQL{% if USE_CELERY %} and Redis{% endif %}),
   * connection to the reverse-proxy server (apache or nginx),
   * the validity of the SSL certificate (can be combined with the previous check),
-  * time of the last backup (database and files),
+  * creation date of the last backup (database and files),
   * living processes for gunicorn{% if USE_CELERY %}, celery, redis{% endif %}, postgresql, apache,
   * standard checks for RAM, disk, swap…
 
@@ -28,3 +28,15 @@ Here is a sample NRPE configuration file:
   command[{{ PROJECT_NAME }}_gunicorn]=/usr/lib/nagios/plugins/check_procs -C python -a '{{ DF_PATH_BIN }}/{{ PROJECT_NAME }}-gunicorn'
   {% if USE_CELERY %}command[{{ PROJECT_NAME }}_celery]=/usr/lib/nagios/plugins/check_procs -C python -a '{{ DF_PATH_BIN }}/{{ PROJECT_NAME }}-celery worker'
   {% endif %}EOF
+{% block sentry %}
+Sentry
+~~~~~~
+
+For using Sentry to log errors, you must add `raven.contrib.django.raven_compat` to the installed apps.
+
+.. code-block:: ini
+
+  [global]
+  extra_apps = raven.contrib.django.raven_compat
+
+{% endblock %}

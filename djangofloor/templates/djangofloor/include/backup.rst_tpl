@@ -52,7 +52,7 @@ If you have a lot of files to backup, beware of the available disk place!
     missingok
     create 640 {{ PROJECT_NAME }} {{ PROJECT_NAME }}
     postrotate
-    tar -czf /var/backups/{{ PROJECT_NAME }}/backup_media.tar.gz /var/backups/{{ PROJECT_NAME }}/media/
+    tar -C /var/backups/{{ PROJECT_NAME }}/media/ -czf /var/backups/{{ PROJECT_NAME }}/backup_media.tar.gz .
     endscript
   }
   EOF

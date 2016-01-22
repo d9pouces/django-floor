@@ -7,8 +7,11 @@ Define all DjangoFloor default settings. The goal is to define valid settings ou
 """
 from __future__ import unicode_literals
 import os
-from djangofloor.utils import DirectoryPath, FilePath, SettingReference, ExpandIterable
+
 from django.utils.translation import ugettext_lazy as _
+
+from djangofloor.utils import DirectoryPath, FilePath, SettingReference, ExpandIterable, CallableSetting, guess_version
+
 
 __author__ = 'Matthieu Gallet'
 
@@ -128,6 +131,8 @@ ACCOUNT_EMAIL_SUBJECT_PREFIX = '[{SERVER_NAME}] '
 # iterable of URL of your application. 'my_app.root_urls.urls'
 FLOOR_URL_CONF = None
 FLOOR_INSTALLED_APPS = []
+FLOOR_EXTRA_APPS = []
+FLOOR_EXTRA_APPS_HELP = 'List of extra Django apps (separated by commas), allowing you to further customize the behaviour.'
 FLOOR_INDEX = None
 FLOOR_PROJECT_NAME = 'DjangoFloor'
 
@@ -333,6 +338,7 @@ INSTALLED_APPS = [
     'allauth.socialaccount',
     'pipeline',
     'debug_toolbar',
+    ExpandIterable('FLOOR_EXTRA_APPS'),
     ExpandIterable('OTHER_ALLAUTH'),
     ExpandIterable('FLOOR_INSTALLED_APPS'),
 ]
@@ -492,3 +498,16 @@ LOGGING = {
 LOGGING_HELP = 'A data structure containing configuration information.' \
                ' The contents of this data structure will be passed as the argument to the configuration method' \
                ' described in LOGGING_CONFIG.'
+
+########################################################################################################################
+# Raven
+########################################################################################################################
+SENTRY_DSN_URL = ''
+SENTRY_DSN_URL_HELP = 'Sentry URL to send data to. https://docs.getsentry.com/'
+
+RAVEN_CONFIG = {
+    'dsn': '{SENTRY_DSN_URL}',
+    'release': '{FLOOR_PROJECT_VERSION}',
+}
+
+FLOOR_PROJECT_VERSION = CallableSetting(guess_version)

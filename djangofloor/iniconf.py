@@ -57,12 +57,20 @@ def strip_split(value):
     >>> strip_split('keyword1, keyword2 ,,keyword3')
     ["keyword1", "keyword2", "keyword3"]
 
+    >>> strip_split('')
+    []
+
+    >>> strip_split(None)
+    []
+
     :param value:
     :type value:
     :return:
     :rtype:
     """
-    return [x.strip() for x in value.split(',') if x.strip()]
+    if value:
+        return [x.strip() for x in value.split(',') if x.strip()]
+    return []
 
 
 MISSING_VALUE = [[]]
@@ -155,4 +163,5 @@ INI_MAPPING = [
     OptionParser('SERVER_NAME', 'global.server_name', doc_default_value='{PROJECT_NAME}.example.org'),
     OptionParser('TIME_ZONE', 'global.time_zone'),
     OptionParser('FLOOR_AUTHENTICATION_HEADER', 'global.remote_user_header', converter=str_or_none),
+    OptionParser('FLOOR_EXTRA_APPS', 'global.extra_apps'),
 ]

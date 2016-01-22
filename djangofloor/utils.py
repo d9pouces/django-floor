@@ -158,6 +158,20 @@ else:
         return sys.modules[name]
 
 
+def guess_version(defined_settings):
+    """ Guesss the project version. Expect __version__ in `your_project/__init__.py`
+
+    :param defined_settings: all already defined settings (dict)
+    :type defined_settings: :class:`dict`
+    :return:
+    :rtype: :class:`str`
+    """
+    try:
+        return import_string('%s.__version__' % defined_settings['PROJECT_NAME'])
+    except ImportError:
+        return 'no.version.defined'
+
+
 class SettingMerger(object):
     """Load different settings modules and config files and merge them.
     """
