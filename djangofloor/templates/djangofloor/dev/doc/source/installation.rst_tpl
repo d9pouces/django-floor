@@ -246,6 +246,7 @@ You can also use systemd to launch {{ PROJECT_NAME }}:
     WantedBy=multi-user.target
     EOF
     systemctl enable {{ PROJECT_NAME }}-gunicorn.service
+    sudo service {{ PROJECT_NAME }}-gunicorn start
 {% if USE_CELERY %}    cat << EOF | sudo tee /etc/systemd/system/{{ PROJECT_NAME }}-celery.service
     [Unit]
     Description={{ FLOOR_PROJECT_NAME }} Celery process
@@ -260,7 +261,8 @@ You can also use systemd to launch {{ PROJECT_NAME }}:
     [Install]
     WantedBy=multi-user.target
     EOF
-    systemctl enable {{ PROJECT_NAME }}-celery.service
+    sudo systemctl enable {{ PROJECT_NAME }}-celery.service
+    sudo service {{ PROJECT_NAME }}-celery start
 {% endif %}
 {% block post_systemd %}{% endblock %}{% endblock %}
 {% block post_install_step %}{% endblock %}

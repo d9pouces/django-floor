@@ -29,11 +29,15 @@ You can switch to Nginx or Systemd by tweaking the right `stdeb-XXX.cfg` file.
 
     sudo -u {{ PROJECT_NAME }} {{ PROJECT_NAME }}-manage createsuperuser
 
-
 Default configuration file is `{{ path_etc_debian }}/{{ PROJECT_NAME }}/settings.ini`.
 If you need more complex settings, you can override default values (given in `djangofloor.defaults` and
 `{{ PROJECT_NAME }}.defaults`) by creating a file named `{{ path_etc_debian }}/{{ PROJECT_NAME }}/settings.py`.
 
+.. code-block:: bash
+
+    sudo service {{ PROJECT_NAME }}-gunicorn start
+{% if USE_CELERY %}    sudo service {{ PROJECT_NAME }}-celery start
+{% endif %}
 {% endblock %}
 
 {% block backup %}

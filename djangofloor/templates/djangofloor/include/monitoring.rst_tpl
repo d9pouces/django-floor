@@ -2,6 +2,9 @@ Monitoring
 ----------
 {% load djangofloor %}
 
+Nagios or Shinken
+~~~~~~~~~~~~~~~~~
+
 You can use Nagios checks to monitor several points:
 
   * connection to the application server (gunicorn or uwsgi):
@@ -38,5 +41,15 @@ For using Sentry to log errors, you must add `raven.contrib.django.raven_compat`
 
   [global]
   extra_apps = raven.contrib.django.raven_compat
+  [sentry]
+  dsn_url = https://[key]:[secret]@app.getsentry.com/[project]
+
+Of course, the Sentry client (Raven) must be separately installed, before testing the installation:
+
+.. code-block:: bash
+
+  sudo -u {{ PROJECT_NAME }} -i
+  {{ PROJECT_NAME }}-manage raven test
+
 
 {% endblock %}

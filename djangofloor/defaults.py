@@ -132,7 +132,7 @@ ACCOUNT_EMAIL_SUBJECT_PREFIX = '[{SERVER_NAME}] '
 FLOOR_URL_CONF = None
 FLOOR_INSTALLED_APPS = []
 FLOOR_EXTRA_APPS = []
-FLOOR_EXTRA_APPS_HELP = 'List of extra Django apps (separated by commas), allowing you to further customize the behaviour.'
+FLOOR_EXTRA_APPS_HELP = 'List of extra Django apps, allowing you to further customize the behaviour.'
 FLOOR_INDEX = None
 FLOOR_PROJECT_NAME = 'DjangoFloor'
 
