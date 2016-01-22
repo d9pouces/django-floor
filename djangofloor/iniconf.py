@@ -163,5 +163,7 @@ INI_MAPPING = [
     OptionParser('SERVER_NAME', 'global.server_name', doc_default_value='{PROJECT_NAME}.example.org'),
     OptionParser('TIME_ZONE', 'global.time_zone'),
     OptionParser('FLOOR_AUTHENTICATION_HEADER', 'global.remote_user_header', converter=str_or_none),
-    OptionParser('FLOOR_EXTRA_APPS', 'global.extra_apps'),
+    OptionParser('FLOOR_EXTRA_APPS', 'global.extra_apps', converter=strip_split, to_str=lambda x: ','.join(x),
+                 help_str='List of extra installed Django apps (separated by commas).'),
+    OptionParser('SENTRY_DSN_URL', 'sentry.dsn_url'),
 ]
