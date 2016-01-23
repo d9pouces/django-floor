@@ -10,19 +10,19 @@ __author__ = 'Matthieu Gallet'
 
 
 # noinspection PyUnusedLocal
-def fix_celery(package_name, package_version, deb_src_dir):
+def fix_celery(package_name, package_version, deb_src_dir=None):
     shutil.rmtree('docs')
 
 
 # noinspection PyUnusedLocal
-def fix_pathlib(package_name, package_version, deb_src_dir):
+def fix_pathlib(package_name, package_version, deb_src_dir=None):
     with codecs.open('MANIFEST.in', 'w', encoding='utf-8') as fd:
         fd.write("include setup.py pathlib.py test_pathlib.py *.txt *.rst\n")
         fd.write("recursive-include docs *.rst *.py make.bat Makefile\n")
 
 
 # noinspection PyUnusedLocal
-def fix_msgpack(package_name, package_version, deb_src_dir):
+def fix_msgpack(package_name, package_version, deb_src_dir=None):
     with codecs.open('MANIFEST.in', 'w', encoding='utf-8') as fd:
         fd.write("include setup.py COPYING msgpack *.txt *.rst\n")
         fd.write("recursive-include docs *.rst *.py make.bat Makefile\n")
@@ -37,13 +37,10 @@ def fix_django_redis(package_name, package_version, deb_src_dir):
 
 
 # noinspection PyUnusedLocal
-def fix_django(package_name, package_version, deb_src_dir):
-    file_replace(os.path.join(deb_src_dir, 'django', 'conf', 'app_template', 'apps.py'),
-                 '{{ unicode_literals }}from django.apps import AppConfig',
-                 'from __future__ import unicode_literals\n')
-    file_replace(os.path.join(deb_src_dir, 'django', 'conf', 'app_template', 'models.py'),
-                 '{{ unicode_literals }}from django.apps import AppConfig',
-                 'from __future__ import unicode_literals\n')
+def fix_django(package_name, package_version, deb_src_dir=None):
+    for root, dirnames, filenames in os.walk(os.path.join('django', 'conf', 'app_template')):
+        for filename in filenames:
+            open(os.path.join(root, filename), 'wb').close()
 
 
 def file_replace(filename, pattern_to_replace, replacement):
