@@ -38,10 +38,10 @@ def fix_django_redis(package_name, package_version, deb_src_dir):
 
 # noinspection PyUnusedLocal
 def fix_django(package_name, package_version, deb_src_dir):
-    file_replace(os.path.join('.', 'django', 'conf', 'app_template', 'apps.py'),
+    file_replace(os.path.join(deb_src_dir, 'django', 'conf', 'app_template', 'apps.py'),
                  '{{ unicode_literals }}from django.apps import AppConfig',
                  'from __future__ import unicode_literals\n')
-    file_replace(os.path.join('.', 'django', 'conf', 'app_template', 'models.py'),
+    file_replace(os.path.join(deb_src_dir, 'django', 'conf', 'app_template', 'models.py'),
                  '{{ unicode_literals }}from django.apps import AppConfig',
                  'from __future__ import unicode_literals\n')
 

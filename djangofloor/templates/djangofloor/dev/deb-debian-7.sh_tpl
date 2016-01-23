@@ -1,5 +1,6 @@
 #!/bin/bash
-{% block dependencies %}
+{% block set_up %}set -e
+{% endblock %}{% block dependencies %}
 # base packages
 sudo apt-get update
 sudo apt-get upgrade --yes
@@ -42,4 +43,6 @@ sudo a2dissite 000-default
 sudo -u {{ PROJECT_NAME }} {{ PROJECT_NAME }}-manage migrate
 sudo service supervisor restart
 sudo service apache2 restart
+{% endblock %}
+{% block tear_down %}set -e
 {% endblock %}

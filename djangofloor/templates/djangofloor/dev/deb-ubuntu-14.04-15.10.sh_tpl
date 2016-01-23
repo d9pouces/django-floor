@@ -1,10 +1,11 @@
 #!/bin/bash
-{% block dependencies %}
+{% block set_up %}set -e
+{% endblock %}{% block dependencies %}
 # base packages
 sudo apt-get update
 sudo apt-get upgrade --yes
 sudo apt-get install --yes vim dh-make ntp rsync liblzma-dev tree
-sudo apt-get install --yes python{% if use_python3 %}3{% endif %}-all-dev virtualenvwrapper python{% if use_python3 %}3{% endif %}-tz python{% if use_python3 %}3{% endif %}-setuptools apache2  libapr1 libaprutil1 libaprutil1-dbd-sqlite3 libaprutil1-ldap python-medusa python-meld3 ssl-cert
+sudo apt-get install --yes python{% if use_python3 %}3{% endif %}-all-dev virtualenvwrapper python{% if use_python3 %}3{% endif %}-tz python{% if use_python3 %}3{% endif %}-setuptools python{% if use_python3 %}3{% endif %}-oauthlib apache2  libapr1 libaprutil1 libaprutil1-dbd-sqlite3 libaprutil1-ldap python-medusa python-meld3 ssl-cert
 {% block extra_dependencies %}{% endblock %}source /etc/bash_completion.d/virtualenvwrapper
 {% endblock %}
 
@@ -42,4 +43,6 @@ sudo a2dissite 000-default.conf
 sudo -u {{ PROJECT_NAME }} {{ PROJECT_NAME }}-manage migrate
 sudo service supervisor restart
 sudo service apache2 restart
+{% endblock %}
+{% block tear_down %}set -e
 {% endblock %}

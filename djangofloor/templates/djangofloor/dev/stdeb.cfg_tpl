@@ -17,7 +17,7 @@ pre_source = debtools.multideb.remove_tests_dir
 pre_source = djangofloor.deb_fixes.fix_celery
 
 [Django]
-pre_source = djangofloor.deb_fixes.fix_django
+post_source = djangofloor.deb_fixes.fix_django
 
 [pathlib]
 pre_source = djangofloor.deb_fixes.fix_pathlib
