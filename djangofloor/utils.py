@@ -177,7 +177,8 @@ class SettingMerger(object):
     """
 
     def __init__(self, project_name, default_settings_module_name, project_settings_module_name,
-                 user_settings_path, djangofloor_config_path, djangofloor_mapping, doc_mode=False):
+                 user_settings_path, djangofloor_config_path, djangofloor_mapping, doc_mode=False,
+                 read_only=False):
         self.project_name = project_name
         self.project_settings_module_name = project_settings_module_name
         self.default_settings_module_name = default_settings_module_name
@@ -196,6 +197,7 @@ class SettingMerger(object):
         self.ini_config_mapping = None
         self.option_parsers = []
         self.doc_mode = doc_mode
+        self.read_only = read_only
 
     @staticmethod
     def import_file(filepath):
@@ -302,12 +304,12 @@ class SettingMerger(object):
                 return self.__formatter.format(obj, **values)
         elif isinstance(obj, DirectoryPath):
             obj = self.parse_setting(obj.value)
-            if not self.doc_mode:
+            if not self.read_only:
                 self.ensure_dir(obj, parent_=False)
             return obj
         elif isinstance(obj, FilePath):
             obj = self.parse_setting(obj.value)
-            if not self.doc_mode:
+            if not self.read_only:
                 self.ensure_dir(obj, parent_=True)
             return obj
         elif isinstance(obj, SettingReference):

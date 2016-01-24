@@ -130,7 +130,7 @@ class Command(BaseCommand):
         project_name = os.environ.get('DJANGOFLOOR_PROJECT_NAME', 'djangofloor')
 
         merger = SettingMerger(project_name, 'djangofloor.defaults', project_settings_module_name, user_settings_path,
-                               djangofloor_config_path, djangofloor_mapping, doc_mode=True)
+                               djangofloor_config_path, djangofloor_mapping, doc_mode=True, read_only=True)
         merger.process()
         merger.post_process()
 

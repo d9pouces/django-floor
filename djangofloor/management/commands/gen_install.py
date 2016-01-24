@@ -11,9 +11,9 @@ import shutil
 from django.conf import settings
 from django.core.management import BaseCommand, call_command
 from django.template.loader import render_to_string
-from django.utils.module_loading import import_string
-from djangofloor.settings import __settings_original_value as settings_original_values
-from djangofloor.iniconf import OptionParser
+from  djangofloor import defaults_install
+from djangofloor.utils import SettingMerger
+
 
 try:
     # noinspection PyCompatibility
@@ -35,20 +35,33 @@ class Command(BaseCommand):
                             help='Generate a Systemd configuration file (destination folder).')
         parser.add_argument('--supervisor', default=None, help='Generate a Supervisor configuration file.')
         parser.add_argument('--collectstatic', default=None, help='Collectstatic and copy them to destination.')
-        parser.add_argument('--extra-process', action='append', default=[], help='Extra process for supervisor/systemd.')
+        parser.add_argument('--extra-process', default=[], nargs='*', help='Extra process for supervisor or systemd')
         parser.add_argument('--username', default=None, help='Name of the project user')
         parser.add_argument('--conf', default=None, help='Generate a basic configuration file (destination folder)')
+        parser.add_argument('--default-conf', default='', help='Use this file as default configuration file')
+        parser.add_argument('--defaults', default=defaults_install.__file__,
+                            help='filepath of a Python module with default install settings')
 
     def handle(self, *args, **options):
+
+        project_name = os.environ.get('DJANGOFLOOR_PROJECT_NAME', 'djangofloor')
+        project_settings_module_name = os.environ.get('DJANGOFLOOR_PROJECT_DEFAULTS', '')
+        djangofloor_mapping = os.environ.get('DJANGOFLOOR_MAPPING', '')
+        merger = SettingMerger(project_name, 'djangofloor.defaults', project_settings_module_name, options['defaults'],
+                               options['default_conf'], djangofloor_mapping, read_only=True)
+        merger.process()
+        merger.post_process()
+
         # noinspection PyAttributeOutsideInit
         self.verbosity = options.get('verbosity')
-        template_values = {'username': options.get('user', settings.PROJECT_NAME),
-                           'bind_address': settings.BIND_ADDRESS,
-                           'project_name': settings.PROJECT_NAME,
-                           'use_celery': settings.USE_CELERY,
-                           'static_url': settings.STATIC_URL,
-                           'media_url': settings.MEDIA_URL,
-                           'use_sqlite': settings.DATABASES['default']['ENGINE'] == 'django.db.backends.sqlite3',
+        use_sqlite = merger.settings['DATABASES']['default']['ENGINE'] == 'django.db.backends.sqlite3'
+        template_values = {'username': options.get('user', merger.settings['PROJECT_NAME']),
+                           'bind_address': merger.settings['BIND_ADDRESS'],
+                           'project_name': merger.settings['PROJECT_NAME'],
+                           'use_celery': merger.settings['USE_CELERY'],
+                           'static_url': merger.settings['STATIC_URL'],
+                           'media_url': merger.settings['MEDIA_URL'],
+                           'use_sqlite': use_sqlite,
                            'static_dst': None,
                            'processes': [x.split(':') for x in options['extra_process']]}
         static_dst = options['collectstatic']
@@ -78,23 +91,10 @@ class Command(BaseCommand):
             ini_conf_path = os.path.join(options['conf'], 'settings.ini')
             py_conf_path = os.path.join(options['conf'], 'settings.py')
             self.write_template('djangofloor/commands/settings.py', py_conf_path, template_values)
-            if settings.DJANGOFLOOR_MAPPING:
-                try:
-                    ini_values = import_string(settings.DJANGOFLOOR_MAPPING)
-                except ImportError:
-                    ini_values = []
-                parser = ConfigParser()
-                for option_parser in ini_values:
-                    assert isinstance(option_parser, OptionParser)
-                    value = str(settings_original_values.get(option_parser.setting_name, ''))
-                    section, sep, option = option_parser.option.partition('.')
-                    if not parser.has_section(section):
-                        parser.add_section(section)
-                    parser.set(section, option, value)
-                with codecs.open(ini_conf_path, 'w', encoding='utf-8') as fd:
-                    parser.write(fd)
-            else:
-                self.write_template('djangofloor/commands/settings.ini', ini_conf_path, {'content': 'content'})
+            if options['default_conf']:
+                shutil.copy2(options['default_conf'], ini_conf_path)
+            elif settings.DJANGOFLOOR_MAPPING:
+                self.write_template('djangofloor/commands/settings.ini', ini_conf_path, {'settings_merger': merger})
 
     @staticmethod
     def write_template(template_name, filename, extra_template_values):
