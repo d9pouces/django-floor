@@ -5,7 +5,11 @@
 sudo apt-get update
 sudo apt-get upgrade --yes
 sudo apt-get install --yes vim dh-make ntp rsync liblzma-dev tree
-sudo apt-get install --yes python{% if use_python3 %}3{% endif %}-all-dev virtualenvwrapper python{% if use_python3 %}3{% endif %}-tz python{% if use_python3 %}3{% endif %}-setuptools apache2 apache2-mpm-worker apache2-utils apache2.2-bin apache2.2-common libapr1 libaprutil1 libaprutil1-dbd-sqlite3 libaprutil1-ldap python-medusa python-meld3 ssl-cert python{% if use_python3 %}3{% endif %}-openid
+sudo apt-get install --yes python{% if use_python3 %}3{% endif %}-all-dev virtualenvwrapper \
+    python{% if use_python3 %}3{% endif %}-tz python{% if use_python3 %}3{% endif %}-setuptools \
+    python{% if use_python3 %}3{% endif %}-oauthlib \
+    apache2 libapr1 libaprutil1 libaprutil1-dbd-sqlite3 libaprutil1-ldap \
+    python-medusa python-meld3 ssl-cert python{% if use_python3 %}3{% endif %}-msgpack
 {% block extra_dependencies %}{% endblock %}source /etc/bash_completion.d/virtualenvwrapper
 {% endblock %}
 
@@ -43,8 +47,9 @@ sudo sed -i "s/localhost/$IP/g" /etc/{{ PROJECT_NAME }}/settings.ini
 sudo a2ensite {{ PROJECT_NAME }}.conf
 sudo a2dissite 000-default.conf
 sudo -u {{ PROJECT_NAME }} {{ PROJECT_NAME }}-manage migrate
-sudo service supervisor restart
-sudo service apache2 restart
+sudo service moneta-gunicorn start
+{% if USE_CELERY %}sudo service moneta-celery start
+{% endif %}sudo service apache2 restart
 {% endblock %}
 {% block tear_down %}set -e
 {% endblock %}
