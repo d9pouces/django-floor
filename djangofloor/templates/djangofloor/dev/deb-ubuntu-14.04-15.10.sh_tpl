@@ -43,7 +43,7 @@ sudo sed -i "s/localhost/$IP/g" /etc/{{ PROJECT_NAME }}/settings.ini
 sudo a2ensite {{ PROJECT_NAME }}.conf
 sudo a2dissite 000-default.conf
 sudo -u {{ PROJECT_NAME }} {{ PROJECT_NAME }}-manage migrate
-sudo service supervisor restart
+sudo service moneta-gunicorn start
 sudo service apache2 restart
 {% endblock %}
 {% block tear_down %}set -e
