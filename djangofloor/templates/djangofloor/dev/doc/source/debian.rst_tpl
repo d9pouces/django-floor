@@ -48,7 +48,7 @@ After installation and configuration, do not forget to create a superuser:
 Launch the service
 ------------------
 
-The service
+The service can be stopped or started via the `service` command. By default, {{ FLOOR_PROJECT_NAME }} is not started.
 
 .. code-block:: bash
 
