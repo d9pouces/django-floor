@@ -19,7 +19,7 @@ These scripts are designed to run on basic installation and are split in five st
 
 If everything is ok, you can copy all the .deb packages to your private mirror or to the destination server.
 By default, {{ FLOOR_PROJECT_NAME }} is installed with Apache 2.4 and systemd.
-You can switch to Nginx or Systemd by tweaking the right `stdeb-XXX.cfg` file.
+You can switch to Nginx or supervisor by tweaking the right `stdeb-XXX.cfg` file.
 
 {% block configuration %}
 Configuration
