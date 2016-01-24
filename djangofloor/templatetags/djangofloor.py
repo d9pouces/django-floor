@@ -86,3 +86,10 @@ def df_urlparse(value, component='hostname'):
     elif not x:
         value = 'scheme%s' % value
     return getattr(urlparse(value), component)
+
+
+@register.filter
+def df_inivalue(value):
+    if not value:
+        return ''
+    return mark_safe('\n    '.join(value.splitlines()))

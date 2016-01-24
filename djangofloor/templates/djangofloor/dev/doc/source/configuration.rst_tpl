@@ -17,7 +17,7 @@ Here is the complete list of settings:
 .. code-block:: ini
 
 {% block ini_configuration %}{% for section in settings_merger.all_ini_options.items %}  [{{ section.0 }}]
-{% for option_parser in section.1 %}  {{ option_parser.key }} = {{ option_parser.str_value }}
+{% for option_parser in section.1 %}  {{ option_parser.key }} = {{ option_parser.str_value|df_inivalue }}
 {% if option_parser.help_str %}  # {{ option_parser.help_str|safe }}
 {% endif %}{% endfor %}{% endfor %}
 {% endblock %}

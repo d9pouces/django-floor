@@ -1,4 +1,4 @@
-Installation
+{% load djangofloor %}Installation
 ============
 {% block introduction %}
 Like many Python packages, you can use several methods to install {{ FLOOR_PROJECT_NAME }}.
@@ -191,7 +191,7 @@ Now, it's time to install {{ FLOOR_PROJECT_NAME }}:
     mkdir -p $VIRTUAL_ENV/etc/{{ PROJECT_NAME }}
     cat << EOF > $VIRTUAL_ENV/etc/{{ PROJECT_NAME }}/settings.ini
 {% block ini_configuration %}{% for section in settings_merger.all_ini_options.items %}    [{{ section.0 }}]
-{% for option_parser in section.1 %}    {{ option_parser.key }} = {{ option_parser.str_value }}
+{% for option_parser in section.1 %}    {{ option_parser.key }} = {{ option_parser.str_value|df_inivalue }}
 {% endfor %}{% endfor %}{% endblock %}    EOF
     chmod 0400 $VIRTUAL_ENV/etc/{{ PROJECT_NAME }}/settings.ini
     # required since there are password in this file
