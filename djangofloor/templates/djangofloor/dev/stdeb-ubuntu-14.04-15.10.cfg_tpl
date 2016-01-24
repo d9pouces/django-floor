@@ -12,7 +12,6 @@ exclude{% if use_python3 %}3{% endif %} = debtools
     pip
     pytz
     futures
-    python{% if use_python3 %}3{% endif %}-openid
     {{ PROJECT_NAME }}
 {% block multideb_extra_exclude %}{% endblock %}
 {% endblock %}

@@ -84,7 +84,7 @@ class Command(BaseCommand):
             for process_name, process_cmd in template_values['processes']:
                 template_values['process_name'] = process_name
                 template_values['process_cmd'] = process_cmd
-                systemd_path = os.path.join(options['systemd'], '%s' % process_name)
+                systemd_path = os.path.join(options['systemd'], '%s.service' % process_name)
                 self.write_template('djangofloor/commands/systemd.conf', systemd_path, template_values)
 
         if options['conf']:
