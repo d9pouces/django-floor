@@ -10,7 +10,6 @@ django-pipeline==1.6.4
 django-redis==4.3.0
 django-redis-cache==1.6.5
 funcsigs==0.4
-futures==3.0.3
 gunicorn==19.4.5
 kombu==3.0.32
 oauthlib==1.0.3
