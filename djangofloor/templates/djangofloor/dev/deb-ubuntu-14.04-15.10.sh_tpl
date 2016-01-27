@@ -17,11 +17,11 @@ sudo apt-get install --yes python{% if use_python3 %}3{% endif %}-all-dev virtua
 # create the virtual env
 set +e
 mkvirtualenv -p `which python{% if use_python3 %}3{% endif %}` djangofloor{% if use_python3 %}3{% endif %}
-set -e
 workon djangofloor{% if use_python3 %}3{% endif %}
 pip install setuptools --upgrade
 pip install pip --upgrade
 pip install debtools djangofloor
+set -e
 {% block extra_virtualenv %}{% endblock %}python setup.py install
 {% endblock %}
 
