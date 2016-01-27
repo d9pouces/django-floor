@@ -77,14 +77,17 @@ class Command(BaseCommand):
                             verbose_mode=False):
         template_filename = '%s/%s' % (default_template_folder, filename)
         target_filename = os.path.join(target_directory, filename)
+        display_filename = filename
         # noinspection PyTypeChecker
         if target_filename.endswith(self.template_suffix):
             target_filename = target_filename[:-len(self.template_suffix)]
+        if display_filename.endswith(self.template_suffix):
+            display_filename = display_filename[:-len(self.template_suffix)]
         pkg_resources.ensure_directory(target_filename)
         try:
             new_content = render_to_string(template_filename, context)
         except TemplateSyntaxError as e:
-            self.stderr.write(self.style.ERROR('Unable to write %s' % filename))
+            self.stderr.write(self.style.ERROR('Invalid template %s found in %s' % (filename, default_template_folder)))
             self.stderr.write(self.style.ERROR(text_type(e)))
             return
         except UnicodeDecodeError as e:
@@ -97,19 +100,23 @@ class Command(BaseCommand):
                 with codecs.open(target_filename, 'r', encoding='utf-8') as fd:
                     previous_content = fd.read()
             if new_content == previous_content:
-                self.stdout.write(self.style.MIGRATE_LABEL('Unmodified content: %s' % filename))
+                self.stdout.write(self.style.MIGRATE_LABEL('Unmodified content: %s from %s' %
+                                                           (display_filename, default_template_folder)))
             elif not test_mode:
                 with codecs.open(target_filename, 'w', encoding='utf-8') as fd:
                     fd.write(new_content)
-                self.stdout.write(self.style.MIGRATE_LABEL('Written file: %s' % filename))
+                self.stdout.write(self.style.MIGRATE_LABEL('Written file: %s from %s' %
+                                                           (display_filename, default_template_folder)))
             else:
-                self.stdout.write(self.style.MIGRATE_LABEL('File to write: %s' % filename))
+                self.stdout.write(self.style.MIGRATE_LABEL('File to write: %s from %s' %
+                                                           (display_filename, default_template_folder)))
             if verbose_mode and previous_content and new_content != previous_content:
                 for line in unified_diff(previous_content.splitlines(), new_content.splitlines(),
                                          fromfile='%s-before' % target_filename, tofile='%s-after' % target_filename):
                     self.stdout.write(line)
         else:
-            self.stdout.write(self.style.MIGRATE_LABEL('Skipped file: %s' % filename))
+            self.stdout.write(self.style.MIGRATE_LABEL('Skipped file: %s from %s' %
+                                                       (display_filename, default_template_folder)))
 
     def handle(self, *args, **options):
         verbose_mode = options['verbosity'] > 1
