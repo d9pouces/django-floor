@@ -1,6 +1,6 @@
 {% block project %}[{{ PROJECT_NAME }}]
 frontend = apache2.4
-process_manager = systemd
+process_manager = supervisor
 {% endblock %}
 
 {% block multideb %}[multideb]
