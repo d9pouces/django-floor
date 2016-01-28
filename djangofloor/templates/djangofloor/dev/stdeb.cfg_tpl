@@ -2,7 +2,6 @@
 processes = {{ PROJECT_NAME }}-gunicorn:/usr/bin/{{ PROJECT_NAME }}-gunicorn
 {% if USE_CELERY %}    {{ PROJECT_NAME }}-celery:/usr/bin/{{ PROJECT_NAME }}-celery worker
 {% endif %}extra_postinst3 = postinst.sh
-process_manager = systemd
 username = {{ PROJECT_NAME }}
 
 [djangofloor]
