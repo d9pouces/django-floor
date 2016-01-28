@@ -27,11 +27,11 @@ set -e
 
 {% block packages %}
 # generate packages for all dependencies
-multideb -r -v -x stdeb-ubuntu-14.04-15.10.cfg
+multideb -r -v -x stdeb-ubuntu-14.04.cfg
 
 # creating package for {{ PROJECT_NAME }}
 rm -rf `find * | grep pyc$`
-python setup.py bdist_deb_django -x stdeb-ubuntu-14.04-15.10.cfg
+python setup.py bdist_deb_django -x stdeb-ubuntu-14.04.cfg
 deb-dep-tree deb_dist/*deb
 mv deb_dist/*deb deb
 {% endblock %}
