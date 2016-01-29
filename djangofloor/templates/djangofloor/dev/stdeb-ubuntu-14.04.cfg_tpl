@@ -30,3 +30,10 @@ exclude{% if use_python3 %}3{% endif %} = debtools
 {% block gunicorn %}[gunicorn]
 Package = gunicorn
 {% endblock %}
+
+{% block python_openid %}{% if use_python3 %}[django-allauth]
+Depends3 = python3 (>= 3.2), python3-openid (>= 3.0.0), python3-django (>= 1.9.0), python3-requests, python3-requests-oauthlib
+{% else %}[django-allauth]
+Depends3 = python (>= 3.2), python-openid (>= 3.0.0), python-django (>= 1.9.0), python-requests, python-requests-oauthlib
+{% endif %}
+{% endblock %}

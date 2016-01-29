@@ -51,5 +51,6 @@ sudo service moneta-gunicorn start
 {% if USE_CELERY %}sudo service moneta-celery start
 {% endif %}sudo service apache2 restart
 {% endblock %}
-{% block tear_down %}set -e
+{% block tear_down %}wget http://$IP/
+set -e
 {% endblock %}

@@ -47,9 +47,9 @@ sudo sed -i "s/localhost/$IP/g" /etc/{{ PROJECT_NAME }}/settings.ini
 sudo a2ensite {{ PROJECT_NAME }}.conf
 sudo a2dissite 000-default.conf
 sudo -u {{ PROJECT_NAME }} {{ PROJECT_NAME }}-manage migrate
-sudo service moneta-gunicorn start
-{% if USE_CELERY %}sudo service moneta-celery start
-{% endif %}sudo service apache2 restart
+sudo service supervisor restart
+sudo service apache2 restart
 {% endblock %}
-{% block tear_down %}set -e
+{% block tear_down %}wget http://$IP/
+set -e
 {% endblock %}
