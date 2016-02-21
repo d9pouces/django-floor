@@ -30,11 +30,26 @@ __author__ = 'Matthieu Gallet'
 
 
 class DjangoFloorConfig(object):
+    """Base class for special setting values. When a setting is a :class:`djangofloor.utils.DjangoFloorConfig`,
+      then the method `get_value(merger)` is called for getting the definitive value.
+    """
     def __init__(self, value):
         self.value = value
 
+    def get_value(self, merger):
+        """ Return the intepreted value
+        :param merger: merger object, with all interpreted settings
+        :type merger: :class:`djangofloor.utils.SettingMerger`
+        :return:
+        :rtype:
+        """
+        raise NotImplementedError
+
 
 class Path(DjangoFloorConfig):
+
+    def get_value(self, merger):
+        raise NotImplementedError
 
     def __repr__(self):
         return str(self.value)
@@ -43,13 +58,24 @@ class Path(DjangoFloorConfig):
 class DirectoryPath(Path):
     """Represent a directory that must be created on startup
     """
-    pass
+    def get_value(self, merger):
+        assert isinstance(merger, SettingMerger)
+        obj = merger.parse_setting(self.value)
+        if not merger.read_only:
+            merger.ensure_dir(obj, parent_=False)
+        return obj
 
 
 class FilePath(Path):
     """Represent a file, whose parent directory should be created on startup
     """
-    pass
+
+    def get_value(self, merger):
+        assert isinstance(merger, SettingMerger)
+        obj = merger.parse_setting(self.value)
+        if not merger.read_only:
+            merger.ensure_dir(obj, parent_=True)
+        return obj
 
 
 class SettingReference(DjangoFloorConfig):
@@ -72,6 +98,17 @@ class SettingReference(DjangoFloorConfig):
     Then `settings.SETTING_2` is equal to `False`
     """
 
+    def __init__(self, value, func=None):
+        super(SettingReference, self).__init__(value)
+        self.func = func
+
+    def get_value(self, merger):
+        assert isinstance(merger, SettingMerger)
+        result = merger.get_setting_value(self.value)
+        if self.func:
+            result = self.func(result)
+        return result
+
 
 class CallableSetting(DjangoFloorConfig):
     """
@@ -89,13 +126,22 @@ class CallableSetting(DjangoFloorConfig):
     >>> from django.conf import settings
 
     Then `settings.SETTING_2` is equal to `True`
+
+    You can provide a list of required settings that must be available before the call to your function.
     """
+
     def __init__(self, value, *required):
         super(CallableSetting, self).__init__(value)
         self.required = required
 
+    def get_value(self, merger):
+        assert isinstance(merger, SettingMerger)
+        for required in self.required:
+            merger.get_setting_value(required)
+        return self.value(merger.settings)
 
-class ExpandIterable(DjangoFloorConfig):
+
+class ExpandIterable(SettingReference):
     """Allow to import an existing list inside a list setting.
     in `defaults.py`:
 
@@ -302,22 +348,8 @@ class SettingMerger(object):
                     values[field_name] = self.get_setting_value(field_name)
             if values:
                 return self.__formatter.format(obj, **values)
-        elif isinstance(obj, DirectoryPath):
-            obj = self.parse_setting(obj.value)
-            if not self.read_only:
-                self.ensure_dir(obj, parent_=False)
-            return obj
-        elif isinstance(obj, FilePath):
-            obj = self.parse_setting(obj.value)
-            if not self.read_only:
-                self.ensure_dir(obj, parent_=True)
-            return obj
-        elif isinstance(obj, SettingReference):
-            return self.get_setting_value(obj.value)
-        elif isinstance(obj, CallableSetting):
-            for required in obj.required:
-                self.get_setting_value(required)
-            return obj.value(self.settings)
+        elif isinstance(obj, DjangoFloorConfig):
+            return obj.get_value(self)
         elif isinstance(obj, list) or isinstance(obj, tuple):
             result = []
             for sub_obj in obj:
