@@ -31,7 +31,7 @@ Here is the list of the default generated files (you can find them in `djangoflo
   ├── stdeb-debian-7.cfg
   ├── stdeb-debian-8.cfg
   ├── stdeb.cfg
-  └── ubuntu-14.04-15.10-python3.sh
+  └── debian-8_ubuntu-14.10-15.10-python3.sh
 
 Assume that you have the following tree in `my_app/templates/my_app/dev`:
 

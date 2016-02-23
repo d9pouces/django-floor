@@ -7,4 +7,4 @@ Only define the current version.
 from __future__ import unicode_literals
 
 __author__ = 'Matthieu Gallet'
-__version__ = '0.18.16'
+__version__ = '0.18.17'
