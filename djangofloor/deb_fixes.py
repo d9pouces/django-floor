@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 import codecs
 import os
 import shutil
+import sys
 
 __author__ = 'Matthieu Gallet'
 
@@ -38,8 +39,12 @@ def fix_django_redis(package_name, package_version, deb_src_dir):
 
 # noinspection PyUnusedLocal
 def fix_django(package_name, package_version, deb_src_dir=None):
+    if sys.version_info[0] == 3:
+        os.rename(os.path.join('django', 'bin', 'django-admin.py'), os.path.join('django', 'bin', 'django-admin3.py'))
+        file_replace('setup.py', 'django-admin', 'django-admin3')
     for root, dirnames, filenames in os.walk(os.path.join('django', 'conf', 'app_template')):
         for filename in filenames:
+            # noinspection PyTypeChecker
             open(os.path.join(root, filename), 'wb').close()
 
 
