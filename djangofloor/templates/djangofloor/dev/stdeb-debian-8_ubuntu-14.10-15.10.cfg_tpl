@@ -12,6 +12,12 @@ exclude{% if use_python3 %}3{% endif %} = debtools
     pip
     pytz
     futures
+    sqlparse
+    gunicorn
+    kombu
+    celery
+    billiard
+    pytz
     {{ PROJECT_NAME }}
 {% block multideb_extra_exclude %}{% endblock %}
 {% endblock %}

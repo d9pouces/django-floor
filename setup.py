@@ -17,10 +17,11 @@ for line in codecs.open(os.path.join('djangofloor', '__init__.py'), 'r', encodin
 # get README content from README.rst file
 with codecs.open(os.path.join(os.path.dirname(__file__), 'README.md'), encoding='utf-8') as fd:
     long_description = fd.read()
-entry_points = {'console_scripts': ['djangofloor-manage = djangofloor.scripts:manage',
-                                    'djangofloor-gunicorn = djangofloor.scripts:gunicorn',
-                                    'djangofloor-celery = djangofloor.scripts:celery',
-                                    'djangofloor-uwsgi = djangofloor.scripts:uwsgi', ],
+suffix = '' if sys.version_info[0] == 2 else '%s' % sys.version_info[0]
+entry_points = {'console_scripts': ['djangofloor-manage%s = djangofloor.scripts:manage' % suffix,
+                                    'djangofloor-gunicorn%s = djangofloor.scripts:gunicorn' % suffix,
+                                    'djangofloor-celery%s = djangofloor.scripts:celery' % suffix,
+                                    'djangofloor-uwsgi%s = djangofloor.scripts:uwsgi' % suffix, ],
                 'distutils.commands': ['bdist_deb_django = '
                                        'djangofloor.management.commands.bdist_deb_django:BdistDebDjango']}
 
