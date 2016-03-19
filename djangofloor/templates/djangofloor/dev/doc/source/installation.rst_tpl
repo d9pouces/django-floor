@@ -240,8 +240,8 @@ You can also use systemd to launch {{ PROJECT_NAME }}:
     Group={{ PROJECT_NAME }}
     WorkingDirectory={{ LOCAL_PATH }}/
     ExecStart=/home/{{ PROJECT_NAME }}/.virtualenvs/{{ PROJECT_NAME }}/bin/{{ PROJECT_NAME }}-gunicorn
-    ExecReload=/bin/kill -s HUP $MAINPID
-    ExecStop=/bin/kill -s TERM $MAINPID
+    ExecReload=/bin/kill -s HUP \$MAINPID
+    ExecStop=/bin/kill -s TERM \$MAINPID
     [Install]
     WantedBy=multi-user.target
     EOF
