@@ -23,8 +23,8 @@ exclude{% if use_python3 %}3{% endif %} = debtools
 {% endblock %}
 
 {% block djangofloor %}[djangofloor]
-{% if use_python3 %}Depends3 = python3 (>= 3.2), python3-django (>= 1.9.0), python3-django-allauth (>= 0.19.0), python3-gunicorn (>=0.14.5), python3-django-bootstrap3 (>= 5.0.0), python3-django-debug-toolbar (>= 1.2.0), python3-django-pipeline (>= 1.5.0), python3-celery (>=3.1.13), python3-django-redis (>= 3.8.3), python3-django-redis-cache (>= 0.13.1)
-{% else %}Depends = python (>= 2.7), python-django (>= 1.9.0), python-django-allauth (>= 0.19.0), python-gunicorn (>=0.14.5), python-django-bootstrap3 (>= 5.0.0), python-django-debug-toolbar (>= 1.2.0), python-django-pipeline (>= 1.5.0), python-celery (>=3.1.13), python-django-redis (>= 3.8.3), python-django-redis-cache (>= 0.13.1)
+{% if use_python3 %}Depends3 = python3 (>= 3.2), python3-django (>= 1.9.0), python3-django-allauth (>= 0.19.0), gunicorn (>=0.14.5), python3-django-bootstrap3 (>= 5.0.0), python3-django-debug-toolbar (>= 1.2.0), python3-django-pipeline (>= 1.5.0), python3-celery (>=3.1.13), python3-django-redis (>= 3.8.3), python3-django-redis-cache (>= 0.13.1)
+{% else %}Depends = python (>= 2.7), python-django (>= 1.9.0), python-django-allauth (>= 0.19.0), gunicorn (>=0.14.5), python-django-bootstrap3 (>= 5.0.0), python-django-debug-toolbar (>= 1.2.0), python-django-pipeline (>= 1.5.0), python-celery (>=3.1.13), python-django-redis (>= 3.8.3), python-django-redis-cache (>= 0.13.1)
 {% endif %}{% endblock %}
 
 {% block django_redis %}[django-redis]
