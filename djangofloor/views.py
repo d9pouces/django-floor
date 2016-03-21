@@ -12,13 +12,11 @@ from django.contrib.sites.shortcuts import get_current_site
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse, StreamingHttpResponse, JsonResponse, HttpResponseRedirect
 from django.contrib.syndication.views import add_domain
-from django.shortcuts import render_to_response
-from django.template import RequestContext
+from django.template.response import TemplateResponse
 from django.utils.lru_cache import lru_cache
 from django.utils.module_loading import import_string
 from django.views.decorators.cache import never_cache
 from django.views.decorators.csrf import csrf_exempt
-
 from django.utils.six import string_types, binary_type
 
 from djangofloor.decorators import REGISTERED_SIGNALS
@@ -63,10 +61,9 @@ def signals(request):
         interval = import_string(interval)
     if callable(interval):
         interval = interval(request)
-    return render_to_response('djangofloor/signals.html',
-                              {'signals': REGISTERED_SIGNALS, 'use_ws4redis': settings.FLOOR_USE_WS4REDIS,
-                               'WS4REDIS_EMULATION_INTERVAL': interval},
-                              RequestContext(request), content_type=__get_js_mimetype())
+    return TemplateResponse(request, 'djangofloor/signals.html',
+                            {'signals': REGISTERED_SIGNALS, 'use_ws4redis': settings.FLOOR_USE_WS4REDIS,
+                             'WS4REDIS_EMULATION_INTERVAL': interval}, content_type=__get_js_mimetype())
 
 
 @csrf_exempt
@@ -149,12 +146,11 @@ def robots(request):
     current_site = get_current_site(request)
     base_url = add_domain(current_site.domain, '/', request.is_secure())[:-1]
     template_values = {'base_url': base_url}
-    return render_to_response('djangofloor/robots.txt', template_values, RequestContext(request),
-                              content_type='text/plain')
+    return TemplateResponse(request, 'djangofloor/robots.txt', template_values, content_type='text/plain')
 
 
 def index(request):
     if settings.FLOOR_INDEX is not None:
         return HttpResponseRedirect(reverse(settings.FLOOR_INDEX))
     template_values = {}
-    return render_to_response('djangofloor/index.html', template_values, RequestContext(request))
+    return TemplateResponse(request, 'djangofloor/index.html', template_values)
