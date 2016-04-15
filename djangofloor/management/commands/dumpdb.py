@@ -51,7 +51,7 @@ class MySQL(BaseDumper):
         """ :return:
         :rtype: :class:`list` of :class:`str`
         """
-        command = ['mysqldump',  '--user', '%(USER)s',  '--password', '%(PASSWORD)s']
+        command = ['mysqldump',  '--user', '%(USER)s',  '--password=%(PASSWORD)s']
         if self.db_options.get('HOST'):
             command += ['--host', '%(HOST)s']
         if self.db_options.get('PORT'):
