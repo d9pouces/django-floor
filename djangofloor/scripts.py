@@ -64,6 +64,7 @@ def set_env():
     else:
         project_name = 'djangofloor'
     project_name = __check_extra_option('dfproject', project_name, '--dfproject')
+    project_name = project_name.replace('-', '_')
     os.environ.setdefault('DJANGOFLOOR_PROJECT_DEFAULTS', '%s.defaults' % project_name)
     os.environ.setdefault('DJANGOFLOOR_PROJECT_NAME', project_name)
 
