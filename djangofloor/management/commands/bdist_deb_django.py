@@ -153,7 +153,7 @@ class BdistDebDjango(sdist_dsc):
         elif frontend is not None:
             print('Invalid value for frontend: %s' % frontend)
             raise ValueError
-        gen_install_command += ['--conf', os.path.join(etc_dir, project_name)]
+        gen_install_command += ['--conf', os.path.join(etc_dir, debian_project_name)]
         if process_manager == 'supervisor':
             gen_install_command += ['--supervisor', os.path.join(etc_dir, 'supervisor', 'conf.d', conf_name)]
             extra_depends += ', supervisor'
