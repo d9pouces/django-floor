@@ -130,6 +130,8 @@ class BdistDebDjango(sdist_dsc):
         username = self.get_option(project_name, 'username', fallback=project_name)
         extra_depends = ''
 
+        debian_project_name = project_name.replace('_', '-')
+        conf_name = '%s.conf' % debian_project_name
         # prepare the use of the gen_install command
         os.environ['DJANGOFLOOR_PROJECT_NAME'] = project_name
         set_env()
@@ -140,20 +142,20 @@ class BdistDebDjango(sdist_dsc):
         for extra_process in extra_processes:
             gen_install_command += ['--extra-process', extra_process]
         if frontend == 'nginx':
-            gen_install_command += ['--nginx', os.path.join(etc_dir, 'nginx', 'sites-available', '%s.conf' % project_name)]
+            gen_install_command += ['--nginx', os.path.join(etc_dir, 'nginx', 'sites-available', conf_name)]
             extra_depends += ', nginx'
         elif frontend == 'apache2.2':
-            gen_install_command += ['--apache22', os.path.join(etc_dir, 'apache2', 'sites-available', '%s.conf' % project_name)]
+            gen_install_command += ['--apache22', os.path.join(etc_dir, 'apache2', 'sites-available', conf_name)]
             extra_depends += ', apache2 (>= 2.2)'
         elif frontend == 'apache2.4':
-            gen_install_command += ['--apache24', os.path.join(etc_dir, 'apache2', 'sites-available', '%s.conf' % project_name)]
+            gen_install_command += ['--apache24', os.path.join(etc_dir, 'apache2', 'sites-available', conf_name)]
             extra_depends += ', apache2 (>= 2.4)'
         elif frontend is not None:
             print('Invalid value for frontend: %s' % frontend)
             raise ValueError
         gen_install_command += ['--conf', os.path.join(etc_dir, project_name)]
         if process_manager == 'supervisor':
-            gen_install_command += ['--supervisor', os.path.join(etc_dir, 'supervisor', 'conf.d', '%s.conf' % project_name)]
+            gen_install_command += ['--supervisor', os.path.join(etc_dir, 'supervisor', 'conf.d', conf_name)]
             extra_depends += ', supervisor'
         elif process_manager == 'systemd':
             gen_install_command += ['--systemd', os.path.join(etc_dir, 'systemd', 'system')]
