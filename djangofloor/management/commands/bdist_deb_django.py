@@ -130,7 +130,7 @@ class BdistDebDjango(sdist_dsc):
         username = self.get_option(project_name, 'username', fallback=project_name)
         extra_depends = ''
 
-        debian_project_name = project_name.replace('_', '-')
+        debian_project_name = project_name.replace('-', '_')
         conf_name = '%s.conf' % debian_project_name
         # prepare the use of the gen_install command
         os.environ['DJANGOFLOOR_PROJECT_NAME'] = project_name
