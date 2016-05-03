@@ -201,7 +201,7 @@ class BdistDebDjango(sdist_dsc):
             rules_fd.write(new_rules_content)
 
         values = {'project_name': project_name, 'process_manager': process_manager,
-                  'frontend': frontend, }
+                  'frontend': frontend, 'debian_project_name': debian_project_name, }
         # get options for installation/remove scripts
         extra_postinst = {2: self.get_option(project_name, 'extra_postinst', fallback=None),
                           3: self.get_option(project_name, 'extra_postinst3', fallback=None), }
