@@ -8,6 +8,7 @@ df.default_message_timeout = 5000;
 df.__message_count = 0;
 df.window_key = null;
 df.ws4redis = null;
+df.csrf_cookie_value = '';
 /**
  * Call an existing signal
  * @param signal
@@ -27,6 +28,20 @@ df.call = function (signal, options, from_server) {
         this.registered_signals[signal][i](options, from_server);
     }
     return false;
+};
+
+/**
+ * add the CSRF token to a form as a hidden input. Always returns True so you can use it as onsubmit attribute;
+ <form onsubmit="return df.add_csrf_to_form(this);" method="POST" >;
+*/
+
+df.add_csrf_to_form = function (form) {
+    var input = document.createElement('input');
+    input.type = 'hidden';
+    input.name = 'csrfmiddlewaretoken';
+    input.value = df.csrf_cookie_value;
+    form.appendChild(input);
+    return true;
 };
 
 /**

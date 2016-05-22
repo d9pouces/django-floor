@@ -63,15 +63,17 @@ def signals(request):
         interval = interval(request)
     return TemplateResponse(request, 'djangofloor/signals.html',
                             {'signals': REGISTERED_SIGNALS, 'use_ws4redis': settings.FLOOR_USE_WS4REDIS,
+                             'CSRF_COOKIE_NAME': settings.CSRF_COOKIE_NAME,
+                             'CSRF_HEADER_NAME': settings.CSRF_HEADER_NAME[5:].replace('_', '-'),
                              'WS4REDIS_EMULATION_INTERVAL': interval}, content_type=__get_js_mimetype())
 
 
-@csrf_exempt
 @never_cache
 def signal_call(request, signal):
     """ Called by JS code when websockets are not available. Allow to call Python signals from JS.
     Arguments are passed in the request body, serialized as JSON.
 
+    :param request: Django HTTP request
     :param signal: name of the called signal
     :type signal: :class:`str`
     """
