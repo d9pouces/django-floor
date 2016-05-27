@@ -61,9 +61,9 @@ class RemoteUserMiddleware(BaseRemoteUserMiddleware):
                 " MIDDLEWARE_CLASSES setting to insert"
                 " 'django.contrib.auth.middleware.AuthenticationMiddleware'"
                 " before the RemoteUserMiddleware class.")
-        if self.header not in request.META:
+        username = request.META.get(self.header)
+        if not username:
             return
-        username = request.META[self.header]
         username, sep, domain = username.partition('@')
         # If the user is already authenticated and that user is the user we are
         # getting passed in the headers, then the correct user is already
