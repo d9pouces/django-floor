@@ -62,7 +62,7 @@ class RemoteUserMiddleware(BaseRemoteUserMiddleware):
                 " 'django.contrib.auth.middleware.AuthenticationMiddleware'"
                 " before the RemoteUserMiddleware class.")
         username = request.META.get(self.header)
-        if not username:
+        if not username or username == '(null)':  # special case caused by Apache :-(
             return
         username, sep, domain = username.partition('@')
         # If the user is already authenticated and that user is the user we are
