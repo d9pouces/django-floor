@@ -1,7 +1,6 @@
 # coding=utf-8
 """Setup file for the DjangoFloor project.
 """
-from __future__ import unicode_literals
 import re
 import sys
 import codecs
