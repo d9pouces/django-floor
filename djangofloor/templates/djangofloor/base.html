@@ -11,6 +11,7 @@
     {% block head_favicon %}<link rel="shortcut icon" href="{% static 'images/favicon.png' %}">{% endblock %}
     {% block head_pipeline %}{% javascript 'default' %}{% stylesheet 'default' %}<!--[if lt IE 9 ]>{% javascript 'ie9' %}<![endif]-->{% endblock %}
     <script type="text/javascript" src="{% url 'djangofloor.views.signals' %}"></script>
+    <script type="text/javascript">$(function () { df.window_key = "{{ df_window_key }}"; }); </script>
 </head>
 <body>
 {% df_window_key %}{% block body %}
