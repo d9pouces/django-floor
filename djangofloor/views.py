@@ -3,22 +3,20 @@
 =================================================
 """
 from __future__ import unicode_literals
+
 import json
 import mimetypes
 import os
-
 from django.conf import settings
 from django.contrib.sites.shortcuts import get_current_site
+from django.contrib.syndication.views import add_domain
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse, StreamingHttpResponse, JsonResponse, HttpResponseRedirect
-from django.contrib.syndication.views import add_domain
 from django.template.response import TemplateResponse
 from django.utils.lru_cache import lru_cache
 from django.utils.module_loading import import_string
-from django.views.decorators.cache import never_cache
-from django.views.decorators.csrf import csrf_exempt
 from django.utils.six import string_types, binary_type
-
+from django.views.decorators.cache import never_cache
 from djangofloor.decorators import REGISTERED_SIGNALS
 from djangofloor.df_redis import fetch_signal_calls
 from djangofloor.exceptions import InvalidRequest
