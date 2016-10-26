@@ -141,7 +141,7 @@ In addition of the degraded mode without Redis, using a Redis server allows to m
 
     * use delayed (Celery) tasks,
     * call Javascript signals anywhere from Python code (including in delayed tasks) by activating a regular polling from JS.
-      However, you can only activate JS signals on a given session (probably the one that sent the first `SignalRequest`).
+      However, you can only activate JS signals on a given session (probably the one that sent the first `WindowInfo`).
 
 You activate a regular polling by setting `WS4REDIS_EMULATION_INTERVAL` to a positive value. This interval is in milliseconds!
 Do not set it below 500 or 1,000 if you do not want to flood your webserver. Leave it to 0 to desactivate this behaviour.
@@ -164,5 +164,5 @@ Notes
             @connect(path='demo.my_signal', allow_from_client=False)
 
     - Several functions (both JS and Python) can be connected to the same signal,
-    - Python calls require a `request`, which can be either a standard `django.http.HttpRequest` or a `djangofloor.decorators.SignalRequest`. `SignalRequest` propagates the username and the session key from call to call and is provided from a JS key.
+    - Python calls require a `request`, which can be either a standard `django.http.HttpRequest` or a `djangofloor.decorators.WindowInfo`. `WindowInfo` propagates the username and the session key from call to call and is provided from a JS key.
     - Required JS files (jquery, ws4redis and `js/djangofloor.js`) are defined in `settings.PIPELINE_JS`
