@@ -1,0 +1,55 @@
+$(function () {
+    function get_cookie(name) {
+        /* copied from the Django doc */
+        var cookieValue = null;
+        if (document.cookie && document.cookie != '') {
+            var cookies = document.cookie.split(';');
+            for (var i = 0; i < cookies.length; i++) {
+                var cookie = jQuery.trim(cookies[i]);
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    df.csrf_cookie_value = get_cookie("{{ CSRF_COOKIE_NAME }}")
+    function csrfSafeMethod(method) {
+        return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+    }
+
+    {% if use_ws4redis %}
+    df.ws4redis_connect = function (window_key) {
+        df.ws4redis = WS4Redis({
+            uri: '{{ WEBSOCKET_URI }}djangofloor?subscribe-broadcast&subscribe-user&subscribe-session&publish-broadcast',
+            receive_message: function (msg) { setTimeout(function() { var parsed = JSON.parse(msg); df.call(parsed.signal, parsed.options, true); }, 0); },
+            heartbeat_msg: {{ WS4REDIS_HEARTBEAT }}
+        });
+        df.window_key = window_key;
+        df.ws4redis_window = WS4Redis({
+            uri: '{{ WEBSOCKET_URI }}' + window_key + '?subscribe-broadcast',
+            receive_message: function (msg) { setTimeout(function() { var parsed = JSON.parse(msg); df.call(parsed.signal, parsed.options, true); }, 0); },
+            heartbeat_msg: {{ WS4REDIS_HEARTBEAT }}
+        });
+    };
+    {% for name in signals %}df.connect_ws('{{ name }}');
+    {% endfor %}{% else %}
+    df.ws4redis_connect = function (window_key) {
+        df.window_key = window_key;
+    };
+    {% if WS4REDIS_EMULATION_INTERVAL > 0 %}
+    setInterval(function () { df.connect_ws_emulator('{% url 'df_get_signal_calls' %}'); }, {{ WS4REDIS_EMULATION_INTERVAL }});{% endif %}
+    {% for name in signals %}df.connect_http('{{ name }}', "{% url 'df_signal_call' signal=name %}");
+    {% endfor %}{% endif %}
+    $.ajaxSetup({
+        beforeSend: function(xhr, settings) {
+            if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                xhr.setRequestHeader("{{ CSRF_HEADER_NAME }}", df.csrf_cookie_value);
+            }
+        }
+    });
+
+});
+

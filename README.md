@@ -149,8 +149,8 @@ Notes:
   - You can prevent Python code from calling the javascript side of calls call('demo.my_signal', request, None, \*\*kwargs)
   - You can propagate Python signals to all sessions of the logged user (use USER instead of SESSION), any logged user (use BROADCAST), or a limited set of users with {USER: ['username']}
   - Several functions (either JS or Python) can be connected to the same signal
-  - Python calls require a `request`, which can be either a standard `django.http.HttpRequest` or a `djangofloor.decorators.WindowInfo`.
-    `WindowInfo` propagates the username and the session key from call to call and is provided from a JS key.   
+  - Python calls require a `request`, which can be either a standard `django.http.HttpRequest` or a `djangofloor.decorators.SignalRequest`.
+    `SignalRequest` propagates the username and the session key from call to call and is provided from a JS key.   
   - Required JS files (jquery, ws4redis and djangofloor) are defined in `settings.PIPELINE_JS`
   
   
