@@ -245,14 +245,19 @@ df.connect('df.redirect', function (options) {
     "use strict";
     window.location.href = options.url;
 });
+df.connect('df.modal.clean_stack'), function () {
+    "use strict";
+    df.__modal_respawn_index = -1;
+    df.__modal_respawn_stack = [];
+});
 df.on_hidden_modal = function () {
     "use strict";
     var baseModal = $('#df_modal'), respawn = undefined;
-    if(df.__modal_respawn_index >= 0) {
-        respawn = df.__modal_respawn_stack[df.__modal_respawn_index - 1];
-    }
     baseModal.removeData('bs.modal');
     baseModal.find(".modal-content").html('');
+    while((df.__modal_respawn_index >= 0) && (!df.__modal_respawn_stack[df.__modal_respawn_index - 1])) {
+        df.__modal_respawn_index -= 1;
+    }
     if (respawn) {
         df.__modal_respawn_index -= 2;
         df.call(respawn.signal, respawn.options);
