@@ -223,17 +223,27 @@ df.connect('df.modal.show', function (options) {
     } else {
         baseModal.find(".modal-dialog").removeAttr("style");
     }
-    df.__modal_respawn_index += 1;
-    while(df.__modal_respawn_index + 1 >= df.__modal_respawn_stack.length) {
-        df.__modal_respawn_stack.push(undefined);
+    if(options.clean_stack) {
+        df.__modal_respawn_index = -1;
+        df.__modal_respawn_stack = [];
     }
-    df.__modal_respawn_stack[df.__modal_respawn_index] = options.respawn;
+    if(options.respawn) {
+        df.__modal_respawn_index += 1;
+        while(df.__modal_respawn_index + 1 >= df.__modal_respawn_stack.length) {
+            df.__modal_respawn_stack.push(undefined);
+        }
+        df.__modal_respawn_stack[df.__modal_respawn_index] = options.respawn;
+    }
     baseModal.modal('show');
 });
 
-df.connect('df.modal.hide', function () {
+df.connect('df.modal.hide', function (opts) {
     "use strict";
     var baseModal = $('#df_modal');
+    if(opts.clean_stack) {
+        df.__modal_respawn_index = -1;
+        df.__modal_respawn_stack = [];
+    }
     baseModal.modal('hide');
     baseModal.removeData('bs.modal');
 });
