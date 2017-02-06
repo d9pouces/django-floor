@@ -255,7 +255,7 @@ df.connect('df.redirect', function (options) {
     "use strict";
     window.location.href = options.url;
 });
-df.connect('df.modal.clean_stack'), function () {
+df.connect('df.modal.clean_stack', function () {
     "use strict";
     df.__modal_respawn_index = -1;
     df.__modal_respawn_stack = [];
