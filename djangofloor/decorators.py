@@ -1,76 +1,371 @@
-# coding=utf-8
-"""Connect Python code to the DjangoFloor signal system
-====================================================
+# -*- coding: utf-8 -*-
+"""Decorators to declare signals and remote functions
+==================================================
 
-Define the decorator for connecting Python code to signals, a :class:`djangofloor.decorators.SignalRequest`
-which can be easily serialized and is lighter than a :class:`django.http.HttpRequest`,
-and some code to convert serialized data sent by Javascript to something useful in Python.
+ALso define common functions for allowing (or not) signal calls to user, and several tools for checking arguments
+provided to the signal (or function).
 
-Using the decorator
-*******************
+Decorators
+----------
 
-The decorator :func:`djangofloor.decorators.connect` let you connect any Python function to a signal (which is only a
-text string). Signals are automatically discovered, as soon as there are in files `signals.py` in any app listed in
-the setting `INSTALLED_APPS` (like `admin.py` or `models.py`).
+Three decorators are provided, for creating signals, websocket functions or special signals for validating forms.
+Original functions are left unmodified by the decorators.
+These decorators instantiate a :class:`djangofloor.decorators.Connection` object and stores it in the
+corresponding dict (`REGISTERED_FUNCTIONS` or `REGISTERED_SIGNALS`).
 
-To use this decorator, create the file `myproject/signals.py`::
+Restrict signal/function use
+----------------------------
 
-    from djangofloor.decorators import connect
-    @connect(path='myproject.signals.demosignal')
-    def my_function(request, arg1, arg2):
-        print(arg1, arg2)
+When creating a connection, you provide a callable that checks if the browser is allowed to call this code.
+By default, the registered code can only be called from Python code.
+The callable takes three arguments:
 
-Serialization/deserialization
-*****************************
+  * the called :class:`djangofloor.decorators.Connection` (signal or ws function),
+  * the :class:`djangofloor.window_info.WindowInfo` object,
+  * the kwarg dict with unmodified arguments.
 
-Since all arguments must be serialized (in JSON), only types which are acceptable for JSON can be used as arguments
-for signals.
+Argument validators
+-------------------
 
-
-Using Python3
-*************
-
-Python3 introduces the notion of function annotations. DjangoFloor can use them to deserialize received data sent by JS:
-
+The registered Python code can use py3 annotation for specifying data types.
 
 .. code-block:: python
 
-    @connect(path='myproject.signals.demosignal')
-    def my_function(request, arg1: int, arg2: float):
-        print(arg1, arg2)
+  from djangofloor.decorators import Choice, RE, SerializedForm
+  from django import forms
 
+  class MyForm(forms.Form):
+      test = forms.CharField()
 
-The annotation can be any callable, which raise ValueError (in case of error ;)) or a deserialized value.
-DjangoFlor define several callable to handle common cases:
+  @signal(path='demo.signal')
+  def my_signal(window_info, kwarg1: Choice([1, 2], int)=1, kwarg2: Re('^\d+$', int)=2,
+          kwarg3: SerializedForm(MyForm)):
+     assert isinstance(kwarg1, int)
+     assert isinstance(kwarg2, int)
+     assert isinstance(kwarg3, MyForm)
 
-    * checking if a string matches a regexp: :class:`djangofloor.decorators.RE`,
-    * checking if a value is one of several choices: :class:`djangofloor.decorators.Choice`,
-    * handle form data sent by JS as a plain Django form.
+  scall(window_info, 'demo.signal', to=[SERVER], kwarg1="1", kwarg2="12312", kwarg3=[{'value': '12', 'name': 'test'}])
+
 
 """
-from __future__ import unicode_literals, absolute_import
+from __future__ import unicode_literals, print_function, absolute_import
+
 import logging
 import re
+import warnings
 
-from django.db.models import Q
-
+from django import forms
+from django.conf import settings
 from django.http import QueryDict
+from django.utils.encoding import force_text
 from django.utils.six import text_type
-
+from djangofloor.utils import RemovedInDjangoFloor110Warning
 
 try:
     from inspect import signature
 except ImportError:
     # noinspection PyUnresolvedReferences,PyPackageRequirements
     from funcsigs import signature
-from django import forms
-from django.utils.translation import ugettext_lazy as _
-from djangofloor.exceptions import InvalidRequest
-
 
 __author__ = 'Matthieu Gallet'
+logger = logging.getLogger('djangofloor.signals')
+
 REGISTERED_SIGNALS = {}
-logger = logging.getLogger('djangofloor.request')
+REGISTERED_FUNCTIONS = {}
+
+
+# noinspection PyUnusedLocal
+def server_side(connection, window_info, kwargs):
+    """never allows a signal to be called from WebSockets; this signal can only be called from Python code.
+    This is the default choice.
+
+    >>> @signal(is_allowed_to=server_side)
+    >>> def my_signal(window_info, arg1=None):
+    >>>     print(window_info, arg1)
+    """
+    return False
+
+
+# noinspection PyUnusedLocal
+def everyone(connection, window_info, kwargs):
+    """allow everyone to call a Python WS signal or remote function
+
+    >>> @signal(is_allowed_to=everyone)
+    >>> def my_signal(request, arg1=None):
+    >>>     print(request, arg1)
+    """
+    return True
+
+
+# noinspection PyUnusedLocal
+def is_authenticated(connection, window_info, kwargs):
+    """restrict a WS signal or a WS function to authenticated users
+
+    >>> @signal(is_allowed_to=is_authenticated)
+    >>> def my_signal(request, arg1=None):
+    >>>     print(request, arg1)
+    """
+    return window_info and window_info.is_authenticated()
+
+
+# noinspection PyUnusedLocal
+def is_anonymous(connection, window_info, kwargs):
+    """restrict a WS signal or a WS function to anonymous users
+
+    >>> @signal(is_allowed_to=is_anonymous)
+    >>> def my_signal(request, arg1=None):
+    >>>     print(request, arg1)
+    """
+    return window_info and window_info.is_anonymous()
+
+
+# noinspection PyUnusedLocal
+def is_staff(connection, window_info, kwargs):
+    """restrict a WS signal or a WS function to staff users
+
+    >>> @signal(is_allowed_to=is_staff)
+    >>> def my_signal(request, arg1=None):
+    >>>     print(request, arg1)
+    """
+    return window_info and window_info.is_staff
+
+
+# noinspection PyUnusedLocal
+def is_superuser(connection, window_info, kwargs):
+    """restrict a WS signal or a WS function to superusers
+
+    >>> @signal(is_allowed_to=is_superuser)
+    >>> def my_signal(request, arg1=None):
+    >>>     print(request, arg1)
+    """
+    return window_info and window_info.is_superuser
+
+
+# noinspection PyPep8Naming
+class has_perm(object):
+    """restrict a WS signal or a WS function to users with permission "perm"
+
+    >>> @signal(is_allowed_to=has_perm('app_label.codename'))
+    >>> def my_signal(request, arg1=None):
+    >>>     print(request, arg1)
+    """
+    def __init__(self, perm):
+        self.perm = perm
+
+    # noinspection PyUnusedLocal
+    def __call__(self, connection, window_info, kwargs):
+        return window_info and window_info.has_perm(self.perm)
+
+
+class Connection(object):
+    """Parent class of a registered signal or remote function.
+     Do not use it directly."""
+    required_function_arg = 'window_info'
+
+    def __init__(self, fn, path=None, is_allowed_to=server_side, queue=None):
+        self.function = fn
+        if not path:
+            if getattr(fn, '__module__', None) and getattr(fn, '__name__', None):
+                path = '%s.%s' % (fn.__module__, fn.__name__)
+            elif getattr(fn, '__name__', None):
+                path = fn.__name__
+        self.path = force_text(path)
+        if not re.match(r'^([_a-zA-Z]\w*)(\.[_a-zA-Z]\w*)*$', self.path):
+            raise ValueError('Invalid identifier: %s' % self.path)
+        self.is_allowed_to = is_allowed_to
+        self.queue = queue or settings.CELERY_DEFAULT_QUEUE
+        self.accept_kwargs = False
+        self.argument_types = {}
+        self.required_arguments_names = set()
+        self.optional_arguments_names = set()
+        self.accepted_argument_names = set()
+        self.signature_check(fn)
+        # noinspection PyTypeChecker
+        if hasattr(fn, '__name__'):
+            self.__name__ = fn.__name__
+
+    def signature_check(self, fn):
+        """Analyze the signature of the registered Python code, and store the annotations.
+        Check if the first argument is `window_info`.
+        """
+        # fetch signature to analyze arguments
+        sig = signature(fn)
+        required_arg_is_present = False
+        for key, param in sig.parameters.items():
+            if key == self.required_function_arg:
+                required_arg_is_present = True
+                continue
+            if param.kind == param.VAR_KEYWORD:  # corresponds to "fn(**kwargs)"
+                self.accept_kwargs = True
+            elif param.kind == param.VAR_POSITIONAL:  # corresponds to "fn(*args)"
+                raise ValueError('Cannot connect a signal using the *%s syntax' % key)
+            elif param.default == param.empty:  # "fn(foo)" : kind = POSITIONAL_ONLY or POSITIONAL_OR_KEYWORD
+                self.required_arguments_names.add(key)
+                if param.annotation != param.empty and callable(param.annotation):
+                    self.argument_types[key] = param.annotation
+                self.accepted_argument_names.add(key)
+            else:  # "fn(foo=bar)" : kind = POSITIONAL_OR_KEYWORD or KEYWORD_ONLY
+                self.optional_arguments_names.add(key)
+                self.accepted_argument_names.add(key)
+                if param.annotation != param.empty and callable(param.annotation):
+                    self.argument_types[key] = param.annotation
+        if self.required_function_arg and not required_arg_is_present:
+            msg = '%s(%s) must takes "%s" as first argument' % \
+                  (self.__class__.__name__, self.path, self.required_function_arg)
+            raise ValueError(msg)
+
+    def check(self, kwargs):
+        """Check the provided kwargs and apply provided annotations to it.
+        Return `None` if something is invalid (like an error raised by an annotation or a missing argument).
+        """
+        cls = self.__class__.__name__
+        for k, v in self.argument_types.items():
+            try:
+                if k in kwargs:
+                    kwargs[k] = v(kwargs[k])
+            except ValueError:
+                logger.info('%s("%s"): Invalid value %r for argument "%s".' % (cls, self.path, v, k))
+                return None
+        for k in self.required_arguments_names:
+            if k not in kwargs:
+                logger.info('%s("%s"): Missing required argument "%s".' % (cls, self.path, k))
+                return None
+        if not self.accept_kwargs:
+            for k in kwargs:
+                if k not in self.accepted_argument_names:
+                    logger.info('%s("%s"): Invalid argument "%s".' % (cls, self.path, k))
+                    return None
+        return kwargs
+
+    def __call__(self, window_info, **kwargs):
+        return self.function(window_info, **kwargs)
+
+    def register(self):
+        """Register the Python code to the right dict."""
+        raise NotImplementedError
+
+    def get_queue(self, window_info, original_kwargs):
+        """Provide the Celery queue name as a string."""
+        if callable(self.queue):
+            return self.queue(self, window_info, original_kwargs)
+        return text_type(self.queue) or settings.CELERY_DEFAULT_QUEUE
+
+
+class SignalConnection(Connection):
+    """represents a connected signal.
+    """
+    def register(self):
+        """register the signal into the `REGISTERED_SIGNALS` dict """
+        REGISTERED_SIGNALS.setdefault(self.path, []).append(self)
+
+
+class FunctionConnection(Connection):
+    """represent a WS function """
+    def register(self):
+        """register the WS function into the `REGISTERED_FUNCTIONS` dict """
+        REGISTERED_FUNCTIONS[self.path] = self
+
+
+class FormValidator(FunctionConnection):
+    """Special signal, dedicated to dynamically validate a HTML form."""
+    def signature_check(self, fn):
+        """override the default method for checking the arguments, since they are independent from the Django Form.
+        """
+        if not isinstance(fn, type) or not issubclass(fn, forms.BaseForm):
+            raise ValueError('validate_form only apply to Django Forms')
+        self.required_arguments_names = set()
+        self.optional_arguments_names = {'data'}
+        self.accepted_argument_names = {'data'}
+
+    def __call__(self, window_info, data=None):
+        form = SerializedForm(self.function)(data)
+        valid = form.is_valid()
+        return {'valid': valid, 'errors': {f: e.get_json_data(escape_html=False) for f, e in form.errors.items()},
+                'help_texts': {f: e.help_text for (f, e) in form.fields.items() if e.help_text}}
+
+
+def signal(fn=None, path=None, is_allowed_to=server_side, queue=None, cls=SignalConnection):
+    """Decorator to use for registering a new signal.
+    This decorator returns the original callable as-is.
+    """
+    def wrapped(fn_):
+        wrapper = cls(fn=fn_, path=path, is_allowed_to=is_allowed_to, queue=queue)
+        wrapper.register()
+        return fn_
+
+    if fn is not None:
+        wrapped = wrapped(fn)
+    return wrapped
+
+
+def function(fn=None, path=None, is_allowed_to=server_side, queue=None):
+    """Allow the following Python code to be called from the JavaScript code.
+The result of this function is serialized (with JSON and `settings.WEBSOCKET_SIGNAL_ENCODER`) before being
+sent to the JavaScript part.
+
+.. code-block:: python
+
+  from djangofloor.decorators import function, everyone
+
+  @function(path='myproject.myfunc', is_allowed_to=everyone)
+  def myfunc(window_info, arg=None)
+      print(arg)
+      return 42
+
+The this function can be called from your JavaScript code:
+
+.. code-block:: javascript
+
+  $.dfws.myproject.myfunc({arg: 3123}).then(function(result) { alert(result); });
+
+
+"""
+    return signal(fn=fn, path=path, is_allowed_to=is_allowed_to, queue=queue, cls=FunctionConnection)
+
+
+def validate_form(form_cls=None, path=None, is_allowed_to=server_side, queue=None):
+    """
+    Decorator for automatically validating HTML forms. Just add it to your Python code and set the 'onchange'
+    attribute to your HTML code. The `path` argument should be unique to your form class.
+
+    :param form_cls: any subclass of :class:`django.forms.Form`
+    :param path: unique name of your form
+    :param is_allowed_to: callable for restricting the use of the form validation
+    :param queue: name (or callable) for ensuring small response times
+
+.. code-block:: python
+
+    from djangofloor.decorators import everyone, validate_form
+
+    @validate_form(path='djangofloor.validate.search', is_allowed_to=everyone, queue='fast')
+    class MyForm(forms.Form):
+        name = forms.CharField()
+        ...
+
+
+.. code-block:: html
+
+    <form onchange="$.df.validateForm(this, 'djangofloor.validate.search');"  action="?" method="post">
+        {% csrf_token %}
+        {% bootstrap_form form %}
+        <input type="submit" class="btn btn-primary" value="{% trans 'Search' %}">
+    </form>
+
+    """
+    if path is None or is_allowed_to is server_side:
+        # @validate_form
+        # class MyForm(forms.Form):
+        #     ...
+        raise ValueError('is_allowed_to and path are not configured for the validate_form decorator')
+
+    def wrapped(form_cls_):
+        wrapper = FormValidator(form_cls_, path=path, is_allowed_to=is_allowed_to, queue=queue)
+        wrapper.register()
+        return form_cls_
+
+    if form_cls:
+        return wrapped(form_cls)
+    return wrapped
 
 
 class RE(object):
@@ -80,8 +375,8 @@ class RE(object):
 
     .. code-block:: python
 
-        @connect(path='myproject.signals.test')
-        def test(request, value: RE("\d{3}a\d{3}")):
+        @signal(path='myproject.signals.test')
+        def test(window_info, value: RE("\d{3}a\d{3}")):
             pass
 
     Your code wan't be called if value has not the right form.
@@ -99,7 +394,7 @@ class RE(object):
         self.regexp = re.compile(value, flags=flags)
 
     def __call__(self, value):
-        matcher = self.regexp.match(value)
+        matcher = self.regexp.match(force_text(value))
         if not matcher:
             raise ValueError
         value = matcher.group(1) if matcher.groups() else value
@@ -113,8 +408,8 @@ class Choice(object):
 
     .. code-block:: python
 
-        @connect(path='myproject.signals.test')
-        def test(request, value: Choice([True, False])):
+        @signal(path='myproject.signals.test')
+        def test(window_info, value: Choice([True, False])):
             pass
 
     Your code wan't be called if value is not True or False.
@@ -138,6 +433,7 @@ class SerializedForm(object):
     Given a form and a :class:`list` of :class:`dict`, transforms the :class:`list` into a
     :class:`django.http.QueryDict` and initialize the form with it.
 
+    >>> from django import forms
     >>> class SimpleForm(forms.Form):
     ...    field = forms.CharField()
     ...
@@ -150,16 +446,16 @@ class SerializedForm(object):
 
     .. code-block:: python
 
-        @connect(path='myproject.signals.test')
-        def test(request, value: SerializedForm(SimpleForm), other: int):
+        @signal(path='myproject.signals.test')
+        def test(window_info, value: SerializedForm(SimpleForm), other: int):
             print(value.is_valid())
 
     How to use it with Python2:
 
     .. code-block:: python
 
-        @connect(path='myproject.signals.test')
-        def test(request, value, other):
+        @signal(path='myproject.signals.test')
+        def test(window_info, value, other):
             value = SerializedForm(SimpleForm)(value)
             print(value.is_valid())
 
@@ -168,7 +464,7 @@ class SerializedForm(object):
 
     .. code-block:: html
 
-        <form onsubmit="return df.call('myproject.signals.test', {value: $(this).serializeArray(), other: 42})">
+        <form onsubmit="return $.df.call('myproject.signals.test', {value: $(this).serializeArray(), other: 42})">
             <input name='field' value='test' type='text'>
         </form>
 
@@ -184,246 +480,35 @@ class SerializedForm(object):
         :return:
         :rtype: :class:`django.forms.Form`
         """
+        if value is None:
+            return self.form_cls(*args, **kwargs)
         query_dict = QueryDict('', mutable=True)
         for obj in value:
             query_dict.update({obj['name']: obj['value']})
         return self.form_cls(query_dict, *args, **kwargs)
 
 
-class SignalRequest(object):
-    """ Store the username and the session key and must be supplied to any Python signal call.
-
-    Can be constructed from a standard :class:`django.http.HttpRequest`.
-
-    :param username: should be User.username
-    :type username: :class:`str`
-    :param session_key: the session key, unique to a opened browser window (useful if a user has multiple windows)
-    :type session_key: :class:`str`
-    :param user_pk: primary key of the user (for easy ORM queries)
-    :type user_pk: :class:`int`
-    :param is_superuser: is the user a superuser?
-    :type is_superuser: :class:`bool`
-    :param is_staff: belongs the user to the staff?
-    :type is_staff: :class:`bool`
-    :param is_active: is the user active?
-    :type is_active: :class:`bool`
-    :param perms: list of "app_name.permission_name" (optional)
-    :type perms: :class:`list`
-    :param window_key: a string value specific to each opened browser window/tab
-    :type window_key: :class:`str`
-    """
-    def __init__(self, username, session_key, user_pk=None, is_superuser=False, is_staff=False, is_active=False,
-                 perms=None, window_key=None):
-        self.username = username
-        self.session_key = session_key
-        self.user_pk = user_pk
-        self.is_superuser = is_superuser
-        self.is_staff = is_staff
-        self.is_active = is_active
-        self._perms = set(perms) if perms is not None else None
-        self._template_perms = None
-        self.window_key = window_key
-
-    @classmethod
-    def from_user(cls, user):
-        """ Create a :class:`djangofloor.decorators.SignalRequest` from a valid User. The SessionKey is set to `None`
-
-        :param user: any Django user
-        :type user: :class:`django.contrib.auth.models.AbstractUser`
-        :rtype: :class:`djangofloor.decorators.SignalRequest`
-        """
-        return cls(user.get_username(), None, user_pk=user.pk, is_superuser=user.is_superuser, is_staff=user.is_staff,
-                   is_active=user.is_active)
-
-    def to_dict(self):
-        """Convert this :class:`djangofloor.decorators.SignalRequest` to a :class:`dict` which can be provided to JSON.
-
-        :return: a dict ready to be serialized in JSON
-        :rtype: :class:`dict`
-        """
-        result = {}
-        result.update(self.__dict__)
-        if isinstance(self._perms, set):
-            result['perms'] = list(self._perms)
-        else:
-            result['perms'] = None
-        del result['_perms']
-        del result['_template_perms']
-        return result
-
-    def has_perm(self, perm):
-        """ return true is the user has the required perm.
-
-        >>> r = SignalRequest('username', perms=['app_label.codename'])
-        >>> r.has_perm('app_label.codename')
-        True
-
-        :param perm: name of the permission  ("app_label.codename")
-        :return: True if the user has the required perm
-        :rtype: :class:`bool`
-        """
-        return perm in self.perms
-
-    @property
-    def perms(self):
-        """:class:`set` of all perms of the user (set of "app_label.codename")"""
-        if not self.user_pk:
-            return set()
-        elif self._perms is not None:
-            return self._perms
-        from django.contrib.auth.models import Permission
-        if self.is_superuser:
-            query = Permission.objects.all()
-        else:
-            query = Permission.objects.filter(Q(user__pk=self.user_pk) | Q(group__user__pk=self.user_pk))
-        self._perms = set(['%s.%s' % p for p in
-                           query.select_related('content_type').values_list('content_type__app_label', 'codename')])
-        return self._perms
-
-    @property
-    def template_perms(self):
-        """:class:`dict` of perms, to be used in templates.
-
-        Example:
-
-        .. code-block:: html
-
-            {% if request.template_perms.app_label.codename %}...{% endif %}
-
-        """
-        if self._template_perms is None:
-            result = {}
-            for perm in self.perms:
-                app_name, sep, codename = perm.partition('.')
-                result.setdefault(app_name, {})[codename] = True
-            self._template_perms = result
-        return self._template_perms
-
-    @classmethod
-    def from_request(cls, request):
-        """ return a :class:`djangofloor.decorators.SignalRequest` from a :class:`django.http.HttpRequest`.
-
-        If the request already is a :class:`djangofloor.decorators.SignalRequest`,
-        then it is returned as-is (not copied).
-
-        :param request: standard Django request
-        :type request: :class:`django.http.HttpRequest` or :class:`djangofloor.decorators.SignalRequest`
-        :return: a valid request
-        :rtype: :class:`djangofloor.decorators.SignalRequest`
-        """
-        if isinstance(request, SignalRequest):
-            return request
-        # noinspection PyUnresolvedReferences
-        session_key = request.session.session_key if hasattr(request, 'session') and request.session else None
-        window_key = request.window_key if hasattr(request, 'window_key') else None
-        # noinspection PyUnresolvedReferences
-        user = request.user if hasattr(request, 'user') and request.user else None
-        if user.is_authenticated():
-            return cls(username=user.get_username(), session_key=session_key,
-                       user_pk=user.pk, is_superuser=user.is_superuser, is_staff=user.is_staff,
-                       is_active=user.is_active, window_key=window_key)
-        return cls(None, session_key=session_key, window_key=window_key)
-
-
-class ViewWrapper(object):
-    def __init__(self, fn, path=None):
-        self.path = path
-        self.function = fn
-        self.__name__ = fn.__name__ if hasattr(fn, '__name__') else path
-
-        # fetch signature to analyze arguments
-        sig = signature(fn)
-        self.required_arguments = set()
-        self.optional_arguments = set()
-        self.accept_kwargs = False
-        self.accept_args = False
-        self.argument_types = {}
-        self.required_arguments_names = []
-        self.optional_arguments_names = []
-
-        for key, param in sig.parameters.items():
-            if key in ('request', ):
-                continue
-            if param.kind == param.VAR_KEYWORD:  # corresponds to "fn(**kwargs)"
-                self.accept_kwargs = True
-            elif param.kind == param.VAR_POSITIONAL:  # corresponds to "fn(*args)"
-                self.accept_args = True
-            elif param.default == param.empty:  # "fn(foo)" : kind = POSITIONAL_ONLY or POSITIONAL_OR_KEYWORD
-                self.required_arguments.add(key)
-                if param.annotation != param.empty and callable(param.annotation):
-                    self.argument_types[key] = param.annotation
-                self.required_arguments_names.append(key)
-            else:
-                self.optional_arguments.add(key)  # "fn(foo=bar)" : kind = POSITIONAL_OR_KEYWORD or KEYWORD_ONLY
-                if param.annotation != param.empty and callable(param.annotation):
-                    self.argument_types[key] = param.annotation
-                self.optional_arguments_names.append(key)
-
-        if path is None:
-            path = fn.__name__
-        self.register(path)
-
-    def register(self, path):
-        raise NotImplementedError
-
-    def __call__(self, *args, **kwargs):
-        return self.function(*args, **kwargs)
-
-
-class RedisCallWrapper(ViewWrapper):
-    def __init__(self, fn, path=None, delayed=False, allow_from_client=True, auth_required=True):
-        super(RedisCallWrapper, self).__init__(fn, path=path)
-        self.allow_from_client = allow_from_client
-        self.delayed = delayed
-        self.auth_required = auth_required
-
-    def register(self, path):
-        REGISTERED_SIGNALS.setdefault(path, []).append(self)
-
-    def prepare_kwargs(self, kwargs):
-        logger.debug(self.path, kwargs)
-        kwargs = {x: y for (x, y) in kwargs.items()}
-        if not self.accept_kwargs:
-            for arg_name in kwargs:
-                if arg_name not in self.required_arguments and arg_name not in self.optional_arguments:
-                    raise InvalidRequest(text_type(_('Unexpected argument: %(arg)s')) % {'arg': arg_name})
-        for arg_name in self.required_arguments:
-            if arg_name not in kwargs:
-                raise InvalidRequest(text_type(_('Required argument: %(arg)s')) % {'arg': arg_name})
-        for k, v in self.argument_types.items():
-            try:
-                if k in kwargs:
-                    kwargs[k] = v(kwargs[k])
-            except ValueError:
-                raise InvalidRequest(text_type(_('Invalid value %(value)s for argument %(arg)s.')) %
-                                     {'arg': k, 'value': v})
-        return kwargs
+class LegacySignalConnection(SignalConnection):
+    """.. deprecated:: 1.0  do not use it"""
+    def __call__(self, window_info, **kwargs):
+        result = super(LegacySignalConnection, self).__call__(window_info, **kwargs)
+        if result:
+            # noinspection PyUnresolvedReferences
+            from djangofloor.tasks import df_call
+            for data in result:
+                df_call(data['signal'], window_info, sharing=data.get('sharing'), from_client=False,
+                        kwargs=data['options'])
 
 
 def connect(fn=None, path=None, delayed=False, allow_from_client=True, auth_required=True):
-    """Decorator to use in your Python code. Use it in any file named `signals.py` in a installed Django app.
-
-    .. code-block:: python
-
-        @connect(path='myproject.signal.name', allow_from_client=True, delayed=False)
-        def function(request, arg1, arg2, **kwargs):
-            pass
-
-    :param fn: the Python function to connect to the signal
-    :type fn: :class:`callable`
-    :param path: the name of the signal
-    :type path: :class:`unicode` or :class:`str`
-    :param delayed: should this code be called in an asynchronous way (through Celery)? default to `False`
-    :type delayed: :class:`bool`
-    :param allow_from_client: can be called from JavaScript? default to `True`
-    :type allow_from_client: :class:`bool`
-    :param auth_required: can be called only from authenticated client? default to `True`
-    :type auth_required: :class:`bool`
-    :return: a wrapped function
-    :rtype: :class:`callable`
-    """
-    wrapped = lambda fn_: RedisCallWrapper(fn_, path=path, delayed=delayed, allow_from_client=allow_from_client,
-                                           auth_required=auth_required)
-    if fn is not None:
-        wrapped = wrapped(fn)
-    return wrapped
+    """.. deprecated:: 1.0 do not use it"""
+    delayed = delayed
+    if not delayed:
+        warnings.warn('The "delayed" argument is deprecated and useless.', RemovedInDjangoFloor110Warning)
+    if allow_from_client and auth_required:
+        is_allowed_to = is_authenticated
+    elif allow_from_client:
+        is_allowed_to = everyone
+    else:
+        is_allowed_to = server_side
+    return signal(fn=fn, path=path, is_allowed_to=is_allowed_to)

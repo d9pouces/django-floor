@@ -1,0 +1,27 @@
+{% extends 'djangofloor/bootstrap3/base.html' %}
+{% load bootstrap3 demo cache i18n %}
+{% block content %}
+<h1>{% trans 'Demo chat view' %}</h1>
+
+{% if form %}
+<form onchange="$.df.validateForm(this, 'validate.loginform');" action="?" method="post">
+    {% csrf_token %}{% bootstrap_form form %}
+    <input type="submit" class="btn btn-success" value="{% trans 'Go to chat' %}">
+</form>
+{% else %}
+<h2>Connected as {{ name }}</h2>
+<ul id="history">
+
+</ul>
+<form onsubmit="return $.df.call('demo.chat.receive', {content: $('#content').val()});">
+    <input type="text" name="content" id="content">
+</form>
+<script type="text/javascript">
+        window.onload = function () {
+            $.df.connect('demo.chat.send', function(opts) {
+                $("#history").append("<li>" + opts.content + "</li>");
+            });
+        };
+</script>
+{% endif %}
+{% endblock %}

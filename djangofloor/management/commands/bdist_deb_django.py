@@ -21,15 +21,13 @@ try:
 except ImportError:
     util = None
     sdist_dsc = None
-
 from djangofloor.scripts import set_env
 
 try:
-    # Python 2.x
+    # noinspection PyUnresolvedReferences
     import ConfigParser
 except ImportError:
-    # Python 3.x
-    # noinspection PyPep8Naming
+    # noinspection PyPep8Naming,PyUnresolvedReferences
     import configparser as ConfigParser
 
 __author__ = 'Matthieu Gallet'
@@ -84,7 +82,7 @@ class BdistDebDjango(sdist_dsc):
 
             * create the source package with `sdist_dsc`
             * update the Python dependencies
-            * run specific DjangoFloor command for extra Debian files (systemd, static files, …)
+            * run specific Djangofloor command for extra Debian files (systemd, static files, …)
             * add postinstall files
             * build  a .deb package from the modified `sdist_dsc`
         """
@@ -133,7 +131,7 @@ class BdistDebDjango(sdist_dsc):
         debian_project_name = project_name.replace('-', '_')
         conf_name = '%s.conf' % debian_project_name
         # prepare the use of the gen_install command
-        os.environ['DJANGOFLOOR_PROJECT_NAME'] = project_name
+        os.environ['DF_CONF_NAME'] = project_name
         set_env()
         collect_static_dir = os.path.join(target_dir, 'gen_install', 'var', project_name, 'static')
         etc_dir = os.path.join(target_dir, 'gen_install', 'etc')

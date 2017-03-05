@@ -1,0 +1,69 @@
+{% load bootstrap3 i18n l10n djangofloor %}
+<div class="col-md-4 col-sm-4 col-xs-12">
+    <div class="panel panel-info">
+        <div class="panel-heading">
+            <h3 class="panel-title">{% trans 'System info' %}</h3>
+        </div>
+        <div class="panel-body">
+            {% if not swap %}
+            <div class="alert alert-warning">{% trans 'The "psutil" package is required to display system info' %}</div>
+            {% else %}
+            <ul class="list-unstyled">
+                <li><strong>{% trans 'CPU(s):' %}</strong>
+                    {{ cpu_count.1 }} {% trans 'cores' %}, {{ cpu_count.0 }} {% trans 'threads' %}
+                </li>
+                <li><strong>{% trans 'CPU average usage:' %}</strong> {{ cpu_average_usage }}%
+
+                    <div class="progress">
+                        <div class="progress-bar progress-bar-{{ cpu_average_usage|df_level }}" role="progressbar" aria-valuenow="{{ cpu_average_usage|floatformat:'0' }}"
+                             aria-valuemin="0"
+                             aria-valuemax="100" style="width: {{ cpu_average_usage|floatformat:'0' }}%">
+                            <span class="sr-only">{{ cpu_average_usage|floatformat:'0' }}%</span>
+                        </div>
+                    </div>
+                </li>
+                <li><strong>{% trans 'CPU current usage:' %}</strong> {{ cpu_current_usage }}%
+
+                    <div class="progress">
+                        <div class="progress-bar progress-bar-{{ cpu_current_usage|df_level }}" role="progressbar" aria-valuenow="{{ cpu_current_usage|floatformat:'0' }}"
+                             aria-valuemin="0"
+                             aria-valuemax="100" style="width: {{ cpu_current_usage|floatformat:'0' }}%">
+                            <span class="sr-only">{{ cpu_current_usage|floatformat:'0' }}%</span>
+                        </div>
+                    </div>
+                </li>
+                <li><strong>{% trans 'Memory current usage:' %}</strong> {{ memory.percent }}% ({{ memory.used|filesizeformat }}/{{ memory.total|filesizeformat }})
+                    <div class="progress">
+                        <div class="progress-bar progress-bar-{{ memory.percent|df_level }}" role="progressbar" aria-valuenow="{{ memory.percent|floatformat:'0' }}"
+                             aria-valuemin="0"
+                             aria-valuemax="100" style="width: {{ memory.percent|floatformat:'0' }}%">
+                            <span class="sr-only">{{ memory.percent|floatformat:'0' }}%</span>
+                        </div>
+                    </div>
+                </li>
+                <li><strong>{% trans 'Swap current usage:' %}</strong> {{ swap.percent }}% ({{ swap.used|filesizeformat }}/{{ swap.total|filesizeformat }})
+                    <div class="progress">
+                        <div class="progress-bar progress-bar-{{ swap.percent|df_level:'10:50' }}" role="progressbar" aria-valuenow="{{ swap.percent|floatformat:'0' }}"
+                             aria-valuemin="0"
+                             aria-valuemax="100" style="width: {{ swap.percent|floatformat:'0' }}%">
+                            <span class="sr-only">{{ swap.percent|floatformat:'0' }}%</span>
+                        </div>
+                    </div>
+                </li>
+                {% for disk in disks %}
+                <li><strong>{% trans 'Disk:' %} {{ disk.0 }}</strong> {{ disk.1.percent }}% ({{ disk.1.used|filesizeformat }}/{{ disk.1.total|filesizeformat }})
+                    <div class="progress">
+                        <div class="progress-bar progress-bar-{{ disk.1.percent|df_level }}" role="progressbar" aria-valuenow="{{ disk.1.percent|floatformat:'0' }}"
+                             aria-valuemin="0"
+                             aria-valuemax="100" style="width: {{ disk.1.percent|floatformat:'0' }}%">
+                            <span class="sr-only">{{ disk.1.percent|floatformat:'0' }}%</span>
+                        </div>
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+
+            {% endif %}
+        </div>
+    </div>
+</div>

@@ -1,0 +1,14 @@
+  * `use_apache` (`false` or `true`). If true, {{ DF_PROJECT_NAME }} assumes that your Apache server use `mod_x_sendfile` and is able to serve files from {{ sendfile_roots }} (use `{{ processes.dango }} config python -v 2` to determine its value).
+
+  * `use_nginx` (`false` or `true`). If true, {{ DF_PROJECT_NAME }} assumes that your nginx server knowns `X-Accel-Redirect` and is able to serve files from {{ sendfile_roots }}.
+
+
+[elasticsearch]
+hosts =
+index = updoc_index
+
+
+public_bookmarks = True
+public_docs = True
+public_index = True
+public_proxies = True

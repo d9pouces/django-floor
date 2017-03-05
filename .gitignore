@@ -29,6 +29,7 @@ var/
 #  before PyInstaller builds the exe, so as to inject date/other infos into it.
 *.manifest
 *.spec
+!/djangofloor/static/vendor/**
 
 # Installer logs
 pip-log.txt
@@ -54,3 +55,8 @@ docs/_build/
 
 # PyBuilder
 target/
+Supprimerait django_data/
+Supprimerait djangofloor/static/vendor/bootstrap3/
+Supprimerait djangofloor/static/vendor/html5shiv/
+Supprimerait djangofloor/static/vendor/jquery/
+Supprimerait djangofloor/static/vendor/metro-ui/

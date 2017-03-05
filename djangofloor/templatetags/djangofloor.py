@@ -1,23 +1,57 @@
 # -*- coding: utf-8 -*-
-"""Template tags specific to DjangoFloor
-=====================================
+"""Templatetags for media files, websockets, notifications
+=======================================================
 
-Define a few useful template tags, currently only for the default Django template system.
+Various templatetags provided by DjangoFloor.
+
 """
-from __future__ import unicode_literals, absolute_import
+from __future__ import unicode_literals, print_function, absolute_import
+
+import logging
+import warnings
+
+from django import template
+from django.conf import settings
+from django.template import Context
+from django.templatetags.static import PrefixNode, StaticNode
+from django.urls import reverse
+from django.utils.encoding import force_text
+# noinspection PyProtectedMember
+from django.utils.html import _js_escapes
+from django.utils.safestring import mark_safe
 # noinspection PyUnresolvedReferences
 from django.utils.six.moves.urllib.parse import urljoin, urlparse
-from django import template
-from django.templatetags.static import StaticNode, PrefixNode
-from django.utils.safestring import mark_safe
+
+from djangofloor.tasks import set_websocket_topics
+from djangofloor.utils import RemovedInDjangoFloor110Warning
+from djangofloor.wsgi.wsgi_server import signer
 
 __author__ = 'Matthieu Gallet'
-
 register = template.Library()
+logger = logging.getLogger('django.requests')
 
 
-class MediaNode(StaticNode):
+@register.simple_tag(takes_context=True)
+def df_init_websocket(context, *topics):
+    """Set the websocket URL with the access token. Allow to access the right topics."""
+    if not settings.WEBSOCKET_URL:
+        return ''
+    elif not context.get('df_has_ws_topics') and not topics:
+        return ''
+    elif not context.get('df_has_ws_topics') and context.get('df_http_request'):
+        set_websocket_topics(context['df_http_request'], *topics)
+    ws_token = context['df_window_key']
+    signed_token = signer.sign(ws_token)
+    protocol = 'wss' if settings.USE_SSL else 'ws'
+    site_name = '%s:%s' % (settings.SERVER_NAME, settings.SERVER_PORT)
+    script = '$(document).ready(function() { $.df._wsConnect("%s://%s%s?token=%s"); });' % \
+             (protocol, site_name, settings.WEBSOCKET_URL, signed_token)
+    init_value = '<script type="application/javascript">%s</script>' % script
+    init_value += '<script type="text/javascript" src="%s" charset="utf-8"></script>' % reverse('df:signals')
+    return mark_safe(init_value)
 
+
+class _MediaNode(StaticNode):
     @classmethod
     def handle_simple(cls, path):
         return urljoin(PrefixNode.handle_simple('MEDIA_URL'), path)
@@ -40,15 +74,17 @@ def do_media(parser, token):
         {% media variable_with_path as varname %}
 
     """
-    return MediaNode.handle_token(parser, token)
+    return _MediaNode.handle_token(parser, token)
 
 
 def media(path):
-    return MediaNode.handle_simple(path)
+    """If you want to reuse the template tag in your Python code."""
+    return _MediaNode.handle_simple(path)
 
 
 @register.simple_tag
 def fontawesome_icon(name, large=False, fixed=False, spin=False, li=False, rotate=None, border=False, color=None):
+    """Add font-awesome icons in your HTML code"""
     if isinstance(large, int) and 2 <= large <= 5:
         large = ' fa-%dx' % large
     elif large:
@@ -67,29 +103,91 @@ def fontawesome_icon(name, large=False, fixed=False, spin=False, li=False, rotat
     ))
 
 
+@register.filter(name='df_level')
+def df_level(value, bounds='80:95'):
+    """Convert a numeric value to "success", "warning" or "danger".
+     The two required bounds are given by a string.
+     """
+    # noinspection PyTypeChecker
+    warning, error = [float(x) for x in bounds.split(':')]
+    if value < warning <= error or error <= warning < value:
+        return 'success'
+    elif warning <= value < error or error < value <= warning:
+        return 'warning'
+    return 'danger'
+
+
+@register.simple_tag(takes_context=True)
+def df_messages(context, style='banner'):
+    """Show django.contrib.messages Messages in Metro alert containers.
+    In order to make the alerts dismissable (with the close button),
+    we have to set the jquery parameter too when using the
+    bootstrap_javascript tag.
+    Uses the template ``bootstrap3/messages.html``.
+
+    :param context: current template context
+    :param style:  "notification", "banner", "modal" or "system"
+
+    Example for your template:
+
+    .. code-block:: html
+
+        {% df_messages style='banner' %}
+        {% df_messages style='notification' %}
+
+    """
+
+    if context and isinstance(context, Context):
+        context = context.flatten()
+
+    def message_level(msg):
+        for (tag, bound) in (('danger', 40), ('warning', 30), ('success', 25)):
+            if msg.level >= bound:
+                return tag
+        return 'info'
+    result = '<script type="text/javascript">\n'
+    for message in context.get('messages', []):
+        result += '$.df.call("df.notify", {style: "%s", level: "%s", content: "%s"});\n' \
+                  % (style, message_level(message), force_text(message).translate(_js_escapes))
+    get_notifications = context.get('df_get_notifications', lambda: [])
+    values = get_notifications()
+    for notification in values:
+        result += '$.df.call("df.notify", {style: "%s", level: "%s", content: "%s", timeout: %s, title: "%s"});\n' \
+                  % (notification.display_mode,
+                     notification.level,
+                     notification.content.translate(_js_escapes),
+                     notification.auto_hide_seconds * 1000,
+                     notification.title)
+    result += '</script>'
+    return mark_safe(result)
+
+
+@register.simple_tag(takes_context=False)
+def df_deprecation(value):
+    """.. deprecated:: 1.0 do not use it"""
+    warnings.warn(value, RemovedInDjangoFloor110Warning)
+    return ''
+
+
+# TODO remove the following functions
 @register.simple_tag(takes_context=True)
 def df_window_key(context):
-    window_key = context.get('df_window_key', '[INVALID]')
-    return mark_safe('<script type="application/javascript">$(function () {df.ws4redis_connect("%s");});</script>'
-                     % window_key)
+    """.. deprecated:: 1.0 do not use it"""
+    warnings.warn('df_window_key template tag has been replaced by df_init_websocket', RemovedInDjangoFloor110Warning)
+    return df_init_websocket(context)
+
 
 @register.filter
 def df_underline(value, kind='='):
+    """.. deprecated:: 1.0 do not use it"""
+    warnings.warn('df_underline template tag will be removed', RemovedInDjangoFloor110Warning)
     return kind * len(value)
 
 
 @register.filter
-def df_urlparse(value, component='hostname'):
-    x, sep, y = value.partition('://')
-    if sep != '://':
-        value = 'scheme://%s' % value
-    elif not x:
-        value = 'scheme%s' % value
-    return getattr(urlparse(value), component)
-
-
-@register.filter
 def df_inivalue(value):
+    """.. deprecated:: 1.0 do not use it"""
+    warnings.warn('df_inivalue template tag will be removed', RemovedInDjangoFloor110Warning)
     if not value:
         return ''
     return mark_safe('\n    '.join(value.splitlines()))

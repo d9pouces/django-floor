@@ -1,0 +1,32 @@
+{% extends 'djangofloor/bootstrap3/base.html' %}
+{% load bootstrap3 demo cache %}
+{% block content %}
+<h1>{{ title }}</h1>
+<div class="btn-group">
+    <button class="btn btn-success btn-sm" onclick="return $.dfws.test_function({}).then(function(x) { alert(x); });">
+        Test Functions
+    </button>
+    <button class="btn btn-success btn-sm" onclick="return $.df.call('demo.print_sig1', {content: 'Client notification [éà]'});">
+        Test Signals
+    </button>
+    <button class="btn btn-success btn-sm" onclick="return $.df.call('demo.slow_signal', {content: 'Slow signal [éà]'});">
+        Test slow Signals (specific Celery queue)
+    </button>
+    <button class="btn btn-success btn-sm" onclick="return $.df.call('demo.show_modal', {message: '{{ message }}', level: {{ level }} +1});">Show a new modal</button>
+</div>
+<form id="testForm" onchange="$.df.validateForm(this, 'validate_test');" action="?" method="post">
+    {% csrf_token %}
+    {% bootstrap_form form %}
+    <input type="submit" class="btn btn-success" value="Valider">
+</form>
+<h3>Cached pages ({% cache 60 sidebar %}Cached template value: {% demo_template_tag 1 %}{% endcache %})</h3>
+<small>Non-cached template value: {% demo_template_tag %}</small>
+<ul>
+    <li><a href="{% url 'chat' %}">Simple chat system</a></li>
+    <li><a href="{% url 'cache_60' %}">Cached during 60s</a></li>
+    <li><a href="{% url 'cache_vary_on_headers' %}">Cached vary on headers</a></li>
+    <li><a href="{% url 'cache_private' %}">Cached for authenticated users</a></li>
+    <li><a href="{% url 'cache_nevercache' %}">Never cached</a></li>
+    <li><button onclick="return $.df.call('html.download_file', {'url': '{% url  'download_file' %}'});" class="btn btn-sm btn-default">Download a file</button></li>
+</ul>
+{% endblock %}

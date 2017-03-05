@@ -1,0 +1,133 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+# All Vagrant configuration is done below. The "2" in Vagrant.configure
+# configures the configuration version (we support older styles for
+# backwards compatibility). Please don't change it unless you know what
+# you're doing.
+Vagrant.configure(2) do |config|
+  # The most common configuration options are documented and commented below.
+  # For a complete reference, please see the online documentation at
+  # https://docs.vagrantup.com.
+
+  # Every Vagrant development environment requires a box. You can search for
+  # boxes at https://atlas.hashicorp.com/search.
+{% block vm_box %}  config.vm.box = "ubuntu/xenial64"
+{% endblock %}
+
+{% block vm_box_check_update %}  # Disable automatic box update checking. If you disable this, then
+  # boxes will only be checked for updates when the user runs
+  # `vagrant box outdated`. This is not recommended.
+  # config.vm.box_check_update = false
+{% endblock %}
+{% block vm_network %}    # Create a forwarded port mapping which allows access to a specific port
+  # within the machine from a port on the host machine. In the example below,
+  # accessing "localhost:8080" will access port 80 on the guest machine.
+  # config.vm.network "forwarded_port", guest: 80, host: 8080
+  config.vm.network "forwarded_port", guest: {{ LISTEN_PORT }}, host: 10080
+
+
+  # Create a private network, which allows host-only access to the machine
+  # using a specific IP.
+  # config.vm.network "private_network", ip: "192.168.33.10"
+
+  # Create a public network, which generally matched to bridged network.
+  # Bridged networks make the machine appear as another physical device on
+  # your network.
+  # config.vm.network "public_network"
+{% endblock %}
+
+{% block vm_synced_folder %}  # Share an additional folder to the guest VM. The first argument is
+  # the path on the host to the actual folder. The second argument is
+  # the path on the guest to mount the folder. And the optional third
+  # argument is a set of non-required options.
+  # config.vm.synced_folder "../data", "/vagrant_data"
+{% endblock %}
+
+{% block vm_provider %}
+  # Provider-specific configuration so you can fine-tune various
+  # backing providers for Vagrant. These expose provider-specific options.
+  # Example for VirtualBox:
+  #
+  # config.vm.provider "virtualbox" do |vb|
+  #   # Display the VirtualBox GUI when booting the machine
+  #   vb.gui = true
+  #
+  #   # Customize the amount of memory on the VM:
+  #   vb.memory = "1024"
+  # end
+  #
+  # View the documentation for the provider you are using for more
+  # information on available options.
+{% endblock %}
+
+{% block push_define %}
+  # Define a Vagrant Push strategy for pushing to Atlas. Other push strategies
+  # such as FTP and Heroku are also available. See the documentation at
+  # https://docs.vagrantup.com/v2/push/atlas.html for more information.
+  # config.push.define "atlas" do |push|
+  #   push.app = "YOUR_ATLAS_USERNAME/YOUR_APPLICATION_NAME"
+  # end
+{% endblock %}
+
+{% block vm_provision %}
+  # Enable provisioning with a shell script. Additional provisioners such as
+  # Puppet, Chef, Ansible, Salt, and Docker are also available. Please see the
+  # documentation for more information about their specific syntax and use.
+  config.vm.provision "shell", inline: <<-SHELL
+sudo locale-gen `echo $LC_ALL`
+sudo apt-get update
+# sudo apt-get install -y libbz2-dev libdb-dev libc6-dev libgdbm-dev libncursesw5-dev libreadline-dev libsqlite3-dev libssl-dev libz-dev liblzma-dev tk-dev
+{% if USE_CELERY %}sudo apt-get install -y redis-server
+{% endif %}# sudo apt-get install -y ruby ruby-dev
+# sudo gem install fpm
+{% block install_deps %}sudo apt-get install -y npm
+sudo npm -g install yuglify
+sudo apt-get install -y virtualenvwrapper {{ python_version }} {{ python_version }}-dev python3-pip build-essential
+{% endblock %}{% block djangofloor %}sudo -H pip3 install git+https://github.com/d9pouces/EasyDjango.git
+{% endblock %}{% block application %}sudo -H pip3 install {{ DF_MODULE_NAME }}
+{% endblock %}{% block pre_application %}{% endblock %}{% block init_application %}sudo mkdir -p /var/{{ DF_MODULE_NAME }}/logs /etc/{{ DF_MODULE_NAME }}
+sudo adduser --system --shell /bin/bash --disabled-password --gecos "" {{ DF_MODULE_NAME }}
+cat << EOF | sudo -H tee /etc/{{ DF_MODULE_NAME }}/settings.ini
+[global]
+data = /var/{{ DF_MODULE_NAME }}
+listen_address = 0.0.0.0:{{ LISTEN_PORT }}
+server_url = http://localhost:10080/
+EOF
+sudo chown -R {{ DF_MODULE_NAME }}: /var/{{ DF_MODULE_NAME }} /etc/{{ DF_MODULE_NAME }}
+sudo -H -u {{ DF_MODULE_NAME }} {{ processes.django }} migrate  # create the database (SQLite by default)
+sudo -H -u {{ DF_MODULE_NAME }} {{ processes.django }} collectstatic --noinput  # prepare static files (CSS, JS, …)
+{% endblock %}{% block post_application %}sudo apt-get install -y supervisor
+cat << EOF | sudo tee /etc/supervisor/conf.d/{{ DF_MODULE_NAME }}.conf
+{% if processes.aiohttp %}[program:{{ DF_MODULE_NAME }}_aiohttp]
+command = /usr/local/bin/{{ processes.aiohttp }}
+user = {{ DF_MODULE_NAME }}
+{% elif processes.gunicorn %}[program:{{ DF_MODULE_NAME }}_gunicorn]
+command = /usr/local/bin/{{ processes.gunicorn }}
+user = {{ DF_MODULE_NAME }}
+{% endif %}{% if processes.celery %}{% for queue in required_celery_queues %}[program:{{ DF_MODULE_NAME }}_celery_{{ queue }}]
+command = /usr/local/bin/{{ processes.celery }} worker -Q {{ queue }}
+user = {{ DF_MODULE_NAME }}
+{% endfor %}{% endif %}EOF
+sudo service supervisor stop
+sudo service supervisor start
+cat << EOF | sudo -H -u {{ DF_MODULE_NAME }} {{ processes.django }} shell
+from django.contrib.auth import get_user_model
+M = get_user_model()
+u = M(username='demo')
+u.set_password('demo')
+u.save()
+u = M(username='admin', is_staff=True, is_superuser=True)
+u.set_password('admin')
+u.save()
+EOF
+
+{% endblock %}
+# sudo apt-get install -y rng-tools git
+# echo "HRNGDEVICE=/dev/urandom" | sudo tee -a /etc/default/rng-tools
+# sudo /etc/init.d/rng-tools restart
+# git clone https://github.com/d9pouces/{{ DF_MODULE_NAME }}.git
+# chown -R vagrant:vagrant {{ DF_MODULE_NAME }}
+SHELL
+{% endblock %}
+end

@@ -1,0 +1,9 @@
+{% block install_deps %}{{ indent }}sudo apt-get install {{ python_version }} {{ python_version }}-dev build-essential
+{% endblock %}{% block application %}{{ indent }}pip install {{ DF_MODULE_NAME }}
+{% endblock %}{% block pre_application %}{% endblock %}{{ indent }}{{ processes.django }} migrate  # create the database (SQLite by default)
+{{ indent }}{{ processes.django }} collectstatic --noinput  # prepare static files (CSS, JS, …)
+{% block post_application %}{{ indent }}{{ processes.django }} createsuperuser  # create an admin user
+{% endblock %}{% block run_application %}{% if USE_CELERY %}{{ indent }}{{ processes.celery }} worker -Q {{ required_celery_queues|join:',' }} &
+{% endif %}{% if processes.aiohttp %}{{ indent }}{{ processes.aiohttp }}
+{% elif processes.gunicorn %}{{ indent }}{{ processes.gunicorn }}
+{% endif %}{% endblock %}

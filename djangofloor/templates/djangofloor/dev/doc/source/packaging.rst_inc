@@ -1,0 +1,63 @@
+Debian Installation
+===================
+
+By default, {{ DF_PROJECT_NAME }} is only packaged as a standard Python project, downloadable from `Pypi <https://pypi.python.org>`_.
+However, you can create pure Debian packages with `DjangoFloor <http://django-floor.readthedocs.org/en/latest/packaging.html#debian-ubuntu>`_.
+
+The source code provides one Bash scripts,  `deb-debian-8_ubuntu-14.10-150.10.sh`.
+
+This script is designed to run on basic installation and are split in five steps:
+
+    * update system and install missing packages,
+    * create a virtualenv and install all dependencies,
+    * package all dependencies,
+    * package {{ DF_PROJECT_NAME }},
+    * install all packages and {{ DF_PROJECT_NAME }}, prepare a simple configuration to test.
+
+If everything is ok, you can copy all the .deb packages to your private mirror or to the destination server.
+By default, {{ DF_PROJECT_NAME }} is installed with Apache 2.4 and systemd.
+You can switch to Nginx or supervisor by tweaking the right `stdeb-XXX.cfg` file.
+
+{% block configuration %}
+Configuration
+-------------
+
+Default configuration file is `{{ path_etc_debian }}/{{ DF_MODULE_NAME }}/settings.ini`.
+If you need more complex settings, you can override default values (given in `djangofloor.defaults` and
+`{{ DF_MODULE_NAME }}.defaults`) by creating a file named `{{ path_etc_debian }}/{{ DF_MODULE_NAME }}/settings.py`.
+After any change in the database configuration or any upgrade, you must migrate the database to create the required tables.
+
+.. code-block:: bash
+
+    sudo -u {{ DF_MODULE_NAME }} {{ DF_MODULE_NAME }}-manage migrate
+{% block after_config %}{% endblock %}
+
+After installation and configuration, do not forget to create a superuser:
+
+.. code-block:: bash
+
+    sudo -u {{ DF_MODULE_NAME }} {{ DF_MODULE_NAME }}-manage createsuperuser
+{% endblock %}
+
+
+
+{% block startup %}
+Launch the service
+------------------
+
+The service can be stopped or started via the `service` command. By default, {{ DF_PROJECT_NAME }} is not started.
+
+.. code-block:: bash
+
+    sudo service {{ DF_MODULE_NAME }}-gunicorn start
+{% if USE_CELERY %}    sudo service {{ DF_MODULE_NAME }}-celery start
+{% endif %}
+
+If you want {{ DF_PROJECT_NAME }} to be started at startup, you have to enable it in systemd:
+
+.. code-block:: bash
+
+    systemctl enable {{ DF_MODULE_NAME }}-gunicorn.service
+{% if USE_CELERY %}    systemctl enable {{ DF_MODULE_NAME }}-celery.service
+{% endif %}
+{% endblock %}

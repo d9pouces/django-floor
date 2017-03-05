@@ -10,22 +10,65 @@ You can look current settings with the following command:
 
 .. code-block:: bash
 
-    {{ PROJECT_NAME }}-manage config
+    {{ processes.django }} config ini -v 2
+
+You can also display the actual list of Python settings
+
+.. code-block:: bash
+
+    {{ processes.django }} config python -v 2
+
 
 Here is the complete list of settings:
 
 .. code-block:: ini
 
-{% block ini_configuration %}{% for section in settings_merger.all_ini_options.items %}  [{{ section.0 }}]
-{% for option_parser in section.1 %}  {{ option_parser.key }} = {{ option_parser.str_value|df_inivalue }}
-{% if option_parser.help_str %}  # {{ option_parser.help_str|safe }}
-{% endif %}{% endfor %}{% endfor %}
+{% block ini_configuration %}{% for line in settings_ini.splitlines %}  {{ line|safe }}
+{% endfor %}
 {% endblock %}
 
 If you need more complex settings, you can override default values (given in `djangofloor.defaults` and
-`{{ PROJECT_NAME }}.defaults`) by creating a file named `{{ path_etc_virtualenv }}/{{ PROJECT_NAME }}/settings.py`.
+`{{ DF_MODULE_NAME }}.defaults`) by creating a file named `{{ path_etc_virtualenv }}/{{ DF_MODULE_NAME }}/settings.py`.
 
 
+{% block optional_config %}
+Optional components
+-------------------
+
+Efficient page caching
+~~~~~~~~~~~~~~~~~~~~~~
+
+You just need to install `django-redis`.
+Settings are automatically changed for using a local Redis server (of course, you can change it in your config file).
+
+.. code-block:: bash
+
+  pip install django-redis
+
+Faster session storage
+~~~~~~~~~~~~~~~~~~~~~~
+
+You just need to install `django-redis-sessions` for storing sessions into user sessions in Redis instead of storing them in the main database.
+Redis is not designed to be backuped; if you loose your Redis server, sessions are lost and all users must login again.
+However, Redis is faster than your main database server and sessions take a huge place if they are not regularly cleaned.
+Settings are automatically changed for using a local Redis server (of course, you can change it in your config file).
+
+.. code-block:: bash
+
+  pip install django-redis-sessions
+
+Optimized media files
+~~~~~~~~~~~~~~~~~~~~~
+
+You can use `Django-Pipeline <https://django-pipeline.readthedocs.io/en/latest/configuration.html>`_ to merge all media files (CSS and JS) for a faster site.
+
+.. code-block:: bash
+
+  pip install django-pipeline
+
+Optimized JavaScript files are currently deactivated due to syntax errors in generated files (not my fault ^^).
+
+{% endblock %}
 {% block debugging %}
 Debugging
 ---------
@@ -36,21 +79,19 @@ or try to run the server interactively:
 .. code-block:: bash
 
   sudo service supervisor stop
-  sudo -u {{ PROJECT_NAME }} -i
-  workon {{ PROJECT_NAME }}
-  {{ PROJECT_NAME }}-manage config
-  {{ PROJECT_NAME }}-manage runserver
-  {{ PROJECT_NAME }}-gunicorn
-{% if USE_CELERY %}  {{ PROJECT_NAME }}-celery worker
+  sudo -u {{ DF_MODULE_NAME }} -i
+  workon {{ DF_MODULE_NAME }}
+  {{ processes.django }} config
+  {{ processes.django }} runserver
+  {% if processes.aiohttp %}{{ processes.aiohttp }}{% else %}{{ processes.gunicorn }}{% endif %}
+{% if USE_CELERY %}  {{ processes.celery }} worker -Q {{ required_celery_queues|join:',' }}
 {% endif %}
 
 {% endblock %}
 {% block backup %}
-{% with DF_PATH_BIN=path_bin_virtualenv DF_PATH_ETC=path_etc_virtualenv %}{% include 'djangofloor/include/backup.rst_tpl' %}{% endwith %}
+{% include 'djangofloor/include/backup.rst_tpl' %}
 {% endblock %}
-{% block monitoring %}
-{% with DF_PATH_BIN=path_bin_virtualenv DF_PATH_ETC=path_etc_virtualenv %}{% include 'djangofloor/include/monitoring.rst_tpl' %}{% endwith %}
-{% endblock %}
+
 {% block ldap_groups %}
 LDAP groups
 -----------
@@ -61,6 +102,6 @@ There are two possibilities to use LDAP groups, with their own pros and cons:
   * regularly synchronize groups between the LDAP server and the SQL servers.
 
 The second approach can be used without any modification in your code and remove a point of failure
-in the global architecture (if you allow some delay during the synchronization process).
-A tool exists for such synchronization: `MultiSync <https://github.com/d9pouces/Multisync>`_.
+in the global architecture (if you can afford regular synchronizations instead of instant replication).
+At least one tool exists for such synchronization: `MultiSync <https://github.com/d9pouces/Multisync>`_.
 {% endblock %}

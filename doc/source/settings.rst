@@ -1,223 +1,80 @@
-Settings
-========
+Settings system
+===============
 
-IMHO, dealing with Django settings is a nightmare for at least two reasons.
-Even if you are building a custom website, some settings are common to both your developper instance and your production instance, and others settings are different.
-So, *you must maintain two differents files with lots of common parts.*
+By default, Django uses a single Python file for all settings.
+However, these settings could be organized into three categories:
 
-Moreover, setting file (with secret data like database passwords) is expected to be in your project.
-*You mix versionned files (the code) and non-versionned files (the settings), and any reinstallation can overwrite your settings.*
+  * settings that are very common and that can be kept as-is for any project (`USE_TZ = True` or `MEDIA_URL = '/media/'`),
+  * settings that are specific to your project but common to all instances of your project (like `INSTALLED_APPS`),
+  * settings that are installation-dependent (`DATABASE_PASSWORD`, …)
 
-With DjangoFloor, you can forget these drawbacks. You always use `djangofloor.settings` as Django settings, but this module does not contain any settings.
-This module can smartly merge settings from three different sources:
+You usually have to maintain at least two versions of the same file (dev and prod, or one that is versionned and the other one for prod), with the risk of desynchronized files.
 
-    * default DjangoFloor settings (`djangofloor.defaults`),
-    * default settings for your wonderful website (`myproject.defaults`, for settings like INSTALLED_APPS, MIDDLEWARES, and so on),
-    * local settings, specific to an instance (`[prefix]/etc/myproject/settings.py`) for settings like database infos,
-    * you can even define settings in a more traditionnal way, with .ini files.
+On the contrary, DjangoFloor allows to dynamically merge several files to define your settings:
 
-Default DjangoFloor settings are overriden by your project defaults, which are overriden by local settings.
-Run `myproject-manage config` to display all configuration files, in order of precedence:
+  * :mod:`djangoFloor.conf.defaults` that aims at providing good default values,
+  * `yourproject.defaults` for your project-specific settings,
+  * `/etc/yourproject/settings.py` for installation-dependent settings.
 
-    * Python local configuration: [...]/etc/archeolog_server/settings.py (defined in environment by DJANGOFLOOR_PYTHON_SETTINGS)
-    * INI local configuration: [...]/etc/archeolog_server/settings.ini (defined in environment by DJANGOFLOOR_INI_SETTINGS)
-    * Default project settings: [...]/[...]/defaults.py (defined in environment by DJANGOFLOOR_PROJECT_DEFAULTS)
-    * Other default settings: [...]/[...]/djangofloor/defaults.py
+You can define a list of settings that are read from a traditionnal text configuration file (`.ini format <https://docs.python.org/3/library/configparser.html>`_).
+DjangoFloor also searches for `local_settings.py` and `local_settings.ini` setting files in the working directory.
 
-Existing files are displayed in blue, missing files are displayed in red.
-All Python settings files have the same syntax as the traditionnal Django settings file.
+Defining settings
+-----------------
+
+  * many settings are *de facto* defined in :mod:`djangofloor.conf.defaults`,
+  * default mapping between Python settings and the `.ini` config file is defined in :mod:`djangofloor.conf.mapping`,
+  * you should define your project-wide settings in `<project_root>/yourproject/defaults.py` (only define overriden settings),
+  * you should define the option that can be defined in a configuration file in `<project_root>/yourproject/iniconf.py`, in a list named `INI_MAPPING`,
+  * define development settings (like `DEBUG = True`) should be defined in  `<project_root>/local_settings.py`,
+
+Before defining your own settings, you should take a look to the first two files and the existing variables.
+
+Your `defaults.py` has the same structure than a traditionnal Django `settings.py` file (but with less variables ^^ )
+`INI_MAPPING` is a list of :class:`djangofloor.conf.config_values.ConfigValue` (or of its subclasses, some of them defined in the same module).
+Several lists are already defined in :mod:`djangofloor.conf.mapping`.
 
 
-However, any string setting can use reference other settings through `string.Formatter`. An example should be clearer:
+Displaying settings
+-------------------
 
-DjangoFloor default settings::
-
-    LOCAL_PATH = '/tmp/'
-    MEDIA_ROOT = '{DATA_PATH}/media'
-    STATIC_ROOT = '{DATA_PATH}/static'
-    LOG_ROOT = '{DATA_PATH}/logs'
-
-your project default settings (which override DjangoFloor settings)::
-
-    MEDIA_ROOT = '{DATA_PATH}/data'
-
-your local settings (which have the top priority)::
-
-    LOCAL_PATH = '/var/www/data'
-    STATIC_ROOT = '/var/www/static'
-
-in the Django shell, you can check that settings are gracefully merged together::
-
-    >>> from django.conf import settings
-    >>> print(settings.LOCAL_PATH)  # overriden in local settings
-    /var/www/data
-    >>> print(settings.MEDIA_ROOT)  # overriden in project defaults but not in local settings
-    /var/www/data/data
-    >>> print(settings.STATIC_ROOT)  # overriden in local settings
-    /var/www/static
-    >>> print(settings.LOG_ROOT)  # reference LOCAL_PATH in DjangoFloor, which is overriden
-    /var/www/data/logs
-
-How to use it?
---------------
-
-Since your settings are expected to be in  `myproject.defaults` and in `[prefix]/etc/myproject/settings.py`, DjangoFloor must to guess your project name `myproject`.
-There are three ways to let it know `myproject`:
-
-  -  use one of the provided commands `djangofloor-celery`, `djangofloor-manage`, `djangofloor-gunicorn` or `djangofloor-uwsgi` with the option `--dfproject myproject`
-  -  `export DJANGOFLOOR_PROJECT_NAME=myproject` before using `djangofloor-celery`, `djangofloor-manage`, `djangofloor-gunicorn` or `djangofloor-uwsgi`
-  -  copy `djangofloor-celery`, `djangofloor-manage`, `djangofloor-gunicorn` or `djangofloor-uwsgi` as `myproject-[celery|manage|gunicorn|uwsgi`.
-
-You can change `myproject.defaults` to another value with the environment variable `DJANGOFLOOR_PROJECT_SETTINGS`
-You can specify another local setting files with the option `--dfconf [path/to/settings.py]`
-
-If you run `[prefix]/bin/myproject-manage`, then local settings are expected in `[prefix]/etc/myproject/settings.py`.
-If you run directly from the source (without installing), local settings are expected in `working_dir/my_project_configuration.py`.
-
-And Pycharm (or other IDEs)?
-----------------------------
-
-PyCharm (and, I guess, many other IDEs) has built-in support for the Django framework and is able to use the settings module for a better auto-completion.
-However, it is not able to use such a complex system.
-
-DjangoFloor can generate a merged settings file for you:
+The complete list of used config files can be displayed using the following command:
 
 .. code-block:: bash
 
-  myproject-manage config --merge > pycharm_settings.py
+  yourproject-django config python -v 2 | less (or python yourproject-django.py config python -v 2)
+  # --------------------------------------------------------------------------------
+  # Djangofloor version 1.0.0
+  # Configuration providers:
+  #  - Python module "djangofloor.conf.defaults"
+  #  - Python module "yourproject.defaults"
+  #  - .ini file "/home/user/.virtualenvs/yourproject/etc/yourproject/settings.ini"
+  #  - Python file "/home/user/.virtualenvs/yourproject/etc/yourproject/settings.py"
+  #  - .ini file "/home/user/.virtualenvs/yourproject/etc/yourproject/django.ini"
+  #  - Python file "/home/user/.virtualenvs/yourproject/etc/yourproject/django.py"
+  #  - .ini file "./local_settings.ini"
+  #  - Python file "./local_settings.py"
+  # --------------------------------------------------------------------------------
+  ...
+  DF_TEMPLATE_CONTEXT_PROCESSORS = ['updoc.context_processors.most_checked']
+  #   djangofloor.conf.defaults -> []
+  #   updoc.defaults -> ['updoc.context_processors.most_checked']
 
-Then you can use this file as Django settings in PyCharm.
 
-Notes
------
+You can also display the corresponding .ini files:
 
-  - Only settings in capitals are taken into account.
-  - interpolation of settings is also recursively processed for dicts, lists, tuples and sets.
-  - If you have a settings MY_SETTING and another called MY_SETTING_HELP, the latter will be used as help for `manage.py config`.
+.. code-block:: bash
 
-Full list of settings
----------------------
-
-DjangoFloor define a few new settings.
-
-    - `FLOOR_INDEX`: django view your the website index,
-    - `FLOOR_INSTALLED_APPS`: list of extra Django apps (including yours),
-    - `FLOOR_PROJECT_NAME`: your project name,
-    - `FLOOR_URL_CONF`: your extra URL configuration,
-    - `FLOOR_FAKE_AUTHENTICATION_USERNAME`: set it to any username you want (allow to fake a HTTP authentication, like Kerberos). Only for debugging purposes,
-    - `FLOOR_FAKE_AUTHENTICATION_GROUPS`: set it to the names of the groups you want for the fake user. Only for debugging purposes,
-    - `FLOOR_WS_FACILITY`: websocket facility for the signal implementation,
-    - `FLOOR_USE_WS4REDIS`: automatically set if you installed ws4redis. If you manually change it:
-
-        * add `ws4redis` in `INSTALLED_APPS`
-        * add `ws4redis.context_processors.default` in `TEMPLATE_CONTEXT_PROCESSORS`
-        * set `WSGI_APPLICATION` to `ws4redis.django_runserver.application`
-
-    - `FLOOR_DEFAULT_GROUP_NAME`: name of the default group for newly created users (when authenticated by the reverse proxy). Leave it to `None` to avoid this behavior.
-
-    - `USE_SCSS`: use SCSS scss compiler with Pipeline
-    - `LOCAL_PATH`: the base directory for all data,
-    - `BIND_ADDRESS`: the default bind address for the runserver command, or for gunicorn,
-    - `REDIS_HOST` and `REDIS_PORT`: this is self-explained,
-
-    - `THREADS`, `WORKERS`, `MAX_REQUESTS`: all these settings are related to gunicorn
-    - `REVERSE_PROXY_IPS`: the IPs of your reverse proxy, allowing authenticating users by the `REMOTE_USER` header
-
-Using flat config files
------------------------
-
-If your application has a few settings available to the end-user (typically the coordinates of the database), you can also put them into a .ini file.
-However, this require a mapping between the option in the .ini file and the settings.
-
-This dictionnary is expected in the file `myproject/iniconf.py`, with a single variable named `INI_MAPPING` which is a list of :class:`djangofloor.iniconf.OptionParser`.
-For example:
-
-.. code-block:: python
-
-    INI_MAPPING = [
-        OptionParser('DATABASE_ENGINE', 'database.engine'),
-        OptionParser('DATABASE_NAME', 'database.name'),
-        OptionParser('DATABASE_USER', 'database.user'),
-        OptionParser('DATABASE_PASSWORD', 'database.password'),
-        OptionParser('DATABASE_HOST', 'database.host'),
-        OptionParser('DATABASE_PORT', 'database.port'),
-    ]
-
-In this case, DjangoFloor will look for a file `[prefix]/etc/myproject/settings.ini` with a section `database`, with the options `engine`, `name`, `user`, `password`, `host` and `port`:
-
-.. code-block:: ini
-
-    [database]
-    host = localhost
-    user = my_user
-    password = my_secret_password
-    engine = django.db.backends.postgresql_psycopg2
-
-The exact expected filename is always given by the command `myproject-manage config`.
-
-Setting classes
----------------
-
-DjangoFloor define a few special classes:
-
-  - Use :class:`djangofloor.utils.DirectoryPath` to reference a directory. It takes a directory path (:class:`str`) as argument.
-    This string can reference any other existing setting (e.g., `DirectoryPath("{LOCAL_PATH}/static")`).
-    The referenced directory will automatically be created on startup.
-
-  - Use :class:`djangofloor.utils.FilePath` to reference a file. It takes a file path (:class:`str`) as argument.
-    This string can reference any other existing setting (e.g., `FilePath("{LOCAL_PATH}/data/database.db")`).
-    The parent directory of the referenced file will automatically be created on startup.
-
-  - Use :class:`djangofloor.utils.SettingReference` to reference another setting. It takes another setting name as argument.
-
-    .. code-block:: python
-
-        A_SETTING = 0
-        B_SETTING = SettingReference('C_SETTING')
-        C_SETTING = A_SETTING
-
-    If `A_SETTING` is overidden in another config file, `C_SETTING` is still equal to `0` while `B_SETTING` will always be equal to `A_SETTING`.
-
-  - Use :class:`djangofloor.utils.ExpandIterable` to include a list in another one. It takes another setting name as argument.
-
-    .. code-block:: python
-
-        A_SETTING = [0, 1, 2]
-        B_SETTING = [ExpandIterable('C_SETTING'), 3, 4]
-
-    `B_SETTING` will be equal to `[0, 1, 2, 3, 4, ]`. If `A_SETTING` is overidden, then all elements of `A_SETTING` will be included before `3, 4` in `B_SETTING`.
-
-  - Use :class:`djangofloor.utils.CallableSetting` to define a setting on startup. It takes a callable as argument.
-    This callable takes a dict as argument: keys are parsed setting names and values are their values.
-
-    .. code-block:: python
-
-        A_SETTING = True
-        B_SETTING = False
-        C_SETTING = CallableSetting(lambda dict_: dict_['A_SETTING'] or dict_['B_SETTING'])
-        D_SETTING = None
-
-    The callable used by `C_SETTING` can only use `A_SETTING` and `B_SETTING`.
-
-    .. code-block:: python
-
-        A_SETTING = True
-        B_SETTING = False
-        C_SETTING = CallableSetting(lambda dict_: dict_['A_SETTING'] or dict_['B_SETTING'], 'D_SETTING')
-        D_SETTING = None
-        E_SETTING = None
-
-    The callable used by `C_SETTING` can now use `D_SETTING`, as its name is given to `CallableSetting`.
-
-Parsing order
--------------
-
-Settings names are sorted before being parsed, but if a setting references another one, the latter will be imported.
-
-.. code-block:: python
-
-    A_SETTING = 0
-    B_SETTING = '{C_SETTING}'
-    C_SETTING = 2
-
-Of course, `B_SETTING` will be equal to `"2"` on startup. The parsing order will be `A_SETTING`, `C_SETTING` and `B_SETTING` (since `B_SETTING` requires `C_SETTING`).
+  yourproject-django config ini -v 2 | less
+  #  - .ini file "/Users/flanker/.virtualenvs/easydjango35/etc/easydemo/settings.ini"
+  #  - .ini file "/Users/flanker/.virtualenvs/easydjango35/etc/easydemo/django.ini"
+  #  - .ini file "/Users/flanker/Developer/Github/EasyDjango/EasyDemo/local_settings.ini"
+  [global]
+  admin_email = admin@localhost
+  data = django_data
+  language_code = fr-fr
+  listen_address = localhost:9000
+  secret_key = secret_key
+  server_url = http://localhost:9000/
+  time_zone = Europe/Paris
+  log_remote_url =

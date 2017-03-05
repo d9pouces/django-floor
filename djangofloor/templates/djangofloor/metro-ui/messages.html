@@ -1,0 +1,6 @@
+{% load metro_ui %}
+<script type="text/javascript">
+{% for message in messages %}
+$.df.notification("{{ message_style }}", "{{ message|metro_ui_message_level }}", "{{ message|escapejs}}", "", null, 0);
+{% endfor %}
+</script>

@@ -6,8 +6,6 @@ df = {};
 df.registered_signals = {};
 df.default_message_timeout = 5000;
 df.__message_count = 0;
-df.__modal_respawn_stack = [];
-df.__modal_respawn_index = -1;
 df.window_key = null;
 df.ws4redis = null;
 df.csrf_cookie_value = '';
@@ -214,36 +212,21 @@ df.connect('df.modal.show', function (options) {
     var baseModal = $('#df_modal');
     if (baseModal.size() == 0) {
         $('body').append('<div class="modal fade" id="df_modal" tabindex="-1" role="dialog" aria-labelledby="df_modal" aria-hidden="true"><div class="modal-dialog"><div class="modal-content"></div></div></div>');
-        baseModal = $('#df_modal');
-        baseModal.on('hidden.bs.modal', df.on_hidden_modal);
     }
+    // TODO : ajouter une option onclose, qui correspond à un appel JS à la fermeture
+    // on l'ajoute à une liste d'onclose pour les enchaînements ouverture/fermeture
     baseModal.find(".modal-content").html(options.html);
     if (options.width) {
         baseModal.find(".modal-dialog").attr("style", "width: " + options.width);
     } else {
         baseModal.find(".modal-dialog").removeAttr("style");
     }
-    if(options.clean_stack) {
-        df.__modal_respawn_index = -1;
-        df.__modal_respawn_stack = [];
-    }
-    if(options.respawn) {
-        df.__modal_respawn_index += 1;
-        while(df.__modal_respawn_index + 1 >= df.__modal_respawn_stack.length) {
-            df.__modal_respawn_stack.push(undefined);
-        }
-        df.__modal_respawn_stack[df.__modal_respawn_index] = options.respawn;
-    }
     baseModal.modal('show');
 });
 
-df.connect('df.modal.hide', function (opts) {
+df.connect('df.modal.hide', function () {
     "use strict";
     var baseModal = $('#df_modal');
-    if(opts.clean_stack) {
-        df.__modal_respawn_index = -1;
-        df.__modal_respawn_stack = [];
-    }
     baseModal.modal('hide');
     baseModal.removeData('bs.modal');
 });
@@ -255,28 +238,14 @@ df.connect('df.redirect', function (options) {
     "use strict";
     window.location.href = options.url;
 });
-df.connect('df.modal.clean_stack', function () {
-    "use strict";
-    df.__modal_respawn_index = -1;
-    df.__modal_respawn_stack = [];
-});
-df.on_hidden_modal = function () {
-    "use strict";
-    var baseModal = $('#df_modal'), respawn = undefined;
-    baseModal.removeData('bs.modal');
-    baseModal.find(".modal-content").html('');
-    while((df.__modal_respawn_index >= 0) && (!df.__modal_respawn_stack[df.__modal_respawn_index - 1])) {
-        df.__modal_respawn_index -= 1;
-    }
-    if (respawn) {
-        df.__modal_respawn_index -= 2;
-        df.call(respawn.signal, respawn.options);
-    } else {
-        df.__modal_respawn_index = -1;
-    }
-};
+
 $(function () {
-    $("#df_modal").on('hidden.bs.modal', df.on_hidden_modal);
+    $("#body").on('hidden.bs.modal', function () {
+        "use strict";
+        var baseModal = $('#df_modal');
+        baseModal.removeData('bs.modal');
+        baseModal.find(".modal-content").html('');
+    });
     $('#messages div').each(function (index, obj) {
         setTimeout(function () {
             $(obj).slideUp(400, 'swing', function () {

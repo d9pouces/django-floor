@@ -1,88 +1,69 @@
-Welcome to DjangoFloor's documentation!
-=======================================
+DjangoFloor
+===========
+
+Introduction
+------------
+
+DjangoFloor is an thin overlay of the Django Python web framework for quickly building websites that are ready to deploy.
+Its main features are:
+
+  * easy to develop: a single command line generates a fully working base project (with complete templates), that you can modify step-by-step,
+    with dedicated development settings,
+  * easy to deploy: ready to be packaged, with separated simple config (.ini) files, without requiring to maintain duplicated config files (prod and dev),
+  * allowing offline computation (computation in separated processes or dedicated machines) and two-way communication link between the server side and the JavaScript world via websockets.
+
+Of course, everything that is provided by default by DjangoFloor can be overriden (like the default templates that are based on the well-known Bootstrap 3 css).
+
+Requirements
+------------
+
+DjangoFloor assumes that some requirements are available:
+
+  * Python 3.4+,
+  * Django 1.8+,
+  * Redis for caching, sessions, websocket management and celery broker,
+  * a reverse proxy like nginx.
+
+DjangoFloor in a nutshell
+-------------------------
+
+.. code-block:: bash
+
+  pip install djangofloor[extra]
+  djangofloor-createproject
+  | Your new project name [MyProject]
+  | Python package name [myproject]
+  | Initial version [0.1]
+  | Root project path [.] test
+  cd test
+  python setup.py develop
+  myproject-django migrate
+  myproject-django collectstatic --noinput
+  myproject-django runserver
+  # open a new terminal window
+  myproject-celery worker
+
+And open your browser on http://localhost:9000/ :)
 
 Overview
---------
-
-
-DjangoFloor helps you to easily create new website with the excellent framework `Django <https://www.djangoproject.com>`_.
-However, Django suffers from different drawbacks:
-
-    * websites are complex to deploy in production,
-    * JavaScript is somewhat hard to use for integrating dynamic parts in a webpage,
-    * several other libraries are almost required,
-    * you need a lot of code which will be common to all your projects.
-
-We try to solve these problems:
-
-    * a system of settings based on default project settings and local configuration files,
-    * an easy-to-use signal system allowing to call Python or Javascript from Python or Javascript,
-    * some common libraries are set as dependencies,
-    * all common code are in a unique library that will be included into your projects.
-
-Default configuration assumes that you use `Redis <http://redis.io>`_ as secondary database, alongside a more classical SQL like `PostgreSQL` or `MySQL`.
-Everything is ready to use `Celery <http://celery.readthedocs.org>`_ for background tasks.
-
-
-:doc:`installation`
-    Instruction on how to install this package
-
-:doc:`tutorial`
-    Start here for a quick overview
-
-:doc:`demo`
-    Use the demo provided in the source
-
-:doc:`architecture`
-    Explain the global architecture of a production deployment
-
-:doc:`batteries`
-    What are all these included dependencies?
-
-:doc:`views`
-    How to integrate your own views into a DjangoFloor project
-
-:doc:`signals`
-    DjangoFloor Signals, or how to call Python and JS code from Python or JS with the same syntax
-
-:doc:`settings`
-    DjangoFloor settings system
-
-:doc:`deployment`
-    How to deploy a production website
-
-:doc:`packaging`
-    How to create packages for Linux distributions
-
-:doc:`documentation`
-    Use DjangoFloor to generate a complete documentation of your project
-
-:doc:`api/index`
-    The complete API documentation, organized by modules
-
-:doc:`javascript`
-    Documentation for the JavaScript functions
-
-
-Full table of contents
-======================
+========
 
 .. toctree::
-    :maxdepth: 1
+   :maxdepth: 3
 
-    installation
-    demo
-    tutorial
-    architecture
-    batteries
-    views
-    signals
-    settings
-    deployment
-    packaging
-    documentation
-    api/index
-    javascript
+   installation
+   newproject
+   settings
+   provided-settings
+   signals
+   remote-functions
+   monitoring
+   notification
+   authentication
+   features
+   common_errors
+   javascript
+   api/index
 
 Indices and tables
 ==================

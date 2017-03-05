@@ -1,26 +1,30 @@
-# coding=utf-8
-"""Authentication backend used for HTTP authentication
-===================================================
+# -*- coding: utf-8 -*-
+"""Authentication backend for `django.contrib.auth`
+================================================
 
-Check :class:`django.contrib.auth.backends.RemoteUserBackend` for a more detailed explanation.
-
-Automatically add a specified group to newly-created users. The name of this default group is defined by the setting
-FLOOR_DEFAULT_GROUP_NAME.
-Set it to `None` if you do not want a default group for new users.
-
+This authentication backend only overrides the default Django one for remote users (users that are authenticated using
+a HTTP header like HTTP_REMOTE_USER). It automatically add several groups to newly-created users.
+Setting `DF_DEFAULT_GROUPS` is expected to be a list of group names.
 """
-from __future__ import unicode_literals
+from __future__ import unicode_literals, print_function, absolute_import
+
 from django.conf import settings
 from django.contrib.auth.backends import RemoteUserBackend
 from django.contrib.auth.models import Group
+from django.utils.encoding import force_text
 
 __author__ = 'Matthieu Gallet'
 
 
-CACHED_GROUPS = {}
+_CACHED_GROUPS = {}
 
 
-class DefaultGroupRemoteUserBackend(RemoteUserBackend):
+class DefaultGroupsRemoteUserBackend(RemoteUserBackend):
+    """Add groups to new users.
+    Based on :class:`django.contrib.auth.backends.RemoteUserBackend`.
+    Only overrides the `configure_user` method to add the required groups.
+
+     """
 
     def configure_user(self, user):
         """
@@ -28,16 +32,8 @@ class DefaultGroupRemoteUserBackend(RemoteUserBackend):
 
         By default, returns the user unmodified; only add it to the default group.
         """
-        group_name = settings.FLOOR_DEFAULT_GROUP_NAME
-        if group_name is None:
-            return user
-        if group_name not in CACHED_GROUPS:
-            CACHED_GROUPS[group_name] = Group.objects.get_or_create(name=str(group_name))[0]
-        user.groups.add(CACHED_GROUPS[group_name])
+        for group_name in settings.DF_DEFAULT_GROUPS:
+            if group_name not in _CACHED_GROUPS:
+                _CACHED_GROUPS[group_name] = Group.objects.get_or_create(name=force_text(group_name))[0]
+            user.groups.add(_CACHED_GROUPS[group_name])
         return user
-
-
-if __name__ == '__main__':
-    import doctest
-
-    doctest.testmod()

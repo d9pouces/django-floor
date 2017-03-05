@@ -1,33 +1,14 @@
-Installing / Upgrading
-======================
+Installing
+==========
 
-Environment
------------
+There are several ways to install DjangoFloor.
 
-DjangoFloor is compatible with Python 2.7, 3.2, 3.3, 3.4 and 3.5.
-We strongly recommend to create a virtualenvironment and the use of `virtualenvwrapper`.
-Go to the `doc <https://virtualenvwrapper.readthedocs.org/>`_ to discover how to use it.
-
-.. code-block:: bash
-
-    mkvirtualenv djangofloor
-
-
-Simple installation
+Installing from pip
 -------------------
 
-The simplest way is to use pip:
-
 .. code-block:: bash
 
-    pip install djangofloor
-
-
-You can also install with optional dependencies:
-
-.. code-block:: bash
-
-    pip install djangofloor[websocket,scss]
+  pip install djangofloor
 
 Installing from source
 ----------------------
@@ -36,16 +17,42 @@ If you prefer install directly from the source:
 
 .. code-block:: bash
 
-    git clone https://github.com/d9pouces/django-floor.git
-    cd django-floor
-    python setup.py install
+  git clone https://github.com/d9pouces/django-floor.git DjangoFloor
+  cd DjangoFloor
+  python setup.py install
 
-Upgrading
----------
+Dependencies
+------------
 
-Again, the easiest way is to use pip:
+Of course, DjangoFloor is not a standalone library and requires several packages:
+
+  * django >= 1.8,
+  * celery,
+  * django-bootstrap3,
+  * redis,
+  * pip,
+  * aiohttp-wsgi,
+  * aiohttp,
+  * asyncio_redis.
+
+Several other dependencies are not mandatory but are really useful:
+
+  * django-pipeline,
+  * django-debug-toolbar,
+  * django-redis-sessions,
+  * django-redis,
+  * psutil.
+
+You can install these optional dependencies:
 
 .. code-block:: bash
 
-    pip install djangofloor --upgrade
+  pip install djangofloor[extra]
 
+
+Virtualenvs
+-----------
+
+You really should consider using `virtualenvs <http://docs.python-guide.org/en/latest/dev/virtualenvs/>`_, allowing
+to create several isolated Python environments (each virtualenv having its own set of libraries).
+`virtualenvwrapper <https://virtualenvwrapper.readthedocs.io/en/latest/>`_ may help you to create and manage your virtualenvs.

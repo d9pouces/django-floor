@@ -1,14 +1,21 @@
 # coding=utf-8
 """Common DjangoFloor exceptions
 =============================
+.. deprecated:: 1.0
 
 Define several common exceptions, which can be gracefully handled by DjangoFloor.
-You should raise these exceptions, or create new exceptions which derive from these ones. They help to display helpful messages to end-user.
+You should raise these exceptions, or create new exceptions which derive from these ones. They help to display helpful
+messages to end-user.
 """
 from __future__ import unicode_literals
+
+import warnings
+
 from django.utils.translation import ugettext as _
+from djangofloor.utils import RemovedInDjangoFloor110Warning
 
 __author__ = 'Matthieu Gallet'
+warnings.warn('djangofloor.exceptions module and its functions will be removed', RemovedInDjangoFloor110Warning)
 
 
 class ApiException(Exception):

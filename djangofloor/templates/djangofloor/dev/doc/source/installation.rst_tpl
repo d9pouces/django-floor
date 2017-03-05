@@ -1,12 +1,12 @@
 {% load djangofloor %}Installation
 ============
 {% block introduction %}
-Like many Python packages, you can use several methods to install {{ FLOOR_PROJECT_NAME }}.
-{{ FLOOR_PROJECT_NAME }} designed to run with {{ python_version }}.x{% if use_python3 %}+{% endif %}.
+Like many Python packages, you can use several methods to install {{ DF_PROJECT_NAME }}.
+{{ DF_PROJECT_NAME }} designed to run with {{ python_version }}.x{% if use_python3 %}+{% endif %}.
 The following packages are also required:
 {% block dependencies %}{% block pre_dependencies %}{% endblock %}
-  * setuptools >= 3.0
-  * djangofloor >= 0.18.0{% block post_dependencies %}{% endblock %}
+  * setuptools >= 3.0,
+  * djangofloor >= 1.0.0{% block post_dependencies %}.{% endblock %}
 {% endblock %}
 
 Of course you can install it from the source, but the preferred way is to install it as a standard Python package, via pip.
@@ -15,10 +15,27 @@ Of course you can install it from the source, but the preferred way is to instal
 Installing or Upgrading
 -----------------------
 
-Here is a simple tutorial to install {{ FLOOR_PROJECT_NAME }} on a basic Debian/Linux installation.
+Here is a simple tutorial to install {{ DF_PROJECT_NAME }} on a basic Debian/Linux installation.
 You should easily adapt it on a different Linux or Unix flavor.
+
+{% block upgrading %}If you want to upgrade an existing installation, just install the new version (with the `--upgrade` flag for `pip`) and run
+the `collectstatic` and `migrate` commands (for updating both static files and the database).{% endblock %}
+
 {% block pre_install_step %}{% endblock %}
 
+{% block environment %}Preparing the environment
+-------------------------
+
+.. code-block:: bash
+
+{% block pre_environment %}{% endblock %}    sudo adduser --disabled-password {{ DF_MODULE_NAME }}
+    sudo chown {{ DF_MODULE_NAME }}:www-data {{ LOCAL_PATH }}
+    sudo apt-get install virtualenvwrapper {{ python_version }} {{ python_version }}-dev build-essential postgresql-client libpq-dev
+    sudo -u {{ DF_MODULE_NAME }} -H -i
+    mkvirtualenv {{ DF_MODULE_NAME }} -p `which {{ python_version }}`
+    workon {{ DF_MODULE_NAME }}{% block post_environment %}{% endblock %}
+
+{% endblock %}
 {% block database %}Database
 --------
 
@@ -27,55 +44,54 @@ PostgreSQL is often a good choice for Django sites:
 .. code-block:: bash
 
 {% block pre_database %}{% endblock %}   sudo apt-get install postgresql
-   echo "CREATE USER {{ PROJECT_NAME }}" | sudo -u postgres psql -d postgres
-   echo "ALTER USER {{ PROJECT_NAME }} WITH ENCRYPTED PASSWORD '5trongp4ssw0rd'" | sudo -u postgres psql -d postgres
-   echo "ALTER ROLE {{ PROJECT_NAME }} CREATEDB" | sudo -u postgres psql -d postgres
-   echo "CREATE DATABASE {{ PROJECT_NAME }} OWNER {{ PROJECT_NAME }}" | sudo -u postgres psql -d postgres
-{% if USE_CELERY %}
+   echo "CREATE USER {{ DF_MODULE_NAME }}" | sudo -u postgres psql -d postgres
+   echo "ALTER USER {{ DF_MODULE_NAME }} WITH ENCRYPTED PASSWORD '5trongp4ssw0rd'" | sudo -u postgres psql -d postgres
+   echo "ALTER ROLE {{ DF_MODULE_NAME }} CREATEDB" | sudo -u postgres psql -d postgres
+   echo "CREATE DATABASE {{ DF_MODULE_NAME }} OWNER {{ DF_MODULE_NAME }}" | sudo -u postgres psql -d postgres
 
-{{ FLOOR_PROJECT_NAME }} also requires Redis:
+
+{% if USE_CELERY %}{{ DF_PROJECT_NAME }} also requires Redis for websockets, background tasks, caching pages and storing sessions:{% else %}{{ DF_PROJECT_NAME }} can use Redis for caching pages and storing sessions:{% endif %}
 
 .. code-block:: bash
 
     sudo apt-get install redis-server
 
-{% endif %}{% block post_database %}{% endblock %}
+{% block post_database %}{% endblock %}
 {% endblock %}
 
 {% block webserver %}
 Apache
 ------
 
-I only present the installation with Apache, but an installation behind nginx should be similar.
-You cannot use different server names for browsing your mirror. If you use `{{ PROJECT_NAME }}.example.org`
-in the configuration, you cannot use its IP address to access the website.
+Only the Apache installation is presented, but an installation behind nginx should be similar.
+Only the chosen server name (like `{{ DF_MODULE_NAME }}.example.org`) can be used for accessing your site. For example, you cannot use its IP address.
 
 .. code-block:: bash
 
-    SERVICE_NAME={{ PROJECT_NAME }}.example.org
+    SERVICE_NAME={{ DF_MODULE_NAME }}.example.org
     sudo apt-get install apache2 libapache2-mod-xsendfile
-    sudo a2enmod headers proxy proxy_http
+    sudo a2enmod headers proxy proxy_http xsendfile
     sudo a2dissite 000-default.conf
     # sudo a2dissite 000-default on Debian7
-    cat << EOF | sudo tee /etc/apache2/sites-available/{{ PROJECT_NAME }}.conf
+    cat << EOF | sudo tee /etc/apache2/sites-available/{{ DF_MODULE_NAME }}.conf
     <VirtualHost *:80>
         ServerName $SERVICE_NAME
-{% block webserver_static %}        Alias {{ STATIC_URL }} {{ STATIC_ROOT }}/
+{% block webserver_static %}        Alias {{ STATIC_URL }} {{ STATIC_ROOT }}
         ProxyPass {{ STATIC_URL }} !
         <Location {{ STATIC_URL }}>
             Order deny,allow
             Allow from all
             Satisfy any
         </Location>
-{% endblock %}{% block webserver_media %}        Alias {{ MEDIA_URL }} {{ MEDIA_ROOT }}/
+{% endblock %}{% block webserver_media %}        Alias {{ MEDIA_URL }} {{ MEDIA_ROOT }}
         ProxyPass {{ MEDIA_URL }} !
         <Location {{ MEDIA_URL }}>
             Order deny,allow
             Allow from all
             Satisfy any
         </Location>
-{% endblock %}        ProxyPass / http://{{ BIND_ADDRESS }}/
-        ProxyPassReverse / http://{{ BIND_ADDRESS }}/
+{% endblock %}        ProxyPass / http://{{ LISTEN_ADDRESS }}/
+        ProxyPassReverse / http://{{ LISTEN_ADDRESS }}/
         DocumentRoot {{ STATIC_ROOT }}
         ServerSignature off
 {% block webserver_xsendfilepath %}        XSendFile on
@@ -85,7 +101,7 @@ in the configuration, you cannot use its IP address to access the website.
     EOF
     sudo mkdir {{ LOCAL_PATH }}
     sudo chown -R www-data:www-data {{ LOCAL_PATH }}
-    sudo a2ensite {{ PROJECT_NAME }}.conf
+    sudo a2ensite {{ DF_MODULE_NAME }}.conf
     sudo apachectl -t
     sudo apachectl restart
 
@@ -114,8 +130,8 @@ If you want to use SSL:
     sudo chown www-data $KEYTAB
     sudo chmod 0400 $KEYTAB
 {% endblock %}
-    SERVICE_NAME={{ PROJECT_NAME }}.example.org
-    cat << EOF | sudo tee /etc/apache2/sites-available/{{ PROJECT_NAME }}.conf
+    SERVICE_NAME={{ DF_MODULE_NAME }}.example.org
+    cat << EOF | sudo tee /etc/apache2/sites-available/{{ DF_MODULE_NAME }}.conf
     <VirtualHost *:80>
         ServerName $SERVICE_NAME
         RedirectPermanent / https://$SERVICE_NAME/
@@ -124,28 +140,28 @@ If you want to use SSL:
         ServerName $SERVICE_NAME
         SSLCertificateFile $PEM
         SSLEngine on
-{% block webserver_ssl_static %}        Alias {{ STATIC_URL }} {{ STATIC_ROOT }}/
+{% block webserver_ssl_static %}        Alias {{ STATIC_URL }} {{ STATIC_ROOT }}
         ProxyPass {{ STATIC_URL }} !
         <Location {{ STATIC_URL }}>
             Order deny,allow
             Allow from all
             Satisfy any
         </Location>
-{% endblock %}{% block webserver_ssl_media %}        Alias {{ MEDIA_URL }} {{ MEDIA_ROOT }}/
+{% endblock %}{% block webserver_ssl_media %}        Alias {{ MEDIA_URL }} {{ MEDIA_ROOT }}
         ProxyPass {{ MEDIA_URL }} !
         <Location {{ MEDIA_URL }}>
             Order deny,allow
             Allow from all
             Satisfy any
         </Location>
-{% endblock %}        ProxyPass / http://{{ BIND_ADDRESS }}/
-        ProxyPassReverse / http://{{ BIND_ADDRESS }}/
+{% endblock %}        ProxyPass / http://{{ LISTEN_ADDRESS }}/
+        ProxyPassReverse / http://{{ LISTEN_ADDRESS }}/
         DocumentRoot {{ STATIC_ROOT }}
         ServerSignature off
         RequestHeader set X_FORWARDED_PROTO https
 {% block webserver_ssl_auth %}        <Location />
             AuthType Kerberos
-            AuthName "{{ FLOOR_PROJECT_NAME }}"
+            AuthName "{{ DF_PROJECT_NAME }}"
             KrbAuthRealms EXAMPLE.ORG example.org
             Krb5Keytab $KEYTAB
             KrbLocalUserMapping On
@@ -163,7 +179,7 @@ If you want to use SSL:
     EOF
     sudo mkdir {{ LOCAL_PATH }}
     sudo chown -R www-data:www-data {{ LOCAL_PATH }}
-    sudo a2ensite {{ PROJECT_NAME }}.conf
+    sudo a2ensite {{ DF_MODULE_NAME }}.conf
     sudo apachectl -t
     sudo apachectl restart
 {% endblock %}
@@ -173,96 +189,116 @@ If you want to use SSL:
 {% block application %}Application
 -----------
 
-Now, it's time to install {{ FLOOR_PROJECT_NAME }}:
+Now, it's time to install {{ DF_PROJECT_NAME }}:
 
 .. code-block:: bash
 
-{% block pre_application %}{% endblock %}    sudo mkdir -p {{ LOCAL_PATH }}
-    sudo adduser --disabled-password {{ PROJECT_NAME }}
-    sudo chown {{ PROJECT_NAME }}:www-data {{ LOCAL_PATH }}
-    sudo apt-get install virtualenvwrapper {{ python_version }} {{ python_version }}-dev build-essential postgresql-client libpq-dev
-    # application
-    sudo -u {{ PROJECT_NAME }} -i
-    mkvirtualenv {{ PROJECT_NAME }} -p `which {{ python_version }}`
-    workon {{ PROJECT_NAME }}
-    pip install setuptools --upgrade
+{% block pre_application %}{% endblock %}    pip install setuptools --upgrade
     pip install pip --upgrade
-    pip install {{ PROJECT_NAME }} psycopg2 gevent
-    mkdir -p $VIRTUAL_ENV/etc/{{ PROJECT_NAME }}
-    cat << EOF > $VIRTUAL_ENV/etc/{{ PROJECT_NAME }}/settings.ini
-{% block ini_configuration %}{% for section in settings_merger.all_ini_options.items %}    [{{ section.0 }}]
-{% for option_parser in section.1 %}    {{ option_parser.key }} = {{ option_parser.str_value|df_inivalue }}
-{% endfor %}{% endfor %}{% endblock %}    EOF
-    chmod 0400 $VIRTUAL_ENV/etc/{{ PROJECT_NAME }}/settings.ini
-    # required since there are password in this file
-    {{ PROJECT_NAME }}-manage migrate
-    {{ PROJECT_NAME }}-manage collectstatic --noinput
-{% block post_application %}    {{ PROJECT_NAME }}-manage createsuperuser
+    pip install {{ DF_MODULE_NAME }} psycopg2 gevent
+    mkdir -p $VIRTUAL_ENV/etc/{{ DF_MODULE_NAME }}
+    cat << EOF > $VIRTUAL_ENV/etc/{{ DF_MODULE_NAME }}/settings.ini
+{% block ini_configuration %}    [global]
+    data = $HOME/{{ DF_MODULE_NAME }}
+    [database]
+    db = {{ DF_MODULE_NAME }}
+    engine = postgresql
+    host = localhost
+    password = 5trongp4ssw0rd
+    port = 5432
+    user = {{ DF_MODULE_NAME }}
+{% endblock %}    EOF
+    chmod 0400 $VIRTUAL_ENV/etc/{{ DF_MODULE_NAME }}/settings.ini
+    # protect passwords in the config files from by being readable by everyone
+    {{ processes.django }} migrate
+    {{ processes.django }} collectstatic --noinput
+{% block post_application %}    {{ processes.django }} createsuperuser
 {% endblock %}
 {% endblock %}
 
 {% block supervisor %}supervisor
 ----------
 
-Supervisor is required to automatically launch {{ PROJECT_NAME }}:
+Supervisor is required to automatically launch {{ DF_MODULE_NAME }}:
 
 .. code-block:: bash
 
 {% block pre_supervisor %}{% endblock %}
     sudo apt-get install supervisor
-    cat << EOF | sudo tee /etc/supervisor/conf.d/{{ PROJECT_NAME }}.conf
-    [program:{{ PROJECT_NAME }}_gunicorn]
-    command = /home/{{ PROJECT_NAME }}/.virtualenvs/{{ PROJECT_NAME }}/bin/{{ PROJECT_NAME }}-gunicorn
-    user = {{ PROJECT_NAME }}
-{% if USE_CELERY %}    [program:{{ PROJECT_NAME }}_celery]
-    command = /home/{{ PROJECT_NAME }}/.virtualenvs/{{ PROJECT_NAME }}/bin/{{ PROJECT_NAME }}-celery worker
-    user = {{ PROJECT_NAME }}
-{% endif %}{% block post_supervisor %}{% endblock %}    EOF
+    cat << EOF | sudo tee /etc/supervisor/conf.d/{{ DF_MODULE_NAME }}.conf
+{% if processes.aiohttp %}    [program:{{ DF_MODULE_NAME }}_aiohttp]
+    command = $VIRTUAL_ENV/bin/{{ processes.aiohttp }}
+    user = {{ DF_MODULE_NAME }}
+{% elif processes.gunicorn %}    [program:{{ DF_MODULE_NAME }}_gunicorn]
+    command = $VIRTUAL_ENV/bin/{{ processes.gunicorn }}
+    user = {{ DF_MODULE_NAME }}
+{% endif %}{% if processes.celery %}{% for queue in required_celery_queues %}    [program:{{ DF_MODULE_NAME }}_celery_{{ queue }}]
+    command = $VIRTUAL_ENV/bin/{{ processes.celery }} worker -Q {{ queue }}
+    user = {{ DF_MODULE_NAME }}
+{% endfor %}{% endif %}{% block post_supervisor %}{% endblock %}    EOF
     sudo service supervisor stop
     sudo service supervisor start
 
-Now, Supervisor should start {{ PROJECT_NAME }} after a reboot.
+Now, Supervisor should start {{ DF_MODULE_NAME }} after a reboot.
 {% endblock %}
 
 {% block systemd %}systemd
 -------
 
-You can also use systemd to launch {{ PROJECT_NAME }}:
+You can also use systemd to launch {{ DF_MODULE_NAME }}:
 
 .. code-block:: bash
 {% block pre_systemd %}{% endblock %}
-    cat << EOF | sudo tee /etc/systemd/system/{{ PROJECT_NAME }}-gunicorn.service
+{% if processes.aiohttp %}    cat << EOF | sudo tee /etc/systemd/system/{{ processes.aiohttp }}.service
     [Unit]
-    Description={{ FLOOR_PROJECT_NAME }} Gunicorn process
+    Description={{ DF_PROJECT_NAME }} aIOHTTP process
     After=network.target
     [Service]
-    User={{ PROJECT_NAME }}
-    Group={{ PROJECT_NAME }}
+    User={{ DF_MODULE_NAME }}
+    Group={{ DF_MODULE_NAME }}
     WorkingDirectory={{ LOCAL_PATH }}/
-    ExecStart=/home/{{ PROJECT_NAME }}/.virtualenvs/{{ PROJECT_NAME }}/bin/{{ PROJECT_NAME }}-gunicorn
+    ExecStart=$VIRTUAL_ENV/bin/{{ processes.aiohttp }}
     ExecReload=/bin/kill -s HUP \$MAINPID
     ExecStop=/bin/kill -s TERM \$MAINPID
     [Install]
     WantedBy=multi-user.target
     EOF
-    systemctl enable {{ PROJECT_NAME }}-gunicorn.service
-    sudo service {{ PROJECT_NAME }}-gunicorn start
-{% if USE_CELERY %}    cat << EOF | sudo tee /etc/systemd/system/{{ PROJECT_NAME }}-celery.service
+    systemctl enable {{ processes.aiohttp }}.service
+    sudo service {{ processes.aiohttp }} start
+{% else %}    cat << EOF | sudo tee /etc/systemd/system/{{ processes.gunicorn }}.service
     [Unit]
-    Description={{ FLOOR_PROJECT_NAME }} Celery process
+    Description={{ DF_PROJECT_NAME }} Gunicorn process
     After=network.target
     [Service]
-    User={{ PROJECT_NAME }}
-    Group={{ PROJECT_NAME }}
+    User={{ DF_MODULE_NAME }}
+    Group={{ DF_MODULE_NAME }}
     WorkingDirectory={{ LOCAL_PATH }}/
-    ExecStart=/home/{{ PROJECT_NAME }}/.virtualenvs/{{ PROJECT_NAME }}/bin/{{ PROJECT_NAME }}-celery worker
-    ExecReload=/bin/kill -s HUP $MAINPID
-    ExecStop=/bin/kill -s TERM $MAINPID
+    ExecStart=$VIRTUAL_ENV/bin/{{ processes.gunicorn }}
+    ExecReload=/bin/kill -s HUP \$MAINPID
+    ExecStop=/bin/kill -s TERM \$MAINPID
     [Install]
     WantedBy=multi-user.target
     EOF
-    sudo systemctl enable {{ PROJECT_NAME }}-celery.service
-    sudo service {{ PROJECT_NAME }}-celery start
-{% endif %}
+    systemctl enable {{ processes.gunicorn }}.service
+    sudo service {{ processes.gunicorn }} start
+{% endif %}{% if USE_CELERY %}{% for queue in required_celery_queues %}    cat << EOF | sudo tee /etc/systemd/system/{{ processes.celery }}{% if queue != "celery" %}-{{ queue }}{% endif %}.service
+    [Unit]
+    Description={{ DF_PROJECT_NAME }} Celery process
+    After=network.target
+    [Service]
+    User={{ DF_MODULE_NAME }}
+    Group={{ DF_MODULE_NAME }}
+    Type=forking
+    WorkingDirectory={{ LOCAL_PATH }}/
+    ExecStart=$VIRTUAL_ENV/bin/{{ processes.celery }} worker -Q {{ queue }}
+    ExecReload=/bin/kill -s HUP \$MAINPID
+    ExecStop=/bin/kill -s TERM \$MAINPID
+    [Install]
+    WantedBy=multi-user.target
+    EOF
+    mkdir -p {{ install_root }}/run
+    sudo systemctl enable {{ processes.celery }}{% if queue != "celery" %}-{{ queue }}{% endif %}.service
+    sudo service {{ processes.celery }}{% if queue != "celery" %}-{{ queue }}{% endif %} start
+{% endfor %}{% endif %}
 {% block post_systemd %}{% endblock %}{% endblock %}
 {% block post_install_step %}{% endblock %}

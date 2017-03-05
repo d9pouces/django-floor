@@ -1,0 +1,116 @@
+<!DOCTYPE html>{% load pipeline staticfiles djangofloor bootstrap3 i18n %}
+<html lang="{% block html-language %}{{ LANGUAGE_CODE }}{% endblock %}">
+<head>
+    {% block head %}
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="{% block header-description %}{% endblock %}">
+    <meta name="author" content="{% block header-author %}{% endblock %}">
+    {% block header-favicon %}
+    <link rel="shortcut icon" type="image/png" href="{% static 'favicon/favicon-32x32.png' %}">
+    <link rel="apple-touch-icon" sizes="152x152" href="{% static 'favicon/apple-touch-icon.png' %}">
+    <link rel="icon" type="image/png" href="{% static 'favicon/favicon-32x32.png' %}" sizes="32x32">
+    <link rel="icon" type="image/png" href="{% static 'favicon/favicon-16x16.png' %}" sizes="16x16">
+    <link rel="manifest" href="{% static 'favicon/manifest.json' %}">
+    <link rel="mask-icon" href="{% static 'favicon/safari-pinned-tab.svg' %}" color="#5bbad5">
+    <meta name="msapplication-TileColor" content="#00a300">
+    <meta name="msapplication-TileImage" content="{% static 'favicon/mstile-144x144.png' %}">
+    <meta name="theme-color" content="#ffffff">
+    {% endblock %}
+    <title>{% block head-title %}{{ df_project_name|capfirst }}{% endblock %}</title>
+    {% endblock %}
+</head>
+
+<body>
+{% block body %}
+{% block navbar %}
+<nav class="navbar navbar-inverse">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar"
+                    aria-expanded="false" aria-controls="navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            {% if df_has_index_view %}<a class="navbar-brand" href="{% url 'index' %}">{{ df_project_name|capfirst}}</a>
+            {% else %}{{ df_project_name|capfirst}}{% endif %}
+
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+            {% block navbar-search %}{% if df_has_site_search_view %}
+            <form class="navbar-form navbar-right" method="get" action="{% url 'df:site_search' %}">
+                <input type="text" placeholder="{% trans 'search…' %}" class="form-control" name="q">
+                <button type="submit" class="btn btn-success">{% trans 'Search' %}</button>
+            </form>
+            {% endif %}{% endblock %}
+
+            {% block navbar-login %}{% if df_has_login_view %}
+            <ul class="nav navbar-nav navbar-right">
+                {% if debug %}<li><a><span class="label label-danger">{% trans 'DEBUG mode is activated' %}</span></a></li>{% endif %}
+                {% if df_user.is_anonymous %}
+                <li><a title="{% trans 'Log-in' %}" href="{% url 'login' %}">{% bootstrap_icon 'log-in' %}</a></li>
+                {% elif df_remote_username %}
+                <li><a>{{ df_user }}</a></li>
+                {% else %}
+                <li><a href="{% url 'df:logout' %}" title="{% trans 'Log out' %}">{{ df_user }} {% bootstrap_icon 'log-out' %}</a>
+                </li>
+                <li><a href="{% url 'df:set_password' %}" title="{% trans 'Change your password' %}">{% bootstrap_icon 'edit' %}</a>
+                </li>
+                {% endif %}
+                {% if df_has_monitoring_view and df_user and df_user.is_superuser %}
+                <li><a href="{% url 'df:system_state' %}" title="{% trans 'Check system state' %}">{% bootstrap_icon 'eye-open' %}</a></li>
+                {% endif %}
+                {% if df_user and df_user.is_staff %}
+                <li><a href="{% url 'admin:index' %}" title="{% trans 'Admin' %}">{% bootstrap_icon 'cog' %}</a></li>
+                {% endif %}
+            </ul>
+            {% endif %}{% endblock %}
+        </div>
+    </div>
+</nav>
+{% endblock %}
+<div id="df_messages"></div>
+{% block body-container %}
+<div class="container">
+    {% block content %}
+    <div class="row">
+        <div class="col-md-4">
+            <h2>Heading</h2>
+            <p>Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor mauris
+                condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna mollis
+                euismod. Donec sed odio dui. </p>
+            <p><a class="btn btn-default" href="#" role="button">View details &raquo;</a></p>
+        </div>
+        <div class="col-md-4">
+            <h2>Heading</h2>
+            <p>Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor mauris
+                condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna mollis
+                euismod. Donec sed odio dui. </p>
+            <p><a class="btn btn-default" href="#" role="button">View details &raquo;</a></p>
+        </div>
+        <div class="col-md-4">
+            <h2>Heading</h2>
+            <p>Donec sed odio dui. Cras justo odio, dapibus ac facilisis in, egestas eget quam. Vestibulum id ligula
+                porta felis euismod semper. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut
+                fermentum massa justo sit amet risus.</p>
+            <p><a class="btn btn-default" href="#" role="button">View details &raquo;</a></p>
+        </div>
+    </div>
+    {% endblock %}
+    {% block footer %}
+    <footer><hr><p>{% block footer-copyright %}&copy; 2017, Matthieu Gallet{% endblock %}</p></footer>
+    {% endblock %}
+</div> <!-- /container -->
+{% endblock %}
+{% endblock %}
+<!-- Placed at the end of the document so the pages load faster -->
+{% javascript 'bootstrap3' %}
+<!--[if lt IE 9 ]>{% javascript 'ie9' %}<![endif]-->
+{% stylesheet 'bootstrap3' %}
+{% df_init_websocket %}
+{% df_messages style='banner' %}
+{% block scripts %}<script type="text/javascript"></script>{% endblock %}
+</body>
+</html>

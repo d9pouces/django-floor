@@ -1,0 +1,6 @@
+<div class="modal-header btn-info" style="border-top-left-radius: inherit; border-top-right-radius: inherit;"><button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+    <h4 class="modal-title">modal </h4></div>';
+<div class="modal-body">
+    <p>{{ level }}: {{ message }}</p>
+<button class="btn btn-info" onclick="return $.df.call('demo.show_modal', {message: '{{ message }}', level: 1 + {{ level }} });">Show a new modal</button>
+</div>

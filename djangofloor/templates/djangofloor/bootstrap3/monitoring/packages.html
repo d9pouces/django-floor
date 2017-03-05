@@ -1,0 +1,18 @@
+{% load i18n bootstrap3 %}
+<div class="col-md-4 col-sm-4 col-xs-12" id="packages">
+    <div class="panel panel-info">
+        <div class="panel-heading">
+            <h3 class="panel-title">{% trans 'Required packages' %}</h3>
+        </div>
+        <div class="panel-body">
+            <ul class="list-unstyled">
+                {% for distrib in installed_distributions %}
+                <li>
+                    <span class="label label-{{ distrib.2 }}">{% bootstrap_icon distrib.3 %}</span>&nbsp;
+                    {{ distrib.0 }} {% if distrib.1 %}{{ distrib.1 }} {% endif %}{% if distrib.4 %} ({{ distrib.4|join:", " }}){% endif %}
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>

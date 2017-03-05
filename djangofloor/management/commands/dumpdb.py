@@ -16,6 +16,7 @@ __author__ = 'Matthieu Gallet'
 
 class BaseDumper(object):
     """ base class for a given database engine. An instance is returned by :py:func:`Command.get_dumper` """
+
     def __init__(self, name, db_options):
         self.name = name
         self.db_options = db_options
@@ -51,7 +52,7 @@ class MySQL(BaseDumper):
         """ :return:
         :rtype: :class:`list` of :class:`str`
         """
-        command = ['mysqldump',  '--user', '%(USER)s',  '--password=%(PASSWORD)s']
+        command = ['mysqldump', '--user', '%(USER)s', '--password=%(PASSWORD)s']
         if self.db_options.get('HOST'):
             command += ['--host', '%(HOST)s']
         if self.db_options.get('PORT'):
@@ -68,7 +69,7 @@ class PostgreSQL(MySQL):
     """ dump the content of a PostgreSQL database, with `pg_dump`"""
 
     def dump_cmd_list(self):
-        command = ['pg_dump',  '--username', '%(USER)s']
+        command = ['pg_dump', '--username', '%(USER)s']
         if self.db_options.get('HOST'):
             command += ['--host', '%(HOST)s']
         if self.db_options.get('PORT'):
@@ -110,9 +111,11 @@ class Command(BaseCommand):
     help = 'Dump the content of one (or more) database'
 
     def add_arguments(self, parser):
-        parser.add_argument('args', nargs='*', help='Name of the databases to dump. If not given, the default database is dumped.')
-        parser.add_argument('--filename', default=None, help='Destination file for the dump. '
-                                                             'If multiple databases are selected, the written file is named filename-$database.ext')
+        parser.add_argument('args', nargs='*',
+                            help='Name of the databases to dump. If not given, the default database is dumped.')
+        parser.add_argument('--filename', default=None,
+                            help='Destination file for the dump. '
+                                 'If multiple databases are selected, the written file is named filename-$database.ext')
 
     def handle(self, *args, **options):
         """ execute the command"""

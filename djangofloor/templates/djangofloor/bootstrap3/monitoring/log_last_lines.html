@@ -1,0 +1,16 @@
+{% load bootstrap3 i18n l10n djangofloor %}
+<div class="col-md-12 col-sm-12 col-xs-12">
+    <div class="panel panel-info">
+        <div class="panel-heading">
+            <h3 class="panel-title">{% trans 'Last lines of logs' %}</h3>
+        </div>
+        <div class="panel-body">
+            {% for content in contents %}
+            <h4>{{ content.0 }}</h4>
+            <pre>{{ content.2 }}</pre>
+            {% empty %}
+            <div class="alert alert-warning">No log file is currently configured.</div>
+            {% endfor %}
+        </div>
+    </div>
+</div>

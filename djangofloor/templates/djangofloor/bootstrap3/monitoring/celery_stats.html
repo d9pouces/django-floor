@@ -1,0 +1,31 @@
+{% load i18n bootstrap3 %}
+<div class="col-md-4 col-sm-4 col-xs-12" id="celery_stats">
+    <div class="panel panel-info">
+        <div class="panel-heading">
+            <h3 class="panel-title">{% trans 'Celery state' %}</h3>
+        </div>
+        <div class="panel-body">
+            <h4>{% trans 'Required Celery queues' %}</h4>
+            <ul class="list-unstyled">
+            {% for queue in expected_queues.items %}
+                <li><span class="label label-{{ queue.1.0 }}">{% bootstrap_icon queue.1.1 %}</span> {{ queue.0 }}</li>
+            {% endfor %}
+            </ul>
+            <h4>{% trans 'Celery workers and active queues' %}</h4>
+            {% for worker in workers %}
+            <h5>
+                <span class="label label-{{ worker.state.0 }}">{% bootstrap_icon worker.state.1 %}</span>&nbsp;
+                {% trans 'worker' %} {{ worker.name }}</h5>
+            <ul class="list-unstyled">
+                <li><strong>{% trans 'broker: ' %}</strong> {{ worker.broker }}</li>
+                <li><strong>{% trans 'PID: ' %}</strong> {{ worker.pid }}</li>
+                <li><strong>{% trans 'thread number: ' %}</strong> {{ worker.threads }}</li>
+                <li><strong>{% trans 'timeouts: ' %}</strong> {{ worker.timeouts }}</li>
+                <li><strong>{% trans 'active queues: ' %}</strong> {{ worker.queues|join:', ' }}</li>
+            </ul>
+            {% empty %}
+            <div class="alert alert-danger">{% trans 'No Celery worker detected' %}</div>
+            {% endfor %}
+        </div>
+    </div>
+</div>

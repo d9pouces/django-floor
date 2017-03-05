@@ -1,3 +1,2 @@
 recursive-include djangofloor *
-exclude .git .svn
 include LICENSE README.md

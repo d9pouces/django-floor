@@ -1,6 +1,4 @@
-<!DOCTYPE html>
-{% load bootstrap3 staticfiles i18n djangofloor pipeline %}
-<html lang="{{ df_language_code }}">
+<!DOCTYPE html>{% load bootstrap3 staticfiles i18n djangofloor pipeline %}{% df_deprecation "Template 'djangofloor/base.html' is deprecated. Please use 'djangofloor/bootstrap3/base.html' instead." %}<html lang="{% block html-language %}{{ LANGUAGE_CODE }}{% endblock %}">
 <head>
     <title>{% block head_title %}{{ df_project_name }}{% endblock %}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,12 +6,21 @@
     <meta name="robots" content="index, follow"/>
     <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
     {% block head_extra %}{% endblock %}
-    {% block head_favicon %}<link rel="shortcut icon" href="{% static 'images/favicon.png' %}">{% endblock %}
-    {% block head_pipeline %}{% javascript 'default' %}{% stylesheet 'default' %}<!--[if lt IE 9 ]>{% javascript 'ie9' %}<![endif]-->{% endblock %}
-    <script type="text/javascript" src="{% url 'djangofloor.views.signals' %}"></script>
+    {% block head_favicon %}
+    <link rel="shortcut icon" href="{% static 'images/favicon.png' %}">
+    <link rel="apple-touch-icon" sizes="152x152" href="{% static 'favicon/apple-touch-icon.png' %}">
+    <link rel="icon" type="image/png" href="{% static 'favicon/favicon-32x32.png' %}" sizes="32x32">
+    <link rel="icon" type="image/png" href="{% static 'favicon/favicon-16x16.png' %}" sizes="16x16">
+    <link rel="manifest" href="{% static 'favicon/manifest.json' %}">
+    <link rel="mask-icon" href="{% static 'favicon/safari-pinned-tab.svg' %}" color="#5bbad5">
+    <meta name="msapplication-TileColor" content="#00a300">
+    <meta name="msapplication-TileImage" content="{% static 'favicon/mstile-144x144.png' %}">
+    <meta name="theme-color" content="#ffffff">
+    {% endblock %}
+    {% block head_pipeline %}{% javascript 'bootstrap3' %}{% stylesheet 'bootstrap3' %}<!--[if lt IE 9 ]>{% javascript 'ie9' %}<![endif]-->{% endblock %}
 </head>
 <body>
-{% df_window_key %}{% block body %}
+{% block body %}
     {% block bootstrap3_nav %}
         <div class="navbar navbar-inverse" role="navigation">
             <div class="navbar-header">
@@ -73,4 +80,4 @@
     </div>
 </div>
 </body>
-</html>
+{% df_init_websocket %}</html>

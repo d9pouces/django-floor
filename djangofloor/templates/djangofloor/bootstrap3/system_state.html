@@ -1,0 +1,8 @@
+{% extends 'djangofloor/bootstrap3/base.html' %}
+{% load bootstrap3 i18n l10n %}
+
+{% block content %}
+<div class="row">
+    {% for component in components %}{{ component }}{% endfor %}
+</div>
+{% endblock %}

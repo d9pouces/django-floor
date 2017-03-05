@@ -1,0 +1,25 @@
+{% extends 'djangofloor/bootstrap3/base.html' %}
+{% load bootstrap3 i18n %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-1 col-sm-1 hidden-xs">&nbsp;</div>
+    <div class="col-md-10 col-sm-10 col-xs-12">
+        <h3>{% trans 'Search results' %}</h3>
+        <form onchange="$.df.validateForm(this, 'djangofloor.validate.search');"  action="?" method="post">
+            {% csrf_token %}
+            {% bootstrap_form form %}
+            <input type="submit" class="btn btn-primary" value="{% trans 'Search' %}">
+        </form>
+        {% bootstrap_pagination paginated_results url=paginated_url %}
+    <table class="table table-striped">
+        {% if formatted_header %}<tr>{{ formatted_header }}</tr>{% endif %}
+        {% for line in formatted_results %}
+        <tr>{{ line }}</tr>
+        {% endfor %}
+    </table>
+        {% bootstrap_pagination paginated_results url=paginated_url %}
+    </div>
+    <div class="col-md-1 col-sm-1 hidden-xs">&nbsp;</div>
+</div>
+{% endblock %}

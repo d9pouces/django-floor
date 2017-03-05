@@ -1,0 +1,82 @@
+{% load bootstrap3 i18n l10n %}
+<div class="col-md-12 col-sm-12 col-xs-12">
+    <div class="panel panel-info">
+        <div class="panel-heading">
+            <h3 class="panel-title">{% trans 'Request and settings info' %}</h3>
+        </div>
+        <div class="panel-body">
+            {% if debug %}<div class="alert alert-danger">{% trans 'The DEBUG mode is activated. You should disable it for a production website.' %}</div>
+            {% endif %}
+            {% if fake_username %}<div class="alert alert-danger">{% trans 'The DF_FAKE_AUTHENTICATION_USERNAME is set. You should disable it for a production website.' %}</div>
+            {% endif %}
+            <ul>
+                <li><strong>{% trans 'Websockets: ' %}</strong>
+                <span class="label label-danger" id="workingwebsockets">{% bootstrap_icon 'remove' %}</span>
+                    <small id="notworkingwebsockets">{% trans 'At least one Celery worker is required, as well as an uwgsi server.' %}</small>
+                </li>
+                <li><strong>{% trans 'User: '%}</strong>
+                    {% if not df_user %}<span class="label label-danger">{% trans 'no user' %}</span>
+                    {% elif not df_user.is_authenticated %}<span class="label label-warning">{% trans 'anonymous user' %}</span>
+                    {% else %}<span class="label label-success">{{ df_user }}</span>
+                    {% endif %}
+                </li>
+                <li>
+                    <strong>{% trans 'Remote address: ' %}</strong>{{ remote_address }}
+                </li>
+                {% if remote_user %}
+                <li><strong>{% trans 'Remote user HTTP header: ' %}</strong>{{ remote_user.0|upper }} =
+                    {% if remote_user.1 %}<span class="label label-success">{{ remote_user.1 }}</span>
+                    {% else %}<span class="label label-danger">{% trans 'empty' %}</span><small>{% trans 'Please ensure that your web server is correctly set to provide the right header (without the HTTP prefix).' %}</small>
+                    {% endif %}
+                </li>
+                {% endif %}
+                    {% if secure_proxy_ssl_header %}
+                <li><strong>{% trans 'Secure proxy SSL HTTP header: ' %}</strong>{{ secure_proxy_ssl_header.0|upper }} =
+                    {% if secure_proxy_ssl_header.2 %}<span
+                            class="label label-success">{{ secure_proxy_ssl_header.1 }}</span>
+                    {% elif secure_proxy_ssl_header.1 %}<span
+                            class="label warning">{{ secure_proxy_ssl_header.1 }}</span>
+                    {% else %}<span class="label label-danger">{% trans 'empty' %}</span><small>
+                        {% trans 'Please ensure that a HTTPS access is available and that the webserver provide the right header (without the HTTP prefix).' %}
+                    </small>
+                    {% endif %}
+                </li>
+                {% endif %}
+                {% if use_x_forwarded_for %}
+                <li><strong>{% trans 'Forwarded-for HTTP header: ' %}</strong>{{ use_x_forwarded_for.0|upper }} =
+                    {% if use_x_forwarded_for.2 %}<span
+                            class="label label-success">{{ use_x_forwarded_for.1 }}</span>
+                    {% elif use_x_forwarded_for.1 %}<span
+                            class="label warning">{{ use_x_forwarded_for.1 }}</span>
+                    {% else %}<span class="label label-danger">{% trans 'empty' %}</span>
+                    {% endif %}
+                </li>
+                {% endif %}
+                <li><strong>{% trans 'Server names allowed to POST requests: ' %}</strong>{{ allowed_hosts|join:', ' }}</li>
+                <li><strong>{% trans 'Requested server name:' %}</strong>
+                <span class="label label-{% if allowed_host %}success{% else %}warning{% endif %}">{% if request_host %}{{ request_host }}{% else %}empty{% endif %}</span>
+                </li>
+                <li><strong>{% trans 'Expected server name:' %}</strong>
+                <span class="label label-{% if server_name_valid %}success{% else %}warning{% endif %}">{{ server_name }}</span>
+                </li>
+                {% if request_site %}<li><strong>{% trans 'Request site (from the CurrentSiteMiddleware middleware):' %}</strong>
+                <span class="label label-{% if request_site_valid %}success{% else %}warning{% endif %}">{{ request_site }}</span>
+                </li>{% endif %}
+                <li><strong>{% trans 'Config files: ' %}</strong>
+                {{ settings_providers|join:', ' }}</li>
+                
+            </ul>
+        </div>
+    </div>
+    <script type="application/javascript">
+        window.onload = function () {
+            $.df.connect('df.monitoring.checked_ws', function () {
+                "use strict";
+                $('#workingwebsockets').removeClass('label-danger').addClass('label-success');
+                $('#workingwebsockets').html('{% bootstrap_icon 'ok' %}');
+                $('#notworkingwebsockets').remove();
+            });
+            $.df.call('df.monitoring.check_ws', {});
+        };
+    </script>
+</div>

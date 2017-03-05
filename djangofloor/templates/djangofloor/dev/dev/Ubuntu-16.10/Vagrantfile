@@ -1,0 +1,3 @@
+{% extends 'djangofloor/dev/include/Vagrantfile_inc' %}
+{% block vm_box %}  config.vm.box = "ubuntu/yakkety64"
+{% endblock %}

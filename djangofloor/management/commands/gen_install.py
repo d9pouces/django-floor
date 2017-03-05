@@ -4,16 +4,21 @@ Currently used for creating Debian packages.
 
 """
 from __future__ import unicode_literals, print_function
+
 import codecs
+import datetime
 import os
 import shutil
+import sys
 
 from django.conf import settings
 from django.core.management import BaseCommand, call_command
 from django.template.loader import render_to_string
-from  djangofloor import defaults_install
-from djangofloor.utils import SettingMerger
 
+from djangofloor import defaults_install
+from djangofloor.conf.providers import IniConfigProvider
+from djangofloor.management.base import TemplatedBaseCommand
+from djangofloor.scripts import get_merger_from_env
 
 try:
     # noinspection PyCompatibility
@@ -25,9 +30,10 @@ except ImportError:
 __author__ = 'Matthieu Gallet'
 
 
-class Command(BaseCommand):
+class Command(TemplatedBaseCommand):
 
     def add_arguments(self, parser):
+        super(Command, self).add_arguments(parser)
         parser.add_argument('--apache22', default=None, help='Generate an Apache 2.2 configuration file.')
         parser.add_argument('--apache24', default=None, help='Generate an Apache 2.4 configuration file.')
         parser.add_argument('--nginx', default=None, help='Generate a NGinx configuration file.')
@@ -43,25 +49,14 @@ class Command(BaseCommand):
                             help='filepath of a Python module with default install settings')
 
     def handle(self, *args, **options):
-
-        project_name = os.environ.get('DJANGOFLOOR_PROJECT_NAME', 'djangofloor')
-        project_settings_module_name = os.environ.get('DJANGOFLOOR_PROJECT_DEFAULTS', '')
-        djangofloor_mapping = os.environ.get('DJANGOFLOOR_MAPPING', '')
-        merger = SettingMerger(project_name, 'djangofloor.defaults', project_settings_module_name, options['defaults'],
-                               options['default_conf'], djangofloor_mapping, read_only=True)
-        merger.process()
-        merger.post_process()
+        config_files = options['config_file']
+        template_values = self.get_template_context(config_files)
 
         # noinspection PyAttributeOutsideInit
         self.verbosity = options.get('verbosity')
-        use_sqlite = merger.settings['DATABASES']['default']['ENGINE'] == 'django.db.backends.sqlite3'
-        template_values = {'username': options.get('user', merger.settings['PROJECT_NAME']),
-                           'bind_address': merger.settings['BIND_ADDRESS'],
-                           'project_name': merger.settings['PROJECT_NAME'],
-                           'use_celery': merger.settings['USE_CELERY'],
-                           'static_url': merger.settings['STATIC_URL'],
-                           'media_url': merger.settings['MEDIA_URL'],
-                           'use_sqlite': use_sqlite,
+        use_sqlite = template_values['DATABASES']['default']['ENGINE'] == 'django.db.backends.sqlite3'
+        template_values = {'USERNAME': options.get('user', template_values['DF_MODULE_NAME']),
+                           'USE_SQLITE': use_sqlite,
                            'static_dst': None,
                            'processes': [x.split(':') for x in options['extra_process']]}
         static_dst = options['collectstatic']
@@ -89,8 +84,6 @@ class Command(BaseCommand):
 
         if options['conf']:
             ini_conf_path = os.path.join(options['conf'], 'settings.ini')
-            py_conf_path = os.path.join(options['conf'], 'settings.py')
-            self.write_template('djangofloor/commands/settings.py', py_conf_path, template_values)
             if options['default_conf']:
                 shutil.copy2(options['default_conf'], ini_conf_path)
             elif settings.DJANGOFLOOR_MAPPING:
@@ -106,3 +99,37 @@ class Command(BaseCommand):
         content = render_to_string(template_name, template_values)
         with codecs.open(filename, 'w', encoding='utf-8') as fd:
             fd.write(content)
+
+    def get_template_context(self, config_files, extra_context):
+        """
+
+        :param config_files: list of .ini filenames
+        :param extra_context: list of "template_variable=value"
+        :return: template context (dict)
+        """
+        merger = get_merger_from_env(read_only=True)
+        for config_file in config_files:
+            merger.add_provider(IniConfigProvider(os.path.abspath(config_file)))
+        merger.process()
+        merger.post_process()
+        context = {key: value for (key, value) in merger.settings.items()}
+        context['year'] = datetime.datetime.now().year
+        context['python_version'] = 'python%s.%s' % (sys.version_info[0], sys.version_info[1])
+        context['use_python3'] = sys.version_info[0] == 3
+        context['settings_merger'] = merger
+        module_name = merger.settings['DF_MODULE_NAME']
+        context['path_bin_virtualenv'] = '/home/%s/.virtualenvs/%s/bin' % (module_name, module_name)
+        context['path_etc_virtualenv'] = '/home/%s/.virtualenvs/%s/etc' % (module_name, module_name)
+        context['path_bin_debian'] = '/usr/local/bin'
+        context['path_etc_debian'] = '/etc'
+        provider = IniConfigProvider()
+        merger.write_provider(provider)
+        context['settings_ini'] = provider.to_str()
+
+        for variable in extra_context:
+            key, sep, value = variable.partition(':')
+            if sep != ':':
+                self.stderr.write(self.style.WARNING('Invalid variable %s (should be like KEY:VALUE)' % variable))
+                continue
+            context[key] = value
+        return context

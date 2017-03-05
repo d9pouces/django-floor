@@ -1,0 +1,2 @@
+recursive-include {package_name} *
+include LICENSE README.md
