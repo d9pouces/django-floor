@@ -23,6 +23,7 @@ var/
 *.egg
 .idea/
 .project/
+.DS_Store
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
@@ -30,7 +31,6 @@ var/
 *.manifest
 *.spec
 !/djangofloor/static/vendor/**
-
 # Installer logs
 pip-log.txt
 pip-delete-this-directory.txt
@@ -44,8 +44,6 @@ nosetests.xml
 coverage.xml
 
 # Translations
-*.mo
-*.pot
 
 # Django stuff:
 *.log
@@ -55,8 +53,3 @@ docs/_build/
 
 # PyBuilder
 target/
-Supprimerait django_data/
-Supprimerait djangofloor/static/vendor/bootstrap3/
-Supprimerait djangofloor/static/vendor/html5shiv/
-Supprimerait djangofloor/static/vendor/jquery/
-Supprimerait djangofloor/static/vendor/metro-ui/
