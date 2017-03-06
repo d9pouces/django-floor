@@ -20,7 +20,8 @@ def slow_signal(window_info, content=''):
     logger.warning('wait for 10 seconds [éà]…')
     time.sleep(10)
     logger.warning('10 seconds: done.')
-    scall(window_info, 'demo.print_sig2', to=[BROADCAST, SERVER], content='slow result [éà]')
+    scall(window_info, 'demo.print_sig2', to=[BROADCAST, SERVER],
+          content='This message is sent by a dedicated Celery queue [éà]')
 
 
 @signal(is_allowed_to=everyone, path='demo.print_sig1')
@@ -33,12 +34,16 @@ def print_sig1(window_info, content=''):
     logger2.info('Debug info message / logger2 [%r]' % content)
     logger2.warning('Debug warn message / logger2 [%r]' % content)
     logger2.error('Debug error message / logger2 [%r]' % content)
+    scall(window_info, 'df.notify', to=[BROADCAST, SERVER],
+          content="Some lines should be added in the Celery log files",
+          level='success', timeout=2, style='notification')
     scall(window_info, 'demo.print_sig2', to=[BROADCAST, SERVER], content=content)
 
 
 @signal(is_allowed_to=everyone, path='demo.print_sig2')
 def print_sig2(window_info, content=''):
-    scall(window_info, 'df.notify', to=[BROADCAST, SERVER], content="Server notification [éà] [%r]" % content,
+    scall(window_info, 'df.notify', to=[BROADCAST, SERVER],
+          content="Server notification that causes an error in the Celery queue[éà] [%r]" % content,
           level='warning', timeout=2, style='notification')
     1/0
 

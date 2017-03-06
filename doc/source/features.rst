@@ -26,21 +26,36 @@ To disable background tasks, websockets and Redis cache, you must change these s
   * `WEBSOCKET_URL = None`
   * `USE_CELERY = False`
 
+Deactivate signals over websockets
+----------------------------------
+
+To disable only the use of websockets, you must set `WEBSOCKET_URL` to `None`.
 
 Default URLs
 ------------
 
 By default, DjangoFloor provides a complete URL configuration:
 
-  * authentication pages,
-  * signal definitions,
-  * websockets,
-  * monitoring view,
-  * a global search view,
+  * index view given by `DF_INDEX_VIEW` (through `'index'`),
+  * static and media files,
+  * simple authentication pages:
+
+        * `'login'` if `DF_LOGIN_VIEW` is defined (the URL is `LOGIN_URL`),
+        * `'df:logout'`,
+        * `'df:password_reset'`,
+        * `'df:set_password'`,
+
+  * signal definitions through `'df:signals'` if `WEBSOCKET_URL`,
+  * monitoring view through `'df:system_state'` if `DF_SYSTEM_CHECKS` is not empty,
+  * global search view through `'df:site_search'` if `DF_SITE_SEARCH_VIEW` is not empty,
+  * favicon through `'favicon'`,
   * Django admin site,
   * javascript translation (i18n),
-  * static and media files,
-  * Django debug toolbar.
+  * URLs for `django-all—auth` if `USE_ALL_AUTH`,
+  * Django-REST-Framework if `USE_REST_FRAMEWORK`,
+  * Django debug toolbar if `USE_DEBUG_TOOLBAR` and `DEBUG`.
+
+To this list is added the list provided by `DF_URL_CONF`.
 
 If you prefer to use your own URL configuration, just set the `ROOT_URLCONF` setting.
 

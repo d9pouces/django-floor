@@ -38,7 +38,7 @@ USE_SCSS = is_package_present('scss')
 USE_PIPELINE = is_package_present('pipeline')
 USE_DEBUG_TOOLBAR = is_package_present('debug_toolbar')
 USE_REST_FRAMEWORK = is_package_present('rest_framework')
-
+USE_ALL_AUTH = is_package_present('allauth')
 # ######################################################################################################################
 #
 # settings that can be kept as-is
@@ -168,7 +168,7 @@ SITE_ID = 1
 STATIC_ROOT = AutocreateDirectory('{LOCAL_PATH}/static')
 STATIC_URL = '/static/'
 if USE_PIPELINE:
-    STATICFILES_STORAGE = 'pipeline.storage.PipelineCachedStorage'
+    STATICFILES_STORAGE = 'djangofloor.backends.DjangofloorPipelineCachedStorage'
 else:
     STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
 STATICFILES_FINDERS = ['django.contrib.staticfiles.finders.FileSystemFinder',

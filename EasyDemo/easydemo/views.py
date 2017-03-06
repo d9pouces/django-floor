@@ -26,7 +26,7 @@ class IndexView(TemplateView):
         logger.info('info log message')
         logger.warning('warn log message')
         logger.error('error log message')
-        messages.error(request, 'message (error)')
+        messages.error(request, 'Example of error message')
         set_websocket_topics(request)
         form = TestForm()
         template_values = {'form': form, 'title': 'Hello, world!'}

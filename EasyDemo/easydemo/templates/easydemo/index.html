@@ -2,8 +2,20 @@
 {% load bootstrap3 demo cache %}
 {% block content %}
 <h1>{{ title }}</h1>
+<div class="panel panel-warning">
+    <div class="panel-heading">You should run</div>
+    <div class="panel-body">
+        <ul class="list-unstyled">
+            <li><pre>easydemo-django collectstatic --noinput</pre></li>
+            <li><pre>easydemo-django migrate</pre></li>
+            <li><pre>easydemo-django createsuperuser</pre></li>
+            <li><pre>easydemo-celery worker -Q slow,celery</pre></li>
+            <li><pre>easydemo-django runserver</pre></li>
+        </ul>
+    </div>
+</div>
 <div class="btn-group">
-    <button class="btn btn-success btn-sm" onclick="return $.dfws.test_function({}).then(function(x) { alert(x); });">
+    <button class="btn btn-success btn-sm" onclick="return $.dfws.test_function({}).then(function(x) { $.df.call('df.notify', {content: 'Result: ' + x}); });">
         Test Functions
     </button>
     <button class="btn btn-success btn-sm" onclick="return $.df.call('demo.print_sig1', {content: 'Client notification [éà]'});">

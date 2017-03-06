@@ -19,7 +19,6 @@ from djangofloor import urls
 from djangofloor.scripts import load_celery
 from djangofloor.utils import get_view_from_string
 from djangofloor.views import favicon, robots
-from djangofloor.views import legacy
 
 __author__ = 'Matthieu Gallet'
 
@@ -44,20 +43,16 @@ if settings.DF_LOGIN_VIEW:
     login_view = get_view_from_string(settings.DF_LOGIN_VIEW)
     urlpatterns += [url(prefix + settings.LOGIN_URL[1:], login_view, name='login')]
 if settings.USE_REST_FRAMEWORK:
-    urlpatterns += [
-        url(prefix + 'api-auth/', include('rest_framework.urls', namespace='rest_framework'))
-    ]
+    urlpatterns += [url(prefix + 'api-auth/', include('rest_framework.urls', namespace='rest_framework'))]
 if settings.DF_INDEX_VIEW:
     index_view = get_view_from_string(settings.DF_INDEX_VIEW)
     urlpatterns += [url(prefix + '$', index_view, name='index')]
 if settings.DEBUG and settings.USE_DEBUG_TOOLBAR:
-    import debug_toolbar
-
-    urlpatterns += [url(prefix + '__debug__/', include(debug_toolbar.urls)), ]
-if settings.ALLAUTH_PROVIDERS:
+    urlpatterns += [url(prefix + '__debug__/', include('debug_toolbar.urls')), ]
+if settings.USE_ALL_AUTH:
     urlpatterns += [url(r'^accounts/', include('allauth.urls')), ]
 
-urlpatterns += [url(r'^df/signal/(?P<signal>[\w\.\-_]+)\.json$', legacy.signal_call, name='df_signal_call'),
-                url(r'^df/signals.js$', legacy.signals),
-                url(r'^df/ws_emulation.js$', legacy.get_signal_calls, name='df_get_signal_calls'),
-                ]
+# urlpatterns += [url(r'^df/signal/(?P<signal>[\w\.\-_]+)\.json$', legacy.signal_call, name='df_signal_call'),
+#                 url(r'^df/signals.js$', legacy.signals),
+#                 url(r'^df/ws_emulation.js$', legacy.get_signal_calls, name='df_get_signal_calls'),
+#                 ]

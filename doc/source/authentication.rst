@@ -36,7 +36,6 @@ Or you can use when you deploy it:
   remote_user_header = HTTP-REMOTE-USER
   remote_user_groups = Users,New Users
 
-
 HTTP basic authentication
 -------------------------
 
@@ -62,7 +61,7 @@ Or you can use when you deploy it:
 OAuth2 authentication
 ---------------------
 
-The package `django-allauth <http://django-allauth.readthedocs.io/en/latest/>`_ perfectly handles OAuth2 authentication from many providers. Please check its own documentation. Of course, it must be installed separately (it is not a dependency of Djangofloor).
+The package `django-allauth <http://django-allauth.readthedocs.io/en/latest/>`_ perfectly handles OAuth2 authentication from many providers. Please check its own documentation. Of course, it must be installed separately (it is not a dependency of Djangofloor) and `USE_ALL_AUTH` must be set to `True` (it should be valid since DjangoFloor autodetects the installed packages).
 However, Djangofloor can help you. If `ALLAUTH_PROVIDERS` is defined (in your project defaults or in the deployment settings), then the following things are transparently done:
 
   * `ALLAUTH_INSTALLED_APPS` contains the list of all corresponding Django apps (this list will be inserted `INSTALLED_APPS`),

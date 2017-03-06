@@ -67,10 +67,11 @@ def authentication_backends(settings_dict):
     if settings_dict['AUTH_LDAP_SERVER_URI'] and is_package_present('django_auth_ldap'):
         result.append('django_auth_ldap.backend.LDAPBackend')
     result.append('django.contrib.auth.backends.ModelBackend')
-    if settings_dict['ALLAUTH_PROVIDERS'] and is_package_present('allauth'):
+    if settings_dict['ALLAUTH_PROVIDERS'] and settings_dict['USE_ALL_AUTH']:
         result.append('allauth.account.auth_backends.AuthenticationBackend')
     return result
-authentication_backends.required_settings = ['ALLAUTH_PROVIDERS', 'DF_REMOTE_USER_HEADER', 'AUTH_LDAP_SERVER_URI']
+authentication_backends.required_settings = ['ALLAUTH_PROVIDERS', 'DF_REMOTE_USER_HEADER', 'AUTH_LDAP_SERVER_URI',
+                                             'USE_ALL_AUTH']
 
 
 def ldap_user_search(settings_dict):
@@ -88,15 +89,15 @@ ldap_user_search.required_settings = ['AUTH_LDAP_SEARCH_BASE', 'AUTH_LDAP_SERVER
 
 
 def allauth_installed_apps(settings_dict):
-    providers = settings_dict['ALLAUTH_PROVIDERS']
-    if not providers:
+    if not settings_dict['USE_ALL_AUTH']:
         return []
-    if not not is_package_present('allauth'):
+    elif not is_package_present('allauth'):
         print("Package django-allauth must be installed to use OAuth2 authentication.")
         return []
     return ['allauth', 'allauth.account', 'allauth.socialaccount'] +\
-           ['allauth.socialaccount.providers.%s' % k for k in providers if k in allauth_providers]
-allauth_installed_apps.required_settings = ['ALLAUTH_PROVIDERS']
+           ['allauth.socialaccount.providers.%s' % k for k in settings_dict['ALLAUTH_PROVIDERS']
+            if k in allauth_providers]
+allauth_installed_apps.required_settings = ['ALLAUTH_PROVIDERS', 'USE_ALL_AUTH']
 allauth_providers = {'amazon', 'angellist', 'asana', 'auth0', 'baidu', 'basecamp', 'bitbucket', 'bitbucket_oauth2',
                      'bitly', 'coinbase', 'daum', 'digitalocean', 'discord', 'douban', 'draugiem', 'dropbox',
                      'dropbox_oauth2', 'edmodo', 'eveonline', 'evernote', 'facebook', 'feedly', 'fivehundredpx',
