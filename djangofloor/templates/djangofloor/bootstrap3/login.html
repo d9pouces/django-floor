@@ -17,7 +17,7 @@
     <div class="col-md-2 col-sm-2 hidden-xs">&nbsp;</div>
     <div class="col-md-3 col-sm-3 col-xs-12">
         <h3>{% trans 'Login to your account' %}</h3>
-        <form action="?" method="post">
+        <form action="?{{ redirect_to }}" method="post">
             {% csrf_token %}
             {% bootstrap_form authentication_form %}
             <input type="submit" class="btn btn-success" value="{% trans 'Login' %}">

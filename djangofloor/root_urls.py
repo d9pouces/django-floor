@@ -30,8 +30,7 @@ if settings.DF_URL_CONF:
 else:
     extra_urls = []
 prefix = '^' + settings.URL_PREFIX[1:]
-urlpatterns = [url(prefix + 'admin/', include(admin.site.urls)),
-               url(prefix + 'jsi18n/$', javascript_catalog, {'packages': ('djangofloor', 'django.contrib.admin'), }),
+urlpatterns = [url(prefix + 'jsi18n/$', javascript_catalog, {'packages': ('djangofloor', 'django.contrib.admin'), }),
                url(prefix + '%s(?P<path>.*)$' % settings.MEDIA_URL[1:], serve, {'document_root': settings.MEDIA_ROOT}),
                url(prefix + '%s(?P<path>.*)$' % settings.STATIC_URL[1:], serve,
                    {'document_root': settings.STATIC_ROOT}),
@@ -42,6 +41,7 @@ urlpatterns = [url(prefix + 'admin/', include(admin.site.urls)),
 if settings.DF_LOGIN_VIEW:
     login_view = get_view_from_string(settings.DF_LOGIN_VIEW)
     urlpatterns += [url(prefix + settings.LOGIN_URL[1:], login_view, name='login')]
+urlpatterns += [url(prefix + 'admin/', include(admin.site.urls))]
 if settings.USE_REST_FRAMEWORK:
     urlpatterns += [url(prefix + 'api-auth/', include('rest_framework.urls', namespace='rest_framework'))]
 if settings.DF_INDEX_VIEW:

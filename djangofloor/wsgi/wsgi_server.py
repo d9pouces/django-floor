@@ -101,7 +101,7 @@ class WebsocketWSGIServer(object):
     def process_request(request):
         request.session = None
         request.user = None
-        session_key = request.COOKIES.get(settings.SESSION_COOKIE_NAME, None)
+        session_key = request.GET.get(settings.SESSION_COOKIE_NAME)
         if session_key is not None:
             engine = import_module(settings.SESSION_ENGINE)
             request.session = engine.SessionStore(session_key)

@@ -68,4 +68,4 @@ class NotificationAdmin(admin.ModelAdmin):
     actions = ['activate', 'deactivate']
 
 
-site.register(Notification, NotificationAdmin)
+# site.register(Notification, NotificationAdmin)

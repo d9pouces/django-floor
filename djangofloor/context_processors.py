@@ -67,6 +67,7 @@ def context_base(request):
         'df_get_notifications': lambda: Notification.get_notifications(request),
         'df_user_agent': request.META.get('HTTP_USER_AGENT', ''),
         'df_window_key': getattr(request, 'window_key', None),
+        'df_session_id': request.COOKIES.get(settings.SESSION_COOKIE_NAME),
         'df_has_ws_topics': getattr(request, 'has_websocket_topics', False),
         'df_http_request': request,
         'df_index_view': df_index_view,

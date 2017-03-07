@@ -41,11 +41,12 @@ def df_init_websocket(context, *topics):
     elif not context.get('df_has_ws_topics') and context.get('df_http_request'):
         set_websocket_topics(context['df_http_request'], *topics)
     ws_token = context['df_window_key']
+    session_id = context['df_session_id']
     signed_token = signer.sign(ws_token)
     protocol = 'wss' if settings.USE_SSL else 'ws'
     site_name = '%s:%s' % (settings.SERVER_NAME, settings.SERVER_PORT)
-    script = '$(document).ready(function() { $.df._wsConnect("%s://%s%s?token=%s"); });' % \
-             (protocol, site_name, settings.WEBSOCKET_URL, signed_token)
+    script = '$(document).ready(function() { $.df._wsConnect("%s://%s%s?token=%s&%s=%s"); });' % \
+             (protocol, site_name, settings.WEBSOCKET_URL, signed_token, settings.SESSION_COOKIE_NAME, session_id)
     init_value = '<script type="application/javascript">%s</script>' % script
     init_value += '<script type="text/javascript" src="%s" charset="utf-8"></script>' % reverse('df:signals')
     return mark_safe(init_value)

@@ -36,7 +36,6 @@ _deprecated_settings = {
     'BROKER_DB': SettingReference('CELERY_DB'),
     'FLOOR_AUTHENTICATION_HEADER': SettingReference('DF_REMOTE_USER_HEADER'),
     'FLOOR_BACKUP_SINGLE_TRANSACTION': None,
-    'FLOOR_DEFAULT_GROUP_NAME': SettingReference('DF_DEFAULT_GROUP'),
     'FLOOR_EXTRA_CSS': SettingReference('DF_CSS'),
     'FLOOR_EXTRA_JS': SettingReference('DF_JS'),
     'FLOOR_FAKE_AUTHENTICATION_USERNAME': SettingReference('DF_FAKE_AUTHENTICATION_USERNAME'),

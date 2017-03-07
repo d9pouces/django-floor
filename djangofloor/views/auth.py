@@ -7,6 +7,7 @@ from __future__ import unicode_literals, print_function, absolute_import
 
 import logging
 
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import REDIRECT_FIELD_NAME, logout as auth_logout, login as auth_login
 from django.contrib.auth.decorators import login_required
@@ -20,6 +21,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.views.generic import TemplateView
 from djangofloor.decorators import validate_form, everyone
 from djangofloor.tasks import set_websocket_topics
+from urllib.parse import urlencode
 
 __author__ = 'Matthieu Gallet'
 logger = logging.getLogger('django.requests')
@@ -34,35 +36,39 @@ class LoginView(TemplateView):
 You can override this view by changing the provided template.
      """
     template_name = 'djangofloor/bootstrap3/login.html'
-    allow_account_creation = True
 
     def get(self, request, *args, **kwargs):
         creation_form = None
         authentication_form = AuthenticationForm(request)
-        if self.allow_account_creation:
+        if settings.DF_USER_SELF_REGISTRATION:
             creation_form = UserCreationForm()
         set_websocket_topics(request)
-        context = {'creation_form': creation_form, 'authentication_form': authentication_form}
+        redirect_to = request.POST.get(REDIRECT_FIELD_NAME, request.GET.get(REDIRECT_FIELD_NAME, '/'))
+        if not is_safe_url(url=redirect_to, host=request.get_host()):
+            redirect_to = resolve_url('index')
+        context = {'creation_form': creation_form, 'authentication_form': authentication_form,
+                   'redirect_to': urlencode({REDIRECT_FIELD_NAME: redirect_to})}
         return self.render_to_response(context)
 
     def post(self, request):
         creation_form = None
         authentication_form = AuthenticationForm(request, request.POST)
+        redirect_to = request.POST.get(REDIRECT_FIELD_NAME, request.GET.get(REDIRECT_FIELD_NAME, '/'))
+        if not is_safe_url(url=redirect_to, host=request.get_host()):
+            redirect_to = resolve_url('index')
         if authentication_form.is_valid():
             auth_login(request, authentication_form.get_user())
             messages.info(request, _('You are now connected.'))
-            redirect_to = request.POST.get(REDIRECT_FIELD_NAME, request.GET.get(REDIRECT_FIELD_NAME, '/'))
-            if not is_safe_url(url=redirect_to, host=request.get_host()):
-                redirect_to = resolve_url('index')
             return HttpResponseRedirect(redirect_to)
         elif 'password' in request.POST:
             messages.warning(request, _('Invalid username or password.'))
-        elif self.allow_account_creation:
+        elif settings.DF_USER_SELF_REGISTRATION:
             creation_form = UserCreationForm(request.POST)
             if creation_form.is_valid():
                 creation_form.save()
         set_websocket_topics(request)
-        context = {'creation_form': creation_form, 'authentication_form': authentication_form}
+        context = {'creation_form': creation_form, 'authentication_form': authentication_form,
+                   'redirect_to': urlencode({REDIRECT_FIELD_NAME: redirect_to})}
         return self.render_to_response(context)
 
 

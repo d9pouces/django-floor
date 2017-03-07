@@ -59,7 +59,7 @@ if USE_REDIS_CACHE:
 else:
     CACHES = {'default': {'BACKEND': 'django.core.cache.backends.locmem.LocMemCache', 'LOCATION': 'unique-snowflake'}}
 CSRF_COOKIE_DOMAIN = '{SERVER_NAME}'
-CSRF_TRUSTED_ORIGINS = ['{SERVER_NAME}', '.{SERVER_NAME}']
+CSRF_TRUSTED_ORIGINS = ['{SERVER_NAME}']
 _default_engines = {'mysql': 'django.db.backends.mysql',
                     'oracle': 'django.db.backends.oracle',
                     'postgresql': 'django.db.backends.postgresql_psycopg2',
@@ -203,7 +203,7 @@ USE_SSL = CallableSetting(url_parse_ssl)  # ~ True
 USE_X_FORWARDED_FOR = True  # X-Forwarded-For
 USE_X_SEND_FILE = False  # Apache module
 X_ACCEL_REDIRECT = []  # paths used by nginx
-DF_FAKE_AUTHENTICATION_USERNAME = 'testuser'
+DF_FAKE_AUTHENTICATION_USERNAME = None
 DF_PROJECT_VERSION = CallableSetting(guess_version)
 DF_REMOVED_DJANGO_COMMANDS = {'startapp', 'startproject'}
 DF_PUBLIC_SIGNAL_LIST = True
@@ -348,6 +348,7 @@ DF_JS = []
 DF_INDEX_VIEW = 'djangofloor.views.IndexView'
 DF_SITE_SEARCH_VIEW = 'djangofloor.views.search.UserSearchView'
 DF_LOGIN_VIEW = 'djangofloor.views.auth.LoginView'
+DF_USER_SELF_REGISTRATION = True  # allow user to create their account themselves
 DF_PROJECT_NAME = CallableSetting(project_name)
 DF_URL_CONF = '{DF_MODULE_NAME}.urls.urlpatterns'
 DF_INSTALLED_APPS = ['{DF_MODULE_NAME}']
