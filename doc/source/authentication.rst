@@ -68,7 +68,7 @@ However, Djangofloor can help you. If `ALLAUTH_PROVIDERS` is defined (in your pr
   * :mod:`allauth.urls` is inserted in root urls,
   * :class:`allauth.account.auth_backends.AuthenticationBackend` is added to authentication backends.
 
-You can use when you deploy it:
+Of course, templates must be written. You can use when you deploy it, if :mod:`djangofloor.conf.mapping`.`ALLAUTH_MAPPING` is added to your `iniconf` mapping:
 
 .. code-block:: ini
   :caption: /etc/yourproject/settings.ini

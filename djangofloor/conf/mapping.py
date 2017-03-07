@@ -119,10 +119,12 @@ AUTH_MAPPING = [
     CharConfigField('auth.ldap_direct_bind', 'AUTH_LDAP_USER_DN_TEMPLATE',
                     help_str='Set it for a direct LDAP bind, like "uid=%(user)s,ou=users,dc=example,dc=com"'),
     BooleanConfigField('auth.ldap_start_tls', 'AUTH_LDAP_START_TLS', 'Set to "true" if you want to use StartTLS.'),
+
+]
+ALLAUTH_MAPPING = [
     ListConfigField('auth.oauth2_providers', 'ALLAUTH_PROVIDERS',
                     help_str='Comma-separated OAuth2 providers, among "%s". "django-allauth" package must be installed.'
                              % '","'.join(allauth_providers)),
-
 ]
 
 INI_MAPPING = BASE_MAPPING + REDIS_MAPPING + CELERY_MAPPING + AUTH_MAPPING
