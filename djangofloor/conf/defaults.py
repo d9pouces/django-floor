@@ -59,6 +59,7 @@ if USE_REDIS_CACHE:
 else:
     CACHES = {'default': {'BACKEND': 'django.core.cache.backends.locmem.LocMemCache', 'LOCATION': 'unique-snowflake'}}
 CSRF_COOKIE_DOMAIN = '{SERVER_NAME}'
+CSRF_TRUSTED_ORIGINS = ['{SERVER_NAME}', '.{SERVER_NAME}']
 _default_engines = {'mysql': 'django.db.backends.mysql',
                     'oracle': 'django.db.backends.oracle',
                     'postgresql': 'django.db.backends.postgresql_psycopg2',
