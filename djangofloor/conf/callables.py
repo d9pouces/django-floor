@@ -24,6 +24,16 @@ def database_engine(settings_dict):
 database_engine.required_settings = ['DATABASE_ENGINE']
 
 
+def allowed_hosts(settings_dict):
+    result = {'127.0.0.1', '::1', 'localhost'}
+    listened_ip, sep, port = settings_dict['LISTEN_ADDRESS'].rpartition(':')
+    if sep == ':' and listened_ip not in ('::', '0.0.0.0'):
+        result.add(listened_ip)
+    result.add(settings_dict['SERVER_NAME'])
+    return list(sorted(result))
+allowed_hosts.required_settings = ['SERVER_NAME', 'LISTEN_ADDRESS']
+
+
 def url_parse_server_name(settings_dict):
     """"""
     return urlparse(settings_dict['SERVER_BASE_URL']).hostname

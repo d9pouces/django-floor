@@ -28,9 +28,11 @@ import codecs
 import os
 import warnings
 
+from django.core.checks.messages import Error, Warning
 from django.utils.module_loading import import_string
 from django.utils.six import text_type
 
+from djangofloor.checks import settings_check_results
 
 __author__ = 'Matthieu Gallet'
 
@@ -39,6 +41,7 @@ class ConfigValue(object):
     """Base class for special setting values. When a setting is a :class:`djangofloor.settings.ConfigValue`,
       then the method `get_value(merger)` is called for getting the definitive value.
     """
+
     def __init__(self, value):
         self.value = value
 
@@ -92,7 +95,7 @@ class Path(ConfigValue):
 
 
 class AutocreateDirectory(Path):
-    """Represent a directory path that must be created on startup (if not `merger.read_only`)
+    """Represent a directory path that must be created on startup, and create it if required and not `merger.read_only`
     """
 
     def get_value(self, merger):
@@ -107,15 +110,34 @@ class AutocreateDirectory(Path):
             try:
                 os.makedirs(value)
             except PermissionError:
-                print('Unable to create %s: Permission denied' % value)
+                settings_check_results.append(Error('Unable to create directory: permission denied.', hint=None,
+                                                    obj=value, id='djangofloor.E001'))
         if not value.endswith('/'):
             value += '/'
         return value
 
 
+class Directory(Path):
+    """Represent a directory path that must be exist on startup, and add a warning if it does not exist"""
+
+    def get_value(self, merger):
+        """ Return the value
+
+        :param merger: merger object, with all interpreted settings
+        :type merger: :class:`djangofloor.utils.SettingMerger`
+        """
+        value = merger.analyze_raw_value(self.value)
+        value = os.path.normpath(value)
+        if not value.endswith('/'):
+            value += '/'
+        if not os.path.isdir(value) and not merger.read_only:
+            settings_check_results.append(Warning('Missing directory, you can create it with \nmkdir -p "%s"' % value,
+                                                  hint=None, obj=value, id='djangofloor.W001'))
+        return value
+
+
 class AutocreateFile(Path):
-    """Represent a file name, whose parent directory should be created on startup
-    """
+    """Represent a file name, whose parent directory should be created on startup"""
 
     def get_value(self, merger):
         """ Return the value
@@ -127,7 +149,29 @@ class AutocreateFile(Path):
         value = os.path.normpath(value)
         dirname = os.path.dirname(value)
         if not os.path.isdir(dirname) and not merger.read_only:
-            os.makedirs(dirname)  # do not use ensure_dir()! (cycling dependencies…)
+            try:
+                os.makedirs(dirname)  # do not use ensure_dir()! (cycling dependencies…)
+            except PermissionError:
+                settings_check_results.append(Error('Unable to create: permission denied.', hint=None,
+                                                    obj=dirname, id='djangofloor.E002'))
+        return value
+
+
+class File(Path):
+    """Represent a file name and raise a warning if the parent directory does not exist"""
+
+    def get_value(self, merger):
+        """ Return the value
+
+        :param merger: merger object, with all interpreted settings
+        :type merger: :class:`djangofloor.utils.SettingMerger`
+        """
+        value = merger.analyze_raw_value(self.value)
+        value = os.path.normpath(value)
+        dirname = os.path.dirname(value)
+        if not os.path.isdir(dirname) and not merger.read_only:
+            settings_check_results.append(Warning('Missing directory, you can create it with \nmkdir -p "%s"' % value,
+                                                  hint=None, obj=value, id='djangofloor.W002'))
         return value
 
 
@@ -136,7 +180,8 @@ class AutocreateFileContent(Path):
     Content must be a unicode string.
 
     """
-    def __init__(self, value, create_function, *args, **kwargs):
+
+    def __init__(self, value, create_function, makedirs=False, *args, **kwargs):
         """
 
         :param value: name of the file
@@ -146,6 +191,7 @@ class AutocreateFileContent(Path):
         """
         super(AutocreateFileContent, self).__init__(value)
         self.create_function = create_function
+        self.makedirs = makedirs
         self.args = args
         self.kwargs = kwargs
 
@@ -159,11 +205,17 @@ class AutocreateFileContent(Path):
         dirname = os.path.dirname(filename)
         allow_create = not merger.read_only
         if not os.path.isdir(dirname) and allow_create:
-            try:
-                os.makedirs(dirname)  # do not use ensure_dir()! (cycling dependencies…)
-            except PermissionError:
+            if self.makedirs:
+                try:
+                    os.makedirs(dirname)  # do not use ensure_dir()! (cycling dependencies…)
+                except PermissionError:
+                    allow_create = False
+                    settings_check_results.append(Error('Unable to create: permission denied.', hint=None,
+                                                        obj=dirname, id='djangofloor.E003'))
+            else:
+                settings_check_results.append(Warning('Missing directory, you can create it with \nmkdir -p "%s"' %
+                                                      dirname, hint=None, obj=dirname, id='djangofloor.W003'))
                 allow_create = False
-                print('Unable to create %s: Permission denied' % dirname)
         if os.path.isfile(filename):
             with codecs.open(filename, 'r', encoding='utf-8') as fd:
                 result = fd.read()
@@ -176,7 +228,8 @@ class AutocreateFileContent(Path):
                     with codecs.open(filename, 'w', encoding='utf-8') as fd:
                         fd.write(result)
                 except PermissionError:
-                    print('Unable to create %s: Permission denied' % filename)
+                    settings_check_results.append(Error('Unable to create: permission denied.', hint=None,
+                                                        obj=filename, id='djangofloor.E004'))
         return result
 
 
@@ -217,7 +270,6 @@ class SettingReference(ConfigValue):
 
 
 class DeprecatedSetting(ConfigValue):
-
     def __init__(self, value, default=None, msg=''):
         super(DeprecatedSetting, self).__init__(value)
         self.default = default

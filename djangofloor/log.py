@@ -15,10 +15,12 @@ import time
 import warnings
 
 from django.conf import settings
+from django.core.checks.messages import Warning
 from django.core.management import color_style
 from django.utils.log import AdminEmailHandler as BaseAdminEmailHandler
 # noinspection PyUnresolvedReferences
 from django.utils.six.moves.urllib.parse import urlparse
+from djangofloor.checks import settings_check_results
 
 __author__ = 'Matthieu Gallet'
 
@@ -204,7 +206,8 @@ def log_configuration(settings_dict):
     if log_directory is not None:
         log_directory = os.path.normpath(log_directory)
         if not os.path.isdir(log_directory):
-            print('Log folder does not exist. Try mkdir -p "%s"' % log_directory)
+            settings_check_results.append(Warning('Missing directory, you can create it with \nmkdir -p "%s"' %
+                                                  log_directory, hint=None, obj=log_directory, id='djangofloor.W004'))
 
             # noinspection PyUnusedLocal
             def get_log_file_handler(suffix):

@@ -13,8 +13,8 @@ from django.utils.translation import ugettext_lazy as _
 
 from djangofloor.conf.callables import database_engine, url_parse_server_name, \
     url_parse_server_protocol, url_parse_server_port, url_parse_prefix, url_parse_ssl, project_name, \
-    authentication_backends, ldap_user_search, allauth_installed_apps
-from djangofloor.conf.config_values import Path, AutocreateDirectory, SettingReference, ExpandIterable, \
+    authentication_backends, ldap_user_search, allauth_installed_apps, allowed_hosts
+from djangofloor.conf.config_values import Path, Directory, SettingReference, ExpandIterable, \
     CallableSetting, AutocreateFileContent
 from djangofloor.log import log_configuration
 from djangofloor.utils import is_package_present, guess_version
@@ -45,8 +45,8 @@ USE_ALL_AUTH = is_package_present('allauth')
 # of course, you can override them in your default settings
 #
 # ######################################################################################################################
-ADMINS = (('admin', '{ADMIN_EMAIL}',),)
-ALLOWED_HOSTS = ['{SERVER_NAME}', '127.0.0.1', '::1', 'localhost']
+ADMINS = (('admin', '{ADMIN_EMAIL}'),)
+ALLOWED_HOSTS = CallableSetting(allowed_hosts)
 if USE_REDIS_CACHE:
     CACHES = {
         'default': {
@@ -60,10 +60,6 @@ else:
     CACHES = {'default': {'BACKEND': 'django.core.cache.backends.locmem.LocMemCache', 'LOCATION': 'unique-snowflake'}}
 CSRF_COOKIE_DOMAIN = '{SERVER_NAME}'
 CSRF_TRUSTED_ORIGINS = ['{SERVER_NAME}']
-_default_engines = {'mysql': 'django.db.backends.mysql',
-                    'oracle': 'django.db.backends.oracle',
-                    'postgresql': 'django.db.backends.postgresql_psycopg2',
-                    'sqlite3': 'django.db.backends.sqlite3', }
 DATABASES = {'default': {
     'ENGINE': CallableSetting(database_engine), 'NAME': '{DATABASE_NAME}', 'USER': '{DATABASE_USER}',
     'OPTIONS': SettingReference('DATABASE_OPTIONS'),
@@ -72,7 +68,7 @@ DATABASES = {'default': {
 DEBUG = False
 # you should create a "local_settings.py" with "DEBUG = True" at the root of your project
 DEFAULT_FROM_EMAIL = 'webmaster@{SERVER_NAME}'
-FILE_UPLOAD_TEMP_DIR = AutocreateDirectory('{LOCAL_PATH}/tmp-uploads')
+FILE_UPLOAD_TEMP_DIR = Directory('{LOCAL_PATH}/tmp-uploads')
 INSTALLED_APPS = [
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -97,7 +93,7 @@ INSTALLED_APPS.append('djangofloor')
 INSTALLED_APPS.append(ExpandIterable('DF_EXTRA_INSTALLED_APPS'))
 LOGGING = CallableSetting(log_configuration)
 MANAGERS = SettingReference('ADMINS')
-MEDIA_ROOT = AutocreateDirectory('{LOCAL_PATH}/media')
+MEDIA_ROOT = Directory('{LOCAL_PATH}/media')
 MEDIA_URL = '/media/'
 MIDDLEWARE_CLASSES = [
     'django.middleware.cache.UpdateCacheMiddleware',
@@ -166,7 +162,7 @@ if USE_REDIS_SESSIONS:
 SITE_ID = 1
 
 # django.contrib.staticfiles
-STATIC_ROOT = AutocreateDirectory('{LOCAL_PATH}/static')
+STATIC_ROOT = Directory('{LOCAL_PATH}/static')
 STATIC_URL = '/static/'
 if USE_PIPELINE:
     STATICFILES_STORAGE = 'djangofloor.backends.DjangofloorPipelineCachedStorage'
@@ -189,11 +185,11 @@ CELERY_TASK_SERIALIZER = 'json'
 
 # django-npm
 NPM_EXECUTABLE_PATH = 'npm'
-NPM_ROOT_PATH = AutocreateDirectory('{LOCAL_PATH}/npm')
+NPM_ROOT_PATH = Directory('{LOCAL_PATH}/npm')
 NPM_STATIC_FILES_PREFIX = 'vendor'
 
 # djangofloor
-DATA_PATH = AutocreateDirectory('{LOCAL_PATH}/data')
+DATA_PATH = Directory('{LOCAL_PATH}/data')
 SERVER_NAME = CallableSetting(url_parse_server_name)  # ~ www.example.org
 SERVER_PORT = CallableSetting(url_parse_server_port)  # ~ 443
 SERVER_PROTOCOL = CallableSetting(url_parse_server_protocol)  # ~ "https"
@@ -393,7 +389,7 @@ EMAIL_USE_SSL = False  # aliased in settings.ini as "[email]use_ssl"
 EMAIL_SSL_CERTFILE = None
 EMAIL_SSL_KEYFILE = None
 LANGUAGE_CODE = 'fr-fr'  # aliased in settings.ini as "[global]language_code"
-SECRET_KEY = AutocreateFileContent('{LOCAL_PATH}/secret_key.txt', get_random_string, length=60)
+SECRET_KEY = AutocreateFileContent('{LOCAL_PATH}/secret_key.txt', get_random_string, length=60, makedirs=False)
 TIME_ZONE = 'Europe/Paris'  # aliased in settings.ini as "[global]time_zone"
 LOG_REMOTE_URL = None  # aliased in settings.ini as "[global]log_remote_url"
 LOG_SLOW_QUERIES_DURATION = None  # aliased in settings.ini as "[global]log_slow_queries_duration"
@@ -404,7 +400,7 @@ LOCAL_PATH = './django_data'  # aliased in settings.ini as "[global]data"
 __split_path = __file__.split(os.path.sep)
 if 'lib' in __split_path:
     prefix = os.path.join(*__split_path[:__split_path.index('lib')])
-    LOCAL_PATH = AutocreateDirectory('/%s/var/{DF_MODULE_NAME}' % prefix)
+    LOCAL_PATH = Directory('/%s/var/{DF_MODULE_NAME}' % prefix)
 SERVER_BASE_URL = 'http://{LISTEN_ADDRESS}/'  # aliased in settings.ini as "[global]server_url"
 LOG_DIRECTORY = '{LOCAL_PATH}/logs'
 
