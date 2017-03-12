@@ -10,7 +10,7 @@ from __future__ import unicode_literals, print_function, absolute_import
 
 from djangofloor.conf.callables import allauth_providers
 from djangofloor.conf.fields import CharConfigField, IntegerConfigField, BooleanConfigField, ConfigField, bool_setting, \
-    ListConfigField
+    ListConfigField, FloatConfigField
 
 __author__ = 'Matthieu Gallet'
 
@@ -71,7 +71,9 @@ BASE_MAPPING = [
                     help_str='Send logs to a syslog or systemd log daemon. \n'
                              'Examples: syslog+tcp://localhost:514/user, syslog:///local7, '
                              'syslog:///dev/log/daemon, logd:///project_name'),
-
+    FloatConfigField('global.log_slow_queries_duration', 'LOG_SLOW_QUERIES_DURATION',
+                     help_str='DB queries that take more than this threshold (in seconds) are logged.'
+                              'Deactivated if left empty.'),
     CharConfigField('database.db', 'DATABASE_NAME', help_str='Main database name (or path of the sqlite3 database)'),
     CharConfigField('database.engine', 'DATABASE_ENGINE',
                     help_str='Main database engine ("mysql", "postgresql", "sqlite3", "oracle", or the dotted name of '

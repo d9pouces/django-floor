@@ -111,6 +111,18 @@ class IntegerConfigField(ConfigField):
         super(IntegerConfigField, self).__init__(name, setting_name, from_str=from_str, to_str=str_or_blank, **kwargs)
 
 
+class FloatConfigField(ConfigField):
+    """Accept floating-point values. If `allow_none`, then `None` replaces any empty values (other `0.0` is used)."""
+    def __init__(self, name, setting_name, allow_none=True, **kwargs):
+        if allow_none:
+            def from_str(value):
+                return float(value) if value else None
+        else:
+            def from_str(value):
+                return float(value) if value else 0.0
+        super(FloatConfigField, self).__init__(name, setting_name, from_str=from_str, to_str=str_or_blank, **kwargs)
+
+
 class ListConfigField(ConfigField):
     """Convert a string to a list of values, splitted with the :meth:`djangofloor.conf.fields.strip_split` function."""
     def __init__(self, name, setting_name, **kwargs):

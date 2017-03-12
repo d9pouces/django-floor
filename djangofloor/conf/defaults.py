@@ -396,6 +396,7 @@ LANGUAGE_CODE = 'fr-fr'  # aliased in settings.ini as "[global]language_code"
 SECRET_KEY = AutocreateFileContent('{LOCAL_PATH}/secret_key.txt', get_random_string, length=60)
 TIME_ZONE = 'Europe/Paris'  # aliased in settings.ini as "[global]time_zone"
 LOG_REMOTE_URL = None  # aliased in settings.ini as "[global]log_remote_url"
+LOG_SLOW_QUERIES_DURATION = None  # aliased in settings.ini as "[global]log_slow_queries_duration"
 
 # djangofloor
 LISTEN_ADDRESS = 'localhost:9000'  # aliased in settings.ini as "[global]listen_address"

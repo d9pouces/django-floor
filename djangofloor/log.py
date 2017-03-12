@@ -148,6 +148,7 @@ def log_configuration(settings_dict):
     *  `LOG_REMOTE_URL`: examples: "syslog+tcp://localhost:514/user", "syslog:///local7"
          "syslog:///dev/log/daemon", "logd:///project_name"
     """
+    slow_query_duration = settings_dict['LOG_SLOW_QUERIES_DURATION']
     log_directory = settings_dict['LOG_DIRECTORY']
     module_name = settings_dict['DF_MODULE_NAME']
     script_name = settings_dict['SCRIPT_NAME']
@@ -163,10 +164,13 @@ def log_configuration(settings_dict):
         'nocolor': {'()': 'logging.Formatter', 'fmt': '%(asctime)s [%(name)s] [%(levelname)s] %(message)s',
                     'datefmt': '%Y-%m-%d %H:%M:%S', },
         'colorized': {'()': 'djangofloor.log.ColorizedFormatter'}}
-    filters = {'remove_duplicate_warnings': {'()': 'djangofloor.log.RemoveDuplicateWarnings'}}
+    filters = {'remove_duplicate_warnings': {'()': 'djangofloor.log.RemoveDuplicateWarnings'},
+               'slow_queries': {'()': 'django.utils.log.CallbackFilter',
+                                'callback': lambda record: record.duration > slow_query_duration}}
     server_loggers = ['aiohttp.access', 'gunicorn.access', 'django.server', 'geventwebsocket.handler']
 
     loggers = {'django': {'handlers': [], 'level': 'WARN', 'propagate': True},
+               'django.db': {'handlers': [], 'level': 'DEBUG', 'propagate': True},
                'django.db.backends': {'handlers': [], 'level': 'WARN', 'propagate': True},
                'django.request': {'handlers': [], 'level': 'INFO', 'propagate': True},
                'django.security': {'handlers': [], 'level': 'WARN', 'propagate': True},
@@ -203,17 +207,21 @@ def log_configuration(settings_dict):
             print('Log folder does not exist. Try mkdir -p "%s"' % log_directory)
 
             # noinspection PyUnusedLocal
-            def get_handler(suffix):
+            def get_log_file_handler(suffix):
                 return error_handler
         else:
-            def get_handler(suffix):
+            def get_log_file_handler(suffix):
                 name = '%s-%s-%s.log' % (module_name, script_name, suffix)
                 return {'class': 'logging.handlers.RotatingFileHandler', 'maxBytes': 1000000, 'backupCount': 3,
                         'formatter': 'nocolor', 'filename': os.path.join(log_directory, name)}
-        error_handler = get_handler('error')
-        handlers.update({'info': get_handler('info'),
-                         'access': get_handler('access'),
+        error_handler = get_log_file_handler('error')
+        handlers.update({'info': get_log_file_handler('info'),
+                         'access': get_log_file_handler('access'),
+                         'slow_queries': get_log_file_handler('slow_queries'),
                          'mail_admins': {'level': 'ERROR', 'class': 'djangofloor.log.AdminEmailHandler'}})
+
+        if slow_query_duration:
+            loggers['django.db']['handlers'] = ['slow_queries']
     if log_remote_url:
         parsed_log_url = urlparse(log_remote_url)
         scheme = parsed_log_url.scheme
@@ -248,4 +256,4 @@ def log_configuration(settings_dict):
 
 
 log_configuration.required_settings = ['DEBUG', 'DF_MODULE_NAME', 'SCRIPT_NAME', 'LOG_DIRECTORY',
-                                                'LOG_REMOTE_URL']
+                                                'LOG_REMOTE_URL', 'LOG_SLOW_QUERIES_DURATION']
