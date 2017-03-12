@@ -35,24 +35,56 @@ allowed_hosts.required_settings = ['SERVER_NAME', 'LISTEN_ADDRESS']
 
 
 def url_parse_server_name(settings_dict):
-    """"""
+    """Return the public hostname, given the public base URL
+
+    >>> url_parse_server_name({'SERVER_BASE_URL': 'https://demo.example.org/'})
+    'demo.example.org'
+
+    """
     return urlparse(settings_dict['SERVER_BASE_URL']).hostname
 url_parse_server_name.required_settings = ['SERVER_BASE_URL']
 
 
 def url_parse_server_port(settings_dict):
-    """"""
+    """Return the public port, given the public base URL
+
+    >>> url_parse_server_port({'SERVER_BASE_URL': 'https://demo.example.org/', 'USE_SSL': True})
+    443
+    >>> url_parse_server_port({'SERVER_BASE_URL': 'http://demo.example.org/', 'USE_SSL': False})
+    80
+    >>> url_parse_server_port({'SERVER_BASE_URL': 'https://demo.example.org:8010/', 'USE_SSL': True})
+    8010
+
+    """
     return urlparse(settings_dict['SERVER_BASE_URL']).port or (settings_dict['USE_SSL'] and 443) or 80
 url_parse_server_port.required_settings = ['SERVER_BASE_URL', 'USE_SSL']
 
 
 def url_parse_server_protocol(settings_dict):
-    """"""
+    """Return the public HTTP protocol, given the public base URL
+
+    >>> url_parse_server_protocol({'USE_SSL': True})
+    'https'
+
+    >>> url_parse_server_protocol({'USE_SSL': False})
+    'http'
+
+    """
     return 'https' if settings_dict['USE_SSL'] else 'http'
 url_parse_server_protocol.required_settings = ['USE_SSL']
 
 
 def url_parse_prefix(settings_dict):
+    """Return the public URL prefix, given the public base URL
+
+    >>> url_parse_prefix({'SERVER_BASE_URL': 'https://demo.example.org/demo/'})
+    '/demo/'
+    >>> url_parse_prefix({'SERVER_BASE_URL': 'http://demo.example.org/'})
+    '/'
+    >>> url_parse_prefix({'SERVER_BASE_URL': 'https://demo.example.org:8010'})
+    '/'
+
+    """
     p = urlparse(settings_dict['SERVER_BASE_URL']).path
     if not p.endswith('/'):
         p += '/'
@@ -61,6 +93,14 @@ url_parse_prefix.required_settings = ['SERVER_BASE_URL']
 
 
 def url_parse_ssl(settings_dict):
+    """Return True if the public URL uses https
+
+    >>> url_parse_ssl({'SERVER_BASE_URL': 'https://demo.example.org/demo/'})
+    True
+    >>> url_parse_ssl({'SERVER_BASE_URL': 'http://demo.example.org/'})
+    False
+
+    """
     return urlparse(settings_dict['SERVER_BASE_URL']).scheme == 'https'
 url_parse_ssl.required_settings = ['SERVER_BASE_URL']
 

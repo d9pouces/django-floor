@@ -1,4 +1,9 @@
 # -*- coding: utf-8 -*-
+"""Define checks integrated to the Django check framework
+=====================================================
+
+Currently, the check is build at settings loading time: any config value can add messages to `settings_check_results`.
+"""
 
 from django.core.checks import register
 
