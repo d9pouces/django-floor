@@ -70,7 +70,7 @@ class Command(BaseCommand):
                 elif verbosity >= 2:
                     self.stdout.write(self.style.ERROR('#  - %s "%s"' % (provider.name, provider)))
             provider = IniConfigProvider()
-            merger.write_provider(provider)
+            merger.write_provider(provider, include_doc=verbosity >= 2)
             self.stdout.write(provider.to_str())
         elif action == 'help':
             for provider in merger.providers:
