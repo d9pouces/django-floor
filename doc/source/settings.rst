@@ -71,10 +71,23 @@ You can also display the corresponding .ini files:
   #  - .ini file "/Users/flanker/Developer/Github/EasyDjango/EasyDemo/local_settings.ini"
   [global]
   admin_email = admin@localhost
+	# e-mail address for receiving logged errors
   data = django_data
-  language_code = fr-fr
+	# where all data will be stored (static/uploaded/temporary files, …)If you change it, you must run the collectstatic and migrate commands again.
+  language_code = fr_FR
+	# default to fr_FR
   listen_address = localhost:9000
-  secret_key = secret_key
+	# address used by your web server.
+  secret_key = *secret_key*
   server_url = http://localhost:9000/
+	# Public URL of your website.
+	# Default to "http://listen_address" but should be ifferent if you use a reverse proxy like Apache or Nginx. Example: http://www.example.org.
   time_zone = Europe/Paris
+	# default to Europe/Paris
   log_remote_url =
+	# Send logs to a syslog or systemd log daemon.
+	# Examples: syslog+tcp://localhost:514/user, syslog:///local7, syslog:///dev/log/daemon, logd:///project_name
+  log_slow_queries_duration =
+	# DB queries that take more than this threshold (in seconds) are logged.Deactivated if left empty.
+  ...
+
