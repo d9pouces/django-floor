@@ -89,14 +89,18 @@ class DjangoFloorMiddleware(BaseRemoteUserMiddleware):
             request.META[self.header] = username
 
         if self.header and self.header in request.META:
-            self.remote_user_authentication(request)
+            remote_username = request.META.get(self.header)
+            if not remote_username or remote_username == '(null)':  # special case due to apache2+auth_mod_kerb :-(
+                return
+            remote_username = self.format_remote_username(remote_username)
+            self.remote_user_authentication(request, remote_username)
 
     # noinspection PyUnusedLocal,PyMethodMayBeStatic
     def process_response(self, request, response):
         response['X-UA-Compatible'] = 'IE=edge,chrome=1'
         return response
 
-    def remote_user_authentication(self, request):
+    def remote_user_authentication(self, request, username):
         # AuthenticationMiddleware is required so that request.user exists.
         # noinspection PyTypeChecker
         if not hasattr(request, 'user'):
@@ -106,22 +110,13 @@ class DjangoFloorMiddleware(BaseRemoteUserMiddleware):
                 " MIDDLEWARE_CLASSES setting to insert"
                 " 'django.contrib.auth.middleware.AuthenticationMiddleware'"
                 " before the RemoteUserMiddleware class.")
-        remote_username = request.META.get(self.header)
-        if not remote_username or remote_username == '(null)':  # special case due to apache2+auth_mod_kerb :-(
-            return
-        username = self.format_remote_username(remote_username)
         # If the user is already authenticated and that user is the user we are
         # getting passed in the headers, then the correct user is already
         # persisted in the session and we don't need to continue.
-        if request.user.is_authenticated():
-            if request.user.get_username() == self.clean_username(username, request):
-                request.remote_username = remote_username
-                return
-            else:
-                # An authenticated user is associated with the request, but
-                # it does not match the authorized user in the header.
-                self._remove_invalid_user(request)
-
+        cleaned_username = self.clean_username(username, request)
+        if request.user.is_authenticated() and request.user.get_username() == cleaned_username:
+            request.remote_username = cleaned_username
+            return
         # We are seeing this user for the first time in this session, attempt
         # to authenticate the user.
         user = auth.authenticate(remote_user=username)
@@ -130,7 +125,7 @@ class DjangoFloorMiddleware(BaseRemoteUserMiddleware):
             # by logging the user in.
             request.user = user
             auth.login(request, user)
-            request.remote_username = remote_username
+            request.remote_username = cleaned_username
 
     # noinspection PyMethodMayBeStatic
     def format_remote_username(self, remote_username):
