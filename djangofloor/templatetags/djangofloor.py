@@ -69,6 +69,8 @@ def do_media(parser, token):
 
     Examples::
 
+    .. code-block:: html
+
         {% media "myapp/css/base.css" %}
         {% media variable_with_path %}
         {% media "myapp/css/base.css" as admin_base_css %}

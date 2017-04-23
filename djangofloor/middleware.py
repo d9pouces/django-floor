@@ -89,10 +89,7 @@ class DjangoFloorMiddleware(BaseRemoteUserMiddleware):
             request.META[self.header] = username
 
         if self.header and self.header in request.META:
-            if not request.user.is_authenticated():
-                self.remote_user_authentication(request)
-            else:
-                request.remote_username = self.format_remote_username(request.META.get(self.header))
+            self.remote_user_authentication(request)
 
     # noinspection PyUnusedLocal,PyMethodMayBeStatic
     def process_response(self, request, response):

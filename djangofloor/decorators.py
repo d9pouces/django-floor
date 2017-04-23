@@ -369,9 +369,9 @@ def validate_form(form_cls=None, path=None, is_allowed_to=server_side, queue=Non
 
 
 class RE(object):
-    """ used to check in a string value match a given regexp.
+    """ used to check if a string value matches a given regexp.
 
-    Example (requires Python 3.2+), for a function that can only handle a string on the form 123a456:
+    Example (requires Python 3.2+), for a function that can only handle a string of the form 123a456:
 
     .. code-block:: python
 
@@ -379,10 +379,10 @@ class RE(object):
         def test(window_info, value: RE("\d{3}a\d{3}")):
             pass
 
-    Your code wan't be called if value has not the right form.
+    Your code won't be called for values like "abc".
 
 
-    :param value: the pattern of the regexp
+    :param value: regexp pattern
     :type value: `str`
     :param caster: if not `None`, any callable applied to the value (if valid)
     :type caster: `callable` or `None`
@@ -460,7 +460,7 @@ class SerializedForm(object):
             print(value.is_valid())
 
 
-    On the JS side, the easiest way is to serialize the form with JQuery:
+    On the JS side, you can serialize the form with JQuery:
 
     .. code-block:: html
 
