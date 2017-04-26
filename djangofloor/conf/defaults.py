@@ -95,23 +95,22 @@ LOGGING = CallableSetting(log_configuration)
 MANAGERS = SettingReference('ADMINS')
 MEDIA_ROOT = Directory('{LOCAL_PATH}/media')
 MEDIA_URL = '/media/'
-MIDDLEWARE_CLASSES = [
+MIDDLEWARE = [
     'django.middleware.cache.UpdateCacheMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.middleware.locale.LocaleMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'djangofloor.middleware.DjangoFloorMiddleware',
-    ExpandIterable('DF_MIDDLEWARE_CLASSES'),
+    ExpandIterable('DF_MIDDLEWARE'),
     'django.middleware.cache.FetchFromCacheMiddleware',
 ]
 if USE_DEBUG_TOOLBAR:
-    MIDDLEWARE_CLASSES.insert(-3, 'debug_toolbar.middleware.DebugToolbarMiddleware')
+    MIDDLEWARE.insert(-3, 'debug_toolbar.middleware.DebugToolbarMiddleware')
 
 ROOT_URLCONF = 'djangofloor.root_urls'
 SERVER_EMAIL = 'root@{SERVER_NAME}'
@@ -348,7 +347,7 @@ DF_USER_SELF_REGISTRATION = True  # allow user to create their account themselve
 DF_PROJECT_NAME = CallableSetting(project_name)
 DF_URL_CONF = '{DF_MODULE_NAME}.urls.urlpatterns'
 DF_INSTALLED_APPS = ['{DF_MODULE_NAME}']
-DF_MIDDLEWARE_CLASSES = []
+DF_MIDDLEWARE = []
 DF_REMOTE_USER_HEADER = None  # HTTP-REMOTE-USER
 DF_DEFAULT_GROUPS = [_('Users')]
 DF_TEMPLATE_CONTEXT_PROCESSORS = []

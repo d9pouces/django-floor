@@ -45,6 +45,7 @@ from django.db.models import Q
 from django.http import HttpRequest
 from django.utils import translation
 from django.utils.crypto import get_random_string
+from django.utils.deprecation import MiddlewareMixin
 from django.utils.translation import get_language_from_request
 from djangofloor.utils import RemovedInDjangoFloor110Warning
 
@@ -75,8 +76,8 @@ class DjangoFloorMiddleware(BaseRemoteUserMiddleware):
 
         if settings.USE_HTTP_BASIC_AUTH and 'HTTP_AUTHORIZATION' in request.META:
             authentication = request.META['HTTP_AUTHORIZATION']
-            (authmeth, auth_data) = authentication.split(' ', 1)
-            if 'basic' == authmeth.lower():
+            authmeth, sep, auth_data = authentication.partition(' ')
+            if sep == ' ' and authmeth.lower() == 'basic':
                 auth_data = base64.b64decode(auth_data.strip()).decode('utf-8')
                 username, password = auth_data.split(':', 1)
                 user = auth.authenticate(username=username, password=password)
@@ -344,9 +345,10 @@ class Djangoi18nMiddleware(WindowInfoMiddleware):
 
 
 # TODO remove these classes
-class IEMiddleware(object):
+class IEMiddleware(MiddlewareMixin):
     """.. deprecated:: 1.0  replaced by :class:`djangofloor.middleware.DjangoFloorMiddleware`"""
-    def __init__(self):
+    def __init__(self, get_response=None):
+        super(IEMiddleware, self).__init__(get_response=get_response)
         warnings.warn('djangofloor.middleware.IEMiddleware has been replaced by '
                       'djangofloor.middleware.DjangoFloorMiddleware', RemovedInDjangoFloor110Warning)
 
@@ -362,8 +364,8 @@ class IEMiddleware(object):
 
 class RemoteUserMiddleware(BaseRemoteUserMiddleware):
     """Deprecated class, replaced by :class:`djangofloor.middleware.DjangoFloorMiddleware`"""
-    def __init__(self):
-        super(RemoteUserMiddleware, self).__init__()
+    def __init__(self, get_response=None):
+        super(RemoteUserMiddleware, self).__init__(get_response=get_response)
         warnings.warn('djangofloor.middleware.RemoteUserMiddleware has been replaced by '
                       'djangofloor.middleware.DjangoFloorMiddleware', RemovedInDjangoFloor110Warning)
     header = settings.DF_REMOTE_USER_HEADER
@@ -409,10 +411,11 @@ class RemoteUserMiddleware(BaseRemoteUserMiddleware):
             auth.login(request, user)
 
 
-class FakeAuthenticationMiddleware(object):
+class FakeAuthenticationMiddleware(MiddlewareMixin):
     """Deprecated class, replaced by :class:`djangofloor.middleware.DjangoFloorMiddleware`
     """
-    def __init__(self):
+    def __init__(self, get_response=None):
+        super(FakeAuthenticationMiddleware, self).__init__(get_response=get_response)
         warnings.warn('djangofloor.middleware.FakeAuthenticationMiddleware has been replaced by '
                       'djangofloor.middleware.DjangoFloorMiddleware', RemovedInDjangoFloor110Warning)
     group_cache = {}
@@ -437,10 +440,11 @@ class FakeAuthenticationMiddleware(object):
                     user.groups.add(group)
 
 
-class BasicAuthMiddleware(object):
+class BasicAuthMiddleware(MiddlewareMixin):
     """Deprecated class, replaced by :class:`djangofloor.middleware.DjangoFloorMiddleware`
     """
-    def __init__(self):
+    def __init__(self, get_response=None):
+        super(BasicAuthMiddleware, self).__init__(get_response=get_response)
         warnings.warn('djangofloor.middleware.BasicAuthMiddleware has been replaced by '
                       'djangofloor.middleware.DjangoFloorMiddleware', RemovedInDjangoFloor110Warning)
 
@@ -448,8 +452,8 @@ class BasicAuthMiddleware(object):
     def process_request(self, request):
         if 'HTTP_AUTHORIZATION' in request.META:
             authentication = request.META['HTTP_AUTHORIZATION']
-            (authmeth, auth_data) = authentication.split(' ', 1)
-            if 'basic' == authmeth.lower():
+            authmeth, sep, auth_data = authentication.partition(' ')
+            if sep == ' ' and authmeth.lower() == 'basic':
                 auth_data = base64.b64decode(auth_data.strip()).decode('utf-8')
                 username, password = auth_data.split(':', 1)
                 user = auth.authenticate(username=username, password=password)
