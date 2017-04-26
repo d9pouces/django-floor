@@ -77,7 +77,7 @@ class WebsocketRunServer(WebsocketWSGIServer):
         return websocket.receive()
 
 
-def run(addr, port, wsgi_handler, ipv6=False, threading=False):
+def run(addr, port, wsgi_handler, ipv6=False, threading=False, server_cls=WSGIServer):
     """
     Function to monkey patch the internal Django command: manage.py runserver
     """
@@ -85,7 +85,8 @@ def run(addr, port, wsgi_handler, ipv6=False, threading=False):
     server_address = (addr, port)
     if not threading:
         raise Exception("Django's Websocket server must run with threading enabled")
-
+    # noinspection PyUnusedLocal
+    server_cls = server_cls
     ServerHandler.http_version = '1.1'
     httpd_cls = type('WSGIServer', (socketserver.ThreadingMixIn, WSGIServer), {'daemon_threads': True})
     httpd = httpd_cls(server_address, WSGIRequestHandler, ipv6=ipv6)

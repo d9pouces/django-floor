@@ -27,7 +27,7 @@ install_requirements = ['django>=1.8', 'celery', 'django-bootstrap3', 'redis', '
 if python_version < (3, 3):
     install_requirements.append('funcsigs')
 if python_version >= (3, 4):
-    install_requirements += ['aiohttp-wsgi', 'aiohttp', 'asyncio_redis']
+    install_requirements += ['aiohttp-wsgi', 'aiohttp<2.0', 'asyncio_redis']
 elif python_version < (2, 8):
     install_requirements += ['gunicorn']
 

@@ -87,6 +87,7 @@ BASE_MAPPING = [
     CharConfigField('email.password', 'EMAIL_HOST_PASSWORD', help_str='SMTP password'),
     IntegerConfigField('email.port', 'EMAIL_PORT', help_str='SMTP port (often 25, 465 or 587)'),
     CharConfigField('email.user', 'EMAIL_HOST_USER', help_str='SMTP user'),
+    CharConfigField('email.from', 'EMAIL_FROM', help_str='Displayed sender email'),
     BooleanConfigField('email.use_tls', 'EMAIL_USE_TLS', help_str='"true" if your SMTP uses STARTTLS '
                                                                   '(often on port 587)'),
     BooleanConfigField('email.use_ssl', 'EMAIL_USE_SSL', help_str='"true" if your SMTP uses SSL (often on port 465)'),

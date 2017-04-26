@@ -6,10 +6,12 @@ This websocket is only used for the debug server and not for the production serv
 """
 import struct
 from socket import error as socket_error
-from django.core.handlers.wsgi import logger
+
+import logging
 from django.utils import six
 from djangofloor.wsgi.utf8validator import Utf8Validator
 from djangofloor.wsgi.exceptions import WebSocketError, FrameTooLargeException
+logger = logging.getLogger('django.request')
 
 
 if six.PY3:
