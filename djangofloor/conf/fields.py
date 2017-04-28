@@ -9,6 +9,8 @@ from __future__ import unicode_literals, print_function, absolute_import
 
 import os
 
+from django.forms import CharField, BooleanField
+from django.utils.encoding import force_text
 from django.utils.six import text_type
 
 __author__ = 'Matthieu Gallet'
@@ -79,6 +81,7 @@ class ConfigField(object):
     :param default: the value that will be used in documentation. The current setting value is used if equal to `None`.
     :type default: `object`
     """
+
     def __init__(self, name, setting_name, from_str=str, to_str=str_or_blank, help_str=None,
                  default=None):
         self.name = name
@@ -91,9 +94,20 @@ class ConfigField(object):
     def __str__(self):
         return self.name
 
+    def get_form_field(self):
+        # noinspection PyUnusedLocal
+        def to_python(self_, value):
+            value = force_text(value)
+            return self.from_str(value)
+
+        kls = type('%sFormField' % self.__class__.__name__,
+                   [CharField], {'to_python': to_python})
+        return kls(label=self.name.partition('.')[2], help_text=self.__doc__, initial=self.value)
+
 
 class CharConfigField(ConfigField):
     """Accepts str values. If `allow_none`, then `None` replaces any empty value."""
+
     def __init__(self, name, setting_name, allow_none=True, **kwargs):
         from_str = str_or_none if allow_none else str
         super(CharConfigField, self).__init__(name, setting_name, from_str=from_str, to_str=str_or_blank, **kwargs)
@@ -101,6 +115,7 @@ class CharConfigField(ConfigField):
 
 class IntegerConfigField(ConfigField):
     """Accept integer values. If `allow_none`, then `None` replaces any empty values (other `0` is used)."""
+
     def __init__(self, name, setting_name, allow_none=True, **kwargs):
         if allow_none:
             def from_str(value):
@@ -113,6 +128,7 @@ class IntegerConfigField(ConfigField):
 
 class FloatConfigField(ConfigField):
     """Accept floating-point values. If `allow_none`, then `None` replaces any empty values (other `0.0` is used)."""
+
     def __init__(self, name, setting_name, allow_none=True, **kwargs):
         if allow_none:
             def from_str(value):
@@ -125,11 +141,13 @@ class FloatConfigField(ConfigField):
 
 class ListConfigField(ConfigField):
     """Convert a string to a list of values, splitted with the :meth:`djangofloor.conf.fields.strip_split` function."""
+
     def __init__(self, name, setting_name, **kwargs):
         def to_str(value):
             if value:
                 return ','.join([text_type(x) for x in value])
             return ''
+
         super(ListConfigField, self).__init__(name, setting_name, from_str=strip_split, to_str=to_str, **kwargs)
 
 
@@ -138,6 +156,7 @@ class BooleanConfigField(ConfigField):
     If this value is empty and `allow_none` is `True`, then the value is `None`.
     Otherwise returns `True` if the provided (lower-cased) text is one of ('1', 'ok', 'yes', 'true', 'on')
     """
+
     def __init__(self, name, setting_name, allow_none=False, **kwargs):
         if allow_none:
             def from_str(value):
@@ -148,3 +167,33 @@ class BooleanConfigField(ConfigField):
             def from_str(value):
                 return bool_setting(value)
         super(BooleanConfigField, self).__init__(name, setting_name, from_str=from_str, to_str=str_or_blank, **kwargs)
+
+    def get_form_field(self):
+        return BooleanField(label=self.name.partition('.')[2], help_text=self.__doc__)
+# RegexConfigField
+# EmailConfigField
+# FileConfigField
+# URLConfigField
+# NullBooleanConfigField
+# DurationConfigField
+# DateTimeConfigField
+# TimeConfigField
+# DateConfigField
+#
+#
+# class ChoiceConfigField(ConfigField):
+#     """Search for a boolean value in the ini file.
+#     If this value is empty and `allow_none` is `True`, then the value is `None`.
+#     Otherwise returns `True` if the provided (lower-cased) text is one of ('1', 'ok', 'yes', 'true', 'on')
+#     """
+#
+#     def __init__(self, name, setting_name, allow_none=False, **kwargs):
+#         if allow_none:
+#             def from_str(value):
+#                 if not value:
+#                     return None
+#                 return bool_setting(value)
+#         else:
+#             def from_str(value):
+#                 return bool_setting(value)
+#         super(ChoiceConfigField, self).__init__(name, setting_name, from_str=from_str, to_str=str_or_blank, **kwargs)
