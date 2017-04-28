@@ -59,7 +59,7 @@ if USE_REDIS_CACHE:
 else:
     CACHES = {'default': {'BACKEND': 'django.core.cache.backends.locmem.LocMemCache', 'LOCATION': 'unique-snowflake'}}
 CSRF_COOKIE_DOMAIN = '{SERVER_NAME}'
-CSRF_TRUSTED_ORIGINS = ['{SERVER_NAME}']
+CSRF_TRUSTED_ORIGINS = ['{SERVER_NAME}', '{SERVER_NAME}:{SERVER_PORT}']
 DATABASES = {'default': {
     'ENGINE': CallableSetting(database_engine), 'NAME': '{DATABASE_NAME}', 'USER': '{DATABASE_USER}',
     'OPTIONS': SettingReference('DATABASE_OPTIONS'),
@@ -113,11 +113,15 @@ if USE_DEBUG_TOOLBAR:
     MIDDLEWARE.insert(-3, 'debug_toolbar.middleware.DebugToolbarMiddleware')
 
 ROOT_URLCONF = 'djangofloor.root_urls'
-SERVER_EMAIL = 'root@{SERVER_NAME}'
+SERVER_EMAIL = '{ADMIN_EMAIL}'
 SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
+SECURE_HSTS_INCLUDE_SUBDOMAINS = SettingReference('USE_SSL')
+SECURE_HSTS_PRELOAD = SettingReference('USE_SSL')
 SECURE_HSTS_SECONDS = 0
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')  # X-Forwarded-Proto or None
+SECURE_SSL_REDIRECT = SettingReference('USE_SSL')
+SECURE_FRAME_DENY = SettingReference('USE_SSL')
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -156,6 +160,7 @@ LOGIN_URL = '/admin/login/'
 # django.contrib.sessions
 if USE_REDIS_SESSIONS:
     SESSION_ENGINE = 'redis_sessions.session'
+SESSION_COOKIE_SECURE = SettingReference('USE_SSL')
 
 # django.contrib.sites
 SITE_ID = 1
@@ -321,6 +326,7 @@ BOOTSTRAP3 = {
     'field_renderers': {'default': 'bootstrap3.renderers.FieldRenderer',
                         'inline': 'bootstrap3.renderers.InlineFieldRenderer'},
 }
+
 # django-auth-ldap
 AUTH_LDAP_SERVER_URI = None
 AUTH_LDAP_BIND_DN = ""
@@ -330,6 +336,15 @@ AUTH_LDAP_FILTER = '(uid=%(user)s)'
 AUTH_LDAP_USER_SEARCH = CallableSetting(ldap_user_search)
 AUTH_LDAP_USER_DN_TEMPLATE = None
 AUTH_LDAP_START_TLS = False
+
+# django-cors-headers
+CORS_ORIGIN_WHITELIST = ('{SERVER_NAME}', '{SERVER_NAME}:{SERVER_PORT}')
+CORS_REPLACE_HTTPS_REFERER = False
+
+# django-hosts
+DEFAULT_HOST = '{SERVER_NAME}'
+HOST_SCHEME = '{SERVER_PROTOCOL}://'
+HOST_PORT = '{SERVER_PORT}'
 
 # ######################################################################################################################
 #
