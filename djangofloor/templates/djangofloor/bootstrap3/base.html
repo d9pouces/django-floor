@@ -49,20 +49,20 @@
             {% block navbar-login %}{% if df_has_login_view %}
             <ul class="nav navbar-nav navbar-right">
                 {% if debug %}<li><a><span class="label label-danger">{% trans 'DEBUG mode is activated' %}</span></a></li>{% endif %}
-                {% if df_user.is_anonymous %}
+                {% if user.is_anonymous %}
                 <li><a title="{% trans 'Log-in' %}" href="{% url 'login' %}">{% bootstrap_icon 'log-in' %}</a></li>
                 {% elif df_remote_username %}
-                <li><a>{{ df_user }}</a></li>
+                <li><a>{{ user }}</a></li>
                 {% else %}
-                <li><a href="{% url 'df:logout' %}" title="{% trans 'Log out' %}">{{ df_user }} {% bootstrap_icon 'log-out' %}</a>
+                <li><a href="{% url 'df:logout' %}" title="{% trans 'Log out' %}">{{ user }} {% bootstrap_icon 'log-out' %}</a>
                 </li>
                 <li><a href="{% url 'df:set_password' %}" title="{% trans 'Change your password' %}">{% bootstrap_icon 'edit' %}</a>
                 </li>
                 {% endif %}
-                {% if df_has_monitoring_view and df_user and df_user.is_superuser %}
+                {% if df_has_monitoring_view and user and user.is_superuser %}
                 <li><a href="{% url 'df:system_state' %}" title="{% trans 'Check system state' %}">{% bootstrap_icon 'eye-open' %}</a></li>
                 {% endif %}
-                {% if df_user and df_user.is_staff %}
+                {% if user and user.is_staff %}
                 <li><a href="{% url 'admin:index' %}" title="{% trans 'Admin' %}">{% bootstrap_icon 'cog' %}</a></li>
                 {% endif %}
             </ul>

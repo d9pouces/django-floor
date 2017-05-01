@@ -224,7 +224,7 @@ Here is the complete JavaScript API provided by DjangoFloor.
 /*"""
 .. function:: html.add_attribute(opts)
 
-    Adds the specified attribute(s) to each of the set of matched elements.
+    Adds or replace the specified attribute(s) to each of the set of matched elements.
 
     .. code-block:: javascript
 

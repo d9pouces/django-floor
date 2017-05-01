@@ -102,7 +102,7 @@ class Notification(models.Model):
         now = datetime.datetime.now(tz=utc)
         query = cls.objects.filter(is_active=True).filter(Q(not_before=None) | Q(not_before__lte=now)) \
             .filter(Q(not_after=None) | Q(not_after__gte=now))
-        if request.user.is_authenticated():
+        if request.user.is_authenticated:
             user = request.user
             query = query.filter(Q(broadcast_mode=cls.ANY) | Q(broadcast_mode=cls.AUTHENTICATED)
                                  | Q(destination_users=user) | Q(destination_groups=user.groups.all()))
@@ -111,7 +111,7 @@ class Notification(models.Model):
         notifications = list(query.order_by('pk').distinct())
         if not notifications:
             return []
-        if request.user.is_authenticated():
+        if request.user.is_authenticated:
             read_by_pk = {}
             for read in NotificationRead.objects.filter(notification_id__in=[x.pk for x in notifications]):
                 read_by_pk[read.notification_id] = read
@@ -153,9 +153,9 @@ class Notification(models.Model):
 
 
 class NotificationRead(models.Model):
-    notification = models.ForeignKey(Notification)
+    notification = models.ForeignKey(Notification, on_delete=models.CASCADE)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name=_('User that read this notification'),
-                             db_index=True)
+                             db_index=True, on_delete=models.CASCADE)
     first_read_time = models.DateTimeField(_('first read time'), auto_now_add=True)
     last_read_time = models.DateTimeField(_('last read time'), auto_now=True)
     read_count = models.IntegerField(_('Read count'), default=1, db_index=True)

@@ -45,7 +45,7 @@ from django.db.models import Q
 from django.http import HttpRequest
 from django.utils import translation
 from django.utils.crypto import get_random_string
-from django.utils.deprecation import MiddlewareMixin
+from django.utils.deprecation import MiddlewareMixin, CallableBool
 from django.utils.translation import get_language_from_request
 from djangofloor.utils import RemovedInDjangoFloor110Warning
 
@@ -115,7 +115,7 @@ class DjangoFloorMiddleware(BaseRemoteUserMiddleware):
         # getting passed in the headers, then the correct user is already
         # persisted in the session and we don't need to continue.
         cleaned_username = self.clean_username(username, request)
-        if request.user.is_authenticated() and request.user.get_username() == cleaned_username:
+        if request.user.is_authenticated and request.user.get_username() == cleaned_username:
             request.remote_username = cleaned_username
             return
         # We are seeing this user for the first time in this session, attempt
@@ -187,7 +187,7 @@ class DjangoAuthMiddleware(WindowInfoMiddleware):
         window_info._template_perms = None
         window_info.user_agent = request.META.get('HTTP_USER_AGENT', '')
         window_info.csrf_cookie = request.META.get('CSRF_COOKIE', '')
-        if user and user.is_authenticated():
+        if user and user.is_authenticated:
             window_info.user_pk = user.pk
             window_info.username = user.get_username()
             window_info.is_superuser = user.is_superuser
@@ -229,6 +229,8 @@ class DjangoAuthMiddleware(WindowInfoMiddleware):
         window_info.is_superuser = values.get('is_superuser')
         window_info.is_staff = values.get('is_staff')
         window_info.is_active = values.get('is_active')
+        window_info.is_authenticated = CallableBool(bool(window_info.user_pk))
+        window_info.is_anonymous = CallableBool(not bool(window_info.user_pk))
         window_info._perms = set(values['perms']) if values.get('perms') is not None else None
         window_info._template_perms = None
         window_info.user_agent = values.get('user_agent')
@@ -285,17 +287,7 @@ class DjangoAuthMiddleware(WindowInfoMiddleware):
                              query.select_related('content_type').values_list('content_type__app_label', 'codename'))
             return req._perms
 
-        def is_authenticated(req):
-            """return `True` is the user is authenticated """
-            return req.user_pk is not None
-
-        def is_anonymous(req):
-            """return `True` is the user is *not* authenticated """
-            return req.user_pk is None
-
         window_info_cls.user = property(get_user)
-        window_info_cls.is_authenticated = is_authenticated
-        window_info_cls.is_anonymous = is_anonymous
         window_info_cls.has_perm = has_perm
         window_info_cls.perms = property(get_perms)
 
@@ -373,9 +365,9 @@ class RemoteUserMiddleware(BaseRemoteUserMiddleware):
     def process_request(self, request):
         request.df_remote_authenticated = False
         if self.header and self.header in request.META:
-            if not request.user.is_authenticated():
+            if not request.user.is_authenticated:
                 self.original_process_request(request)
-            request.df_remote_authenticated = request.user.is_authenticated()
+            request.df_remote_authenticated = request.user.is_authenticated
 
     def original_process_request(self, request):
         # AuthenticationMiddleware is required so that request.user exists.
@@ -393,7 +385,7 @@ class RemoteUserMiddleware(BaseRemoteUserMiddleware):
         # If the user is already authenticated and that user is the user we are
         # getting passed in the headers, then the correct user is already
         # persisted in the session and we don't need to continue.
-        if request.user.is_authenticated():
+        if request.user.is_authenticated:
             if request.user.get_username() == self.clean_username(username, request):
                 return
             else:

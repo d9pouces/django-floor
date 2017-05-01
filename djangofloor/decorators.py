@@ -105,7 +105,7 @@ def is_authenticated(connection, window_info, kwargs):
     >>> def my_signal(request, arg1=None):
     >>>     print(request, arg1)
     """
-    return window_info and window_info.is_authenticated()
+    return window_info and window_info.is_authenticated
 
 
 # noinspection PyUnusedLocal
@@ -116,7 +116,7 @@ def is_anonymous(connection, window_info, kwargs):
     >>> def my_signal(request, arg1=None):
     >>>     print(request, arg1)
     """
-    return window_info and window_info.is_anonymous()
+    return window_info and window_info.is_anonymous
 
 
 # noinspection PyUnusedLocal

@@ -15,9 +15,9 @@
                     <small id="notworkingwebsockets">{% trans 'At least one Celery worker is required, as well as an uwgsi server.' %}</small>
                 </li>
                 <li><strong>{% trans 'User: '%}</strong>
-                    {% if not df_user %}<span class="label label-danger">{% trans 'no user' %}</span>
-                    {% elif not df_user.is_authenticated %}<span class="label label-warning">{% trans 'anonymous user' %}</span>
-                    {% else %}<span class="label label-success">{{ df_user }}</span>
+                    {% if not user %}<span class="label label-danger">{% trans 'no user' %}</span>
+                    {% elif not user.is_authenticated %}<span class="label label-warning">{% trans 'anonymous user' %}</span>
+                    {% else %}<span class="label label-success">{{ user }}</span>
                     {% endif %}
                 </li>
                 <li>

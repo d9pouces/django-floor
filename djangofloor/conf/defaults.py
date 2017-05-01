@@ -127,7 +127,7 @@ TEMPLATES = [
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': SettingReference('TEMPLATE_DIRS'),
         'OPTIONS': {'context_processors': SettingReference('TEMPLATE_CONTEXT_PROCESSORS'),
-                    'loaders': SettingReference('TEMPLATE_LOADERS')},
+                    'loaders': [('django.template.loaders.cached.Loader', SettingReference('TEMPLATE_LOADERS'))]},
     },
 ]
 TEMPLATE_DEBUG = False  # SettingReference('DEBUG')

@@ -44,15 +44,18 @@ def context_base(request):
     """
     # noinspection PyTypeChecker
     def df_index_view():
-        warnings.warn('df_index_view template value will be removed', RemovedInDjangoFloor110Warning)
+        warnings.warn('"df_index_view" template value will be removed, use "df_has_index_view" instead.',
+                      RemovedInDjangoFloor110Warning)
         return 'index'
 
     def df_language_code():
-        warnings.warn('df_language_code template value will be removed', RemovedInDjangoFloor110Warning)
+        warnings.warn('"df_language_code" template value will be removed, use "LANGUAGE_CODE" (provided by '
+                      '"django.template.context_processors.i18n") instead.', RemovedInDjangoFloor110Warning)
         return settings.LANGUAGE_CODE
 
     def df_user():
-        warnings.warn('df_language_code template value will be removed', RemovedInDjangoFloor110Warning)
+        warnings.warn('"df_user" template value will be removed, use "user" (provided by '
+                      '"django.contrib.auth.context_processors.auth") instead.', RemovedInDjangoFloor110Warning)
         return getattr(request, 'user', AnonymousUser())
 
     return {

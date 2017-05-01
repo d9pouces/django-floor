@@ -67,7 +67,7 @@ by the client.
     request = WindowInfo.from_request(request)
     topic_strings = {_topic_serializer(request, x) for x in topics if x is not SERVER}
     # noinspection PyUnresolvedReferences,PyTypeChecker
-    if getattr(request, 'user', None) and request.user.is_authenticated():
+    if getattr(request, 'user', None) and request.user.is_authenticated:
         topic_strings.add(_topic_serializer(request, USER))
     topic_strings.add(_topic_serializer(request, WINDOW))
     topic_strings.add(_topic_serializer(request, BROADCAST))

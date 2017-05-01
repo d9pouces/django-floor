@@ -24,6 +24,7 @@ __author__ = 'Matthieu Gallet'
 
 load_celery()
 admin.autodiscover()
+admin_urls = admin.site.urls
 
 if settings.DF_URL_CONF:
     extra_urls = import_string(settings.DF_URL_CONF)
@@ -41,7 +42,7 @@ urlpatterns = [url(prefix + 'jsi18n/$', javascript_catalog, {'packages': ('djang
 if settings.DF_LOGIN_VIEW:
     login_view = get_view_from_string(settings.DF_LOGIN_VIEW)
     urlpatterns += [url(prefix + settings.LOGIN_URL[1:], login_view, name='login')]
-urlpatterns += [url(prefix + 'admin/', include(admin.site.urls))]
+urlpatterns += [url(prefix + 'admin/', include(admin_urls[:2]))]
 if settings.USE_REST_FRAMEWORK:
     urlpatterns += [url(prefix + 'api-auth/', include('rest_framework.urls', namespace='rest_framework'))]
 if settings.DF_INDEX_VIEW:
