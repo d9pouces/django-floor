@@ -21,6 +21,8 @@ _default_engines = {'mysql': 'django.db.backends.mysql',
 def database_engine(settings_dict):
     """Allow to use aliases for database engines, as well as the default dotted name"""
     return _default_engines.get(settings_dict['DATABASE_ENGINE'].lower(), settings_dict['DATABASE_ENGINE'])
+
+
 database_engine.required_settings = ['DATABASE_ENGINE']
 
 
@@ -31,7 +33,26 @@ def allowed_hosts(settings_dict):
         result.add(listened_ip)
     result.add(settings_dict['SERVER_NAME'])
     return list(sorted(result))
+
+
 allowed_hosts.required_settings = ['SERVER_NAME', 'LISTEN_ADDRESS']
+
+
+def cache_setting(settings_dict):
+    if settings_dict['DEBUG']:
+        return {'default': {'BACKEND': 'django.core.cache.backends.dummy.DummyCache'}}
+    elif settings_dict['USE_REDIS_CACHE']:
+        return {'default': {
+            'BACKEND': 'django_redis.cache.RedisCache',
+            'LOCATION': '{CACHE_REDIS_PROTOCOL}://:{CACHE_REDIS_PASSWORD}@{CACHE_REDIS_HOST}:{CACHE_REDIS_PORT}/'
+                        '{CACHE_REDIS_DB}',
+            'OPTIONS': {'CLIENT_CLASS': 'django_redis.client.DefaultClient'}
+        }
+        }
+    return {'default': {'BACKEND': 'django.core.cache.backends.locmem.LocMemCache', 'LOCATION': 'unique-snowflake'}}
+
+
+cache_setting.required_settings = ['USE_REDIS_CACHE', 'DEBUG']
 
 
 def url_parse_server_name(settings_dict):
@@ -42,6 +63,8 @@ def url_parse_server_name(settings_dict):
 
     """
     return urlparse(settings_dict['SERVER_BASE_URL']).hostname
+
+
 url_parse_server_name.required_settings = ['SERVER_BASE_URL']
 
 
@@ -57,6 +80,8 @@ def url_parse_server_port(settings_dict):
 
     """
     return urlparse(settings_dict['SERVER_BASE_URL']).port or (settings_dict['USE_SSL'] and 443) or 80
+
+
 url_parse_server_port.required_settings = ['SERVER_BASE_URL', 'USE_SSL']
 
 
@@ -71,6 +96,8 @@ def url_parse_server_protocol(settings_dict):
 
     """
     return 'https' if settings_dict['USE_SSL'] else 'http'
+
+
 url_parse_server_protocol.required_settings = ['USE_SSL']
 
 
@@ -89,6 +116,8 @@ def url_parse_prefix(settings_dict):
     if not p.endswith('/'):
         p += '/'
     return p
+
+
 url_parse_prefix.required_settings = ['SERVER_BASE_URL']
 
 
@@ -102,11 +131,15 @@ def url_parse_ssl(settings_dict):
 
     """
     return urlparse(settings_dict['SERVER_BASE_URL']).scheme == 'https'
+
+
 url_parse_ssl.required_settings = ['SERVER_BASE_URL']
 
 
 def project_name(settings_dict):
     return settings_dict['DF_MODULE_NAME'].capitalize()
+
+
 project_name.required_settings = ['DF_MODULE_NAME']
 
 
@@ -120,6 +153,8 @@ def authentication_backends(settings_dict):
     if settings_dict['ALLAUTH_PROVIDERS'] and settings_dict['USE_ALL_AUTH']:
         result.append('allauth.account.auth_backends.AuthenticationBackend')
     return result
+
+
 authentication_backends.required_settings = ['ALLAUTH_PROVIDERS', 'DF_REMOTE_USER_HEADER', 'AUTH_LDAP_SERVER_URI',
                                              'USE_ALL_AUTH']
 
@@ -135,6 +170,8 @@ def ldap_user_search(settings_dict):
         from django_auth_ldap.config import LDAPSearch
         return LDAPSearch(settings_dict['AUTH_LDAP_SEARCH_BASE'], ldap.SCOPE_SUBTREE, settings_dict['AUTH_LDAP_FILTER'])
     return None
+
+
 ldap_user_search.required_settings = ['AUTH_LDAP_SEARCH_BASE', 'AUTH_LDAP_SERVER_URI', 'AUTH_LDAP_FILTER']
 
 
@@ -144,9 +181,11 @@ def allauth_installed_apps(settings_dict):
     elif not is_package_present('allauth'):
         print("Package django-allauth must be installed to use OAuth2 authentication.")
         return []
-    return ['allauth', 'allauth.account', 'allauth.socialaccount'] +\
+    return ['allauth', 'allauth.account', 'allauth.socialaccount'] + \
            ['allauth.socialaccount.providers.%s' % k for k in settings_dict['ALLAUTH_PROVIDERS']
             if k in allauth_providers]
+
+
 allauth_installed_apps.required_settings = ['ALLAUTH_PROVIDERS', 'USE_ALL_AUTH']
 allauth_providers = {'amazon', 'angellist', 'asana', 'auth0', 'baidu', 'basecamp', 'bitbucket', 'bitbucket_oauth2',
                      'bitly', 'coinbase', 'daum', 'digitalocean', 'discord', 'douban', 'draugiem', 'dropbox',

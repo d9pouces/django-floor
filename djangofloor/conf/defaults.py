@@ -13,7 +13,7 @@ from django.utils.translation import ugettext_lazy as _
 
 from djangofloor.conf.callables import database_engine, url_parse_server_name, \
     url_parse_server_protocol, url_parse_server_port, url_parse_prefix, url_parse_ssl, project_name, \
-    authentication_backends, ldap_user_search, allauth_installed_apps, allowed_hosts
+    authentication_backends, ldap_user_search, allauth_installed_apps, allowed_hosts, cache_setting
 from djangofloor.conf.config_values import Path, Directory, SettingReference, ExpandIterable, \
     CallableSetting, AutocreateFileContent
 from djangofloor.log import log_configuration
@@ -47,17 +47,7 @@ USE_ALL_AUTH = is_package_present('allauth')
 # ######################################################################################################################
 ADMINS = (('admin', '{ADMIN_EMAIL}'),)
 ALLOWED_HOSTS = CallableSetting(allowed_hosts)
-if USE_REDIS_CACHE:
-    CACHES = {
-        'default': {
-            'BACKEND': 'django_redis.cache.RedisCache',
-            'LOCATION': '{CACHE_REDIS_PROTOCOL}://:{CACHE_REDIS_PASSWORD}@{CACHE_REDIS_HOST}:{CACHE_REDIS_PORT}/'
-                        '{CACHE_REDIS_DB}',
-            'OPTIONS': {'CLIENT_CLASS': 'django_redis.client.DefaultClient'}
-        }
-    }
-else:
-    CACHES = {'default': {'BACKEND': 'django.core.cache.backends.locmem.LocMemCache', 'LOCATION': 'unique-snowflake'}}
+CACHES = CallableSetting(cache_setting)
 CSRF_COOKIE_DOMAIN = '{SERVER_NAME}'
 CSRF_TRUSTED_ORIGINS = ['{SERVER_NAME}', '{SERVER_NAME}:{SERVER_PORT}']
 DATABASES = {'default': {
