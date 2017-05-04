@@ -438,7 +438,7 @@ class SerializedForm(object):
     ...    field = forms.CharField()
     ...
     >>> x = SerializedForm(SimpleForm)
-    >>> form = x([{'field': 'object'}])
+    >>> form = x([{'name': 'field', 'value': 'object'}])
     >>> form.is_valid()
     True
 
