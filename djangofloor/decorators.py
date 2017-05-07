@@ -258,6 +258,10 @@ class SignalConnection(Connection):
         """register the signal into the `REGISTERED_SIGNALS` dict """
         REGISTERED_SIGNALS.setdefault(self.path, []).append(self)
 
+    def call(self, window_info, **kwargs):
+        from djangofloor.tasks import call, SERVER
+        call(window_info, self.path, to=SERVER, kwargs=kwargs)
+
 
 class FunctionConnection(Connection):
     """represent a WS function """
