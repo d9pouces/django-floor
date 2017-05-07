@@ -13,7 +13,7 @@ from django.utils.translation import ugettext_lazy as _
 
 from djangofloor.conf.callables import database_engine, url_parse_server_name, \
     url_parse_server_protocol, url_parse_server_port, url_parse_prefix, url_parse_ssl, project_name, \
-    authentication_backends, ldap_user_search, allauth_installed_apps, allowed_hosts, cache_setting
+    authentication_backends, ldap_user_search, allauth_installed_apps, allowed_hosts, cache_setting, template_setting
 from djangofloor.conf.config_values import Path, Directory, SettingReference, ExpandIterable, \
     CallableSetting, AutocreateFileContent
 from djangofloor.log import log_configuration
@@ -112,14 +112,7 @@ SECURE_HSTS_SECONDS = 0
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')  # X-Forwarded-Proto or None
 SECURE_SSL_REDIRECT = SettingReference('USE_SSL')
 SECURE_FRAME_DENY = SettingReference('USE_SSL')
-TEMPLATES = [
-    {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': SettingReference('TEMPLATE_DIRS'),
-        'OPTIONS': {'context_processors': SettingReference('TEMPLATE_CONTEXT_PROCESSORS'),
-                    'loaders': [('django.template.loaders.cached.Loader', SettingReference('TEMPLATE_LOADERS'))]},
-    },
-]
+TEMPLATES = CallableSetting(template_setting)
 TEMPLATE_DEBUG = False  # SettingReference('DEBUG')
 TEMPLATE_DIRS = ()
 TEMPLATE_CONTEXT_PROCESSORS = ['django.contrib.auth.context_processors.auth',
@@ -132,8 +125,6 @@ TEMPLATE_CONTEXT_PROCESSORS = ['django.contrib.auth.context_processors.auth',
                                'djangofloor.context_processors.context_base',
                                ExpandIterable('DF_TEMPLATE_CONTEXT_PROCESSORS'),
                                ]
-TEMPLATE_LOADERS = ('django.template.loaders.filesystem.Loader',
-                    'django.template.loaders.app_directories.Loader')
 TEST_RUNNER = 'django.test.runner.DiscoverRunner'
 USE_I18N = True
 USE_L10N = True

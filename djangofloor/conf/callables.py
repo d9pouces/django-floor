@@ -39,6 +39,14 @@ allowed_hosts.required_settings = ['SERVER_NAME', 'LISTEN_ADDRESS']
 
 
 def cache_setting(settings_dict):
+    """Automatically compute cache settings:
+      * if debug mode is set, then caching is disabled
+      * if django_redis is available, then Redis is used for caching
+      * else memory is used
+
+    :param settings_dict:
+    :return:
+    """
     if settings_dict['DEBUG']:
         return {'default': {'BACKEND': 'django.core.cache.backends.dummy.DummyCache'}}
     elif settings_dict['USE_REDIS_CACHE']:
@@ -137,7 +145,16 @@ url_parse_ssl.required_settings = ['SERVER_BASE_URL']
 
 
 def project_name(settings_dict):
-    return settings_dict['DF_MODULE_NAME'].capitalize()
+    """Transform the base module name into a nicer project name
+
+    >>> project_name({'DF_MODULE_NAME': 'my_project'})
+    'My Project'
+
+    :param settings_dict:
+    :return:
+    """
+
+    return ' '.join([x.capitalize() for x in settings_dict['DF_MODULE_NAME'].replace('_', ' ').split()])
 
 
 project_name.required_settings = ['DF_MODULE_NAME']
@@ -157,6 +174,27 @@ def authentication_backends(settings_dict):
 
 authentication_backends.required_settings = ['ALLAUTH_PROVIDERS', 'DF_REMOTE_USER_HEADER', 'AUTH_LDAP_SERVER_URI',
                                              'USE_ALL_AUTH']
+
+
+def template_setting(settings_dict):
+    loaders = ['django.template.loaders.filesystem.Loader', 'django.template.loaders.app_directories.Loader']
+    if settings_dict['DEBUG']:
+        backend = {'BACKEND': 'django.template.backends.django.DjangoTemplates', 'NAME': 'default',
+                   'DIRS': settings_dict['TEMPLATE_DIRS'],
+                   'OPTIONS': {'context_processors': settings_dict['TEMPLATE_CONTEXT_PROCESSORS'],
+                               'loaders': loaders, 'debug': True}}
+    else:
+        backend = {'BACKEND': 'django.template.backends.django.DjangoTemplates', 'NAME': 'default',
+                   'DIRS': settings_dict['TEMPLATE_DIRS'],
+                   'OPTIONS': {
+                       'context_processors': settings_dict['TEMPLATE_CONTEXT_PROCESSORS'],
+                       'debug': False,
+                       'loaders': [('django.template.loaders.cached.Loader', loaders)]
+                   }}
+    return [backend]
+
+
+template_setting.required_settings = ['DEBUG', 'TEMPLATE_DIRS', 'TEMPLATE_CONTEXT_PROCESSORS']
 
 
 def ldap_user_search(settings_dict):
