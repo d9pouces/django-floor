@@ -224,7 +224,7 @@ class Connection(object):
                 if k in kwargs:
                     kwargs[k] = v(kwargs[k])
             except ValueError:
-                logger.info('%s("%s"): Invalid value %r for argument "%s".' % (cls, self.path, v, k))
+                logger.info('%s("%s"): Invalid value %r for argument "%s".' % (cls, self.path, kwargs[k], k))
                 return None
         for k in self.required_arguments_names:
             if k not in kwargs:
