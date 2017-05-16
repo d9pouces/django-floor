@@ -235,6 +235,20 @@ Here is the complete JavaScript API provided by DjangoFloor.
     :param string attr_value: attribute value
 
 */
+    $.df.connect('html.after', function (opts) { $(opts.selector).after(opts.content); });
+/*"""
+.. function:: html.after(opts)
+
+    Insert content, specified by the parameter, after each element in the set of matched elements..
+
+    .. code-block:: javascript
+
+        $.df.call('html.after', {selector: "#obj", content: "<span>hello</span>"});
+
+    :param string selector: jQuery selector
+    :param string content: new HTML content
+
+*/
     $.df.connect('html.append', function (opts) { $(opts.selector).append(opts.content); });
 /*"""
 .. function:: html.append(opts)
