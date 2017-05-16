@@ -65,6 +65,11 @@ def before(window_info, selector, html_content, to=WINDOW):
     return scall(window_info, 'html.before', to=to, selector=selector, content=html_content)
 
 
+def after(window_info, selector, html_content, to=WINDOW):
+    """Insert content, specified by the parameter, before after element in the set of matched elements."""
+    return scall(window_info, 'html.after', to=to, selector=selector, content=html_content)
+
+
 def empty(window_info, selector, to=WINDOW):
     """Remove all child nodes of the set of matched elements from the DOM."""
     return scall(window_info, 'html.empty', to=to, selector=selector)
