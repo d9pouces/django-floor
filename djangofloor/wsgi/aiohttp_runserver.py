@@ -154,7 +154,7 @@ def run_server(host, port):
     except KeyboardInterrupt:
         pass
     finally:
-        loop.run_until_complete(handler.finish_connections(1.0))
+        loop.run_until_complete(handler.finish_connections(settings.DF_SERVER_TIMEOUT))
         srv.close()
         loop.run_until_complete(srv.wait_closed())
         loop.run_until_complete(app.cleanup())

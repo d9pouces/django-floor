@@ -209,6 +209,9 @@ def gunicorn():
     logging.config.dictConfig(settings.LOGGING)
     parser = ArgumentParser(usage="%(prog)s subcommand [options] [args]", add_help=False)
     parser.add_argument('-b', '--bind', default=settings.LISTEN_ADDRESS)
+    parser.add_argument('--threads', default=settings.DF_SERVER_THREADS, type=int)
+    parser.add_argument('-w', '--workers', default=settings.DF_SERVER_PROCESSES, type=int)
+    parser.add_argument('-t', '--timeout', default=settings.DF_SERVER_TIMEOUT, type=int)
     parser.add_argument('--reload', default=False, action='store_true')
     if use_gevent:
         parser.add_argument('-k', '--worker-class', default='geventwebsocket.gunicorn.workers.GeventWebSocketWorker')
@@ -221,6 +224,9 @@ def gunicorn():
         os.environ['DF_CONF_SET'] = '1'
         __set_default_option(options, 'bind')
         __set_default_option(options, 'worker_class')
+        __set_default_option(options, 'threads')
+        __set_default_option(options, 'workers')
+        __set_default_option(options, 'timeout')
         if settings.DEBUG and not options.reload:
             sys.argv += ['--reload']
     application = 'djangofloor.wsgi.gunicorn_runserver:application'

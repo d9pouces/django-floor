@@ -66,6 +66,14 @@ BASE_MAPPING = [
                              'Default to "http://listen_address" but should '
                              'be ifferent if you use a reverse proxy like '
                              'Apache or Nginx. Example: http://www.example.org.'),
+    IntegerConfigField('server.timeout', 'DF_SERVER_TIMEOUT', help_str='Workers silent for more than this many '
+                                                                       'seconds are killed and restarted.'),
+    IntegerConfigField('server.threads', 'DF_SERVER_THREADS',
+                       help_str='The number of worker threads for handling requests.'),
+    IntegerConfigField('server.processes', 'DF_SERVER_PROCESSES',
+                       help_str='The number of worker processes for handling requests.'),
+
+
     CharConfigField('global.time_zone', 'TIME_ZONE', help_str='default to Europe/Paris'),
     CharConfigField('global.log_remote_url', 'LOG_REMOTE_URL',
                     help_str='Send logs to a syslog or systemd log daemon. \n'
@@ -106,7 +114,8 @@ AUTH_MAPPING = [
     CharConfigField('auth.remote_user_header', 'DF_REMOTE_USER_HEADER',
                     help_str='Set it if you want to use HTTP authentication, a common value is "HTTP-REMOTE-USER".'),
     ListConfigField('auth.remote_user_groups', 'DF_DEFAULT_GROUPS',
-                    help_str='Comma-separated list of groups of new users, authenticated by a HTTP header.'),
+                    help_str='Comma-separated list of groups, for new users that automatically created '
+                             'when authenticated by a HTTP header.'),
     BooleanConfigField('auth.allow_basic_auth', 'USE_HTTP_BASIC_AUTH',
                        help_str='Set to "true" if you want to allow HTTP basic auth, using the Django database.'),
     CharConfigField('auth.ldap_server_url', 'AUTH_LDAP_SERVER_URI',

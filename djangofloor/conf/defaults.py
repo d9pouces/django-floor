@@ -199,6 +199,9 @@ WINDOW_INFO_MIDDLEWARES = ['djangofloor.middleware.WindowKeyMiddleware',
                            'djangofloor.middleware.DjangoAuthMiddleware',
                            'djangofloor.middleware.Djangoi18nMiddleware',
                            'djangofloor.middleware.BrowserMiddleware', ]
+DF_SERVER_TIMEOUT = 5
+DF_SERVER_THREADS = 2
+DF_SERVER_PROCESSES = 2
 
 WEBSOCKET_URL = '/ws/'
 WEBSOCKET_REDIS_CONNECTION = {'host': '{WEBSOCKET_REDIS_HOST}', 'port': SettingReference('WEBSOCKET_REDIS_PORT'),
@@ -232,14 +235,6 @@ PIPELINE_CSS = {
                              'css/djangofloor-bootstrap3.css', ExpandIterable('DF_CSS')],
         'output_filename': 'css/bootstrap3-all.css', 'extra_context': {'media': 'all'},
     },
-    # 'metro-ui': {
-    #     'source_filenames': ['vendor/metro-ui/build/css/metro.min.css',
-    #                          'vendor/metro-ui/build/css/metro-icons.min.css',
-    #                          'vendor/metro-ui/build/css/metro-responsive.min.css',
-    #                          'vendor/font-awesome/css/font-awesome.min.css',
-    #                          'css/djangofloor-metro-ui.css', ExpandIterable('DF_CSS')],
-    #     'output_filename': 'css/metro-ui-all.css', 'extra_context': {'media': 'all'},
-    # },
     'ie9': {
         'source_filenames': [],
         'output_filename': 'css/ie9.css', 'extra_context': {'media': 'all'},
@@ -267,11 +262,6 @@ PIPELINE_JS = {
         ],
         'output_filename': 'js/bootstrap3.js',
     },
-    # 'metro-ui': {
-    #     'source_filenames': ['vendor/jquery/dist/jquery.min.js', 'vendor/metro-ui/build/js/metro.min.js',
-    #                          'js/djangofloor-base.js', 'js/djangofloor-metro-ui.js', ExpandIterable('DF_JS')],
-    #     'output_filename': 'js/metro-ui.js',
-    # },
     'ie9': {
         'source_filenames': ['vendor/html5shiv/dist/html5shiv.js', 'vendor/respond.js/dest/respond.src.js', ],
         'output_filename': 'js/ie9.js',
@@ -347,7 +337,7 @@ DF_MIDDLEWARE = []
 DF_REMOTE_USER_HEADER = None  # HTTP-REMOTE-USER
 DF_DEFAULT_GROUPS = [_('Users')]
 DF_TEMPLATE_CONTEXT_PROCESSORS = []
-DF_CHECKED_REQUIREMENTS = ['django>=1.10', 'celery', 'django-bootstrap3', 'pip', 'psutil']
+DF_CHECKED_REQUIREMENTS = ['django>=1.10', 'celery', 'django-bootstrap3', 'redis', 'pip']
 
 NPM_FILE_PATTERNS = {
     'bootstrap-notify': ['*.js'],
@@ -425,42 +415,3 @@ CELERY_HOST = 'localhost'  # aliased in settings.ini as "[celery]host"
 CELERY_PORT = 6379  # aliased in settings.ini as "[celery]port"
 CELERY_DB = 13  # aliased in settings.ini as "[celery]db"
 CELERY_PASSWORD = ''  # aliased in settings.ini as "[celery]password"
-
-# ######################################################################################################################
-#
-# deprecated settings
-#
-# ######################################################################################################################
-
-# LISTEN_ADDRESS = SettingReference('LISTEN_ADDRESS')
-# BROKER_DB = SettingReference('CELERY_DB')
-# DF_EXTRA_APPS = DeprecatedSetting('FLOOR_EXTRA_APPS', msg='FLOOR_EXTRA_APPS should be merged to DF_INSTALLED_APPS.')
-# DF_OTHER_ALLAUTH = DeprecatedSetting('OTHER_ALLAUTH', msg='OTHER_ALLAUTH should be merged to DF_INSTALLED_APPS.')
-# FLOOR_AUTHENTICATION_HEADER = SettingReference('DF_REMOTE_USER_HEADER')
-# FLOOR_BACKUP_SINGLE_TRANSACTION = False
-# FLOOR_DEFAULT_GROUP_NAME = _('Users')
-# FLOOR_FAKE_AUTHENTICATION_USERNAME = SettingReference('DF_FAKE_AUTHENTICATION_USERNAME')
-# FLOOR_INDEX = None
-# FLOOR_PROJECT_NAME = SettingReference('DF_PROJECT_NAME')
-# FLOOR_PROJECT_VERSION = CallableSetting(guess_version)
-# FLOOR_SIGNAL_DECODER = SettingReference('WEBSOCKET_SIGNAL_DECODER')
-# FLOOR_SIGNAL_ENCODER = SettingReference('WEBSOCKET_SIGNAL_ENCODER')
-# FLOOR_URL_CONF = SettingReference('DF_URL_CONF')
-# FLOOR_USE_WS4REDIS = False
-# FLOOR_WS_FACILITY = 'djangofloor'
-# LOG_PATH = Path('{LOCAL_PATH}/log')
-# LOGOUT_URL = '/df/logout/'
-# MAX_REQUESTS = 10000
-# PROTOCOL = SettingReference('SERVER_PROTOCOL')
-# REDIS_HOST = SettingReference('CELERY_HOST')
-# REDIS_PORT = SettingReference('CELERY_PORT')
-# REVERSE_PROXY_IPS = ['127.0.0.1', ]
-# REVERSE_PROXY_PORT = None  #
-# REVERSE_PROXY_SSL_KEY_FILE = None
-# REVERSE_PROXY_SSL_CRT_FILE = None
-# REVERSE_PROXY_TIMEOUT = 300
-# THREADS = 20
-# USE_SCSS = False
-# WORKERS = 1
-# WEBSOCKET_REDIS_EMULATION_INTERVAL = 0
-# WEBSOCKET_REDIS_SUBSCRIBER = 'djangofloor.df_ws4redis.Subscriber'
