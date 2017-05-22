@@ -69,9 +69,9 @@ BASE_MAPPING = [
     IntegerConfigField('server.timeout', 'DF_SERVER_TIMEOUT', help_str='Workers silent for more than this many '
                                                                        'seconds are killed and restarted.'),
     IntegerConfigField('server.threads', 'DF_SERVER_THREADS',
-                       help_str='The number of worker threads for handling requests.'),
+                       help_str='The number of Gunicorn threads for handling requests.'),
     IntegerConfigField('server.processes', 'DF_SERVER_PROCESSES',
-                       help_str='The number of worker processes for handling requests.'),
+                       help_str='The number of Gunicorn processes for handling requests.'),
 
 
     CharConfigField('global.time_zone', 'TIME_ZONE', help_str='default to Europe/Paris'),
