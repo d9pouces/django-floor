@@ -27,7 +27,7 @@ install_requirements = ['django>=1.10', 'celery', 'django-bootstrap3', 'redis', 
 if python_version < (3, 3):
     install_requirements.append('funcsigs')
 if python_version >= (3, 4):
-    install_requirements += ['aiohttp-wsgi', 'aiohttp<2.0', 'asyncio_redis']
+    install_requirements += ['aiohttp-wsgi', 'aiohttp>=2,<3', 'asyncio_redis']
 elif python_version < (2, 8):
     install_requirements += ['gunicorn']
 
@@ -65,6 +65,5 @@ setup(
     classifiers=['Development Status :: 4 - Beta', 'Operating System :: MacOS :: MacOS X',
                  'Operating System :: POSIX :: BSD', 'Operating System :: POSIX :: Linux', 'Operating System :: Unix',
                  'License :: OSI Approved :: CEA CNRS Inria Logiciel Libre License, version 2.1 (CeCILL-2.1)',
-                 'Programming Language :: Python :: 3.4', 'Programming Language :: Python :: 3.5',
-                 'Programming Language :: Python :: 3.6'],
+                 'Programming Language :: Python :: 3.5', 'Programming Language :: Python :: 3.6'],
 )

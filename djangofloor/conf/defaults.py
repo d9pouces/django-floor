@@ -199,7 +199,7 @@ WINDOW_INFO_MIDDLEWARES = ['djangofloor.middleware.WindowKeyMiddleware',
                            'djangofloor.middleware.DjangoAuthMiddleware',
                            'djangofloor.middleware.Djangoi18nMiddleware',
                            'djangofloor.middleware.BrowserMiddleware', ]
-DF_SERVER_TIMEOUT = 5
+DF_SERVER_TIMEOUT = 30
 DF_SERVER_THREADS = 2
 DF_SERVER_PROCESSES = 2
 
