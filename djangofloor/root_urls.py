@@ -36,8 +36,12 @@ urlpatterns = [url(prefix + 'jsi18n/$', javascript_catalog, {'packages': ('djang
                url(prefix + '%s(?P<path>.*)$' % settings.STATIC_URL[1:], serve,
                    {'document_root': settings.STATIC_ROOT}),
                url(prefix + 'df/', include(urls, namespace='df')),
-               url(prefix + 'robots\.txt$', robots),
-               url(prefix + 'favicon\.ico$', favicon, name='favicon'),
+               url(prefix + r'robots\.txt$', robots),
+               url(prefix + r'apple-touch-icon\.png$', serve,
+                   {'document_root': settings.STATIC_ROOT, 'path': 'favicon/apple-touch-icon.png'}),
+               url(prefix + r'apple-touch-icon-precomposed\.png$', serve,
+                   {'document_root': settings.STATIC_ROOT, 'path': 'favicon/apple-touch-icon-precomposed.png'}),
+               url(prefix + r'favicon\.ico$', favicon, name='favicon'),
                ] + list(extra_urls)
 if settings.DF_LOGIN_VIEW:
     login_view = get_view_from_string(settings.DF_LOGIN_VIEW)
