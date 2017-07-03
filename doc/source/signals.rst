@@ -78,7 +78,12 @@ In the following example, both functions will be executed. The first one will al
     def slow_signal(window_info, kwarg1="demo", kwarg2: int=32):
        [perform a (clever) thing]
 
-    @signal(is_allowed_to=is_authenticated, path='demo.signal.name', queue=lambda connection, window_info, kwargs: getattr(window_info, 'username', 'celery')
+    def get_queue_identifier(connection, window_info, kwargs):
+       """return the name of the Celery queue (in this case, each user has its own Celery queue)
+       """
+       return getattr(window_info, 'username', 'celery')
+
+    @signal(is_allowed_to=is_authenticated, path='demo.signal.name', queue=get_queue_identifier)
     def slow_signal(window_info, kwarg1='demo', kwarg3: bool=True, **kwargs):
        [perform a (clever) thing]
 
@@ -93,13 +98,15 @@ Calling signals is quite easy: just provide the `window_info` if the call is des
 
 .. code-block:: python
 
-  from djangofloor.tasks import call, SERVER
+  from djangofloor.tasks import call, SERVER, WINDOW, USER
   from django.contrib.auth.models import User
 
   u = User.objects.get(id=1)
   call(window_info, 'demo.signal.name', to=[SERVER, 42, 'test', u], kwargs={'kwarg1': "value", "kwarg2": 10}, countdown=None, expires=None, eta=None)
 
-The destination can be `SERVER`, `WINDOW`, `USER` (all JS clients belonging to the connected user), `BROADCAST` (any JS client), or a list of any value.
+
+
+The destination can be one of the constants `SERVER` (), `WINDOW`, `USER` (all JS browser windows belonging to the connected user), `BROADCAST` (any JS client), or a list of any value.
 If `SERVER` is present, then the code will be executed on the server side.
 All JS clients featuring the corresponding values will execute the signal (if the corresponding JS signal is defined!).
 

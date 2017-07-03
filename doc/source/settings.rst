@@ -42,9 +42,21 @@ The complete list of used config files can be displayed using the following comm
 
 .. code-block:: bash
 
+  yourproject-django config python | less (or python yourproject-django.py config python -v 2)
+  # --------------------------------------------------------------------------------
+  # Djangofloor version 1.0.4
+  # Configuration providers:
+  # --------------------------------------------------------------------------------
+  ...
+  DF_TEMPLATE_CONTEXT_PROCESSORS = ['updoc.context_processors.most_checked']
+
+You can use the `-v 2` flag for a more verbose output:
+
+.. code-block:: bash
+
   yourproject-django config python -v 2 | less (or python yourproject-django.py config python -v 2)
   # --------------------------------------------------------------------------------
-  # Djangofloor version 1.0.0
+  # Djangofloor version 1.0.4
   # Configuration providers:
   #  - Python module "djangofloor.conf.defaults"
   #  - Python module "yourproject.defaults"

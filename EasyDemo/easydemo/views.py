@@ -76,10 +76,10 @@ def chat(request):
         if form.is_valid():
             name = form.cleaned_data['name']
             form = None
-            set_websocket_topics(request, WINDOW, 'chat-%s' % name)
+            set_websocket_topics(request, 'chat-%s' % name)
     else:
         form = ChatLoginForm()
-        set_websocket_topics(request, WINDOW)
+        set_websocket_topics(request)
 
     template_values = {'form': form, 'name': name}
     return TemplateResponse(request, 'easydemo/chat.html', template_values)
