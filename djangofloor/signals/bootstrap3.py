@@ -33,7 +33,7 @@ def notify(window_info, content, title=None, timeout=5000, style=NOTIFICATION, l
     :param level: one of `djangofloor.signals.bootstrap3.{INFO,DEFAULT,SUCCESS,DANGER,WARNING}`
     :param to: list of signal clients
     """
-    return scall(window_info, 'df.notify', to=to, content=text_type and text_type(content) or None,
+    return scall(window_info, 'df.notify', to=to, content=content and text_type(content) or None,
                  title=title and text_type(title) or None, timeout=timeout, style=style, level=level)
 
 
