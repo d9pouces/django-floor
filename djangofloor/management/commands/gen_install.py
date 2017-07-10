@@ -18,13 +18,7 @@ from djangofloor import defaults_install
 from djangofloor.conf.providers import IniConfigProvider
 from djangofloor.management.base import TemplatedBaseCommand
 from djangofloor.scripts import get_merger_from_env
-
-try:
-    # noinspection PyCompatibility
-    from configparser import ConfigParser
-except ImportError:
-    # noinspection PyUnresolvedReferences,PyCompatibility
-    from ConfigParser import ConfigParser
+from configparser import ConfigParser
 
 __author__ = 'Matthieu Gallet'
 
