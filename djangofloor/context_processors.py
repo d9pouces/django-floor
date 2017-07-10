@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """DjangoFloor's specific context processors
 =========================================
 

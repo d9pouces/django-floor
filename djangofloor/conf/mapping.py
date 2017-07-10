@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Mapping between .ini config files and Django settings
 =====================================================
 

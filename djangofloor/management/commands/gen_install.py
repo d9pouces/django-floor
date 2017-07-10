@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Command for generating default configuration files for Apache, Nginx, Supervisor or systemd.
 Currently used for creating Debian packages.
 

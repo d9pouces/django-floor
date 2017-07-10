@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Templatetags for media files, websockets, notifications
 =======================================================
 

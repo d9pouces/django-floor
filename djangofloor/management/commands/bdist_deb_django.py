@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Build a .deb package with binaries and default config
 =====================================================
 

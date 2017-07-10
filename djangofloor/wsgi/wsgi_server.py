@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Structure of the redis database, with `prefix = settings.WEBSOCKET_REDIS_PREFIX`:
 

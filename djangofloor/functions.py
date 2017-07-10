@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Module with all default DjangoFloor WS functions
 ================================================
 

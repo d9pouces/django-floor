@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Convert a websocket topic to a string
 =====================================
 

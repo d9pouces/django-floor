@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Decorators to declare signals and remote functions
 ==================================================
 

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """.. deprecated:: 1.0"""
 from __future__ import unicode_literals
 

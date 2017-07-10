@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Generate scripts (for creating packages) and documentation source.
 
 One of the goal of this project is to standardize deployment methods. Documentation should also be standardized.

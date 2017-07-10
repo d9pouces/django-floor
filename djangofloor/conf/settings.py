@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Classes and functions used for the DjangoFloor settings system
 ==============================================================
 

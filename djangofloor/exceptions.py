@@ -1,4 +1,3 @@
-# coding=utf-8
 """Common DjangoFloor exceptions
 =============================
 .. deprecated:: 1.0

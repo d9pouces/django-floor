@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Default values for all Django settings
 ======================================
 

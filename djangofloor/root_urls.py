@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Root URLs provided by DjangoFloor
 =================================
 

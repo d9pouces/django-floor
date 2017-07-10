@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Django models specific to DjangoFloor
 =====================================
 

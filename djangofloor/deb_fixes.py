@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """patches for creating Debian Packages with `multideb` and `stdeb`
 """
 from __future__ import unicode_literals

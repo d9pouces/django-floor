@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Log utilities to improve Django logging
 =======================================
 

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """WindowInfo object and associated functions
 ==========================================
 

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Admin models for created notifications
 ======================================
 

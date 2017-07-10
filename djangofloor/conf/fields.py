@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Convert values from config files to Python values
 =================================================
 

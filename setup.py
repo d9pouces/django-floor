@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Setup file for the Djangofloor project.
 """
 

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Dump the content of the databases to stdout or to a file.
 

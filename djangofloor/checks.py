@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Define checks integrated to the Django check framework
 =====================================================
 

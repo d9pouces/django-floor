@@ -1,4 +1,3 @@
-# coding=utf-8
 """ "Main" functions for Django, Celery, Gunicorn and uWSGI
 ========================================================
 

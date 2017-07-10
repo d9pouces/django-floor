@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 from djangofloor import checks
 __author__ = 'Matthieu Gallet'

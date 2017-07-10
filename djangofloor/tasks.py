@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Define Celery tasks and functions for calling signals
 =====================================================
 
