@@ -1,4 +1,16 @@
-from __future__ import unicode_literals, print_function, absolute_import
+# generate Makefile for:
+#   installing python deps for compilation
+# packaging steps
+#   * create virtualenv or compile Python?
+#   * installing the project inside this environment
+#   * packaging the whole directory
+#   * create links to external files:
+#       * config /user/local/bin/myproject-* -> /opt/myproject/bin/myproject-*
+#       * config /etc/myproject -> /opt/myproject/etc/myproject
+#   * config file /opt/myproject/etc/apache2.4
+#   * config file /opt/myproject/etc/systemd
+#   * config file /opt/myproject/etc/nginx
+#   * config file /opt/myproject/etc/supervisor
 
 import codecs
 import hashlib
@@ -6,14 +18,13 @@ import os
 import shlex
 import shutil
 import subprocess
-import tarfile
-import urllib.request
 from argparse import ArgumentParser
 from configparser import ConfigParser
 
 import pkg_resources
 from django.conf import settings
 from django.template.loader import render_to_string
+from django.utils.functional import cached_property
 from django.utils.module_loading import import_string
 
 from djangofloor.management.base import TemplatedBaseCommand
@@ -171,90 +182,245 @@ class Command(TemplatedBaseCommand):
 
     def __init__(self, stdout=None, stderr=None, no_color=False):
         super(Command, self).__init__(stdout=stdout, stderr=stderr, no_color=no_color)
-        self.packaging_config = None
         self.build_dir = None
         self.dist_dir = None
-        self.use_virtualenv = None
-        self.controller = None
-        self.proxy = None
-        self.python = None
-        self.packages = None
-        self.verbose_mode = False
-        self.force_mode = False
-        self.default_config_locations = []
-        self.default_setting_merger = None
-        self.default_template_context = {}
-        self.processes = {}
         self.hooks = {'pre_install_project': None, 'post_install_project': None,
                       'pre_install_config': None, 'post_install_config': None,
                       'pre_install_python': None, 'post_install_python': None,
-                      'pre_build_package': None, 'post_build_package': None,
-                      }
+                      'pre_build_package': None, 'post_build_package': None}
+        self.force_mode = False
+        self.config_filename = None
+        self.default_setting_merger = None
+        self.default_template_context = {}
+        self.verbose_mode = False
+        self.source_dir = '.'
+        self.vagrant_distrib = None
+
+        # self.controller = None
+        # self.proxy = None
+        # self.packages = None
+        # self.default_config_locations = []
+        # self.processes = {}
 
     def add_arguments(self, parser):
-        assert isinstance(parser, ArgumentParser)
         super(Command, self).add_arguments(parser)
-        parser.add_argument('-p', '--package-config', help='Config file for packaging')
-        parser.add_argument('--clean', help='Remove temporary dirs',
-                            action='store_true', default=False)
+        assert isinstance(parser, ArgumentParser)
         parser.add_argument('--build-dir', default='./build')
         parser.add_argument('--dist-dir', default='./dist')
-        parser.add_argument('--package', default=[], action='append',
-                            choices=['deb', 'rpm', 'tar'])
-        parser.add_argument('--include', default=[], action='append',
-                            help='Where to search templates and static files.\n'
-                                 ' If not used, use ["djangofloor:djangofloor/dev"].\n'
-                                 'Syntax: "dotted.module.path:root/folder/from/templates". '
-                                 '\nCan be used multiple times.')
+        parser.add_argument('-C', '--config', help='Config file for FPM packaging and default config file',
+                            default=None)
+        parser.add_argument('--source-dir', default='.', help='Path of your project source.'
+                                                              '"." by default, expecting that you run this command '
+                                                              'from the source dir.')
+        parser.add_argument('--clean', help='Remove temporary dirs',
+                            action='store_true', default=False)
+        parser.add_argument('--distrib', default='ubuntu/trusty64')
+        # parser.add_argument('--add-pyton-dep', default=False, action='store_true',
+        #                     help='Use the native Python package')
+        # parser.add_argument('--package', default=[], action='append',
+        #                     choices=['deb', 'rpm', 'tar'])
+        # parser.add_argument('--include', default=[], action='append',
+        #                     help='Where to search templates and static files.\n'
+        #                          ' If not used, use ["djangofloor:djangofloor/dev"].\n'
+        #                          'Syntax: "dotted.module.path:root/folder/from/templates". '
+        #                          '\nCan be used multiple times.')
         parser.add_argument('--extra-context', nargs='*', help='Extra variable for the template system '
                                                                '(--extra-context=NAME:VALUE)', default=[])
-
-    def download_source(self, force=False):
-        """ download the Python source if required
+        parser.description = """Create a self-contained package (deb, tar or rpm) for the project.
+        
+        The package is created in a Vagrant box. 
         """
-        self.stdout.write(self.style.SUCCESS('downloading Python source…'))
-        url = self.python_source_url
-        dst = self.python_source_filename
-        ensure_dir(dst, parent=True)
-        if os.path.isfile(dst) and not force and not self.use_virtualenv:
-            return
-        with urllib.request.urlopen(url) as f_in:
-            with open(dst, 'wb') as f_out:
-                for data in iter(lambda: f_in.read(8192), b''):
-                    f_out.write(data)
+
+    def load_options(self, options):
+        self.build_dir = os.path.abspath(options['build_dir'])
+        self.dist_dir = os.path.abspath(options['dist_dir'])
+        self.source_dir = options['source_dir']  # project source
+        self.verbose_mode = options['verbosity'] > 1
+        self.force_mode = options['clean']
+        self.vagrant_distrib = options['distrib']
+
+        parser = ConfigParser()
+        self.config_filename = options['config']
+        if self.config_filename:
+            parser.read([self.config_filename])
+        for hook_name in list(self.hooks.keys()):
+            if parser.has_option('global', hook_name):
+                self.hooks[hook_name] = parser.get('global', hook_name)
+        self.default_setting_merger = self.get_merger([options['config']] if options['config'] else [])
+        self.default_template_context = self.get_template_context(self.default_setting_merger, options['extra_context'])
+        # self.controller = parser.get('global', 'controller', fallback='systemd')
+        # self.proxy = parser.get('global', 'reverse_proxy', fallback='apache2.4')
+        # if parser.has_section('processes'):
+        #     for option in parser.options('processes'):
+        #         self.processes[option] = Process(option, parser.get('processes', option))
+        #
+        # self.packages = options['package']
+        # for value in options['include']:
+        #     module_name, sep, folder_name = value.partition(':')
+        #     if sep != ':':
+        #         self.stderr.write('Invalid "include" value: %s' % value)
+        #         continue
+        #     self.default_config_locations.append((module_name, folder_name))
+        # if not self.default_config_locations:
+        #     self.default_config_locations = self.default_searched_locations
+
+    def handle(self, *args, **options):
+        self.load_options(options)
+        self.prepare_vagrant_box(force=self.force_mode)
+        try:
+            self.install_python(force=self.force_mode)
+            self.install_project()
+            self.install_config()
+        finally:
+            self.destroy_vagrant_box(force=self.force_mode)
+        # for package in self.packages:
+        #     self.build_package(package)
+
+    @cached_property
+    def host_python_path(self):
+        return os.path.join(self.host_install_dir, 'bin', 'python3')
+
+    @cached_property
+    def host_install_dir(self):
+        return ensure_dir(os.path.join(self.build_dir, 'opt', settings.DF_MODULE_NAME), parent=False)
+
+    @cached_property
+    def host_config_dir(self):
+        return ensure_dir(os.path.join(self.build_dir, 'etc', settings.DF_MODULE_NAME), parent=False)
+
+    @cached_property
+    def host_data_dir(self):
+        return ensure_dir(os.path.join(self.build_dir, 'var', settings.DF_MODULE_NAME), parent=False)
+
+    @cached_property
+    def host_log_dir(self):
+        return ensure_dir(os.path.join(self.build_dir, 'var/log', settings.DF_MODULE_NAME), parent=False)
+
+    @cached_property
+    def host_tmp_dir(self):
+        return ensure_dir(os.path.join(self.build_dir, 'tmp', settings.DF_MODULE_NAME), parent=False)
+
+    @cached_property
+    def vagrant_box_dir(self):
+        return ensure_dir(os.path.join(self.build_dir, 'vagrant'), parent=False)
+
+    @cached_property
+    def vagrant_config_dir(self):
+        return os.path.join('/etc', settings.DF_MODULE_NAME)
+
+    @cached_property
+    def vagrant_data_dir(self):
+        return os.path.join('/var', settings.DF_MODULE_NAME)
+
+    @cached_property
+    def vagrant_install_dir(self):
+        return os.path.join('/opt', settings.DF_MODULE_NAME)
+
+    @cached_property
+    def vagrant_log_dir(self):
+        return os.path.join('/var/log', settings.DF_MODULE_NAME)
+
+    @cached_property
+    def vagrant_tmp_dir(self):
+        return os.path.join('/tmp', settings.DF_MODULE_NAME)
+
+    @cached_property
+    def bind_dirs(self):
+        return [(self.host_tmp_dir, self.vagrant_tmp_dir), (self.host_config_dir, self.vagrant_config_dir),
+                (self.host_data_dir, self.vagrant_data_dir), (self.host_log_dir, self.vagrant_log_dir)]
+
+    @cached_property
+    def python_package_dir(self):
+        return ensure_dir(os.path.join(self.build_dir, 'pkg'), parent=False)
+
+    def execute_hook(self, hook_name):
+        if not self.hooks[hook_name]:
+            return False
+        self.stdout.write(self.style.NOTICE('executing %s hook [%s]…' % (hook_name, self.hooks[hook_name])))
+        func = import_string(self.hooks[hook_name])
+        func(self)
+        return True
+
+    def prepare_vagrant_box(self, force=False):
+        vagrant_content = render_to_string('djangofloor/vagrant/Vagrantfile', self.default_template_context)
+        with open(os.path.join(self.vagrant_box_dir, 'Vagrantfile'), 'w') as fd:
+            fd.write(vagrant_content)
+        subprocess.check_call(['vagrant', 'up'], cwd=self.vagrant_box_dir)
+
+    def destroy_vagrant_box(self, force=False):
+        pass
+        # subprocess.check_call(['vagrant', 'destroy', '--force'], cwd=self.vagrant_box_dir)
+
+    def get_template_context(self, merger, extra_context):
+        context = super(Command, self).get_template_context(merger, extra_context)
+        context['bind_dirs'] = self.bind_dirs
+        context['build_dir'] = self.build_dir
+        context['vagrant_distrib'] = self.vagrant_distrib
+        context['install_dir'] = (self.host_install_dir, self.vagrant_install_dir)
+        context['tmp_dir'] = (self.host_tmp_dir, self.vagrant_tmp_dir)
+        context['config_dir'] = (self.host_config_dir, self.vagrant_config_dir)
+        context['data_dir'] = (self.host_data_dir, self.vagrant_data_dir)
+        context['log_dir'] = (self.host_log_dir, self.vagrant_log_dir)
+        # process_categories = {'django': None, 'gunicorn': None, 'uwsgi': None, 'aiohttp': None, 'celery': None}
+        #
+        # # analyze scripts to detect which processes to launch on startup
+        # for script_name, entry_point in pkg_resources.get_entry_map('moneta').get('console_scripts').items():
+        #     if entry_point.module_name != 'djangofloor.scripts' or not entry_point.attrs:
+        #         continue
+        #     daemon_type = entry_point.attrs[0]
+        #     if process_categories.get(daemon_type):
+        #         continue
+        #     process_categories[daemon_type] = os.path.join(self.python_prefix, 'bin', entry_point.name)
+        # processes = {key: Process(key, value) for (key, value) in process_categories.items() if value}
+        # context['processes'] = self.processes or processes
+        return context
 
     def install_python(self, force=False):
         self.stdout.write(self.style.SUCCESS('installing Python…'))
         self.execute_hook('pre_install_python')
-        if os.path.isfile(self.python_path) and not force:
+        if os.path.isfile(self.host_python_path) and not force:
             return
-        if self.use_virtualenv:
-            pass
-        src_dir = os.path.dirname(self.python_source_dir)
-        ensure_dir(src_dir, parent=True)
-        if os.path.isdir(src_dir):
-            shutil.rmtree(src_dir)
-        elif os.path.isfile(src_dir):
-            os.remove(src_dir)
-        self.stdout.write(self.style.NOTICE('uncompressing source…'))
-        with tarfile.open(name=self.python_source_filename, mode='r:*') as fd:
-            fd.extractall(path=src_dir)
-        configure_filename = os.path.join(self.python_source_dir, 'configure')
-        prefix = self.python_prefix
-        self.stdout.write(self.style.NOTICE('running configure…'))
-        subprocess.check_call([configure_filename, '--prefix=%s' % prefix, '--enable-shared'],
-                              cwd=self.python_source_dir)
-        self.stdout.write(self.style.NOTICE('running make…'))
-        subprocess.check_call(['make'], cwd=self.python_source_dir)
-        self.stdout.write(self.style.NOTICE('running make install…'))
-        subprocess.check_call(['make', 'install'], cwd=self.python_source_dir)
+
+        script_content = render_to_string('djangofloor/vagrant/install_python.sh', self.default_template_context)
+        script_name = 'install_python.sh'
+        with open(os.path.join(self.host_tmp_dir, script_name), 'w') as fd:
+            fd.write(script_content)
+        cmd = ['vagrant', 'ssh', '-c', 'sudo bash %s' % os.path.join(self.vagrant_tmp_dir, script_name)]
+        subprocess.check_call(cmd, cwd=self.vagrant_box_dir)
+        # shutil.rmtree(src_dir)
         self.execute_hook('post_install_python')
 
     def install_project(self):
-        self.stdout.write(self.style.SUCCESS('installing project…'))
+        self.stdout.write(self.style.SUCCESS('creating dist file…'))
         self.execute_hook('pre_install_project')
-        subprocess.check_call([self.python_path, 'setup.py', 'install'], env=self.install_environment,
-                              stdout=subprocess.PIPE)
+        dist_dir = os.path.join(self.source_dir, 'dist')
+
+        def get_dist_files():
+            if not os.path.isdir(dist_dir):
+                return {}
+            return {x: os.stat(os.path.join(dist_dir, x)).st_mtime for x in os.listdir(dist_dir)}
+
+        current_files = get_dist_files()
+        subprocess.check_call(['python3', 'setup.py', 'sdist'], cwd=self.source_dir)
+        new_files = get_dist_files()
+        dist_path, dist_filename = None, None
+        for dist_filename, mtime in new_files.items():
+            if mtime > current_files.get(dist_filename, 0.0):
+                dist_path = os.path.join(dist_dir, dist_filename)
+        if not dist_path:
+            raise ValueError('unable to create source dist file')
+        shutil.copy2(dist_path, os.path.join(self.host_tmp_dir, dist_filename))
+
+        self.stdout.write(self.style.SUCCESS('installing source file…'))
+        context = {'dist_filename': dist_filename}
+        context.update(self.default_template_context)
+        script_content = render_to_string('djangofloor/vagrant/install_project.sh', context)
+        script_name = 'install_source.sh'
+        with open(os.path.join(self.host_tmp_dir, script_name), 'w') as fd:
+            fd.write(script_content)
+        cmd = ['vagrant', 'ssh', '-c', 'sudo bash %s' % os.path.join(self.vagrant_tmp_dir, script_name)]
+        subprocess.check_call(cmd, cwd=self.vagrant_box_dir)
+
         self.execute_hook('post_install_project')
 
     def install_config(self):
@@ -267,123 +433,15 @@ class Command(TemplatedBaseCommand):
             writer.write(self.python_package_dir, template_context, dry_mode=False, verbose_mode=self.verbose_mode)
         self.execute_hook('post_install_config')
 
-    def load_options(self, options):
-        parser = ConfigParser()
-        self.packaging_config = options['package_config']
-        if self.packaging_config:
-            parser.read([self.packaging_config])
-        self.use_virtualenv = parser.getboolean('global', 'use_virtualenv', fallback=False)
-        self.controller = parser.get('global', 'controller', fallback='systemd')
-        self.proxy = parser.get('global', 'reverse_proxy', fallback='apache2.4')
-        self.python = parser.get('global', 'python_version', fallback='3.5.2')
-
-        for hook_name in list(self.hooks.keys()):
-            if parser.has_option('global', hook_name):
-                self.hooks[hook_name] = parser.get('global', hook_name)
-
-        if parser.has_section('processes'):
-            for option in parser.options('processes'):
-                self.processes[option] = Process(option, parser.get('processes', option))
-
-        self.build_dir = os.path.abspath(options['build_dir'])
-        self.dist_dir = os.path.abspath(options['dist_dir'])
-        self.packages = options['package']
-        self.verbose_mode = options['verbosity'] > 1
-        self.force_mode = options['clean']
-        for value in options['include']:
-            module_name, sep, folder_name = value.partition(':')
-            if sep != ':':
-                self.stderr.write('Invalid "include" value: %s' % value)
-                continue
-            self.default_config_locations.append((module_name, folder_name))
-        if not self.default_config_locations:
-            self.default_config_locations = self.default_searched_locations
-        self.default_setting_merger = self.get_merger(options['config_file'])
-        self.default_template_context = self.get_template_context(self.default_setting_merger, options['extra_context'])
-
-    def handle(self, *args, **options):
-        self.load_options(options)
-        self.download_source(force=self.force_mode)
-        self.install_python(force=self.force_mode)
-        self.install_project()
-        self.install_config()
-        for package in self.packages:
-            self.build_package(package)
-
-    @property
-    def python_source_url(self):
-        return "https://www.python.org/ftp/python/%s/Python-%s.tgz" % (self.python, self.python)
-
-    @property
-    def python_source_dir(self):
-        return os.path.join(self.build_dir, 'src', 'Python-%s' % self.python)
-
-    @property
-    def python_source_filename(self):
-        url = self.python_source_url
-        archive_name = url.rpartition('/')[2]
-        return os.path.join(self.build_dir, archive_name)
-
-    @property
-    def python_path(self):
-        binary = 'python3' if self.python.startswith('3') else 'python'
-        return os.path.join(self.python_prefix, 'bin', binary)
-
-    @property
-    def python_prefix(self):
-        return os.path.join(self.python_package_dir, 'opt', settings.DF_MODULE_NAME)
-
-    @property
-    def python_package_dir(self):
-        return os.path.join(self.build_dir, 'pkg')
-
-    @property
-    def tmp_dir(self):
-        return os.path.join(self.build_dir, 'tmp')
-
-    @property
-    def install_environment(self):
-        exclusion = {'VIRTUALENVWRAPPER_PROJECT_FILENAME', 'VIRTUALENVWRAPPER_SCRIPT', 'WORKON_HOME',
-                     'VIRTUALENVWRAPPER_HOOK_DIR', 'VIRTUAL_ENV', '_VIRTUALENVWRAPPER_API'}
-        new_environ = {k: v for (k, v) in os.environ.items() if k not in exclusion}
-        prefixes = {'PATH': 'bin', 'INCLUDE': 'include', 'LD_LIBRARY_PATH': 'lib'}
-        for var, prefix in prefixes.items():
-            new_value = os.path.join(self.python_prefix, prefix)
-            old_values = new_environ.get(var, '/usr/%s' % prefix)
-            new_environ[var] = '%s:%s' % (new_value, old_values)
-        return new_environ
-
-    # generate Makefile for:
-    #   installing python deps for compilation
-    # packaging steps
-    #   * create virtualenv or compile Python?
-    #   * installing the project inside this environment
-    #   * packaging the whole directory
-    #   * create links to external files:
-    #       * config /user/local/bin/myproject-* -> /opt/myproject/bin/myproject-*
-    #       * config /etc/myproject -> /opt/myproject/etc/myproject
-    #   * config file /opt/myproject/etc/apache2.4
-    #   * config file /opt/myproject/etc/systemd
-    #   * config file /opt/myproject/etc/nginx
-    #   * config file /opt/myproject/etc/supervisor
-
-    def execute_hook(self, hook_name):
-        if not self.hooks[hook_name]:
-            return False
-        self.stdout.write(self.style.NOTICE('executing %s hook [%s]…' % (hook_name, self.hooks[hook_name])))
-        func = import_string(self.hooks[hook_name])
-        func(self)
-        return True
-
     def build_package(self, package):
         self.execute_hook('pre_build_package')
-        if os.path.isdir(self.tmp_dir):
-            shutil.rmtree(self.tmp_dir)
-        ensure_dir(self.tmp_dir, parent=False)
+        if os.path.isdir(self.host_tmp_dir):
+            shutil.rmtree(self.host_tmp_dir)
+        ensure_dir(self.host_tmp_dir, parent=False)
         default_config = self.write_default_fpm_options()
         parser = ConfigParser()
-        if self.packaging_config:
-            parser.read([default_config, self.packaging_config])
+        if self.config_filename:
+            parser.read([default_config, self.config_filename])
         else:
             parser.read([default_config])
         # get fpm options
@@ -407,7 +465,7 @@ class Command(TemplatedBaseCommand):
                 template_name = parser.get(section, option)
                 content = render_to_string(template_name, self.default_template_context)
                 sha1 = hashlib.sha1(content.encode('utf-8')).hexdigest()
-                filename = os.path.join(self.tmp_dir, '%s.%s' % (os.path.basename(template_name), sha1))
+                filename = os.path.join(self.host_tmp_dir, '%s.%s' % (os.path.basename(template_name), sha1))
                 with codecs.open(filename, mode='w', encoding='utf-8') as fd:
                     fd.write(content)
                 fpm_options += [cli_option, filename]
@@ -421,7 +479,7 @@ class Command(TemplatedBaseCommand):
         self.execute_hook('post_build_package')
 
     def write_default_fpm_options(self):
-        default_config = os.path.join(self.tmp_dir, 'config.ini')
+        default_config = os.path.join(self.host_tmp_dir, 'config.ini')
         parser = ConfigParser()
         defaults = {'version': settings.DF_PROJECT_VERSION, 'name': settings.DF_MODULE_NAME}
         maintainer = [None, None]
@@ -449,19 +507,3 @@ class Command(TemplatedBaseCommand):
         with codecs.open(default_config, 'w', encoding='utf-8') as fd:
             parser.write(fd)
         return default_config
-
-    def get_template_context(self, merger, extra_context):
-        context = super(Command, self).get_template_context(merger, extra_context)
-        process_categories = {'django': None, 'gunicorn': None, 'uwsgi': None, 'aiohttp': None, 'celery': None}
-
-        # analyze scripts to detect which processes to launch on startup
-        for script_name, entry_point in pkg_resources.get_entry_map('moneta').get('console_scripts').items():
-            if entry_point.module_name != 'djangofloor.scripts' or not entry_point.attrs:
-                continue
-            daemon_type = entry_point.attrs[0]
-            if process_categories.get(daemon_type):
-                continue
-            process_categories[daemon_type] = os.path.join(self.python_prefix, 'bin', entry_point.name)
-        processes = {key: Process(key, value) for (key, value) in process_categories.items() if value}
-        context['processes'] = self.processes or processes
-        return context

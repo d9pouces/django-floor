@@ -50,6 +50,7 @@ def ensure_dir(path, parent=True):
     dirname = os.path.dirname(path) if parent else path
     if not os.path.isdir(dirname):
         os.makedirs(dirname)
+    return path
 
 
 def walk(module_name, dirname, topdown=True):
