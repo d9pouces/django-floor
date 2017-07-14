@@ -29,7 +29,6 @@ from django.utils.module_loading import import_string
 
 from djangofloor.management.base import TemplatedBaseCommand
 from djangofloor.utils import ensure_dir
-
 __author__ = 'Matthieu Gallet'
 FPM_MULTIPLE_OPTIONS = {'--depends', '--provides', '--conflicts', '--replaces', '--config-files', '--directories',
                         '--deb-build-depends', '--deb-pre-depends', '--rpm-auto-add-exclude-directories'}
@@ -199,7 +198,7 @@ class Command(TemplatedBaseCommand):
         # self.controller = None
         # self.proxy = None
         # self.packages = None
-        # self.default_config_locations = []
+        self.default_config_locations = []
         # self.processes = {}
 
     def add_arguments(self, parser):
@@ -219,11 +218,13 @@ class Command(TemplatedBaseCommand):
         #                     help='Use the native Python package')
         # parser.add_argument('--package', default=[], action='append',
         #                     choices=['deb', 'rpm', 'tar'])
-        # parser.add_argument('--include', default=[], action='append',
-        #                     help='Where to search templates and static files.\n'
-        #                          ' If not used, use ["djangofloor:djangofloor/dev"].\n'
-        #                          'Syntax: "dotted.module.path:root/folder/from/templates". '
-        #                          '\nCan be used multiple times.')
+        parser.add_argument('--include', default=[], action='append',
+                            help='Where to search templates and static files.\n'
+                                 ' If not used, use "--include djangofloor:djangofloor/packages '
+                                 '--include %s:%s/packages".\n\n'
+                                 'Syntax: "dotted.module.path:root/folder". '
+                                 '\nCan be used multiple times, root/folder must be a subfolder of the "templates" '
+                                 'folder.' % (settings.DF_MODULE_NAME, settings.DF_MODULE_NAME))
         parser.add_argument('--extra-context', nargs='*', help='Extra variable for the template system '
                                                                '(--extra-context=NAME:VALUE)', default=[])
         parser.description = """Create a self-contained package (deb, tar or rpm) for the project.
@@ -255,14 +256,14 @@ class Command(TemplatedBaseCommand):
         #         self.processes[option] = Process(option, parser.get('processes', option))
         #
         # self.packages = options['package']
-        # for value in options['include']:
-        #     module_name, sep, folder_name = value.partition(':')
-        #     if sep != ':':
-        #         self.stderr.write('Invalid "include" value: %s' % value)
-        #         continue
-        #     self.default_config_locations.append((module_name, folder_name))
-        # if not self.default_config_locations:
-        #     self.default_config_locations = self.default_searched_locations
+        for value in options['include']:
+            module_name, sep, folder_name = value.partition(':')
+            if sep != ':':
+                self.stderr.write('Invalid "include" value: %s' % value)
+                continue
+            self.default_config_locations.append((module_name, folder_name))
+        if not self.default_config_locations:
+            self.default_config_locations = self.default_searched_locations
 
     def handle(self, *args, **options):
         self.load_options(options)

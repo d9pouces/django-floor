@@ -100,7 +100,7 @@ class Command(TemplatedBaseCommand):
         :param extra_context: list of "template_variable=value"
         :return: template context (dict)
         """
-        merger = get_merger_from_env(read_only=True)
+        merger = get_merger_from_env()
         for config_file in config_files:
             merger.add_provider(IniConfigProvider(os.path.abspath(config_file)))
         merger.process()

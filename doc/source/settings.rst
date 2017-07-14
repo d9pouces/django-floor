@@ -85,7 +85,7 @@ You can also display the corresponding .ini files:
   admin_email = admin@localhost
 	# e-mail address for receiving logged errors
   data = django_data
-	# where all data will be stored (static/uploaded/temporary files, …)If you change it, you must run the collectstatic and migrate commands again.
+	# where all data will be stored (static/uploaded/temporary files, …) If you change it, you must run the collectstatic and migrate commands again.
   language_code = fr_FR
 	# default to fr_FR
   listen_address = localhost:9000

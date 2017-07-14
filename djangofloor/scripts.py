@@ -37,7 +37,7 @@ def __set_default_option(options, name):
         sys.argv += ['--%s' % option_name, text_type(getattr(options, name))]
 
 
-def get_merger_from_env(read_only=False):
+def get_merger_from_env():
     """ Should be used after set_env(); determine all available settings in this order:
 
    * djangofloor.defaults
@@ -83,7 +83,7 @@ def get_merger_from_env(read_only=False):
     extra_values = {'DF_MODULE_NAME': module_name}
     if script:
         extra_values['SCRIPT_NAME'] = script
-    return SettingMerger(fields_provider, config_providers, extra_values=extra_values, read_only=read_only)
+    return SettingMerger(fields_provider, config_providers, extra_values=extra_values)
 
 
 def set_env(command_name=None):

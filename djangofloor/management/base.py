@@ -113,7 +113,7 @@ class TemplatedBaseCommand(OriginalBaseCommand):
 
     @staticmethod
     def get_merger(config_files):
-        merger = get_merger_from_env(read_only=True)
+        merger = get_merger_from_env()
         for config_file in config_files:
             merger.add_provider(IniConfigProvider(os.path.abspath(config_file)))
         merger.process()

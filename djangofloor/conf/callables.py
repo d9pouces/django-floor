@@ -5,6 +5,7 @@
 """
 from __future__ import unicode_literals, print_function, absolute_import
 # noinspection PyUnresolvedReferences
+from django.utils.crypto import get_random_string
 from django.utils.six.moves.urllib.parse import urlparse
 
 from djangofloor.utils import is_package_present
@@ -232,3 +233,10 @@ allauth_providers = {'amazon', 'angellist', 'asana', 'auth0', 'baidu', 'basecamp
                      'openid', 'orcid', 'paypal', 'persona', 'pinterest', 'reddit', 'robinhood', 'shopify',
                      'slack', 'soundcloud', 'spotify', 'stackexchange', 'stripe', 'tumblr', 'twentythreeandme',
                      'twitch', 'twitter', 'untappd', 'vimeo', 'vk', 'weibo', 'weixin', 'windowslive', 'xing'}
+
+
+def generate_secret_key(django_ready, length=60):
+    if not django_ready:
+        return get_random_string(length=length)
+    from django.conf import settings
+    return settings.SECRET_KEY

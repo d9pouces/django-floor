@@ -95,7 +95,7 @@ class SettingMerger(object):
     """Load different settings modules and config files and merge them.
     """
 
-    def __init__(self, fields_provider, providers, extra_values=None, read_only=False):
+    def __init__(self, fields_provider, providers, extra_values=None):
         self.fields_provider = fields_provider or PythonConfigFieldsProvider(None)
         extra_values = extra_values or {}
         self.providers = providers or []
@@ -107,7 +107,6 @@ class SettingMerger(object):
             self.raw_settings[key][None] = value
         # raw_settings[setting_name][str(provider) or None] = raw_value
         self.__working_stack = set()
-        self.read_only = read_only
 
     def add_provider(self, provider):
         self.providers.append(provider)
@@ -170,16 +169,29 @@ class SettingMerger(object):
         for setting_name in self.raw_settings:
             self.get_setting_value(setting_name)
 
+    def call_method_on_config_values(self, method_name: str):
+        """Scan all settings, looking for :class:`django.conf.config_values.ConfigValue` and calling one of their
+        methods.
+
+        :param method_name: 'pre_collectstatic', 'pre_migrate', 'post_collectstatic', or 'post_migrate'.
+        """
+        for setting_name, config_values in self.raw_settings.items():
+            raw_value = None
+            for raw_value in config_values.values():
+                pass
+            if not isinstance(raw_value, ConfigValue):
+                continue
+            final_value = self.settings[setting_name]
+            getattr(raw_value, method_name)(self, final_value)
+
     def analyze_raw_value(self, obj):
         """Parse the object for replacing variables by their values.
 
         If `obj` is a string like "THIS_IS_{TEXT}", search for a setting named "TEXT" and replace {TEXT} by its value
         (say, "VALUE"). The returned object is then equal to "THIS_IS_VALUE".
         If `obj` is a list, a set, a tuple or a dict, its components are recursively parsed.
-        If `obj` is a :class:`djangofloor.utils.DirectoryPath` or a :class:`djangofloor.utils.FilePath`,
-        required parent directories are automatically created and the name is returned.
+        If `obj` is a subclass of :class:`djangofloor.conf.config_values.ConfigValue`, its value is on-the-fly computed.
         Otherwise, `obj` is returned as-is.
-
 
         :param obj: object to analyze
         :return: the parsed setting

@@ -21,17 +21,13 @@ Examples:
 Since the second file overrides the first one, `TEMPLATE_DEBUG` has the same value as `DEBUG` and is `True`.
 
 """
-from __future__ import unicode_literals, print_function, absolute_import
 
 import codecs
 import os
 import warnings
 
-from django.core.checks.messages import Error, Warning
 from django.utils.module_loading import import_string
 from django.utils.six import text_type
-
-from djangofloor.checks import settings_check_results
 
 __author__ = 'Matthieu Gallet'
 
@@ -51,6 +47,30 @@ class ConfigValue(object):
         :type merger: :class:`djangofloor.utils.SettingMerger`
         """
         raise NotImplementedError
+
+    # noinspection PyMethodMayBeStatic
+    def pre_collectstatic(self, merger, value):
+        """Called before the "collectstatic" command (at least the one provided by Djangofloor).
+        Could be used for creating public files or directories (static files, required directories...).
+        """
+        pass
+
+    # noinspection PyMethodMayBeStatic
+    def pre_migrate(self, merger, value):
+        """Called before the "migrate" command.
+        Could be used for creating private files (like the SECRET_KEY file)
+        """
+        pass
+
+    # noinspection PyMethodMayBeStatic
+    def post_collectstatic(self, merger, value):
+        """Called after the "collectstatic" command"""
+        pass
+
+    # noinspection PyMethodMayBeStatic
+    def post_migrate(self, merger, value):
+        """Called after the "migrate" command"""
+        pass
 
     def __repr__(self):
         return "%s(%r)" % (self.__class__.__name__, self.value)
@@ -79,6 +99,10 @@ you need to use :class:`RawValue` for using values that should be formatted.
 class Path(ConfigValue):
     """Represent any path on the filesystem."""
 
+    def __init__(self, value, mode=0o755):
+        super().__init__(value)
+        self.mode = mode
+
     def get_value(self, merger):
         """ Return the value
 
@@ -93,31 +117,9 @@ class Path(ConfigValue):
         return text_type(self.value)
 
 
-class AutocreateDirectory(Path):
-    """Represent a directory path that must be created on startup, and create it if required and not `merger.read_only`
-    """
-
-    def get_value(self, merger):
-        """ Return the value
-
-        :param merger: merger object, with all interpreted settings
-        :type merger: :class:`djangofloor.utils.SettingMerger`
-        """
-        value = merger.analyze_raw_value(self.value)
-        value = os.path.normpath(value)
-        if not os.path.isdir(value) and not merger.read_only:
-            try:
-                os.makedirs(value)
-            except PermissionError:
-                settings_check_results.append(Error('Unable to create directory: permission denied.', hint=None,
-                                                    obj=value, id='djangofloor.E001'))
-        if not value.endswith('/'):
-            value += '/'
-        return value
-
-
 class Directory(Path):
-    """Represent a directory path that must be exist on startup, and add a warning if it does not exist"""
+    """Represent a directory on the filesystem, that is automatically created by the "migrate" and "collectstatic"
+    commands"""
 
     def get_value(self, merger):
         """ Return the value
@@ -129,35 +131,23 @@ class Directory(Path):
         value = os.path.normpath(value)
         if not value.endswith('/'):
             value += '/'
-        if not os.path.isdir(value) and not merger.read_only:
-            settings_check_results.append(Warning('Missing directory, you can create it with \nmkdir -p "%s"' % value,
-                                                  hint=None, obj=value, id='djangofloor.W001'))
         return value
 
+    def pre_collectstatic(self, merger, value):
+        if not os.path.isdir(value):
+            os.makedirs(value)
+        if self.mode and (os.stat(value).st_mode & 0o777) != self.mode:
+            os.chmod(value, self.mode)
 
-class AutocreateFile(Path):
-    """Represent a file name, whose parent directory should be created on startup"""
-
-    def get_value(self, merger):
-        """ Return the value
-
-        :param merger: merger object, with all interpreted settings
-        :type merger: :class:`djangofloor.utils.SettingMerger`
-        """
-        value = merger.analyze_raw_value(self.value)
-        value = os.path.normpath(value)
-        dirname = os.path.dirname(value)
-        if not os.path.isdir(dirname) and not merger.read_only:
-            try:
-                os.makedirs(dirname)  # do not use ensure_dir()! (cycling dependencies…)
-            except PermissionError:
-                settings_check_results.append(Error('Unable to create: permission denied.', hint=None,
-                                                    obj=dirname, id='djangofloor.E002'))
-        return value
+    def pre_migrate(self, merger, value):
+        self.pre_collectstatic(merger, value)
 
 
 class File(Path):
-    """Represent a file name and raise a warning if the parent directory does not exist"""
+    """Represent a file name. Its parent directory is automatically created by the "migrate" and "collectstatic"
+    command.
+
+    """
 
     def get_value(self, merger):
         """ Return the value
@@ -167,32 +157,82 @@ class File(Path):
         """
         value = merger.analyze_raw_value(self.value)
         value = os.path.normpath(value)
-        dirname = os.path.dirname(value)
-        if not os.path.isdir(dirname) and not merger.read_only:
-            settings_check_results.append(Warning('Missing directory, you can create it with \nmkdir -p "%s"' % value,
-                                                  hint=None, obj=value, id='djangofloor.W002'))
         return value
 
+    def pre_collectstatic(self, merger, value):
+        filename = merger.analyze_raw_value(self.value)
+        dirname = os.path.dirname(filename)
+        if not os.path.isdir(dirname):
+            os.makedirs(dirname)
+        if os.path.isfile(value) and self.mode is not None:
+            os.chmod(value, self.mode)
 
-class AutocreateFileContent(Path):
-    """Return the content of an existing file, or automatically write it and returns the content of the created file.
-    Content must be a unicode string.
+    def pre_migrate(self, merger, value):
+        self.pre_collectstatic(merger, value)
 
-    """
 
-    def __init__(self, value, create_function, makedirs=False, *args, **kwargs):
+class AutocreateFile(File):
+    """Represent a file name. Its parent directory is automatically created by the "collectstatic" command.
+     If the file does not exist, the provided callable is used when the "migrate" command is called.
+
+     The first argument of the provided `create_function` is the name of the file to create.
+     If `create_function` is `None`, then an empty file is created.
+     """
+
+    def __init__(self, value, create_function, mode=None, *args, **kwargs):
         """
 
         :param value: name of the file
-        :param create_function: callable called when the file does not exist. Must return a text string
+        :param create_function: called when the file does not exist.
+            Must return a text string.
+        :param mode: mode of the create file (chmod value, like 0o755 for a file readable by everyone)
         :param args: args passed to the `create_function`
         :param kwargs:  keyword args passed to the `create_function`
+
         """
-        super(AutocreateFileContent, self).__init__(value)
+        super().__init__(value, mode=mode)
         self.create_function = create_function
-        self.makedirs = makedirs
         self.args = args
         self.kwargs = kwargs
+
+    def pre_migrate(self, merger, value):
+        self.pre_collectstatic(merger, value)
+        if os.path.isfile(value):
+            return
+        if self.create_function is None:
+            open(value, 'w').close()
+        else:
+            self.create_function(value, *self.args, **self.kwargs)
+        if self.mode is not None and os.path.isfile(value):
+            os.chmod(value, self.mode)
+
+
+class AutocreateFileContent(AutocreateFile):
+    """Return the content of an existing file, or automatically write it and returns the content of the created file.
+    Content must be a unicode string.
+
+    The file is only written when the "migrate" Django command is called.
+    The first arg of the provided `create_function` is a bool, in addition of your *args and **kwargs:
+        * `True` when Django is ready and your function is called for writing the file during the "migrate" command
+        * `False` when Django is not ready and your function is called for loading settings
+
+    """
+
+    def pre_migrate(self, merger, value):
+        filename = merger.analyze_raw_value(self.value)
+        if os.path.isfile(filename):
+            return
+        result = self.create_function(True, *self.args, **self.kwargs)
+        dirname = os.path.dirname(filename)
+        try:
+            if not os.path.isdir(dirname):
+                os.makedirs(dirname)
+            with open(filename, 'w', encoding='utf-8') as fd:
+                fd.write(result)
+            if self.mode is not None:
+                os.chmod(filename, self.mode)
+        except PermissionError:
+            print('Unable to modify %s: permission denied.' % value)
 
     def get_value(self, merger):
         """ Return the value
@@ -201,34 +241,11 @@ class AutocreateFileContent(Path):
         :type merger: :class:`djangofloor.utils.SettingMerger`
         """
         filename = merger.analyze_raw_value(self.value)
-        dirname = os.path.dirname(filename)
-        allow_create = not merger.read_only
-        if not os.path.isdir(dirname) and allow_create:
-            if self.makedirs:
-                try:
-                    os.makedirs(dirname)  # do not use ensure_dir()! (cycling dependencies…)
-                except PermissionError:
-                    allow_create = False
-                    settings_check_results.append(Error('Unable to create: permission denied.', hint=None,
-                                                        obj=dirname, id='djangofloor.E003'))
-            else:
-                settings_check_results.append(Warning('Missing directory, you can create it with \nmkdir -p "%s"' %
-                                                      dirname, hint=None, obj=dirname, id='djangofloor.W003'))
-                allow_create = False
         if os.path.isfile(filename):
             with codecs.open(filename, 'r', encoding='utf-8') as fd:
                 result = fd.read()
-        elif merger.read_only or not callable(self.create_function):
-            result = ''
         else:
-            result = self.create_function(*self.args, **self.kwargs)
-            if allow_create:
-                try:
-                    with codecs.open(filename, 'w', encoding='utf-8') as fd:
-                        fd.write(result)
-                except PermissionError:
-                    settings_check_results.append(Error('Unable to create: permission denied.', hint=None,
-                                                        obj=filename, id='djangofloor.E004'))
+            result = self.create_function(False, *self.args, **self.kwargs)
         return result
 
 
@@ -296,7 +313,9 @@ class CallableSetting(ConfigValue):
     Require a function(kwargs) as argument, this function will be called with all already computed settings in a dict.
 
     >>> SETTING_1 = True
-    >>> SETTING_2 = CallableSetting(lambda x: not x['SETTING_1'], 'SETTING_1')
+    >>> def inverse_value(values):
+    >>>     return not values['SETTING_1']
+    >>> SETTING_2 = CallableSetting(inverse_value, 'SETTING_1')
 
     In `local_settings.py`
 
@@ -305,17 +324,18 @@ class CallableSetting(ConfigValue):
     In your code:
 
     >>> from django.conf import settings
-
-    Then `settings.SETTING_2` is equal to `True`
+    >>> if hasattr(settings, 'SETTING_2'):
+    >>>     assert(settings.SETTING_1 is False)  # default value is overriden by local_settings.py
+    >>>     assert(settings.SETTING_2 is True)  # SETTING_2 value is dynamically computed on startup
 
     Extra arguments must be strings, that are interpreted as required settings,
     that must be available before the call to your function. You can also set an attribute called
     `required_settings`.
 
-
-    >>> def sample_setting(x, y):
-    >>>     return x + y
-    >>> sample_setting.required_settings = ['SETTING_1', 'SETTING_2']
+    >>> def inverse_value(values):
+    >>>     return not values['SETTING_1']
+    >>> inverse_value.required_settings = ['SETTING_1']
+    >>> SETTING_2 = CallableSetting(inverse_value)
 
     """
 

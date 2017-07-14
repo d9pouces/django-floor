@@ -9,19 +9,12 @@ from __future__ import unicode_literals, print_function
 import argparse
 import os
 import sys
-import warnings
 from argparse import ArgumentParser
 
 import pkg_resources
 from django.core.exceptions import ImproperlyConfigured
 from django.utils import six
 from django.utils.module_loading import import_string
-
-from djangofloor.conf.config_values import AutocreateDirectory, AutocreateFile, \
-    SettingReference as OriginalSettingReference, CallableSetting as OriginalCallableSetting, \
-    ExpandIterable as OriginalExpandIterable
-from djangofloor.conf.merger import SettingMerger as OriginalSettingMerger
-from djangofloor.conf.providers import PythonModuleProvider, PythonFileProvider, IniConfigProvider
 
 __author__ = 'Matthieu Gallet'
 
@@ -165,117 +158,3 @@ def remove_arguments_from_help(parser, arguments):
     for action in parser._actions:
         if arguments & set(action.option_strings):
             action.help = argparse.SUPPRESS
-
-
-# ##############################################################################
-#
-#   Deprecated functions
-#
-# ##############################################################################
-
-
-class DirectoryPath(AutocreateDirectory):
-    """.. deprecated:: 1.0 use :class:`djangofloor.conf.config_values.DirectoryPath`"""
-    def __init__(self, value):
-        warnings.warn('DirectoryPath is moved to djangofloor.conf.config_values.DirectoryPath',
-                      RemovedInDjangoFloor110Warning)
-        super(DirectoryPath, self).__init__(value)
-
-
-class FilePath(AutocreateFile):
-    """.. deprecated:: 1.0 use :class:`djangofloor.conf.config_values.AutocreateFile`"""
-    def __init__(self, value):
-        warnings.warn('DirectoryPath is moved to djangofloor.conf.config_values.AutocreateFile',
-                      RemovedInDjangoFloor110Warning)
-        super(FilePath, self).__init__(value)
-
-
-class SettingReference(OriginalSettingReference):
-    """.. deprecated:: 1.0 use :class:`djangofloor.conf.config_values.SettingReference`"""
-    def __init__(self, value, func=None):
-        warnings.warn('SettingReference is moved to djangofloor.conf.config_values.SettingReference',
-                      RemovedInDjangoFloor110Warning)
-        super(SettingReference, self).__init__(value, func=func)
-
-
-class CallableSetting(OriginalCallableSetting):
-    """.. deprecated:: 1.0 use :class:`djangofloor.conf.config_values.CallableSetting`"""
-    def __init__(self, value, *required):
-        warnings.warn('CallableSetting is moved to djangofloor.conf.config_values.CallableSetting',
-                      RemovedInDjangoFloor110Warning)
-        super(CallableSetting, self).__init__(value, *required)
-
-
-class ExpandIterable(OriginalExpandIterable):
-    """.. deprecated:: 1.0 use :class:`djangofloor.conf.config_values.ExpandIterable`"""
-    def __init__(self, value):
-        warnings.warn('ExpandIterable is moved to djangofloor.conf.config_values.ExpandIterable',
-                      RemovedInDjangoFloor110Warning)
-        super(ExpandIterable, self).__init__(value)
-
-
-class SettingMerger(OriginalSettingMerger):
-    """.. deprecated:: 1.0 use :class:`djangofloor.conf.merger.SettingMerger`
-    """
-
-    def __init__(self, project_name, default_settings_module_name, project_settings_module_name,
-                 user_settings_path, djangofloor_config_path, djangofloor_mapping, doc_mode=False,
-                 read_only=False):
-        # noinspection PyUnusedLocal
-        doc_mode = doc_mode
-        warnings.warn('SettingMerger is moved to djangofloor.conf.merger.SettingMerger',
-                      RemovedInDjangoFloor110Warning)
-        from djangofloor.conf.providers import PythonConfigFieldsProvider
-        extra_values = {'DF_MODULE_NAME': project_name}
-        providers = []
-        if default_settings_module_name:
-            providers.append(PythonModuleProvider(default_settings_module_name))
-        if project_settings_module_name:
-            providers.append(PythonModuleProvider(project_settings_module_name))
-        if user_settings_path:
-            providers.append(PythonFileProvider(user_settings_path))
-        if djangofloor_config_path:
-            providers.append(IniConfigProvider(djangofloor_config_path))
-        super(SettingMerger, self).__init__(PythonConfigFieldsProvider(djangofloor_mapping), providers,
-                                            extra_values=extra_values,
-                                            read_only=read_only)
-
-    @staticmethod
-    def import_file(filepath):
-        """import the Python source file as a Python module.
-
-        :param filepath: absolute path of the Python module
-        :type filepath: :class:`str`
-        :return: the imported module
-        """
-        warnings.warn('SettingMerger.import_file method will be removed', RemovedInDjangoFloor110Warning)
-        if filepath and os.path.isfile(filepath):
-            dirname = os.path.dirname(filepath)
-            if dirname not in sys.path:
-                sys.path.insert(0, dirname)
-            conf_module = os.path.splitext(os.path.basename(filepath))[0]
-            module_ = import_module(conf_module)
-        elif filepath:
-            import djangofloor.empty
-            module_ = djangofloor.empty
-        else:
-            import djangofloor.empty
-            module_ = djangofloor.empty
-        return module_
-
-    @staticmethod
-    def ensure_dir(path_, parent_=True):
-        """Ensure that the given directory exists
-
-        :param path_: the path to check
-        :param parent_: only ensure the existence of the parent directory
-
-        """
-        warnings.warn('SettingMerger.ensure_dir method will be removed', RemovedInDjangoFloor110Warning)
-        dirname_ = os.path.dirname(path_) if parent_ else path_
-        if not os.path.isdir(dirname_):
-            try:
-                os.makedirs(dirname_)
-                print('Directory %s created.' % dirname_)
-            except IOError:
-                print('Unable to create directory %s.' % dirname_)

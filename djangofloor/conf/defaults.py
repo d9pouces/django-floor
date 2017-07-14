@@ -7,12 +7,12 @@ from __future__ import unicode_literals, print_function, absolute_import
 
 import os
 
-from django.utils.crypto import get_random_string
 from django.utils.translation import ugettext_lazy as _
 
 from djangofloor.conf.callables import database_engine, url_parse_server_name, \
     url_parse_server_protocol, url_parse_server_port, url_parse_prefix, url_parse_ssl, project_name, \
-    authentication_backends, ldap_user_search, allauth_installed_apps, allowed_hosts, cache_setting, template_setting
+    authentication_backends, ldap_user_search, allauth_installed_apps, allowed_hosts, cache_setting, template_setting, \
+    generate_secret_key
 from djangofloor.conf.config_values import Path, Directory, SettingReference, ExpandIterable, \
     CallableSetting, AutocreateFileContent
 from djangofloor.log import log_configuration
@@ -63,14 +63,15 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'django.contrib.staticfiles',
     'django.contrib.humanize',
-    'django.contrib.sites',
     'django.contrib.sitemaps',
-    'django.contrib.admin',
+    'django.contrib.sites',
     ExpandIterable('DF_INSTALLED_APPS'),
     ExpandIterable('ALLAUTH_INSTALLED_APPS'),
     'bootstrap3',
+    'djangofloor',
+    'django.contrib.staticfiles',
+    'django.contrib.admin',
 ]
 if USE_DEBUG_TOOLBAR:
     INSTALLED_APPS.append('debug_toolbar')
@@ -78,7 +79,6 @@ if USE_PIPELINE:
     INSTALLED_APPS.append('pipeline')
 if USE_REST_FRAMEWORK:
     INSTALLED_APPS.append('rest_framework')
-INSTALLED_APPS.append('djangofloor')
 INSTALLED_APPS.append(ExpandIterable('DF_EXTRA_INSTALLED_APPS'))
 LOGGING = CallableSetting(log_configuration)
 MANAGERS = SettingReference('ADMINS')
@@ -374,7 +374,7 @@ EMAIL_USE_SSL = False  # aliased in settings.ini as "[email]use_ssl"
 EMAIL_SSL_CERTFILE = None
 EMAIL_SSL_KEYFILE = None
 LANGUAGE_CODE = 'fr-fr'  # aliased in settings.ini as "[global]language_code"
-SECRET_KEY = AutocreateFileContent('{LOCAL_PATH}/secret_key.txt', get_random_string, length=60, makedirs=False)
+SECRET_KEY = AutocreateFileContent('{LOCAL_PATH}/secret_key.txt', generate_secret_key, mode=0o600, length=60)
 TIME_ZONE = 'Europe/Paris'  # aliased in settings.ini as "[global]time_zone"
 LOG_REMOTE_URL = None  # aliased in settings.ini as "[global]log_remote_url"
 LOG_SLOW_QUERIES_DURATION = None  # aliased in settings.ini as "[global]log_slow_queries_duration"
@@ -387,7 +387,7 @@ if 'lib' in __split_path:
     prefix = os.path.join(*__split_path[:__split_path.index('lib')])
     LOCAL_PATH = Directory('/%s/var/{DF_MODULE_NAME}' % prefix)
 SERVER_BASE_URL = 'http://{LISTEN_ADDRESS}/'  # aliased in settings.ini as "[global]server_url"
-LOG_DIRECTORY = '{LOCAL_PATH}/logs'
+LOG_DIRECTORY = Directory('{LOCAL_PATH}/logs')
 
 # django_redis
 CACHE_REDIS_PROTOCOL = 'redis'  # aliased in settings.ini as "[cache]protocol"

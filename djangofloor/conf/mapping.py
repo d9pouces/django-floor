@@ -54,8 +54,7 @@ BASE_MAPPING = [
     CharConfigField('global.admin_email', 'ADMIN_EMAIL',
                     help_str='e-mail address for receiving logged errors'),
     CharConfigField('global.data', 'LOCAL_PATH',
-                    help_str='where all data will be stored '
-                             '(static/uploaded/temporary files, …)'
+                    help_str='where all data will be stored (static/uploaded/temporary files, …). '
                              'If you change it, you must run the collectstatic and migrate commands again.\n'),
     CharConfigField('global.language_code', 'LANGUAGE_CODE', help_str='default to fr_FR'),
     CharConfigField('global.listen_address', 'LISTEN_ADDRESS',

@@ -17,9 +17,13 @@ from django.contrib.auth.models import Group
 from django.db import models
 from django.db.models import F
 from django.db.models import Q
+from django.db.models.signals import pre_migrate, post_migrate
+from django.dispatch import receiver
 from django.template.defaultfilters import truncatewords
 from django.utils.timezone import utc
 from django.utils.translation import ugettext_lazy as _
+
+from djangofloor.conf.settings import merger
 
 __author__ = 'Matthieu Gallet'
 
@@ -158,3 +162,21 @@ class NotificationRead(models.Model):
     first_read_time = models.DateTimeField(_('first read time'), auto_now_add=True)
     last_read_time = models.DateTimeField(_('last read time'), auto_now=True)
     read_count = models.IntegerField(_('Read count'), default=1, db_index=True)
+
+
+# noinspection PyUnusedLocal
+@receiver(pre_migrate)
+def apply_pre_migrate_settings(sender, **kwargs):
+    """Defined for calling "pre_migrate" method on each ConfigValue setting through the "pre_migrate" Django signal."""
+    if not hasattr(apply_pre_migrate_settings, 'applied'):  # must be called once, but the signal is called for all app
+        merger.call_method_on_config_values('pre_migrate')
+        apply_pre_migrate_settings.applied = True
+
+
+# noinspection PyUnusedLocal
+@receiver(post_migrate)
+def apply_post_migrate_settings(sender, **kwargs):
+    """Defined for calling "post_migrate" method on each ConfigValue setting through the "post_migrate" Django signal"""
+    if not hasattr(apply_post_migrate_settings, 'applied'):  # must be called once, but the signal is called for all app
+        merger.call_method_on_config_values('post_migrate')
+        apply_post_migrate_settings.applied = True
