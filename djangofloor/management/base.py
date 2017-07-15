@@ -96,7 +96,7 @@ class BaseCommand(OriginalBaseCommand):
 
 # noinspection PyClassHasNoInit
 class TemplatedBaseCommand(OriginalBaseCommand):
-    default_config_files = []
+    packaging_config_files = []
     transparent_suffix = '_tpl'
     ignored_suffix = '_inc'
 
@@ -105,7 +105,7 @@ class TemplatedBaseCommand(OriginalBaseCommand):
 
     def add_arguments(self, parser):
         assert isinstance(parser, ArgumentParser)
-        parser.add_argument('--config-file', help='Config file(s) to use', default=self.default_config_files,
+        parser.add_argument('--config-file', help='Config file(s) to use', default=self.packaging_config_files,
                             action='append')
         parser.add_argument('--dry', default=False, action='store_true',
                             help='Dry mode: do not write any file')

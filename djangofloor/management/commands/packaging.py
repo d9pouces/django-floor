@@ -12,6 +12,14 @@
 #   * config file /opt/myproject/etc/nginx
 #   * config file /opt/myproject/etc/supervisor
 
+
+# TODO: create sym links in /usr/local/bin (search for /opt/{{ project_name }}/bin/{{ project_name }}-*)
+# TODO: create systemd service and configuration files in /opt
+# TODO: symlinks for /opt/{{ project_name }}/etc|var|  /opt/moneta/var/moneta/logs/
+# TODO: create user
+# TODO: create final package (move /opt/{{ project_name }}/)
+# TODO: install optional dependencies (redis, mysql, postgresql...)
+
 import codecs
 import hashlib
 import os
@@ -29,6 +37,7 @@ from django.utils.module_loading import import_string
 
 from djangofloor.management.base import TemplatedBaseCommand
 from djangofloor.utils import ensure_dir
+
 __author__ = 'Matthieu Gallet'
 FPM_MULTIPLE_OPTIONS = {'--depends', '--provides', '--conflicts', '--replaces', '--config-files', '--directories',
                         '--deb-build-depends', '--deb-pre-depends', '--rpm-auto-add-exclude-directories'}
@@ -175,9 +184,9 @@ class Process(object):
 
 class Command(TemplatedBaseCommand):
     """Create a Makefile """
-    default_searched_locations = [('djangofloor', 'djangofloor/packaging'),
-                                  (settings.DF_MODULE_NAME, '%s/packaging' % settings.DF_MODULE_NAME)]
-    default_config_files = ['dev/config-packaging.ini']
+    default_written_files_locations = [('djangofloor', 'djangofloor/packaging'),
+                                       (settings.DF_MODULE_NAME, '%s/packaging' % settings.DF_MODULE_NAME)]
+    packaging_config_files = ['dev/config-packaging.ini']
 
     def __init__(self, stdout=None, stderr=None, no_color=False):
         super(Command, self).__init__(stdout=stdout, stderr=stderr, no_color=no_color)
@@ -194,12 +203,12 @@ class Command(TemplatedBaseCommand):
         self.verbose_mode = False
         self.source_dir = '.'
         self.vagrant_distrib = None
+        self.written_files_locations = []
 
         # self.controller = None
         # self.proxy = None
         # self.packages = None
-        self.default_config_locations = []
-        # self.processes = {}
+        self.processes = {}
 
     def add_arguments(self, parser):
         super(Command, self).add_arguments(parser)
@@ -214,7 +223,7 @@ class Command(TemplatedBaseCommand):
         parser.add_argument('--clean', help='Remove temporary dirs',
                             action='store_true', default=False)
         parser.add_argument('--distrib', default='ubuntu/trusty64')
-        # parser.add_argument('--add-pyton-dep', default=False, action='store_true',
+        # parser.add_argument('--add-python-dep', default=False, action='store_true',
         #                     help='Use the native Python package')
         # parser.add_argument('--package', default=[], action='append',
         #                     choices=['deb', 'rpm', 'tar'])
@@ -251,9 +260,9 @@ class Command(TemplatedBaseCommand):
         self.default_template_context = self.get_template_context(self.default_setting_merger, options['extra_context'])
         # self.controller = parser.get('global', 'controller', fallback='systemd')
         # self.proxy = parser.get('global', 'reverse_proxy', fallback='apache2.4')
-        # if parser.has_section('processes'):
-        #     for option in parser.options('processes'):
-        #         self.processes[option] = Process(option, parser.get('processes', option))
+        if parser.has_section('processes'):
+            for option in parser.options('processes'):
+                self.processes[option] = Process(option, parser.get('processes', option))
         #
         # self.packages = options['package']
         for value in options['include']:
@@ -261,41 +270,25 @@ class Command(TemplatedBaseCommand):
             if sep != ':':
                 self.stderr.write('Invalid "include" value: %s' % value)
                 continue
-            self.default_config_locations.append((module_name, folder_name))
-        if not self.default_config_locations:
-            self.default_config_locations = self.default_searched_locations
+            self.written_files_locations.append((module_name, folder_name))
+        if not self.written_files_locations:
+            self.written_files_locations = self.default_written_files_locations
 
     def handle(self, *args, **options):
         self.load_options(options)
-        self.prepare_vagrant_box(force=self.force_mode)
+        # self.prepare_vagrant_box(force=self.force_mode)
         try:
-            self.install_python(force=self.force_mode)
-            self.install_project()
+            # self.install_python(force=self.force_mode)
+            # self.install_project()
             self.install_config()
         finally:
             self.destroy_vagrant_box(force=self.force_mode)
-        # for package in self.packages:
-        #     self.build_package(package)
-
-    @cached_property
-    def host_python_path(self):
-        return os.path.join(self.host_install_dir, 'bin', 'python3')
+            # for package in self.packages:
+            #     self.build_package(package)
 
     @cached_property
     def host_install_dir(self):
         return ensure_dir(os.path.join(self.build_dir, 'opt', settings.DF_MODULE_NAME), parent=False)
-
-    @cached_property
-    def host_config_dir(self):
-        return ensure_dir(os.path.join(self.build_dir, 'etc', settings.DF_MODULE_NAME), parent=False)
-
-    @cached_property
-    def host_data_dir(self):
-        return ensure_dir(os.path.join(self.build_dir, 'var', settings.DF_MODULE_NAME), parent=False)
-
-    @cached_property
-    def host_log_dir(self):
-        return ensure_dir(os.path.join(self.build_dir, 'var/log', settings.DF_MODULE_NAME), parent=False)
 
     @cached_property
     def host_tmp_dir(self):
@@ -306,20 +299,12 @@ class Command(TemplatedBaseCommand):
         return ensure_dir(os.path.join(self.build_dir, 'vagrant'), parent=False)
 
     @cached_property
-    def vagrant_config_dir(self):
-        return os.path.join('/etc', settings.DF_MODULE_NAME)
-
-    @cached_property
-    def vagrant_data_dir(self):
-        return os.path.join('/var', settings.DF_MODULE_NAME)
-
-    @cached_property
     def vagrant_install_dir(self):
         return os.path.join('/opt', settings.DF_MODULE_NAME)
 
     @cached_property
-    def vagrant_log_dir(self):
-        return os.path.join('/var/log', settings.DF_MODULE_NAME)
+    def vagrant_package_dir(self):
+        return '/pkg'
 
     @cached_property
     def vagrant_tmp_dir(self):
@@ -327,11 +312,10 @@ class Command(TemplatedBaseCommand):
 
     @cached_property
     def bind_dirs(self):
-        return [(self.host_tmp_dir, self.vagrant_tmp_dir), (self.host_config_dir, self.vagrant_config_dir),
-                (self.host_data_dir, self.vagrant_data_dir), (self.host_log_dir, self.vagrant_log_dir)]
+        return [(self.host_tmp_dir, self.vagrant_tmp_dir), (self.host_package_dir, self.vagrant_package_dir)]
 
     @cached_property
-    def python_package_dir(self):
+    def host_package_dir(self):
         return ensure_dir(os.path.join(self.build_dir, 'pkg'), parent=False)
 
     def execute_hook(self, hook_name):
@@ -343,6 +327,7 @@ class Command(TemplatedBaseCommand):
         return True
 
     def prepare_vagrant_box(self, force=False):
+        # noinspection PyUnresolvedReferences
         vagrant_content = render_to_string('djangofloor/vagrant/Vagrantfile', self.default_template_context)
         with open(os.path.join(self.vagrant_box_dir, 'Vagrantfile'), 'w') as fd:
             fd.write(vagrant_content)
@@ -355,40 +340,41 @@ class Command(TemplatedBaseCommand):
     def get_template_context(self, merger, extra_context):
         context = super(Command, self).get_template_context(merger, extra_context)
         context['bind_dirs'] = self.bind_dirs
-        context['build_dir'] = self.build_dir
         context['vagrant_distrib'] = self.vagrant_distrib
         context['install_dir'] = (self.host_install_dir, self.vagrant_install_dir)
+        context['package_dir'] = (self.host_package_dir, self.vagrant_package_dir)
         context['tmp_dir'] = (self.host_tmp_dir, self.vagrant_tmp_dir)
-        context['config_dir'] = (self.host_config_dir, self.vagrant_config_dir)
-        context['data_dir'] = (self.host_data_dir, self.vagrant_data_dir)
-        context['log_dir'] = (self.host_log_dir, self.vagrant_log_dir)
-        # process_categories = {'django': None, 'gunicorn': None, 'uwsgi': None, 'aiohttp': None, 'celery': None}
-        #
-        # # analyze scripts to detect which processes to launch on startup
-        # for script_name, entry_point in pkg_resources.get_entry_map('moneta').get('console_scripts').items():
-        #     if entry_point.module_name != 'djangofloor.scripts' or not entry_point.attrs:
-        #         continue
-        #     daemon_type = entry_point.attrs[0]
-        #     if process_categories.get(daemon_type):
-        #         continue
-        #     process_categories[daemon_type] = os.path.join(self.python_prefix, 'bin', entry_point.name)
-        # processes = {key: Process(key, value) for (key, value) in process_categories.items() if value}
-        # context['processes'] = self.processes or processes
+        process_categories = {'django': None, 'gunicorn': None, 'uwsgi': None, 'aiohttp': None, 'celery': None}
+
+        # analyze scripts to detect which processes to launch on startup
+        entry_map = pkg_resources.get_entry_map(settings.DF_MODULE_NAME)
+        for script_name, entry_point in entry_map.get('console_scripts').items():
+            if entry_point.module_name != 'djangofloor.scripts' or not entry_point.attrs:
+                continue
+            daemon_type = entry_point.attrs[0]
+            if process_categories.get(daemon_type):
+                continue
+            process_categories[daemon_type] = os.path.join(self.vagrant_install_dir, 'bin', entry_point.name)
+        processes = {key: Process(key, value) for (key, value) in process_categories.items() if value}
+        context['processes'] = self.processes or processes
         return context
+
+    def copy_vagrant_script(self, template_name, context=None, execute=True):
+        if context is None:
+            context = {}
+        context.update(self.default_template_context)
+        script_content = render_to_string(template_name, context)
+        script_name = os.path.basename(template_name)
+        with open(os.path.join(self.host_tmp_dir, script_name), 'w') as fd:
+            fd.write(script_content)
+        if execute:
+            cmd = ['vagrant', 'ssh', '-c', 'sudo bash %s' % os.path.join(self.vagrant_tmp_dir, script_name)]
+            subprocess.check_call(cmd, cwd=self.vagrant_box_dir)
 
     def install_python(self, force=False):
         self.stdout.write(self.style.SUCCESS('installing Python…'))
         self.execute_hook('pre_install_python')
-        if os.path.isfile(self.host_python_path) and not force:
-            return
-
-        script_content = render_to_string('djangofloor/vagrant/install_python.sh', self.default_template_context)
-        script_name = 'install_python.sh'
-        with open(os.path.join(self.host_tmp_dir, script_name), 'w') as fd:
-            fd.write(script_content)
-        cmd = ['vagrant', 'ssh', '-c', 'sudo bash %s' % os.path.join(self.vagrant_tmp_dir, script_name)]
-        subprocess.check_call(cmd, cwd=self.vagrant_box_dir)
-        # shutil.rmtree(src_dir)
+        self.copy_vagrant_script('djangofloor/vagrant/install_python.sh')
         self.execute_hook('post_install_python')
 
     def install_project(self):
@@ -413,26 +399,20 @@ class Command(TemplatedBaseCommand):
         shutil.copy2(dist_path, os.path.join(self.host_tmp_dir, dist_filename))
 
         self.stdout.write(self.style.SUCCESS('installing source file…'))
-        context = {'dist_filename': dist_filename}
-        context.update(self.default_template_context)
-        script_content = render_to_string('djangofloor/vagrant/install_project.sh', context)
-        script_name = 'install_source.sh'
-        with open(os.path.join(self.host_tmp_dir, script_name), 'w') as fd:
-            fd.write(script_content)
-        cmd = ['vagrant', 'ssh', '-c', 'sudo bash %s' % os.path.join(self.vagrant_tmp_dir, script_name)]
-        subprocess.check_call(cmd, cwd=self.vagrant_box_dir)
-
+        self.copy_vagrant_script('djangofloor/vagrant/install_project.sh', {'dist_filename': dist_filename})
         self.execute_hook('post_install_project')
 
     def install_config(self):
-        self.stdout.write(self.style.SUCCESS('installing config…'))
+        self.stdout.write(self.style.SUCCESS('installing static files…'))
         self.execute_hook('pre_install_config')
         template_context = self.default_template_context
-        writers = self.get_file_writers(self.default_config_locations, context=template_context)
+        writers = self.get_file_writers(self.written_files_locations, context=template_context)
         for target_filename in sorted(writers):  # fix the writing order
             writer = writers[target_filename]
-            writer.write(self.python_package_dir, template_context, dry_mode=False, verbose_mode=self.verbose_mode)
+            writer.write(self.host_package_dir, template_context, dry_mode=False, verbose_mode=self.verbose_mode)
+        self.copy_vagrant_script('djangofloor/vagrant/configure_project.sh')
         self.execute_hook('post_install_config')
+        self.copy_vagrant_script('djangofloor/vagrant/post_install.sh', execute=False)
 
     def build_package(self, package):
         self.execute_hook('pre_build_package')
@@ -475,8 +455,8 @@ class Command(TemplatedBaseCommand):
 
         self.stdout.write(self.style.SUCCESS('building %s package…') % package)
         cmd = ['fpm', '-s', 'dir', '-f', '-t', package, '--log', 'error'] + fpm_options + \
-              ['%s/=%s' % (self.python_package_dir, '/')]
-        subprocess.check_call(cmd, cwd=self.python_package_dir)
+              ['%s/=%s' % (self.host_package_dir, '/')]
+        subprocess.check_call(cmd, cwd=self.host_package_dir)
         self.execute_hook('post_build_package')
 
     def write_default_fpm_options(self):

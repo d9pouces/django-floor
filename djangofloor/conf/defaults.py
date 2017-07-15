@@ -405,12 +405,12 @@ SESSION_REDIS_PASSWORD = ''  # aliased in settings.ini as "[session]password"
 # ws4redis
 WEBSOCKET_REDIS_HOST = 'localhost'  # aliased in settings.ini as "[websocket]host"
 WEBSOCKET_REDIS_PORT = 6379  # aliased in settings.ini as "[websocket]port"
-WEBSOCKET_REDIS_DB = 11  # aliased in settings.ini as "[websocket]db"
+WEBSOCKET_REDIS_DB = 3  # aliased in settings.ini as "[websocket]db"
 WEBSOCKET_REDIS_PASSWORD = ''  # aliased in settings.ini as "[websocket]password"
 
 # celery
 CELERY_PROTOCOL = 'redis'
 CELERY_HOST = 'localhost'  # aliased in settings.ini as "[celery]host"
 CELERY_PORT = 6379  # aliased in settings.ini as "[celery]port"
-CELERY_DB = 13  # aliased in settings.ini as "[celery]db"
+CELERY_DB = 4  # aliased in settings.ini as "[celery]db"
 CELERY_PASSWORD = ''  # aliased in settings.ini as "[celery]password"

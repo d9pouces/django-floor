@@ -35,6 +35,9 @@ Many backup strategies exist, and you must choose one that fits your needs. We c
   MAILTO={{ ADMIN_EMAIL }}
   0 1 * * * {{ processes.django }} clearsessions
   0 2 * * * logrotate -f /etc/{{ DF_MODULE_NAME }}/backup_db.conf
+
+
+Note that clearing sessions is not required with Redis.
 {% endblock %}
 
 {% block backup_media %}Backup of the user-created files can be done with rsync, with a full backup each month:
