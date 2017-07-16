@@ -214,8 +214,15 @@ def log_configuration(settings_dict):
         else:
             def get_log_file_handler(suffix):
                 name = '%s-%s-%s.log' % (module_name, script_name, suffix)
+                log_filename = os.path.join(log_directory, name)
+                try:
+                    open(log_filename, 'a').close()
+                except PermissionError:
+                    settings_check_results.append(Warning('Unable to write files in "%s". Unsufficient rights?' %
+                                                  log_directory, hint=None, obj=log_directory, id='djangofloor.W005'))
+                    return error_handler
                 return {'class': 'logging.handlers.RotatingFileHandler', 'maxBytes': 1000000, 'backupCount': 3,
-                        'formatter': 'nocolor', 'filename': os.path.join(log_directory, name)}
+                        'formatter': 'nocolor', 'filename': log_filename}
         error_handler = get_log_file_handler('error')
         handlers.update({'info': get_log_file_handler('info'),
                          'access': get_log_file_handler('access'),

@@ -387,7 +387,7 @@ if 'lib' in __split_path:
     prefix = os.path.join(*__split_path[:__split_path.index('lib')])
     LOCAL_PATH = Directory('/%s/var/{DF_MODULE_NAME}' % prefix)
 SERVER_BASE_URL = 'http://{LISTEN_ADDRESS}/'  # aliased in settings.ini as "[global]server_url"
-LOG_DIRECTORY = Directory('{LOCAL_PATH}/logs')
+LOG_DIRECTORY = Directory('{LOCAL_PATH}/log')
 
 # django_redis
 CACHE_REDIS_PROTOCOL = 'redis'  # aliased in settings.ini as "[cache]protocol"

@@ -86,7 +86,7 @@ sudo npm -g install yuglify
 sudo apt-get install -y virtualenvwrapper {{ python_version }} {{ python_version }}-dev python3-pip build-essential
 {% endblock %}{% block djangofloor %}sudo -H pip3 install git+https://github.com/d9pouces/EasyDjango.git
 {% endblock %}{% block application %}sudo -H pip3 install {{ DF_MODULE_NAME }}
-{% endblock %}{% block pre_application %}{% endblock %}{% block init_application %}sudo mkdir -p /var/{{ DF_MODULE_NAME }}/logs /etc/{{ DF_MODULE_NAME }}
+{% endblock %}{% block pre_application %}{% endblock %}{% block init_application %}sudo mkdir -p /var/{{ DF_MODULE_NAME }}/log /etc/{{ DF_MODULE_NAME }}
 sudo adduser --system --shell /bin/bash --disabled-password --gecos "" {{ DF_MODULE_NAME }}
 cat << EOF | sudo -H tee /etc/{{ DF_MODULE_NAME }}/settings.ini
 [global]
