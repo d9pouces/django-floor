@@ -1,4 +1,5 @@
-{% include 'djangofloor/vagrant/post_install.sh' %}
+#!/usr/bin/env bash
+{% include 'djangofloor/vagrant/after_install.sh' %}
 {{ processes.django.command_line }} collectstatic --noinput
 mkdir -p "{{ package_dir.1 }}{{ install_dir.1 }}"
 rm -rf "{{ package_dir.1 }}/usr/local/bin"

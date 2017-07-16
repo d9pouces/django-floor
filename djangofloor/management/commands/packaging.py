@@ -1,4 +1,3 @@
-import codecs
 import hashlib
 import json
 import os
@@ -226,23 +225,13 @@ class Command(TemplatedBaseCommand):
         self.verbose_mode = options['verbosity'] > 1
         self.force_mode = options['clean']
         self.vagrant_distrib = options['distrib']
-
-        parser = ConfigParser()
         self.custom_config_filename = options['config']
-        if self.custom_config_filename:
-            parser.read([self.custom_config_filename])
-        for hook_name in list(self.hooks.keys()):
+        parser = self.get_config_parser()
+        for hook_name in self.hooks:
             if parser.has_option('global', hook_name):
                 self.hooks[hook_name] = parser.get('global', hook_name)
         self.default_setting_merger = self.get_merger([options['config']] if options['config'] else [])
         self.default_template_context = self.get_template_context(self.default_setting_merger, options['extra_context'])
-        # self.controller = parser.get('global', 'controller', fallback='systemd')
-        # self.proxy = parser.get('global', 'reverse_proxy', fallback='apache2.4')
-        if parser.has_section('processes'):
-            for option in parser.options('processes'):
-                self.processes[option] = Process(option, parser.get('processes', option))
-        #
-        # self.packages = options['package']
         for value in options['include']:
             module_name, sep, folder_name = value.partition(':')
             if sep != ':':
@@ -254,14 +243,14 @@ class Command(TemplatedBaseCommand):
 
     def handle(self, *args, **options):
         self.load_options(options)
-        # self.prepare_vagrant_box(force=self.force_mode)
+        self.prepare_vagrant_box()
         try:
-            # self.install_python(force=self.force_mode)
+            self.install_python()
             self.install_project()
             self.install_config()
             self.build_package('deb')
         finally:
-            self.destroy_vagrant_box(force=self.force_mode)
+            self.destroy_vagrant_box()
 
     @cached_property
     def host_install_dir(self):
@@ -276,7 +265,11 @@ class Command(TemplatedBaseCommand):
         return ensure_dir(os.path.join(self.build_dir, 'pkg'), parent=False)
 
     @cached_property
-    def host_fpm_config_filename(self):
+    def host_fpm_project_config_filename(self):
+        return os.path.join(self.host_tmp_dir, 'fpm-project.ini')
+
+    @cached_property
+    def host_fpm_default_config_filename(self):
         return os.path.join(self.host_tmp_dir, 'fpm-default.ini')
 
     @cached_property
@@ -296,12 +289,16 @@ class Command(TemplatedBaseCommand):
         return '/pkg'
 
     @cached_property
-    def vagrant_fpm_config_filename(self):
-        return os.path.join(self.vagrant_tmp_dir, 'fpm-default.ini')
+    def vagrant_fpm_project_config_filename(self):
+        return os.path.join(self.vagrant_tmp_dir, 'fpm-project.ini')
 
     @cached_property
     def vagrant_fpm_custom_config_filename(self):
         return os.path.join(self.vagrant_tmp_dir, 'fpm-custom.ini')
+
+    @cached_property
+    def vagrant_fpm_default_config_filename(self):
+        return os.path.join(self.vagrant_tmp_dir, 'fpm-default.ini')
 
     @cached_property
     def vagrant_tmp_dir(self):
@@ -319,48 +316,18 @@ class Command(TemplatedBaseCommand):
         func(self)
         return True
 
-    def prepare_vagrant_box(self, force=False):
+    def prepare_vagrant_box(self):
         # noinspection PyUnresolvedReferences
         vagrant_content = render_to_string('djangofloor/vagrant/Vagrantfile', self.default_template_context)
         with open(os.path.join(self.vagrant_box_dir, 'Vagrantfile'), 'w') as fd:
             fd.write(vagrant_content)
         subprocess.check_call(['vagrant', 'up'], cwd=self.vagrant_box_dir)
 
-    def destroy_vagrant_box(self, force=False):
+    def destroy_vagrant_box(self):
         pass
         # subprocess.check_call(['vagrant', 'destroy', '--force'], cwd=self.vagrant_box_dir)
 
-    def get_template_context(self, merger, extra_context):
-        if self.__template_context:
-            return self.__template_context
-        context = super(Command, self).get_template_context(merger, extra_context)
-        context['bind_dirs'] = self.bind_dirs
-        context['vagrant_distrib'] = self.vagrant_distrib
-        context['install_dir'] = (self.host_install_dir, self.vagrant_install_dir)
-        context['package_dir'] = (self.host_package_dir, self.vagrant_package_dir)
-        context['tmp_dir'] = (self.host_tmp_dir, self.vagrant_tmp_dir)
-        context['fpm_config_filename'] = (self.host_fpm_config_filename, self.vagrant_fpm_config_filename)
-        context['fpm_custom_config_filename'] = (self.host_fpm_custom_config_filename,
-                                                 self.vagrant_fpm_custom_config_filename)
-        self.__template_context = context
-        return context
-
-    def copy_vagrant_script(self, template_name, context=None, execute=True):
-        if context is None:
-            context = {}
-        context.update(self.default_template_context)
-        script_content = render_to_string(template_name, context)
-        script_name = os.path.basename(template_name)
-        with open(os.path.join(self.host_tmp_dir, script_name), 'w') as fd:
-            fd.write(script_content)
-        if execute:
-            binary = 'bash'
-            if script_name.endswith('.py'):
-                binary = '%s/bin/python3' % self.vagrant_install_dir
-            cmd = ['vagrant', 'ssh', '-c', 'sudo %s %s' % (binary, os.path.join(self.vagrant_tmp_dir, script_name))]
-            subprocess.check_call(cmd, cwd=self.vagrant_box_dir)
-
-    def install_python(self, force=False):
+    def install_python(self):
         self.stdout.write(self.style.SUCCESS('installing Python…'))
         self.execute_hook('pre_install_python')
         self.copy_vagrant_script('djangofloor/vagrant/install_python.sh')
@@ -389,27 +356,12 @@ class Command(TemplatedBaseCommand):
 
         self.stdout.write(self.style.SUCCESS('installing source file…'))
         self.copy_vagrant_script('djangofloor/vagrant/install_project.sh', {'dist_filename': dist_filename})
-        self.copy_vagrant_script('djangofloor/vagrant/prepare_fpm_options.py')
+        self.copy_vagrant_script('djangofloor/vagrant/fpm-default.ini', execute=False,
+                                 host_filename=self.host_fpm_default_config_filename,
+                                 vagrant_filename=self.vagrant_fpm_default_config_filename)
+        self.copy_vagrant_script('djangofloor/vagrant/get_project_info.py')
         self.update_template_context()
         self.execute_hook('post_install_project')
-
-    def update_template_context(self):
-        parser = ConfigParser()
-        parser.read([self.host_fpm_config_filename])
-        regex = re.compile(r'(?P<module>[\w.]+)\s*(:\s*(?P<attr>[\w.]+))?\s*(?P<extras>\[.*\])?\s*$', flags=re.UNICODE)
-        process_categories = {'django': None, 'gunicorn': None, 'uwsgi': None, 'aiohttp': None, 'celery': None}
-        for option_name in parser.options('processes'):
-            option_matcher = regex.match(parser.get('processes', option_name))
-            if not option_matcher:
-                continue
-            values = option_matcher.groupdict()
-            if values['attr'] not in process_categories or values['module'] != 'djangofloor.scripts':
-                continue
-            elif process_categories[values['attr']]:
-                continue
-            process_categories[values['attr']] = os.path.join(self.vagrant_install_dir, 'bin', option_name)
-        processes = {key: Process(key, value) for (key, value) in process_categories.items() if value}
-        self.__template_context['processes'] = self.processes or processes
 
     def install_config(self):
         self.stdout.write(self.style.SUCCESS('installing static files…'))
@@ -421,24 +373,64 @@ class Command(TemplatedBaseCommand):
             writer.write(self.host_package_dir, template_context, dry_mode=False, verbose_mode=self.verbose_mode)
         self.copy_vagrant_script('djangofloor/vagrant/configure_project.sh')
         self.execute_hook('post_install_config')
-        self.copy_vagrant_script('djangofloor/vagrant/post_install.sh', execute=False)
 
-    def build_package(self, package):
+    def build_package(self, package_type):
         self.execute_hook('pre_build_package')
-        self.stdout.write(self.style.SUCCESS('building %s package…') % package)
-        cmd = self.get_fpm_command_line(package)
+        self.stdout.write(self.style.SUCCESS('building %s package…') % package_type)
+        cmd = self.get_fpm_command_line(package_type)
         with open(os.path.join(self.host_tmp_dir, 'fpm.json'), 'w') as fd:
             json.dump(cmd, fd)
         self.copy_vagrant_script('djangofloor/vagrant/create_package.sh')
         self.execute_hook('post_build_package')
 
-    def get_fpm_command_line(self, package_type):
+    def get_template_context(self, merger, extra_context):
+        if self.__template_context:
+            return self.__template_context
+        context = super(Command, self).get_template_context(merger, extra_context)
+        context['bind_dirs'] = self.bind_dirs
+        context['vagrant_distrib'] = self.vagrant_distrib
+        context['install_dir'] = (self.host_install_dir, self.vagrant_install_dir)
+        context['package_dir'] = (self.host_package_dir, self.vagrant_package_dir)
+        context['tmp_dir'] = (self.host_tmp_dir, self.vagrant_tmp_dir)
+        context['fpm_default_config_filename'] = (self.host_fpm_default_config_filename,
+                                                  self.vagrant_fpm_default_config_filename)
+        context['fpm_project_config_filename'] = (self.host_fpm_project_config_filename,
+                                                  self.vagrant_fpm_project_config_filename)
+        context['fpm_custom_config_filename'] = (self.host_fpm_custom_config_filename,
+                                                 self.vagrant_fpm_custom_config_filename)
+        self.__template_context = context
+        return context
+
+    def copy_vagrant_script(self, template_name, context=None, execute=True,
+                            host_filename=None, vagrant_filename=None):
+        if context is None:
+            context = {}
+        context.update(self.default_template_context)
+        script_content = render_to_string(template_name, context)
+        script_name = os.path.basename(template_name)
+        if host_filename is None:
+            host_filename = os.path.join(self.host_tmp_dir, script_name)
+        with open(host_filename, 'w') as fd:
+            fd.write(script_content)
+        if execute:
+            binary = 'bash'
+            if script_name.endswith('.py'):
+                binary = '%s/bin/python3' % self.vagrant_install_dir
+            if vagrant_filename is None:
+                vagrant_filename = os.path.join(self.vagrant_tmp_dir, script_name)
+            cmd = ['vagrant', 'ssh', '-c', 'sudo %s %s' % (binary, vagrant_filename)]
+            subprocess.check_call(cmd, cwd=self.vagrant_box_dir)
+
+    def get_config_parser(self):
         parser = ConfigParser()
-        if self.custom_config_filename:
-            parser.read([self.host_fpm_config_filename, self.custom_config_filename])
-        else:
-            parser.read([self.host_fpm_config_filename])
-        # get fpm options
+        config_files = [filename for filename in [self.host_fpm_default_config_filename,
+                                                  self.host_fpm_project_config_filename,
+                                                  self.custom_config_filename] if os.path.isfile(filename)]
+        parser.read(config_files)
+        return parser
+
+    def get_fpm_command_line(self, package_type):
+        parser = self.get_config_parser()
         cmd = ['fpm', '-s', 'dir', '-f', '-t', package_type, '--log', 'error']
         for ini_option, cli_option in FPM_CLI_OPTIONS.items():
             section, sep, option = ini_option.partition('.')
@@ -469,3 +461,19 @@ class Command(TemplatedBaseCommand):
         cmd += ['%s/=/' % self.vagrant_package_dir]
         return cmd
 
+    def update_template_context(self):
+        parser = self.get_config_parser()
+        regex = re.compile(r'(?P<module>[\w.]+)\s*(:\s*(?P<attr>[\w.]+))?\s*(?P<extras>\[.*\])?\s*$', flags=re.UNICODE)
+        process_categories = {'django': None, 'gunicorn': None, 'uwsgi': None, 'aiohttp': None, 'celery': None}
+        for option_name in parser.options('processes'):
+            option_matcher = regex.match(parser.get('processes', option_name))
+            if not option_matcher:
+                continue
+            values = option_matcher.groupdict()
+            if values['attr'] not in process_categories or values['module'] != 'djangofloor.scripts':
+                continue
+            elif process_categories[values['attr']]:
+                continue
+            process_categories[values['attr']] = os.path.join(self.vagrant_install_dir, 'bin', option_name)
+        processes = {key: Process(key, value) for (key, value) in process_categories.items() if value}
+        self.__template_context['processes'] = self.processes or processes

@@ -1,4 +1,5 @@
 from configparser import ConfigParser
+from email import message_from_string
 
 import pkg_resources
 
@@ -24,27 +25,27 @@ def main():
     defaults = {'version': project_distribution.version, 'name': project_name}
     maintainer = [None, None]
     # noinspection PyBroadException
-    try:
-        for line in project_distribution.get_metadata_lines('PKG-INFO'):
-            k, sep, v = line.partition(': ')
-            if v == 'UNKNOWN' or sep != ': ':
-                continue
-            elif k == 'License':
-                defaults['license'] = v
-            elif k == 'Description':
-                defaults['description'] = v
-            elif k == 'Home-page':
-                defaults['url'] = v
-            elif k == 'Author':
-                maintainer[0] = v
-            elif k == 'Author-email':
-                maintainer[1] = v
-    except:
-        pass
+    pkg_info = project_distribution.get_metadata('PKG-INFO')
+    msg = message_from_string(pkg_info)
+    for k, v in msg.items():
+        if v == 'UNKNOWN':
+            continue
+        elif k == 'License':
+            defaults['license'] = v
+        elif k == 'Description':
+            defaults['description'] = v
+        elif k == 'Home-page':
+            defaults['url'] = v
+        elif k == 'Author':
+            maintainer[0] = v
+        elif k == 'Author-email':
+            maintainer[1] = v
     if maintainer[0] and maintainer[1]:
         defaults['maintainer'] = '%s <%s>' % tuple(maintainer)
+        defaults['vendor'] = '%s <%s>' % tuple(maintainer)
+
     parser['DEFAULT'] = defaults
-    with open('{{ fpm_config_filename.1 }}', 'w', encoding='utf-8') as fd:
+    with open('{{ fpm_project_config_filename.1 }}', 'w', encoding='utf-8') as fd:
         parser.write(fd)
 
 
