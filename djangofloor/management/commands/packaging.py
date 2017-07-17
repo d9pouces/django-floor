@@ -425,7 +425,7 @@ class Command(TemplatedBaseCommand):
         parser = ConfigParser()
         config_files = [filename for filename in [self.host_fpm_default_config_filename,
                                                   self.host_fpm_project_config_filename,
-                                                  self.custom_config_filename] if os.path.isfile(filename)]
+                                                  self.custom_config_filename] if filename and os.path.isfile(filename)]
         parser.read(config_files)
         return parser
 
