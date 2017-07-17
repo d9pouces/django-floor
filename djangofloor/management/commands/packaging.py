@@ -165,6 +165,7 @@ class Command(TemplatedBaseCommand):
     default_written_files_locations = [('djangofloor', 'djangofloor/packaging'),
                                        (settings.DF_MODULE_NAME, '%s/packaging' % settings.DF_MODULE_NAME)]
     packaging_config_files = ['dev/config-packaging.ini']
+    available_distributions = {'ubuntu/trusty64': 'deb'}
     __template_context = {}
 
     def __init__(self, stdout=None, stderr=None, no_color=False):
@@ -181,12 +182,8 @@ class Command(TemplatedBaseCommand):
         self.default_template_context = {}
         self.verbose_mode = False
         self.source_dir = '.'
-        self.vagrant_distrib = None
+        self.vagrant_distrib = 'ubuntu/trusty64'
         self.written_files_locations = []
-
-        # self.controller = None
-        # self.proxy = None
-        # self.packages = None
         self.processes = {}
 
     def add_arguments(self, parser):
@@ -201,7 +198,7 @@ class Command(TemplatedBaseCommand):
                                                               'from the source dir.')
         parser.add_argument('--clean', help='Remove temporary dirs',
                             action='store_true', default=False)
-        parser.add_argument('--distrib', default='ubuntu/trusty64')
+        parser.add_argument('--distrib', default=self.distribution, choices=self.available_distributions)
         # parser.add_argument('--add-python-dep', default=False, action='store_true',
         #                     help='Use the native Python package')
         parser.add_argument('--include', default=[], action='append',
@@ -248,7 +245,7 @@ class Command(TemplatedBaseCommand):
             self.install_python()
             self.install_project()
             self.install_config()
-            self.build_package('deb')
+            self.build_package(self.available_distributions[self.vagrant_distrib])
         finally:
             self.destroy_vagrant_box()
 
