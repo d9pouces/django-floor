@@ -5,8 +5,6 @@ This module contains the WSGI application used by Gunicorn. However, websockets 
 (due to active polling on the websocket that eats the whole CPU).
 
 """
-from __future__ import unicode_literals, print_function, absolute_import
-
 import logging
 import select
 

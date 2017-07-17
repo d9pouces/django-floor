@@ -18,8 +18,6 @@ Designed to be instanciated from a :class:`django.http.request.HttpRequest` and 
 (when a signal calls another one). However, a blank :class:`WindowInfo` can also be directly instanciated.
 
 """
-from __future__ import unicode_literals, print_function, absolute_import
-
 import logging
 
 from django.conf import settings

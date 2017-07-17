@@ -7,17 +7,14 @@ Here is an example of abstract class-based view, as well as a generic model sear
 view (searching across users)
 
 """
-from __future__ import unicode_literals, print_function, absolute_import
-
 import logging
+from urllib.parse import urlencode
 
 from django.contrib.auth import get_user_model
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.db.models import Q
 from django.urls import reverse
 from django.utils.safestring import mark_safe
-# noinspection PyUnresolvedReferences
-from django.utils.six.moves.urllib.parse import urlencode
 from django.views.generic import TemplateView
 from djangofloor.tasks import set_websocket_topics
 from djangofloor.forms import SearchForm

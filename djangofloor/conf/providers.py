@@ -5,8 +5,6 @@ Settings that are merged to provide the final Django settings come from differen
 (Python modules or files, ini files, …).
 
 """
-from __future__ import unicode_literals, print_function, absolute_import
-
 import hashlib
 import os
 import sys

@@ -3,7 +3,6 @@
 
 Require a `stdeb.cfg` at the root of your project.
 """
-from __future__ import unicode_literals, print_function, absolute_import
 import codecs
 from distutils.errors import DistutilsModuleError
 import os

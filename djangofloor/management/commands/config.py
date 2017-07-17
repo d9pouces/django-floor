@@ -1,12 +1,10 @@
-from __future__ import unicode_literals, print_function, absolute_import
-
 from argparse import ArgumentParser
 
 from django.core.management import BaseCommand
 from django.utils.translation import ugettext as _
+
 from djangofloor import __version__ as version
 from djangofloor import decorators
-from djangofloor.conf.fields import ConfigField
 from djangofloor.conf.providers import IniConfigProvider
 from djangofloor.conf.settings import merger
 from djangofloor.tasks import import_signals_and_functions

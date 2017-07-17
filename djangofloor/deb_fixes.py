@@ -1,6 +1,5 @@
 """patches for creating Debian Packages with `multideb` and `stdeb`
 """
-from __future__ import unicode_literals
 import codecs
 import os
 import shutil

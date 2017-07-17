@@ -1,5 +1,3 @@
-from __future__ import unicode_literals, print_function, absolute_import
-
 from django.test import TestCase
 
 from djangofloor.management.base import TemplatedBaseCommand

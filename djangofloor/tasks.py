@@ -9,7 +9,6 @@ Use these functions for:
     shortcut (:meth:`djangofloor.tasks.scall`)
 
 """
-from __future__ import unicode_literals, print_function, absolute_import
 
 import json
 import logging
@@ -25,9 +24,9 @@ from django.utils.six import text_type
 from redis import StrictRedis
 
 from djangofloor.decorators import REGISTERED_SIGNALS, SignalConnection, REGISTERED_FUNCTIONS, FunctionConnection
-from djangofloor.wsgi.window_info import WindowInfo
 from djangofloor.utils import import_module, RemovedInDjangoFloor110Warning
 from djangofloor.wsgi.exceptions import NoWindowKeyException
+from djangofloor.wsgi.window_info import WindowInfo
 
 __author__ = 'Matthieu Gallet'
 logger = logging.getLogger('djangofloor.signals')

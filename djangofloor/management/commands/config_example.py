@@ -1,5 +1,3 @@
-from __future__ import unicode_literals
-
 from argparse import ArgumentParser
 
 from django.core.management import BaseCommand

@@ -1,15 +1,14 @@
 """.. deprecated:: 1.0"""
-from __future__ import unicode_literals, print_function, absolute_import
-
 import warnings
 
 from django.contrib.auth import get_user_model
-from django.utils.lru_cache import lru_cache
 from django.utils.encoding import force_text
+from django.utils.lru_cache import lru_cache
 from django.utils.six import binary_type
-from djangofloor.wsgi.window_info import WindowInfo, Session
+
 from djangofloor.tasks import SESSION, WINDOW, BROADCAST, USER, call
 from djangofloor.utils import RemovedInDjangoFloor110Warning
+from djangofloor.wsgi.window_info import WindowInfo, Session
 
 __author__ = 'Matthieu Gallet'
 

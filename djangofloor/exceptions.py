@@ -6,8 +6,6 @@ Define several common exceptions, which can be gracefully handled by DjangoFloor
 You should raise these exceptions, or create new exceptions which derive from these ones. They help to display helpful
 messages to end-user.
 """
-from __future__ import unicode_literals
-
 import warnings
 
 from django.utils.translation import ugettext as _

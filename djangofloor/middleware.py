@@ -26,8 +26,6 @@ The class :class:`WindowInfoMiddleware` allows to:
   * install new methods to the :class:`djangofloor.wsgi.window_info.WindowInfo` class.
 
 """
-from __future__ import unicode_literals, print_function, absolute_import
-
 import base64
 import warnings
 
@@ -46,6 +44,7 @@ from django.utils import translation
 from django.utils.crypto import get_random_string
 from django.utils.deprecation import MiddlewareMixin, CallableBool
 from django.utils.translation import get_language_from_request
+
 from djangofloor.utils import RemovedInDjangoFloor110Warning
 
 __author__ = 'Matthieu Gallet'

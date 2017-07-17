@@ -4,8 +4,6 @@
 
 Currently, only a SearchForm is provided.
 """
-from __future__ import unicode_literals
-
 from django import forms
 from django.utils.translation import ugettext_lazy as _
 from djangofloor.decorators import validate_form, everyone

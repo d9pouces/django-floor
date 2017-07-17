@@ -8,8 +8,6 @@ You should install the :mod:`psutil` module to add server info (like the CPU usa
 
 
 """
-from __future__ import unicode_literals, print_function, absolute_import
-
 import codecs
 import logging
 import os

@@ -6,8 +6,6 @@ This module only defines shortcuts to existing JS signals.
 These signals are intended to be called on the JS side from the Python side and allow you to easily modify the client webpage.
 
 """
-from __future__ import unicode_literals
-
 from djangofloor.tasks import WINDOW, scall
 from djangofloor.wsgi.window_info import render_to_string
 

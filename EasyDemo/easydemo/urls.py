@@ -1,5 +1,3 @@
-from __future__ import unicode_literals, print_function, absolute_import
-
 # noinspection PyUnresolvedReferences
 from easydemo.views import cache_60, cache_nevercache, cache_private, cache_vary_on_headers, chat, download_file
 from django.conf.urls import url

@@ -5,8 +5,6 @@ By default, register URLs for the admin site, `jsi18n`, static and media files, 
 If DjangoDebugToolbar is present, then its URL is also registered.
 
 """
-from __future__ import unicode_literals, print_function, absolute_import
-
 from django.conf import settings
 from django.conf.urls import url, include
 from django.contrib import admin

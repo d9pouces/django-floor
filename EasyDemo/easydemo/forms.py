@@ -1,5 +1,3 @@
-from __future__ import unicode_literals, print_function, absolute_import
-
 from django import forms
 from djangofloor.decorators import validate_form, everyone
 from django.utils.translation import ugettext_lazy as _

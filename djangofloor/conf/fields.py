@@ -4,7 +4,6 @@
 Use these classes in your mapping provided in `yourproject.iniconf:INI_MAPPING`.
 Check :mod:`djangofloor.conf.mapping` for examples.
 """
-from __future__ import unicode_literals, print_function, absolute_import
 
 import os
 

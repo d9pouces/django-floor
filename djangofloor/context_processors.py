@@ -9,8 +9,6 @@ Add some values to the template context, related to:
   * websockets
 
 """
-from __future__ import unicode_literals, print_function, absolute_import
-
 import warnings
 
 from django.conf import settings

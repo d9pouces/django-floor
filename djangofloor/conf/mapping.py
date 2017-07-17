@@ -5,7 +5,6 @@ This mapping can be overriden in `yourproject.iniconf:INI_MAPPING`.
 The `INI_MAPPING` must be a list of :class:`djangofloor.conf.fields.ConfigField`, giving where to search in a .ini file,
 the corresponding Django setting value and how to convert from one format to the another.
 """
-from __future__ import unicode_literals, print_function, absolute_import
 
 from djangofloor.conf.callables import allauth_providers
 from djangofloor.conf.fields import CharConfigField, IntegerConfigField, BooleanConfigField, ConfigField, bool_setting, \

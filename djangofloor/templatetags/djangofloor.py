@@ -4,8 +4,6 @@
 Various templatetags provided by DjangoFloor.
 
 """
-from __future__ import unicode_literals, print_function, absolute_import
-
 import logging
 import warnings
 

@@ -3,8 +3,6 @@
 
 Websocket handler specific to aiohttp, as well as its main function.
 """
-from __future__ import unicode_literals, print_function, absolute_import
-
 # noinspection PyCompatibility
 import asyncio
 import logging

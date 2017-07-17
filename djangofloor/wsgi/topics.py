@@ -8,8 +8,6 @@ The default serializer should be sufficient for any Django models, but of course
 with the `WEBSOCKET_TOPIC_SERIALIZER` setting.
 
 """
-from __future__ import unicode_literals, print_function, absolute_import
-
 import logging
 
 from django.contrib.auth import get_user_model

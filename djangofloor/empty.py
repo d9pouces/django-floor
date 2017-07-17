@@ -1,6 +1,4 @@
 """.. deprecated:: 1.0"""
-from __future__ import unicode_literals, print_function, absolute_import
-
 import warnings
 
 from djangofloor.utils import RemovedInDjangoFloor110Warning

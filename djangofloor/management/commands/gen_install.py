@@ -2,8 +2,6 @@
 Currently used for creating Debian packages.
 
 """
-from __future__ import unicode_literals, print_function
-
 import codecs
 import datetime
 import os
@@ -11,14 +9,13 @@ import shutil
 import sys
 
 from django.conf import settings
-from django.core.management import BaseCommand, call_command
+from django.core.management import call_command
 from django.template.loader import render_to_string
 
 from djangofloor import defaults_install
 from djangofloor.conf.providers import IniConfigProvider
 from djangofloor.management.base import TemplatedBaseCommand
 from djangofloor.scripts import get_merger_from_env
-from configparser import ConfigParser
 
 __author__ = 'Matthieu Gallet'
 

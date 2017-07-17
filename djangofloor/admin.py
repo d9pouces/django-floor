@@ -4,14 +4,12 @@
 You can use the default admin view to create new notifications for your users.
 There are actions to activate or deactivate these notifications.
 """
-from __future__ import unicode_literals, print_function, absolute_import
+
 
 from django.contrib import admin
 from django.contrib import messages
-from django.contrib.admin import site
 from django.template.defaultfilters import truncatewords
 from django.utils.translation import ugettext_lazy as _
-from djangofloor.models import Notification
 
 __author__ = 'Matthieu Gallet'
 

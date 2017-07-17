@@ -5,15 +5,14 @@ Allows you to use the same `javascript` and `stylesheet` template tags as with `
 If you add `django-pipeline` to your `settings.INSTALLED_APPS`, these versions are ignored, using the original ones.
 
 """
-from __future__ import unicode_literals, print_function, absolute_import
-
 import warnings
 
 from django import template
 from django.conf import settings
-from django.template.library import SimpleNode
 from django.utils.safestring import mark_safe
+
 from djangofloor.utils import RemovedInDjangoFloor110Warning
+
 if settings.USE_PIPELINE:
     try:
         # noinspection PyPackageRequirements

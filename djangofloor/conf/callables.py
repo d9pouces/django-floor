@@ -3,10 +3,12 @@
 
 
 """
-from __future__ import unicode_literals, print_function, absolute_import
+
 # noinspection PyUnresolvedReferences
+from urllib.parse import urlparse
+
 from django.utils.crypto import get_random_string
-from django.utils.six.moves.urllib.parse import urlparse
+
 
 from djangofloor.utils import is_package_present
 

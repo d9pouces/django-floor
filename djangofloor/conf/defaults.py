@@ -3,7 +3,6 @@
 
 Tries to define settings that are valid for deploying most of djangofloor-based websites.
 """
-from __future__ import unicode_literals, print_function, absolute_import
 
 import os
 

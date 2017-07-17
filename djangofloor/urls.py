@@ -4,8 +4,6 @@
 Define URLs for user authentication forms and for defining JS signals.
 Also define the URL linked to the monitoring and to the search views.
 """
-from __future__ import unicode_literals, print_function, absolute_import
-
 from django.conf import settings
 from django.conf.urls import url
 

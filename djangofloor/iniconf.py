@@ -1,6 +1,4 @@
 """.. deprecated:: 1.0"""
-from __future__ import unicode_literals
-
 import warnings
 
 from djangofloor.conf import fields, mapping

@@ -8,7 +8,6 @@ Setting `DF_DEFAULT_GROUPS` is expected to be a list of group names.
 
 
 """
-from __future__ import unicode_literals, print_function, absolute_import
 
 import logging
 from django.conf import settings

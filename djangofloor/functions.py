@@ -5,17 +5,15 @@ For all app in `settings.INSTALLED_APPS`, DjangoFloor tries to import `app.funct
 If you want to write your WS functions into other modules, be sure that `app.functions` imports these modules.
 
 """
-from __future__ import unicode_literals, print_function, absolute_import
-
 import logging
 
 from django.contrib.auth.forms import SetPasswordForm
 from django.http import QueryDict
-from django.middleware.csrf import get_token, _get_new_csrf_string, _salt_cipher_secret, _unsalt_cipher_token
+# noinspection PyProtectedMember
+from django.middleware.csrf import _get_new_csrf_string, _salt_cipher_secret, _unsalt_cipher_token
 
 from djangofloor.decorators import function, is_authenticated
 from djangofloor.tasks import scall, WINDOW
-from djangofloor.wsgi.window_info import WindowInfo
 
 __author__ = 'Matthieu Gallet'
 logger = logging.getLogger('djangofloor.signals')

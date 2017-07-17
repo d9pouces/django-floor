@@ -1,5 +1,3 @@
-from __future__ import unicode_literals, print_function, absolute_import
-
 import glob
 import os
 import shutil
@@ -7,6 +5,7 @@ import subprocess
 
 from django.conf import settings
 from django.core.management import BaseCommand
+
 from djangofloor.utils import ensure_dir
 
 __author__ = 'Matthieu Gallet'

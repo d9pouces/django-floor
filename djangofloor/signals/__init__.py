@@ -5,8 +5,6 @@ For all app in `settings.INSTALLED_APPS`, DjangoFloor tries to import `app.signa
 If you want to write your signals into other modules, be sure that `app.signals` imports these modules.
 
 """
-from __future__ import unicode_literals, print_function, absolute_import
-
 import logging
 
 from djangofloor.decorators import signal, is_staff

@@ -8,8 +8,6 @@ Currently, only defines models for Notification:
 
 Non-authenticated users uses sessions for tracking read actions.
 """
-from __future__ import unicode_literals, print_function, absolute_import
-
 import datetime
 
 from django.conf import settings

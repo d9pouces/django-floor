@@ -3,8 +3,6 @@
 
 Define useful handlers, formatters and filters and generate an complete log configuration.
 """
-from __future__ import unicode_literals, print_function, absolute_import
-
 import logging
 import logging.handlers
 import os
@@ -19,6 +17,7 @@ from django.core.management import color_style
 from django.utils.log import AdminEmailHandler as BaseAdminEmailHandler
 # noinspection PyUnresolvedReferences
 from django.utils.six.moves.urllib.parse import urlparse
+
 from djangofloor.checks import settings_check_results
 
 __author__ = 'Matthieu Gallet'

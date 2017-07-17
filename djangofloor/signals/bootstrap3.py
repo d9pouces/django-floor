@@ -5,8 +5,6 @@
 
 This module only defines shortcuts to existing JS signals that are linked to Boostrap3.
 """
-from __future__ import unicode_literals
-
 from django.utils.six import text_type
 
 from djangofloor.tasks import WINDOW, scall

@@ -4,7 +4,6 @@
 Define some utility functions like warning or walking through modules.
 
 """
-from __future__ import unicode_literals, print_function
 
 import argparse
 import os

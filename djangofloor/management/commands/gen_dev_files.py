@@ -17,8 +17,6 @@ A few extra variables are currently added to the context:
   * `settings_merger` : :class:`djangofloor.utils.SettingMerger` with documentation settings
 
 """
-from __future__ import unicode_literals
-
 from argparse import ArgumentParser
 
 import pkg_resources

@@ -3,8 +3,6 @@
 
 Define "main" functions for your scripts using the Django `manage.py` system or Gunicorn/Celery/uWSGI.
 """
-from __future__ import unicode_literals, absolute_import, print_function
-
 import codecs
 import logging
 import logging.config
@@ -16,6 +14,7 @@ import sys
 from argparse import ArgumentParser
 
 from django.utils.six import text_type
+
 from djangofloor.conf.merger import SettingMerger
 from djangofloor.conf.providers import PythonModuleProvider, PythonFileProvider, IniConfigProvider, \
     PythonConfigFieldsProvider

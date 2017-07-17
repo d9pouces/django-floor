@@ -47,8 +47,6 @@ The registered Python code can use py3 annotation for specifying data types.
 
 
 """
-from __future__ import unicode_literals, print_function, absolute_import
-
 import logging
 import re
 import warnings
@@ -58,6 +56,7 @@ from django.conf import settings
 from django.http import QueryDict
 from django.utils.encoding import force_text
 from django.utils.six import text_type
+
 from djangofloor.utils import RemovedInDjangoFloor110Warning
 
 try:

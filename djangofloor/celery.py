@@ -4,7 +4,6 @@
 You should not use this module (or rename it), as it is only used to auto-discover tasks.
 
 """
-from __future__ import unicode_literals, absolute_import, print_function
 import logging.config
 from django.conf import settings
 from djangofloor.scripts import set_env

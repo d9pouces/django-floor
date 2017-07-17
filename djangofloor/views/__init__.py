@@ -6,8 +6,6 @@ Also define two functions:
   * :meth:`read_file_in_chunks`: generate an iterator that reads a file object in chunks
   * :meth:`send_file`: return an efficient :class:`django.http.response.HttpResponse` for reading files
 """
-from __future__ import unicode_literals, print_function, absolute_import
-
 import json
 import mimetypes
 import os
