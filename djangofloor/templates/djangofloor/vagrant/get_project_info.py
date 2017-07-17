@@ -44,7 +44,9 @@ def main():
         defaults['maintainer'] = '%s <%s>' % tuple(maintainer)
         defaults['vendor'] = '%s <%s>' % tuple(maintainer)
 
-    parser['DEFAULT'] = defaults
+    parser['deb'] = defaults
+    parser['rpm'] = defaults
+    parser['tar'] = defaults
     with open('{{ fpm_project_config_filename.1 }}', 'w', encoding='utf-8') as fd:
         parser.write(fd)
 

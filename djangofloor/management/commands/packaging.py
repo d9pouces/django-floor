@@ -7,6 +7,7 @@ import shutil
 import subprocess
 from argparse import ArgumentParser
 from configparser import ConfigParser
+from io import StringIO
 
 from django.conf import settings
 from django.template.loader import render_to_string
@@ -165,8 +166,14 @@ class Command(TemplatedBaseCommand):
     default_written_files_locations = [('djangofloor', 'djangofloor/packaging'),
                                        (settings.DF_MODULE_NAME, '%s/packaging' % settings.DF_MODULE_NAME)]
     packaging_config_files = ['dev/config-packaging.ini']
-    available_distributions = {'ubuntu/trusty64': 'deb'}
+    available_distributions = {'ubuntu/precise64': 'deb', 'ubuntu/trusty64': 'deb', 'ubuntu/wily64': 'deb',
+                               'ubuntu/xenial64': 'deb', 'ubuntu/yakketty64': 'deb', 'ubuntu/zesty64': 'deb',
+                               'debian/jessie64': 'deb', 'debian/wheezy64': 'deb'}
     __template_context = {}
+    BUILD_PACKAGE = 'build_package'
+    SHOW_CONFIG = 'display_config'
+    hooks_section = 'global'
+    processes_section = 'processes'
 
     def __init__(self, stdout=None, stderr=None, no_color=False):
         super(Command, self).__init__(stdout=stdout, stderr=stderr, no_color=no_color)
@@ -185,6 +192,7 @@ class Command(TemplatedBaseCommand):
         self.vagrant_distrib = 'ubuntu/trusty64'
         self.written_files_locations = []
         self.processes = {}
+        self.action = self.BUILD_PACKAGE
 
     def add_arguments(self, parser):
         super(Command, self).add_arguments(parser)
@@ -193,12 +201,14 @@ class Command(TemplatedBaseCommand):
         parser.add_argument('--dist-dir', default='./dist')
         parser.add_argument('-C', '--config', help='Config file for FPM packaging and default config file',
                             default=None)
-        parser.add_argument('--source-dir', default='.', help='Path of your project source.'
+        parser.add_argument('--show-config', help='Display a most complete configuration file, displaying '
+                                                  'all available options.', action='store_true', default=False)
+        parser.add_argument('--source-dir', default='.', help='Path of your project source. '
                                                               '"." by default, expecting that you run this command '
                                                               'from the source dir.')
         parser.add_argument('--clean', help='Remove temporary dirs',
                             action='store_true', default=False)
-        parser.add_argument('--distrib', default=self.distribution, choices=self.available_distributions)
+        parser.add_argument('--distrib', default=self.vagrant_distrib, choices=self.available_distributions)
         # parser.add_argument('--add-python-dep', default=False, action='store_true',
         #                     help='Use the native Python package')
         parser.add_argument('--include', default=[], action='append',
@@ -225,8 +235,8 @@ class Command(TemplatedBaseCommand):
         self.custom_config_filename = options['config']
         parser = self.get_config_parser()
         for hook_name in self.hooks:
-            if parser.has_option('global', hook_name):
-                self.hooks[hook_name] = parser.get('global', hook_name)
+            if parser.has_option(self.hooks_section, hook_name):
+                self.hooks[hook_name] = parser.get(self.hooks_section, hook_name)
         self.default_setting_merger = self.get_merger([options['config']] if options['config'] else [])
         self.default_template_context = self.get_template_context(self.default_setting_merger, options['extra_context'])
         for value in options['include']:
@@ -237,6 +247,8 @@ class Command(TemplatedBaseCommand):
             self.written_files_locations.append((module_name, folder_name))
         if not self.written_files_locations:
             self.written_files_locations = self.default_written_files_locations
+        if options['show_config']:
+            self.action = self.SHOW_CONFIG
 
     def handle(self, *args, **options):
         self.load_options(options)
@@ -244,8 +256,11 @@ class Command(TemplatedBaseCommand):
         try:
             self.install_python()
             self.install_project()
-            self.install_config()
-            self.build_package(self.available_distributions[self.vagrant_distrib])
+            if self.action == self.BUILD_PACKAGE:
+                self.install_config()
+                self.build_package(self.available_distributions[self.vagrant_distrib])
+            elif self.action == self.SHOW_CONFIG:
+                self.show_config(self.available_distributions[self.vagrant_distrib])
         finally:
             self.destroy_vagrant_box()
 
@@ -379,6 +394,40 @@ class Command(TemplatedBaseCommand):
             json.dump(cmd, fd)
         self.copy_vagrant_script('djangofloor/vagrant/create_package.sh')
         self.execute_hook('post_build_package')
+
+    def show_config(self, package_type):
+        current_parser = self.get_config_parser()
+        new_parser = ConfigParser()
+
+        new_parser.add_section(self.hooks_section)
+        for key in self.hooks:
+            if current_parser.has_section(self.hooks_section) and current_parser.has_option(self.hooks_section, key):
+                new_parser.set(self.hooks_section, key, current_parser[self.hooks_section][key])
+            else:
+                new_parser.set(self.hooks_section, key, 'example.module.hook_function')
+
+        new_parser.add_section(self.processes_section)
+        for key in current_parser.options(self.processes_section):
+            new_parser.set(self.processes_section, key, current_parser[self.processes_section][key])
+        for key, fpm_option in sorted(FPM_CLI_OPTIONS.items()):
+            section, sep, option_name = key.partition('.')
+            if section != package_type:
+                continue
+            value = '%s fpm option' % fpm_option
+            if fpm_option in FPM_TEMPLATED_OPTIONS:
+                value += ' [name of a valid Django template]'
+            elif fpm_option in FPM_BOOL_OPTIONS:
+                value += ' ["true" or "false"]'
+            elif fpm_option in FPM_MULTIPLE_OPTIONS:
+                value += ' [one value per line\n   (each extra line must starts by two spaces)]'
+            if current_parser.has_option(section, option_name):
+                value += ' [current value: %s]' % current_parser[section][option_name]
+            if not new_parser.has_section(section):
+                new_parser.add_section(section)
+            new_parser.set(section, option_name, value)
+        fp = StringIO()
+        new_parser.write(fp)
+        self.stdout.write(self.style.SUCCESS(fp.getvalue()))
 
     def get_template_context(self, merger, extra_context):
         if self.__template_context:
