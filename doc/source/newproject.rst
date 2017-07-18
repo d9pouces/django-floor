@@ -6,7 +6,7 @@ Expected archicture
 
 By default, DjangoFloor assumes several architectural choices:
 
-  * your application server (aiohttp) is behind a reverse proxy (nginx or apache),
+  * your application server (aiohttp or gunicorn) is behind a reverse proxy (nginx or apache),
   * offline computation are processed by Celery queues,
   * Redis is used as Celery broker, session store and cache database.
 
@@ -68,14 +68,14 @@ Preparing the environment
 Project structure
 -----------------
 
-The structure of this project closely follows the Django classical one.
+The structure of this project closely follows the Django standard one.
 DjangoFloor only provides default code or values for some parts, so you do not have to write them (but you can override them if you want):
 
   * instead of writing a complete `myproject.settings` module, you only have to override some values in a `myproject.defaults` module,
   * a valid `ROOT_URLCONF` is provided (with admin views as well as static and media files), you can only add some views in a list in `myproject.url.urlpatterns`,
-  * a base template, based on Bootstrap 3,
+  * a default template and a default index view, based on Bootstrap 3,
   * a minimal mapping for some settings in a configuration file,
-  * multiple WSGI apps are also provided.
+  * multiple WSGI apps (for Gunicorn and aiohttp) are also provided.
 
 Translating strings
 -------------------
@@ -128,9 +128,6 @@ Development files
 DjangoFloor can create a documentation for your project as well as some extra files:
 
   * configuration file for generating the doc source,
-  * configuration file for creating packages,
-  * Vagrant files
-  *
 
 .. code-block:: bash
 
@@ -141,12 +138,12 @@ You can now install sphinx and generate the doc:
 
 .. code-block:: bash
 
-  pip install sphinx
+  pip install sphinx  # some extra style packages may be required
   cd doc
   make html
   cd ..
 
-how files are generated?
+How files are generated?
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
 The `gen_dev_files` command looks for files in some directories.
@@ -209,3 +206,34 @@ Template values are:
 If the final file is empty, then it is not written.
 
 Due to the search pattern, you can create your own templates that extends DjangoFloor ones.
+
+
+Creating Debian packages
+------------------------
+
+There are several ways to distribute your application, like:
+
+  * source Python files,
+  * Docker files,
+  * standard packages for your distribution (e.g. .deb files for Ubuntu and Debian)
+
+Again, there are two methods for building a .deb package:
+
+  * a small package that only contains your application, with a package dependency for each Python dependency.
+  This is the cleanest way, but that requires to package every Python dependency, and you may have many conflicts
+  between versions. Of course, this is the selected method for official packages.
+  * a big package that contains everything (your application, its Python dependencies, Python itself, and standard
+  database servers like Redis and PostgreSQL).
+
+Packages created by DjangoFloor (and its Django command `"packaging`") are between these two methods, since it is a virtualenv (using the Python 3 provided
+by your distribution) created in /opt and simply packaged as-is. All dependencies are installed inside this virtualenv.
+
+The whole process is quite simple:
+
+  * create a Vagrant box using the selected distribution (like `"ubuntu/xenial64"`),
+  * install a virtual env inside /opt/myproject,
+  * create an archive of your project (with `python3 setup.py sdist` in the current directory),
+  * send this archive to the Vagrant box and install it in the virtual env,
+  * create required directories, collect static files and create some files (like service files for systemd),
+  * finally create the package using the `fpm` command.
+

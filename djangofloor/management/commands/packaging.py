@@ -161,8 +161,39 @@ class Process(object):
         self.binary = shlex.split(command_line)[0]
 
 
+class CreatedFilesContext:
+    """Watch created files in a given directory during some actions.
+
+    """
+    def __init__(self, watched_dir):
+        self.watched_dir = watched_dir
+        self.initial_files = None
+        self.new_files = {}
+        self.single_created_file = None
+
+    def __enter__(self):
+        self.initial_files = self.get_dist_files()
+        return self
+
+    def get_dist_files(self):
+        if not os.path.isdir(self.watched_dir):
+            return {}
+        return {x: os.stat(os.path.join(self.watched_dir, x)).st_mtime for x in os.listdir(self.watched_dir)}
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        new_files = self.get_dist_files()
+        for dist_filename, mtime in new_files.items():
+            if mtime > self.initial_files.get(dist_filename, 0.0):
+                dist_path = os.path.join(self.watched_dir, dist_filename)
+                self.new_files[dist_path] = dist_filename
+                if self.single_created_file is None:
+                    self.single_created_file = (dist_path, dist_filename)
+                else:
+                    self.single_created_file = None
+
+
 class Command(TemplatedBaseCommand):
-    """Create a Makefile """
+    """Create a complete Debian package using a Vagrant box. You must build a different package for each distrib."""
     default_written_files_locations = [('djangofloor', 'djangofloor/packaging'),
                                        (settings.DF_MODULE_NAME, '%s/packaging' % settings.DF_MODULE_NAME)]
     packaging_config_files = ['dev/config-packaging.ini']
@@ -179,10 +210,14 @@ class Command(TemplatedBaseCommand):
         super(Command, self).__init__(stdout=stdout, stderr=stderr, no_color=no_color)
         self.build_dir = None
         self.dist_dir = None
-        self.hooks = {'pre_install_project': None, 'post_install_project': None,
-                      'pre_install_config': None, 'post_install_config': None,
-                      'pre_install_python': None, 'post_install_python': None,
-                      'pre_build_package': None, 'post_build_package': None}
+        self.hooks = {
+            'pre_prepare_vagrant_box': None, 'post_prepare_vagrant_box': None,
+            'pre_install_project': None, 'post_install_project': None,
+            'pre_install_config': None, 'post_install_config': None,
+            'pre_install_python': None, 'post_install_python': None,
+            'pre_build_package': None, 'post_build_package': None,
+            'pre_destroy_vagrant_box': None, 'post_destroy_vagrant_box': None,
+        }
         self.force_mode = False
         self.custom_config_filename = None
         self.default_setting_merger = None
@@ -193,6 +228,7 @@ class Command(TemplatedBaseCommand):
         self.written_files_locations = []
         self.processes = {}
         self.action = self.BUILD_PACKAGE
+        self.no_vagrant_destroy = False
 
     def add_arguments(self, parser):
         super(Command, self).add_arguments(parser)
@@ -209,8 +245,8 @@ class Command(TemplatedBaseCommand):
         parser.add_argument('--clean', help='Remove temporary dirs',
                             action='store_true', default=False)
         parser.add_argument('--distrib', default=self.vagrant_distrib, choices=self.available_distributions)
-        # parser.add_argument('--add-python-dep', default=False, action='store_true',
-        #                     help='Use the native Python package')
+        parser.add_argument('--no-destroy', default=False, action='store_true',
+                            help='Do not destroy the Vagrant virtual machine')
         parser.add_argument('--include', default=[], action='append',
                             help='Where to search templates and static files.\n'
                                  ' If not used, use "--include djangofloor:djangofloor/packages '
@@ -233,6 +269,7 @@ class Command(TemplatedBaseCommand):
         self.force_mode = options['clean']
         self.vagrant_distrib = options['distrib']
         self.custom_config_filename = options['config']
+        self.no_vagrant_destroy = options['no_destroy']
         parser = self.get_config_parser()
         for hook_name in self.hooks:
             if parser.has_option(self.hooks_section, hook_name):
@@ -329,15 +366,19 @@ class Command(TemplatedBaseCommand):
         return True
 
     def prepare_vagrant_box(self):
+        self.execute_hook('pre_prepare_vagrant_box')
         # noinspection PyUnresolvedReferences
         vagrant_content = render_to_string('djangofloor/vagrant/Vagrantfile', self.default_template_context)
         with open(os.path.join(self.vagrant_box_dir, 'Vagrantfile'), 'w') as fd:
             fd.write(vagrant_content)
         subprocess.check_call(['vagrant', 'up'], cwd=self.vagrant_box_dir)
+        self.execute_hook('post_prepare_vagrant_box')
 
     def destroy_vagrant_box(self):
-        pass
-        # subprocess.check_call(['vagrant', 'destroy', '--force'], cwd=self.vagrant_box_dir)
+        if not self.no_vagrant_destroy:
+            self.execute_hook('pre_destroy_vagrant_box')
+            subprocess.check_call(['vagrant', 'destroy', '--force'], cwd=self.vagrant_box_dir)
+            self.execute_hook('post_destroy_vagrant_box')
 
     def install_python(self):
         self.stdout.write(self.style.SUCCESS('installing Python…'))
@@ -348,22 +389,11 @@ class Command(TemplatedBaseCommand):
     def install_project(self):
         self.stdout.write(self.style.SUCCESS('creating dist file…'))
         self.execute_hook('pre_install_project')
-        dist_dir = os.path.join(self.source_dir, 'dist')
-
-        def get_dist_files():
-            if not os.path.isdir(dist_dir):
-                return {}
-            return {x: os.stat(os.path.join(dist_dir, x)).st_mtime for x in os.listdir(dist_dir)}
-
-        current_files = get_dist_files()
-        subprocess.check_call(['python3', 'setup.py', 'sdist'], cwd=self.source_dir)
-        new_files = get_dist_files()
-        dist_path, dist_filename = None, None
-        for dist_filename, mtime in new_files.items():
-            if mtime > current_files.get(dist_filename, 0.0):
-                dist_path = os.path.join(dist_dir, dist_filename)
-        if not dist_path:
+        with CreatedFilesContext(os.path.join(self.source_dir, 'dist')) as ctx:
+            subprocess.check_call(['python3', 'setup.py', 'sdist'], cwd=self.source_dir)
+        if ctx.single_created_file is None:
             raise ValueError('unable to create source dist file')
+        (dist_path, dist_filename) = ctx.single_created_file
         shutil.copy2(dist_path, os.path.join(self.host_tmp_dir, dist_filename))
 
         self.stdout.write(self.style.SUCCESS('installing source file…'))
@@ -392,7 +422,18 @@ class Command(TemplatedBaseCommand):
         cmd = self.get_fpm_command_line(package_type)
         with open(os.path.join(self.host_tmp_dir, 'fpm.json'), 'w') as fd:
             json.dump(cmd, fd)
-        self.copy_vagrant_script('djangofloor/vagrant/create_package.sh')
+        with CreatedFilesContext(self.host_tmp_dir) as ctx:
+            self.copy_vagrant_script('djangofloor/vagrant/create_package.sh')
+        package_src_filename = None
+        for key, value in ctx.new_files.items():
+            if value.endswith('.%s' % package_type):
+                package_src_filename = key
+        if package_src_filename:
+            package_dst_filename = os.path.join(self.dist_dir, os.path.basename(package_src_filename))
+            os.rename(package_src_filename, package_dst_filename)
+            self.stdout.write(self.style.SUCCESS('package %s created' % package_dst_filename))
+        else:
+            self.stdout.write(self.style.ERROR('no package has been created'))
         self.execute_hook('post_build_package')
 
     def show_config(self, package_type):

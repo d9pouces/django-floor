@@ -1,3 +1,0 @@
-{% extends 'djangofloor/dev/include/Vagrantfile_inc' %}
-{% block vm_box %}  config.vm.box = "ubuntu/xenial64"
-{% endblock %}
