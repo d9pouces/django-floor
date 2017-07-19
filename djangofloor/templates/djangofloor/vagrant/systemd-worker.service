@@ -5,7 +5,7 @@ After=network.target
 User={{ DF_MODULE_NAME }}
 Group={{ DF_MODULE_NAME }}
 WorkingDirectory=/opt/{{ DF_MODULE_NAME }}/var/
-ExecStart={{ processes.celery.command_line }} -Q {{ queue }}
+ExecStart={{ processes.celery.command_line }} worker -Q {{ queue }}
 [Install]
 WantedBy=multi-user.target
 {% endif %}

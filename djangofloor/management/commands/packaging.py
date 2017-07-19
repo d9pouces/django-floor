@@ -199,9 +199,8 @@ class Command(TemplatedBaseCommand):
                                        (settings.DF_MODULE_NAME, '%s/packaging' % settings.DF_MODULE_NAME)]
     packaging_config_files = ['dev/config-packaging.ini']
     available_distributions = {'ubuntu/precise64': 'deb', 'ubuntu/trusty64': 'deb', 'ubuntu/wily64': 'deb',
-                               'ubuntu/xenial64': 'deb', 'ubuntu/yakketty64': 'deb', 'ubuntu/zesty64': 'deb',
+                               'ubuntu/xenial64': 'deb', 'ubuntu/yakkety64': 'deb', 'ubuntu/zesty64': 'deb',
                                'debian/jessie64': 'deb', 'debian/wheezy64': 'deb'}
-    __template_context = {}
     BUILD_PACKAGE = 'build_package'
     SHOW_CONFIG = 'display_config'
     hooks_section = 'global'
@@ -222,7 +221,7 @@ class Command(TemplatedBaseCommand):
         self.force_mode = False
         self.custom_config_filename = None
         self.default_setting_merger = None
-        self.default_template_context = {}
+        self.template_context = {}
         self.verbose_mode = False
         self.source_dir = '.'
         self.vagrant_distrib = 'ubuntu/trusty64'
@@ -276,7 +275,7 @@ class Command(TemplatedBaseCommand):
             if parser.has_option(self.hooks_section, hook_name):
                 self.hooks[hook_name] = parser.get(self.hooks_section, hook_name)
         self.default_setting_merger = self.get_merger([options['config']] if options['config'] else [])
-        self.default_template_context = self.get_template_context(self.default_setting_merger, options['extra_context'])
+        self.template_context = self.get_template_context(self.default_setting_merger, options['extra_context'])
         for value in options['include']:
             module_name, sep, folder_name = value.partition(':')
             if sep != ':':
@@ -369,7 +368,7 @@ class Command(TemplatedBaseCommand):
     def prepare_vagrant_box(self):
         self.execute_hook('pre_prepare_vagrant_box')
         # noinspection PyUnresolvedReferences
-        vagrant_content = render_to_string('djangofloor/vagrant/Vagrantfile', self.default_template_context)
+        vagrant_content = render_to_string('djangofloor/vagrant/Vagrantfile', self.template_context)
         with open(os.path.join(self.vagrant_box_dir, 'Vagrantfile'), 'w') as fd:
             fd.write(vagrant_content)
         subprocess.check_call(['vagrant', 'up'], cwd=self.vagrant_box_dir)
@@ -409,24 +408,24 @@ class Command(TemplatedBaseCommand):
     def install_config(self):
         self.stdout.write(self.style.SUCCESS('installing static files…'))
         self.execute_hook('pre_install_config')
-        template_context = {}
-        template_context.update(self.default_template_context)
-        writers = self.get_file_writers(self.written_files_locations, context=template_context)
+        writers = self.get_file_writers(self.written_files_locations, context=self.template_context)
         for target_filename in sorted(writers):  # fix the writing order
             writer = writers[target_filename]
-            writer.write(self.host_package_dir, template_context, dry_mode=False, verbose_mode=self.verbose_mode)
-        script_content = render_to_string('djangofloor/vagrant/systemd-web.service', template_context)
+            writer.write(self.host_package_dir, self.template_context, dry_mode=False, verbose_mode=self.verbose_mode)
+        script_content = render_to_string('djangofloor/vagrant/systemd-web.service', self.template_context)
         # noinspection PyStringFormat
         filename = os.path.join(self.host_package_dir, 'etc', 'systemd', 'system',
-                                '%(DF_MODULE_NAME)s-HTTP-worker.service' % template_context)
+                                '%(DF_MODULE_NAME)s-HTTP-worker.service' % self.template_context)
         with open(filename, 'w') as fd:
             fd.write(script_content)
+        local_template_context = {}
+        local_template_context.update(self.template_context)
         for queue in get_expected_queues():
-            template_context['queue'] = queue
-            script_content = render_to_string('djangofloor/vagrant/systemd-worker.service', template_context)
+            local_template_context['queue'] = queue
+            script_content = render_to_string('djangofloor/vagrant/systemd-worker.service', local_template_context)
             # noinspection PyStringFormat
             filename = os.path.join(self.host_package_dir, 'etc', 'systemd', 'system',
-                                    '%(DF_MODULE_NAME)s-%(queue)s.service' % template_context)
+                                    '%(DF_MODULE_NAME)s-%(queue)s.service' % local_template_context)
             with open(filename, 'w') as fd:
                 fd.write(script_content)
         self.copy_vagrant_script('djangofloor/vagrant/configure_project.sh')
@@ -445,11 +444,16 @@ class Command(TemplatedBaseCommand):
             if value.endswith('.%s' % package_type):
                 package_src_filename = key
         if package_src_filename:
-            package_dst_filename = os.path.join(self.dist_dir, os.path.basename(package_src_filename))
+            package_basename = os.path.basename(package_src_filename)
+            package_dst_filename = os.path.join(self.dist_dir, package_basename)
             shutil.copy2(package_src_filename, package_dst_filename)
             self.stdout.write(self.style.SUCCESS('package %s created' % package_dst_filename))
+            local_template_context = {'package_filename': package_basename}
+            local_template_context.update(self.template_context)
+            self.copy_vagrant_script('djangofloor/vagrant/run_package.sh', execute=False)
         else:
             self.stdout.write(self.style.ERROR('no package has been created'))
+
         self.execute_hook('post_build_package')
 
     def show_config(self, package_type):
@@ -487,8 +491,6 @@ class Command(TemplatedBaseCommand):
         self.stdout.write(self.style.SUCCESS(fp.getvalue()))
 
     def get_template_context(self, merger, extra_context):
-        if self.__template_context:
-            return self.__template_context
         context = super(Command, self).get_template_context(merger, extra_context)
         context['bind_dirs'] = self.bind_dirs
         context['vagrant_distrib'] = self.vagrant_distrib
@@ -502,14 +504,13 @@ class Command(TemplatedBaseCommand):
                                                   self.vagrant_fpm_project_config_filename)
         context['fpm_custom_config_filename'] = (self.host_fpm_custom_config_filename,
                                                  self.vagrant_fpm_custom_config_filename)
-        self.__template_context = context
         return context
 
     def copy_vagrant_script(self, template_name, context=None, execute=True,
                             host_filename=None, vagrant_filename=None):
         if context is None:
             context = {}
-        context.update(self.default_template_context)
+        context.update(self.template_context)
         script_content = render_to_string(template_name, context)
         script_name = os.path.basename(template_name)
         if host_filename is None:
@@ -553,7 +554,7 @@ class Command(TemplatedBaseCommand):
                     cmd += [cli_option, value]
             elif cli_option in FPM_TEMPLATED_OPTIONS:
                 template_name = parser.get(section, option)
-                content = render_to_string(template_name, self.default_template_context)
+                content = render_to_string(template_name, self.template_context)
                 sha1 = hashlib.sha1(content.encode('utf-8')).hexdigest()
                 filename = os.path.join(self.host_tmp_dir, '%s.%s' % (os.path.basename(template_name), sha1))
                 with open(filename, mode='w', encoding='utf-8') as fd:
@@ -580,4 +581,4 @@ class Command(TemplatedBaseCommand):
                 continue
             process_categories[values['attr']] = os.path.join(self.vagrant_install_dir, 'bin', option_name)
         processes = {key: Process(key, value) for (key, value) in process_categories.items() if value}
-        self.__template_context['processes'] = self.processes or processes
+        self.template_context['processes'] = self.processes or processes

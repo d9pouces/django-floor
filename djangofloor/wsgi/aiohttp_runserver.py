@@ -8,11 +8,9 @@ import asyncio
 import logging
 
 # noinspection PyPackageRequirements
-import aiohttp
-# noinspection PyPackageRequirements
 import aiohttp.web
-# noinspection PyPackageRequirements
 import aiohttp.web_reqrep
+import aiohttp.web_request
 # noinspection PyPackageRequirements
 import asyncio_redis
 from aiohttp_wsgi import WSGIHandler
@@ -112,9 +110,9 @@ class WebsocketHandler(object):
         """Build a Django request from a aiohttp request: required to get sessions and topics.
 
         :param aiohttp_request: websocket request provided
-        :type aiohttp_request: :class:`aiohttp.web_reqrep.Request`
+        :type aiohttp_request: :class:`aiohttp.web_request.Request`
         """
-        assert isinstance(aiohttp_request, aiohttp.web_reqrep.Request)
+        assert isinstance(aiohttp_request, aiohttp.web_request.Request)
         django_request = HttpRequest()
         django_request.GET = aiohttp_request.rel_url.query
         django_request.COOKIES = aiohttp_request.cookies

@@ -1,10 +1,21 @@
 #!/usr/bin/env bash
-sudo rm -rf /opt/updoc/
-sudo dpkg -i /tmp/updoc/updoc_1.9.2_amd64.deb
-sudo -u updoc updoc-manage migrate
-cat << EOF | sudo tee /opt/updoc/etc/updoc/settings.ini
+IS_INSTALLED=`dpkg -l | grep "{{ DF_MODULE_NAME }}"`
+if [ -z "${IS_INSTALLED}" ]; then
+    sudo rm -rf "{{ install_dir.1 }}"
+fi
+sudo dpkg -i "{{ tmp_dir.1 }}/{{ DF_MODULE_NAME }}"*.deb
+sudo -u "{{ DF_MODULE_NAME }}" "{{ processes.django.command_line }}" migrate
+cat << EOF | sudo tee "{{ install_dir.1 }}/etc/{{ DF_MODULE_NAME }}/settings.ini"
 [global]
-listen_address = 127.0.0.1:8129
+listen_address = 0.0.0.0:{{ SERVER_PORT }}
 EOF
-sudo -u updoc updoc-manage runserver
-sudo apt-get install redis-server
+sudo apt-get install -y redis-server
+{% if processes.aiohttp %}sudo -u "{{ DF_MODULE_NAME }}" "{{ processes.aiohttp.command_line }}" &
+{% elif processes.gunicorn %}sudo -u "{{ DF_MODULE_NAME }}" "{{ processes.gunicorn.command_line }}" &
+{% endif %}
+{% if processes.celery %}{% for queue in expected_celery_queues %}sudo -u "{{ DF_MODULE_NAME }}" "{{ processes.celery.command_line }}" worker -Q "{{ queue }}" &
+{% endfor %}
+{% endif %}
+
+echo "To stop all commands, you can use the following command"
+echo "sudo kill `ps aux  | grep '^{{ DF_MODULE_NAME }} ' | awk '{print $2}'`"
