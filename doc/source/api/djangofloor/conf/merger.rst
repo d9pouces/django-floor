@@ -1,6 +1,6 @@
-:mod:`djangofloor.conf`
-***********************
+:mod:`djangofloor.conf.merger`
+******************************
 
-.. automodule:: djangofloor.conf
+.. automodule:: djangofloor.conf.merger
     :members:
     :undoc-members:

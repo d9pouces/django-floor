@@ -23,12 +23,11 @@ from django.utils.safestring import mark_safe
 from django.utils.six import text_type
 from django.utils.translation import ugettext_lazy as _
 from django.views.decorators.cache import never_cache
-from djangofloor.decorators import REGISTERED_SIGNALS, REGISTERED_FUNCTIONS
 from pkg_resources import parse_requirements, Distribution
 
 from djangofloor.celery import app
 from djangofloor.conf.settings import merger
-from djangofloor.tasks import set_websocket_topics, import_signals_and_functions
+from djangofloor.tasks import set_websocket_topics, import_signals_and_functions, get_expected_queues
 
 try:
     # noinspection PyPackageRequirements
@@ -147,9 +146,7 @@ class CeleryStats(MonitoringCheck):
     def get_context(self, request):
         celery_stats = app.control.inspect().stats()
         import_signals_and_functions()
-        expected_queues = {y.queue: ('danger', 'remove') for y in REGISTERED_FUNCTIONS.values()}
-        for connections in REGISTERED_SIGNALS.values():
-            expected_queues.update({y.queue: ('danger', 'remove') for y in connections if not callable(y.queue)})
+        expected_queues = {x: ('danger', 'remove') for x in get_expected_queues()}
         queue_stats = app.control.inspect().active_queues()
         if queue_stats is None:
             queue_stats = {}

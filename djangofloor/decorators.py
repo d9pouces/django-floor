@@ -48,6 +48,7 @@ The registered Python code can use py3 annotation for specifying data types.
 
 """
 import logging
+import random
 import re
 import warnings
 
@@ -55,7 +56,6 @@ from django import forms
 from django.conf import settings
 from django.http import QueryDict
 from django.utils.encoding import force_text
-from django.utils.six import text_type
 
 from djangofloor.utils import RemovedInDjangoFloor110Warning
 
@@ -70,6 +70,54 @@ logger = logging.getLogger('djangofloor.signals')
 
 REGISTERED_SIGNALS = {}
 REGISTERED_FUNCTIONS = {}
+
+
+class DynamicQueueName:
+    """Allow to dynamically select a Celery queue when the signal is called.
+    You can use it if all signals of a user must be processed by the same worker, but you still
+      want to dispatch signals to several workers.
+
+    """
+    def __call__(self, connection, window_info, original_kwargs):
+        """called for each signal call to dispatch this connection"""
+        raise NotImplementedError
+
+    def get_available_queues(self):
+        """return the set of all queues that can be returned by the `__call__` method.
+         However, if this method is not implemented, the impact is currently limited:
+           * the monitoring view will not display all required queues,
+           * the systemd service files (provided by the `packaging` command) will not create all required workers.
+         """
+        return {settings.CELERY_DEFAULT_QUEUE}
+
+
+class RandomDynamicQueueName(DynamicQueueName):
+    """Return a random queue on each signal call.
+
+     This class is somewhat useless since you could just run more workers on the same queue.
+
+      >>> q = RandomDynamicQueueName('prefix-', 2)
+      >>> q.get_available_queues() == {'prefix-0', 'prefix-1'}
+      True
+
+      >>> q(None, None, None) in {'prefix-0', 'prefix-1'}
+      True
+
+    """
+    def __init__(self, prefix: str, size: int):
+        """
+
+        :param prefix: prefix of the queue
+        :param size: number of available queues
+        """
+        self.prefix = prefix
+        self.size = size
+
+    def __call__(self, connection, window_info, original_kwargs):
+        return '%s%d' % (self.prefix, random.randint(0, self.size - 1))
+
+    def get_available_queues(self):
+        return {'%s%d' % (self.prefix, x) for x in range(self.size)}
 
 
 # noinspection PyUnusedLocal
@@ -245,8 +293,8 @@ class Connection(object):
     def get_queue(self, window_info, original_kwargs):
         """Provide the Celery queue name as a string."""
         if callable(self.queue):
-            return self.queue(self, window_info, original_kwargs)
-        return text_type(self.queue) or settings.CELERY_DEFAULT_QUEUE
+            return str(self.queue(self, window_info, original_kwargs))
+        return str(self.queue) or settings.CELERY_DEFAULT_QUEUE
 
 
 class SignalConnection(Connection):

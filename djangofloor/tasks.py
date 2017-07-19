@@ -23,7 +23,8 @@ from django.utils.module_loading import import_string
 from django.utils.six import text_type
 from redis import StrictRedis
 
-from djangofloor.decorators import REGISTERED_SIGNALS, SignalConnection, REGISTERED_FUNCTIONS, FunctionConnection
+from djangofloor.decorators import REGISTERED_SIGNALS, SignalConnection, REGISTERED_FUNCTIONS, FunctionConnection, \
+    DynamicQueueName
 from djangofloor.utils import import_module, RemovedInDjangoFloor110Warning
 from djangofloor.wsgi.exceptions import NoWindowKeyException
 from djangofloor.wsgi.window_info import WindowInfo
@@ -341,3 +342,22 @@ def df_call(signal_name, request, sharing=None, from_client=False, kwargs=None, 
     from djangofloor.df_ws4redis import _sharing_to_topics
     to = _sharing_to_topics(request, sharing) + [SERVER]
     call(signal_name, request, to=to, kwargs=kwargs, countdown=countdown, expires=expires, eta=eta)
+
+
+def get_expected_queues():
+    import_signals_and_functions()
+    expected_queues = set()
+    for connection in REGISTERED_FUNCTIONS.values():
+        if isinstance(connection.queue, DynamicQueueName):
+            for queue_name in connection.queue.get_available_queues():
+                expected_queues.add(queue_name)
+        elif not callable(connection.queue):
+            expected_queues.add(connection.queue)
+    for connections in REGISTERED_SIGNALS.values():
+        for connection in connections:
+            if isinstance(connection.queue, DynamicQueueName):
+                for queue_name in connection.queue.get_available_queues():
+                    expected_queues.add(queue_name)
+            elif not callable(connection.queue):
+                expected_queues.add(connection.queue)
+    return expected_queues

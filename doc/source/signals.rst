@@ -62,7 +62,7 @@ Of course, you can attach multiple functions to the same signal. All codes will 
 In this example:
   * `path` is the name of the signal,
   * `queue` is the (optional) name Celery queue. It allows to dispatch signal calls to specialized queues: one for interactive functions (allowing short response times) and one for slow functions (real background tasks).
-    `queue` can be a `callable` for dynamically choose the Celery queue.
+    `queue` can also be a sub-class of :class:`djangofloor.decorators.DynamicQueueName` for dynamically choose the Celery queue.
     Given `queue(signal, window_info, kwargs)`, it should return a string (corresponding to the Celery queue).
   * `is_allowed_to` must be a `callable` that determine whether if a signal call is allowed to a JS client. Given `is_allowed_to(signal, window_info, kwargs)`, it must return `True` or `False`. When the list of signals allowed to a client is built, kwargs is `None`.
 
@@ -73,17 +73,19 @@ In the following example, both functions will be executed. The first one will al
 
 .. code-block:: python
 
-    from djangofloor.decorators import signal, everyone, is_authenticated
+    from djangofloor.decorators import signal, everyone, is_authenticated, DynamicQueueName
     @signal(is_allowed_to=everyone, path='demo.signal.name', queue='celery')
     def slow_signal(window_info, kwarg1="demo", kwarg2: int=32):
        [perform a (clever) thing]
 
-    def get_queue_identifier(connection, window_info, kwargs):
-       """return the name of the Celery queue (in this case, each user has its own Celery queue)
-       """
-       return getattr(window_info, 'username', 'celery')
+    class UserQueueName(DynamicQueueName):
 
-    @signal(is_allowed_to=is_authenticated, path='demo.signal.name', queue=get_queue_identifier)
+        def __call__(connection, window_info, kwargs):
+           """return the name of the Celery queue (in this case, each user has its own Celery queue)
+           """
+           return getattr(window_info, 'username', 'celery')
+
+    @signal(is_allowed_to=is_authenticated, path='demo.signal.name', queue=UserQueueName())
     def slow_signal(window_info, kwarg1='demo', kwarg3: bool=True, **kwargs):
        [perform a (clever) thing]
 

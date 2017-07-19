@@ -3,8 +3,7 @@
 Vagrant.configure("2") do |config|
   config.vm.box = "{{ vagrant_distrib }}"
   {% for bind_dir in bind_dirs %}config.vm.synced_folder "{{ bind_dir.0 }}", "{{ bind_dir.1 }}"
-  {% endfor %}
-
+  {% endfor %}config.vm.network "forwarded_port", guest: {{ SERVER_PORT }}, host: 10080
   config.vm.provision "shell", inline: <<-SHELL
 sudo locale-gen `echo $LC_ALL`
 sudo apt-get update

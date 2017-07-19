@@ -15,6 +15,7 @@ from django.utils.functional import cached_property
 from django.utils.module_loading import import_string
 
 from djangofloor.management.base import TemplatedBaseCommand
+from djangofloor.tasks import get_expected_queues
 from djangofloor.utils import ensure_dir
 
 __author__ = 'Matthieu Gallet'
@@ -303,11 +304,11 @@ class Command(TemplatedBaseCommand):
 
     @cached_property
     def host_install_dir(self):
-        return ensure_dir(os.path.join(self.build_dir, 'opt', settings.DF_MODULE_NAME), parent=False)
+        return ensure_dir(os.path.join(self.build_dir, 'opt'), parent=False)
 
     @cached_property
     def host_tmp_dir(self):
-        return ensure_dir(os.path.join(self.build_dir, 'tmp', settings.DF_MODULE_NAME), parent=False)
+        return ensure_dir(os.path.join(self.build_dir, 'tmp'), parent=False)
 
     @cached_property
     def host_package_dir(self):
@@ -408,11 +409,26 @@ class Command(TemplatedBaseCommand):
     def install_config(self):
         self.stdout.write(self.style.SUCCESS('installing static files…'))
         self.execute_hook('pre_install_config')
-        template_context = self.default_template_context
+        template_context = {}
+        template_context.update(self.default_template_context)
         writers = self.get_file_writers(self.written_files_locations, context=template_context)
         for target_filename in sorted(writers):  # fix the writing order
             writer = writers[target_filename]
             writer.write(self.host_package_dir, template_context, dry_mode=False, verbose_mode=self.verbose_mode)
+        script_content = render_to_string('djangofloor/vagrant/systemd-web.service', template_context)
+        # noinspection PyStringFormat
+        filename = os.path.join(self.host_package_dir, 'etc', 'systemd', 'system',
+                                '%(DF_MODULE_NAME)s-HTTP-worker.service' % template_context)
+        with open(filename, 'w') as fd:
+            fd.write(script_content)
+        for queue in get_expected_queues():
+            template_context['queue'] = queue
+            script_content = render_to_string('djangofloor/vagrant/systemd-worker.service', template_context)
+            # noinspection PyStringFormat
+            filename = os.path.join(self.host_package_dir, 'etc', 'systemd', 'system',
+                                    '%(DF_MODULE_NAME)s-%(queue)s.service' % template_context)
+            with open(filename, 'w') as fd:
+                fd.write(script_content)
         self.copy_vagrant_script('djangofloor/vagrant/configure_project.sh')
         self.execute_hook('post_install_config')
 
@@ -430,7 +446,7 @@ class Command(TemplatedBaseCommand):
                 package_src_filename = key
         if package_src_filename:
             package_dst_filename = os.path.join(self.dist_dir, os.path.basename(package_src_filename))
-            os.rename(package_src_filename, package_dst_filename)
+            shutil.copy2(package_src_filename, package_dst_filename)
             self.stdout.write(self.style.SUCCESS('package %s created' % package_dst_filename))
         else:
             self.stdout.write(self.style.ERROR('no package has been created'))
@@ -479,6 +495,7 @@ class Command(TemplatedBaseCommand):
         context['install_dir'] = (self.host_install_dir, self.vagrant_install_dir)
         context['package_dir'] = (self.host_package_dir, self.vagrant_package_dir)
         context['tmp_dir'] = (self.host_tmp_dir, self.vagrant_tmp_dir)
+        context['expected_celery_queues'] = get_expected_queues()
         context['fpm_default_config_filename'] = (self.host_fpm_default_config_filename,
                                                   self.vagrant_fpm_default_config_filename)
         context['fpm_project_config_filename'] = (self.host_fpm_project_config_filename,
