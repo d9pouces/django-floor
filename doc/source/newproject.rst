@@ -228,7 +228,7 @@ Again, there are two methods for building a .deb package:
 Packages created by DjangoFloor (and its Django command `"packaging`") are between these two methods, since it is a virtualenv (using the Python 3 provided
 by your distribution) created in /opt and simply packaged as-is. All dependencies are installed inside this virtualenv.
 
-The whole process is quite simple:
+Here is the description of the whole process:
 
   * create a Vagrant box using the selected distribution (like `"ubuntu/xenial64"`),
   * install a virtual env inside /opt/myproject,
@@ -237,3 +237,9 @@ The whole process is quite simple:
   * create required directories, collect static files and create some files (like service files for systemd),
   * finally create the package using the `fpm` command.
 
+You can optionally keep the Vagrant box (it should be destroyed at the end of the command) with `--no-destroy` and install the
+newly created package in this box with `--run-package`.
+If you use this latter option, open your favorite browser to `http://localhost:10080/` to try your project.
+FPM supports many options. You can tweak its behaviour with a config file provided by the `--config` option.
+You can display an example of such config file with the `--show-config` (since this option requires to run almost the whole process,
+it can takes some time).

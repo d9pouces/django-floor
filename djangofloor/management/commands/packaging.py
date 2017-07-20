@@ -155,7 +155,7 @@ FPM_CLI_OPTIONS = {
 }
 
 
-class Process(object):
+class Process:
     def __init__(self, category, command_line):
         self.category = category
         self.command_line = command_line
@@ -201,8 +201,10 @@ class Command(TemplatedBaseCommand):
     available_distributions = {'ubuntu/precise64': 'deb', 'ubuntu/trusty64': 'deb', 'ubuntu/wily64': 'deb',
                                'ubuntu/xenial64': 'deb', 'ubuntu/yakkety64': 'deb', 'ubuntu/zesty64': 'deb',
                                'debian/jessie64': 'deb', 'debian/wheezy64': 'deb'}
-    BUILD_PACKAGE = 'build_package'
-    SHOW_CONFIG = 'display_config'
+    BUILD_PACKAGE = 1
+    SHOW_CONFIG = 2
+    DO_NOT_DESTROY_VAGRANT = 4
+    RUN_PACKAGE_AFTER_BUILD = 8
     hooks_section = 'global'
     processes_section = 'processes'
 
@@ -216,6 +218,7 @@ class Command(TemplatedBaseCommand):
             'pre_install_config': None, 'post_install_config': None,
             'pre_install_python': None, 'post_install_python': None,
             'pre_build_package': None, 'post_build_package': None,
+            'pre_run_package': None, 'post_run_package': None,
             'pre_destroy_vagrant_box': None, 'post_destroy_vagrant_box': None,
         }
         self.force_mode = False
@@ -227,8 +230,9 @@ class Command(TemplatedBaseCommand):
         self.vagrant_distrib = 'ubuntu/trusty64'
         self.written_files_locations = []
         self.processes = {}
+
+        self.run_options = 0
         self.action = self.BUILD_PACKAGE
-        self.no_vagrant_destroy = False
 
     def add_arguments(self, parser):
         super(Command, self).add_arguments(parser)
@@ -247,6 +251,8 @@ class Command(TemplatedBaseCommand):
         parser.add_argument('--distrib', default=self.vagrant_distrib, choices=self.available_distributions)
         parser.add_argument('--no-destroy', default=False, action='store_true',
                             help='Do not destroy the Vagrant virtual machine')
+        parser.add_argument('--run-package', default=False, action='store_true',
+                            help='Do not destroy the Vagrant virtual machine, install package and run processes')
         parser.add_argument('--include', default=[], action='append',
                             help='Where to search templates and static files.\n'
                                  ' If not used, use "--include djangofloor:djangofloor/packages '
@@ -269,7 +275,14 @@ class Command(TemplatedBaseCommand):
         self.force_mode = options['clean']
         self.vagrant_distrib = options['distrib']
         self.custom_config_filename = options['config']
-        self.no_vagrant_destroy = options['no_destroy']
+        if options['no_destroy']:
+            self.run_options |= self.DO_NOT_DESTROY_VAGRANT
+        if options['run_package']:
+            self.run_options |= self.RUN_PACKAGE_AFTER_BUILD
+        if options['show_config']:
+            self.run_options |= self.SHOW_CONFIG
+        else:
+            self.run_options |= self.BUILD_PACKAGE
         parser = self.get_config_parser()
         for hook_name in self.hooks:
             if parser.has_option(self.hooks_section, hook_name):
@@ -284,8 +297,6 @@ class Command(TemplatedBaseCommand):
             self.written_files_locations.append((module_name, folder_name))
         if not self.written_files_locations:
             self.written_files_locations = self.default_written_files_locations
-        if options['show_config']:
-            self.action = self.SHOW_CONFIG
 
     def handle(self, *args, **options):
         self.load_options(options)
@@ -293,11 +304,13 @@ class Command(TemplatedBaseCommand):
         try:
             self.install_python()
             self.install_project()
-            if self.action == self.BUILD_PACKAGE:
+            if self.run_options & self.BUILD_PACKAGE:
                 self.install_config()
                 self.build_package(self.available_distributions[self.vagrant_distrib])
-            elif self.action == self.SHOW_CONFIG:
+            elif self.run_options & self.SHOW_CONFIG:
                 self.show_config(self.available_distributions[self.vagrant_distrib])
+            if self.run_options & self.RUN_PACKAGE_AFTER_BUILD:
+                self.run_package()
         finally:
             self.destroy_vagrant_box()
 
@@ -375,10 +388,11 @@ class Command(TemplatedBaseCommand):
         self.execute_hook('post_prepare_vagrant_box')
 
     def destroy_vagrant_box(self):
-        if not self.no_vagrant_destroy:
-            self.execute_hook('pre_destroy_vagrant_box')
-            subprocess.check_call(['vagrant', 'destroy', '--force'], cwd=self.vagrant_box_dir)
-            self.execute_hook('post_destroy_vagrant_box')
+        if self.run_options & (self.DO_NOT_DESTROY_VAGRANT | self.RUN_PACKAGE_AFTER_BUILD):
+            return
+        self.execute_hook('pre_destroy_vagrant_box')
+        subprocess.check_call(['vagrant', 'destroy', '--force'], cwd=self.vagrant_box_dir)
+        self.execute_hook('post_destroy_vagrant_box')
 
     def install_python(self):
         self.stdout.write(self.style.SUCCESS('installing Python…'))
@@ -430,6 +444,12 @@ class Command(TemplatedBaseCommand):
                 fd.write(script_content)
         self.copy_vagrant_script('djangofloor/vagrant/configure_project.sh')
         self.execute_hook('post_install_config')
+
+    def run_package(self):
+        self.execute_hook('pre_run_package')
+        self.stdout.write(self.style.SUCCESS('run the created package…'))
+        self.copy_vagrant_script('djangofloor/vagrant/run_package.sh')
+        self.execute_hook('after_run_package')
 
     def build_package(self, package_type):
         self.execute_hook('pre_build_package')

@@ -39,6 +39,7 @@ Here is the documentation of the complete API.
   djangofloor/views/auth
   djangofloor/views/monitoring
   djangofloor/views/search
+  djangofloor/wsgi/aiohttp_runserver
   djangofloor/wsgi/django_runserver
   djangofloor/wsgi/exceptions
   djangofloor/wsgi/gunicorn_runserver

@@ -11,6 +11,8 @@ sudo apt-get install -y build-essential python3-dev libmysqlclient-dev libpq-dev
 # sudo apt-get install -y libbz2-dev libdb-dev libc6-dev libgdbm-dev libncursesw5-dev libreadline-dev libsqlite3-dev libssl-dev libz-dev liblzma-dev tk-dev build-essential python3-dev libmysqlclient-dev libpq-dev
 sudo apt-get install -y ruby ruby-dev
 sudo apt-get install -y `python3 -c 'import sys; print("python%d.%d-venv" % (sys.version_info[0], sys.version_info[1]))'`
+sudo apt-get purge -y {{ DF_MODULE_NAME }} 2> /dev/null || :
+
 echo "HRNGDEVICE=/dev/urandom" | sudo tee -a /etc/default/rng-tools
 sudo /etc/init.d/rng-tools restart
 SHELL
