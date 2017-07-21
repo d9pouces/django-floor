@@ -5,12 +5,15 @@ Websocket handler specific to aiohttp, as well as its main function.
 """
 # noinspection PyCompatibility
 import asyncio
+# noinspection PyProtectedMember
+import concurrent.futures._base as base
 import logging
 
 # noinspection PyPackageRequirements
 import aiohttp
 # noinspection PyPackageRequirements
 import aiohttp.web
+
 try:
     # noinspection PyPackageRequirements
     from aiohttp.web_reqrep import Request
@@ -29,48 +32,106 @@ __author__ = 'Matthieu Gallet'
 logger = logging.getLogger('django.request')
 
 
+@asyncio.coroutine
+def handle_redis(window_info, ws, subscriber):
+    """ handle the Redis pubsub connection"""
+    while True:
+        msg_redis = yield from subscriber.next_published()
+        if msg_redis:
+            # noinspection PyTypeChecker
+            WebsocketHandler.on_msg_from_redis(window_info, ws, msg_redis)
+
+
+@asyncio.coroutine
+def handle_ws(window_info, ws):
+    """process each event received on the websocket connection.
+
+    :param window_info: window
+    :type window_info: :class:`djangofloor.wsgi.window_info.WindowInfo`
+    :param ws: open websocket connection
+    :type ws: :class:`aiohttp.web.WebSocketResponse`
+    """
+    while True:
+        msg_ws = yield from ws.receive()
+        if msg_ws:
+            # noinspection PyTypeChecker
+            WebsocketHandler.on_msg_from_ws(window_info, ws, msg_ws)
+
+
+@asyncio.coroutine
+def websocket_handler(request):
+    ws = aiohttp.web.WebSocketResponse()
+    yield from ws.prepare(request)
+    django_request = WebsocketHandler.get_http_request(request)
+    window_info = WebsocketWSGIServer.process_request(django_request)
+    channels, echo_message = WebsocketWSGIServer.process_subscriptions(django_request)
+    connection = yield from asyncio_redis.Connection.create(**settings.WEBSOCKET_REDIS_CONNECTION)
+    subscriber = yield from connection.start_subscribe()
+    try:
+        yield from subscriber.subscribe(channels)
+        # noinspection PyTypeChecker
+        yield from asyncio.gather(handle_ws(window_info, ws), handle_redis(window_info, ws, subscriber))
+    except aiohttp.ClientConnectionError:
+        pass
+    except base.CancelledError:
+        pass
+    except RuntimeError:  # avoid raise RuntimeError('WebSocket connection is closed.')
+        pass
+    except Exception as e:
+        logger.exception(e)
+    return ws
+
+
 # noinspection PyCompatibility
 class WebsocketHandler(object):
     """Handle a websocket as a async routine"""
 
-    @asyncio.coroutine
-    def __call__(self, request):
-        ws = aiohttp.web.WebSocketResponse()
-        # noinspection PyDeprecation
-        ws.start(request)
-        django_request = self.get_http_request(request)
-        window_info = WebsocketWSGIServer.process_request(django_request)
-        channels, echo_message = WebsocketWSGIServer.process_subscriptions(django_request)
+    # @asyncio.coroutine
+    # def __call__(self, request):
+    #     ws = aiohttp.web.WebSocketResponse()
+    #     ws.prepare(request)
+    #     django_request = self.get_http_request(request)
+    #     window_info = WebsocketWSGIServer.process_request(django_request)
+    #     channels, echo_message = WebsocketWSGIServer.process_subscriptions(django_request)
+    #
+    #     connection = yield from asyncio_redis.Connection.create(**settings.WEBSOCKET_REDIS_CONNECTION)
+    #     subscriber = yield from connection.start_subscribe()
+    #     try:
+    #         yield from subscriber.subscribe(channels)
+    #         # noinspection PyBroadException
+    #         # noinspection PyTypeChecker
+    #         yield from asyncio.gather(self.handle_ws(window_info, ws), self.handle_redis(window_info, ws, subscriber))
+    #     except aiohttp.ClientConnectionError:
+    #         pass
+    #     except RuntimeError:  # avoid raise RuntimeError('WebSocket connection is closed.')
+    #         pass
+    #     except Exception as e:
+    #         logger.exception(e)
+    #     return ws
 
-        connection = yield from asyncio_redis.Connection.create(**settings.WEBSOCKET_REDIS_CONNECTION)
-        subscriber = yield from connection.start_subscribe()
-        yield from subscriber.subscribe(channels)
-        # noinspection PyBroadException
-        try:
-            # noinspection PyTypeChecker
-            yield from asyncio.gather(self.handle_ws(window_info, ws), self.handle_redis(window_info, ws, subscriber))
-        except aiohttp.ClientDisconnectedError:
-            pass
-        except RuntimeError:  # avoid raise RuntimeError('WebSocket connection is closed.')
-            pass
-        except Exception as e:
-            logger.exception(e)
-        return ws
+    # @asyncio.coroutine
+    # def handle_redis(self, window_info, ws, subscriber):
+    #     """ handle the Redis pubsub connection"""
+    #     while True:
+    #         msg_redis = yield from subscriber.next_published()
+    #         if msg_redis:
+    #             # noinspection PyTypeChecker
+    #             WebsocketHandler.on_msg_from_redis(window_info, ws, msg_redis)
 
-    @asyncio.coroutine
-    def handle_ws(self, window_info, ws):
-        """process each event received on the websocket connection.
-
-        :param window_info: window
-        :type window_info: :class:`djangofloor.wsgi.window_info.WindowInfo`
-        :param ws: open websocket connection
-        :type ws: :class:`aiohttp.web.WebSocketResponse`
-        """
-        while True:
-            msg_ws = yield from ws.receive()
-            if msg_ws:
-                # noinspection PyTypeChecker
-                self.on_msg_from_ws(window_info, ws, msg_ws)
+    # @asyncio.coroutine
+    # def handle_ws(self, window_info, ws):
+    #     """process each event received on the websocket connection.
+    #
+    #     :param window_info: window
+    #     :type window_info: :class:`djangofloor.wsgi.window_info.WindowInfo`
+    #     :param ws: open websocket connection
+    #     :type ws: :class:`aiohttp.web.WebSocketResponse`
+    #     """
+    #     while True:
+    #         msg_ws = yield from ws.receive()
+    #         if msg_ws:
+    #             # noinspection PyTypeChecker
+    #             WebsocketHandler.on_msg_from_ws(window_info, ws, msg_ws)
 
     @staticmethod
     def on_msg_from_ws(window_info, ws, msg):
@@ -102,15 +163,6 @@ class WebsocketHandler(object):
         message = msg.value
         ws.send_str(message)
 
-    @asyncio.coroutine
-    def handle_redis(self, window_info, ws, subscriber):
-        """ handle the Redis pubsub connection"""
-        while True:
-            msg_redis = yield from subscriber.next_published()
-            if msg_redis:
-                # noinspection PyTypeChecker
-                self.on_msg_from_redis(window_info, ws, msg_redis)
-
     @staticmethod
     def get_http_request(aiohttp_request):
         """Build a Django request from a aiohttp request: required to get sessions and topics.
@@ -141,7 +193,7 @@ def run_server(host, port):
     http_application = get_wsgi_application()
     wsgi_handler = WSGIHandler(http_application)
     if settings.WEBSOCKET_URL:
-        app.router.add_route('GET', settings.WEBSOCKET_URL, WebsocketHandler())
+        app.router.add_route('GET', settings.WEBSOCKET_URL, websocket_handler)
     app.router.add_route("*", "/{path_info:.*}", wsgi_handler)
 
     loop = asyncio.get_event_loop()

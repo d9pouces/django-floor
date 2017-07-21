@@ -449,7 +449,7 @@ class Command(TemplatedBaseCommand):
         self.execute_hook('pre_run_package')
         self.stdout.write(self.style.SUCCESS('run the created package…'))
         self.copy_vagrant_script('djangofloor/vagrant/run_package.sh')
-        self.execute_hook('after_run_package')
+        self.execute_hook('post_run_package')
 
     def build_package(self, package_type):
         self.execute_hook('pre_build_package')
@@ -468,8 +468,7 @@ class Command(TemplatedBaseCommand):
             package_dst_filename = os.path.join(self.dist_dir, package_basename)
             shutil.copy2(package_src_filename, package_dst_filename)
             self.stdout.write(self.style.SUCCESS('package %s created' % package_dst_filename))
-            local_template_context = {'package_filename': package_basename}
-            local_template_context.update(self.template_context)
+            self.template_context['package_filename'] = package_basename
             self.copy_vagrant_script('djangofloor/vagrant/run_package.sh', execute=False)
         else:
             self.stdout.write(self.style.ERROR('no package has been created'))

@@ -6,4 +6,4 @@ if [ -z "${USER_EXISTS}" ]; then
 
 fi
 chown -R "{{ DF_MODULE_NAME }}": "/opt/{{ DF_MODULE_NAME }}/var/"
-systemctl daemon-reload
+# systemctl daemon-reload

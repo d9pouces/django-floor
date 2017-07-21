@@ -73,10 +73,10 @@
             $.df.connect('df.monitoring.checked_ws', function () {
                 "use strict";
                 $('#workingwebsockets').removeClass('label-danger').addClass('label-success');
-                $('#workingwebsockets').html('{% bootstrap_icon 'ok' %}');
+                $('#workingwebsockets').html('{% bootstrap_icon "ok" %}');
                 $('#notworkingwebsockets').remove();
             });
-            $.df.call('df.monitoring.check_ws', {});
+            setTimeout(function () { $.df.call('df.monitoring.check_ws', {}); }, 500);
         };
     </script>
 </div>
