@@ -166,6 +166,7 @@ class CreatedFilesContext:
     """Watch created files in a given directory during some actions.
 
     """
+
     def __init__(self, watched_dir):
         self.watched_dir = watched_dir
         self.initial_files = None
@@ -219,6 +220,7 @@ class Command(TemplatedBaseCommand):
             'pre_install_python': None, 'post_install_python': None,
             'pre_build_package': None, 'post_build_package': None,
             'pre_run_package': None, 'post_run_package': None,
+            'pre_install_dependencies': None, 'post_install_dependencies': None,
             'pre_destroy_vagrant_box': None, 'post_destroy_vagrant_box': None,
         }
         self.force_mode = False
@@ -227,7 +229,7 @@ class Command(TemplatedBaseCommand):
         self.template_context = {}
         self.verbose_mode = False
         self.source_dir = '.'
-        self.vagrant_distrib = 'ubuntu/trusty64'
+        self.vagrant_distrib = 'ubuntu/xenial64'
         self.written_files_locations = []
         self.processes = {}
 
@@ -304,6 +306,7 @@ class Command(TemplatedBaseCommand):
         try:
             self.install_python()
             self.install_project()
+            self.install_dependencies()
             if self.run_options & self.BUILD_PACKAGE:
                 self.install_config()
                 self.build_package(self.available_distributions[self.vagrant_distrib])
@@ -419,6 +422,12 @@ class Command(TemplatedBaseCommand):
         self.update_template_context()
         self.execute_hook('post_install_project')
 
+    def install_dependencies(self):
+        self.stdout.write(self.style.SUCCESS('installing extra Python dependencies…'))
+        self.execute_hook('pre_install_dependencies')
+        self.copy_vagrant_script('djangofloor/vagrant/install_dependencies.sh')
+        self.execute_hook('post_install_dependencies')
+
     def install_config(self):
         self.stdout.write(self.style.SUCCESS('installing static files…'))
         self.execute_hook('pre_install_config')
@@ -430,6 +439,7 @@ class Command(TemplatedBaseCommand):
         # noinspection PyStringFormat
         filename = os.path.join(self.host_package_dir, 'etc', 'systemd', 'system',
                                 '%(DF_MODULE_NAME)s-HTTP-worker.service' % self.template_context)
+        ensure_dir(filename, parent=True)
         with open(filename, 'w') as fd:
             fd.write(script_content)
         local_template_context = {}
@@ -547,9 +557,9 @@ class Command(TemplatedBaseCommand):
 
     def get_config_parser(self):
         parser = ConfigParser()
-        config_files = [filename for filename in [self.host_fpm_default_config_filename,
-                                                  self.host_fpm_project_config_filename,
-                                                  self.custom_config_filename] if filename and os.path.isfile(filename)]
+        filenames = [self.host_fpm_default_config_filename, self.host_fpm_project_config_filename,
+                     './dev/fpm-config.ini', self.custom_config_filename]
+        config_files = [filename for filename in filenames if filename and os.path.isfile(filename)]
         parser.read(config_files)
         return parser
 

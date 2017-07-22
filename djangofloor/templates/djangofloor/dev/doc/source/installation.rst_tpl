@@ -210,8 +210,8 @@ Now, it's time to install {{ DF_PROJECT_NAME }}:
 {% endblock %}    EOF
     chmod 0400 $VIRTUAL_ENV/etc/{{ DF_MODULE_NAME }}/settings.ini
     # protect passwords in the config files from by being readable by everyone
-    {{ processes.django }} migrate
     {{ processes.django }} collectstatic --noinput
+    {{ processes.django }} migrate
 {% block post_application %}    {{ processes.django }} createsuperuser
 {% endblock %}
 {% endblock %}

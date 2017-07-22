@@ -22,7 +22,7 @@ with codecs.open(os.path.join(os.path.dirname(__file__), 'README.md'), encoding=
 
 
 extras_requirements = {}
-install_requirements = ['django>=1.11', 'celery', 'django-bootstrap3', 'redis', 'pip', 'urllib3<1.22']
+install_requirements = ['django>=1.11', 'celery', 'django-bootstrap3', 'redis', 'pip']
 if python_version < (3, 3):
     install_requirements.append('funcsigs')
 if python_version >= (3, 4):

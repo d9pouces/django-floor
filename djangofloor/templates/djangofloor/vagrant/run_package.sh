@@ -11,25 +11,28 @@ listen_address = 0.0.0.0:{{ SERVER_PORT }}
 server_url = http://localhost:10080/
 EOF
 sudo apt-get install -y redis-server
-{% if processes.aiohttp %}sudo -u "{{ DF_MODULE_NAME }}" "{{ processes.aiohttp.command_line }}" &
-{% elif processes.gunicorn %}sudo -u "{{ DF_MODULE_NAME }}" "{{ processes.gunicorn.command_line }}" &
-{% endif %}
+cat << EOF | sudo -u "{{ DF_MODULE_NAME }}" "{{ processes.django.command_line }}" shell
+from django.contrib.auth.models import User
+if User.objects.filter(username='admin').count() == 0:
+    u = User(username='admin')
+    u.is_superuser = True
+    u.is_staff = True
+    u.set_password('admin')
+    u.save()
+if User.objects.filter(username='user').count() == 0:
+    u = User(username='user')
+    u.set_password('user')
+    u.save()
+EOF
 {% if processes.celery %}{% for queue in expected_celery_queues %}sudo -u "{{ DF_MODULE_NAME }}" "{{ processes.celery.command_line }}" worker -Q "{{ queue }}"  -n '%h-{{ queue }}' &
 {% endfor %}
 {% endif %}
-cat << EOF | sudo -u "{{ DF_MODULE_NAME }}" "{{ processes.django.command_line }}" shell
-from django.contrib.auth.models import User
-u = User(username='admin')
-u.is_superuser = True
-u.is_staff = True
-u.set_password('admin')
-u.save()
-u = User(username='user')
-u.set_password('user')
-u.save()
-EOF
-echo "To stop all commands, you can use the following command"
-#echo 'sudo kill `ps aux  | grep \'^{{ DF_MODULE_NAME }} \' | awk \'{print $2}\'` '
-
 echo "a standard user named “user” has been created (with password “user”)"
 echo "an admin user named “admin” has been created (with password “admin”)"
+echo "You can stop the web process with <Ctrl>-<C>"
+{% if processes.aiohttp %}sudo -u "{{ DF_MODULE_NAME }}" "{{ processes.aiohttp.command_line }}"
+{% elif processes.gunicorn %}sudo -u "{{ DF_MODULE_NAME }}" "{{ processes.gunicorn.command_line }}"
+{% endif %}
+{% if expected_celery_queues %}echo "To stop all Celery workers, you can use the following command"
+echo 'sudo kill `ps aux   | grep "^{{ DF_MODULE_NAME }}"  | awk "{print \$2}"`'
+{% endif %}
