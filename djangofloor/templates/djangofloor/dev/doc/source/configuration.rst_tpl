@@ -79,7 +79,7 @@ or try to run the server interactively:
 .. code-block:: bash
 
   sudo service supervisor stop
-  sudo -u {{ DF_MODULE_NAME }} -i
+  sudo -H -u {{ DF_MODULE_NAME }} -i
   workon {{ DF_MODULE_NAME }}
   {{ processes.django }} config
   {{ processes.django }} runserver

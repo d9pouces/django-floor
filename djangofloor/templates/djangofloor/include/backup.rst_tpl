@@ -17,7 +17,7 @@ Many backup strategies exist, and you must choose one that fits your needs. We c
 
   sudo mkdir -p /var/backups/{{ DF_MODULE_NAME }}
   sudo chown -r {{ DF_MODULE_NAME }}: /var/backups/{{ DF_MODULE_NAME }}
-  sudo -u {{ DF_MODULE_NAME }} -i
+  sudo -H -u {{ DF_MODULE_NAME }} -i
   cat << EOF > /etc/{{ DF_MODULE_NAME }}/backup_db.conf
   /var/backups/{{ DF_MODULE_NAME }}/backup_db.sql.gz {
     daily

@@ -29,14 +29,14 @@ After any change in the database configuration or any upgrade, you must migrate 
 
 .. code-block:: bash
 
-    sudo -u {{ DF_MODULE_NAME }} {{ DF_MODULE_NAME }}-manage migrate
+    sudo -H -u {{ DF_MODULE_NAME }} {{ DF_MODULE_NAME }}-manage migrate
 {% block after_config %}{% endblock %}
 
 After installation and configuration, do not forget to create a superuser:
 
 .. code-block:: bash
 
-    sudo -u {{ DF_MODULE_NAME }} {{ DF_MODULE_NAME }}-manage createsuperuser
+    sudo -H -u {{ DF_MODULE_NAME }} {{ DF_MODULE_NAME }}-manage createsuperuser
 {% endblock %}
 
 
