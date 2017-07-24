@@ -162,6 +162,12 @@ def df_messages(context, style='banner'):
     return mark_safe(result)
 
 
+@register.filter
+def df_underline(value, kind='='):
+    """.. deprecated:: 1.0 do not use it"""
+    return kind * len(value)
+
+
 @register.simple_tag(takes_context=False)
 def df_deprecation(value):
     """.. deprecated:: 1.0 do not use it"""
@@ -175,13 +181,6 @@ def df_window_key(context):
     """.. deprecated:: 1.0 do not use it"""
     warnings.warn('df_window_key template tag has been replaced by df_init_websocket', RemovedInDjangoFloor110Warning)
     return df_init_websocket(context)
-
-
-@register.filter
-def df_underline(value, kind='='):
-    """.. deprecated:: 1.0 do not use it"""
-    warnings.warn('df_underline template tag will be removed', RemovedInDjangoFloor110Warning)
-    return kind * len(value)
 
 
 @register.filter

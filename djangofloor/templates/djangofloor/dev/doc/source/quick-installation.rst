@@ -7,14 +7,14 @@ You can quickly test {{ DF_PROJECT_NAME }}, storing all data in $HOME/{{ DF_MODU
 
 {% block install_deps %}    sudo apt-get install {{ python_version }} {{ python_version }}-dev build-essential
 {% endblock %}{% block application %}    pip install {{ DF_MODULE_NAME }}
-{% endblock %}{% block pre_application %}{% endblock %}    {{ processes.django }} migrate  # create the database (SQLite by default)
-    {{ processes.django }} collectstatic --noinput  # prepare static files (CSS, JS, …)
+{% endblock %}{% block pre_application %}{% endblock %}    {{ processes.django }} collectstatic --noinput  # prepare static files (CSS, JS, …)
+    {{ processes.django }} migrate  # create the database (SQLite by default)
 {% block post_application %}    {{ processes.django }} createsuperuser  # create an admin user
 {% endblock %}
 
 {% block basic_config %}
 You can easily change the root location for all data (SQLite database, uploaded or temp files, static files, …) by
-editing the configuration file:
+editing the configuration file.
 
 .. code-block:: bash
 

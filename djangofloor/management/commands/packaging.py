@@ -305,7 +305,7 @@ class Command(TemplatedBaseCommand):
         self.prepare_vagrant_box()
         try:
             self.install_python()
-            self.install_project()
+            self.install_project(self.available_distributions[self.vagrant_distrib])
             self.install_dependencies()
             if self.run_options & self.BUILD_PACKAGE:
                 self.install_config()
@@ -403,7 +403,7 @@ class Command(TemplatedBaseCommand):
         self.copy_vagrant_script('djangofloor/vagrant/install_python.sh')
         self.execute_hook('post_install_python')
 
-    def install_project(self):
+    def install_project(self, package_type):
         self.stdout.write(self.style.SUCCESS('creating dist file…'))
         self.execute_hook('pre_install_project')
         with CreatedFilesContext(os.path.join(self.source_dir, 'dist')) as ctx:
@@ -419,7 +419,7 @@ class Command(TemplatedBaseCommand):
                                  host_filename=self.host_fpm_default_config_filename,
                                  vagrant_filename=self.vagrant_fpm_default_config_filename)
         self.copy_vagrant_script('djangofloor/vagrant/get_project_info.py')
-        self.update_template_context()
+        self.update_template_context(package_type)
         self.execute_hook('post_install_project')
 
     def install_dependencies(self):
@@ -457,6 +457,7 @@ class Command(TemplatedBaseCommand):
 
     def run_package(self):
         self.execute_hook('pre_run_package')
+
         self.stdout.write(self.style.SUCCESS('run the created package…'))
         self.copy_vagrant_script('djangofloor/vagrant/run_package.sh')
         self.execute_hook('post_run_package')
@@ -595,7 +596,7 @@ class Command(TemplatedBaseCommand):
         cmd += ['%s/=/' % self.vagrant_package_dir]
         return cmd
 
-    def update_template_context(self):
+    def update_template_context(self, package_type):
         parser = self.get_config_parser()
         regex = re.compile(r'(?P<module>[\w.]+)\s*(:\s*(?P<attr>[\w.]+))?\s*(?P<extras>\[.*\])?\s*$', flags=re.UNICODE)
         process_categories = {'django': None, 'gunicorn': None, 'uwsgi': None, 'aiohttp': None, 'celery': None}
@@ -611,3 +612,8 @@ class Command(TemplatedBaseCommand):
             process_categories[values['attr']] = os.path.join(self.vagrant_install_dir, 'bin', option_name)
         processes = {key: Process(key, value) for (key, value) in process_categories.items() if value}
         self.template_context['processes'] = self.processes or processes
+        self.template_context['dependencies'] = []
+        if parser.has_option(package_type, 'depends'):
+            self.template_context['dependencies'] = [x.strip()
+                                                     for x in parser.get(package_type, 'depends').splitlines()
+                                                     if x.strip()]

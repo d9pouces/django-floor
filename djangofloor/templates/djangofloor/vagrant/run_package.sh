@@ -3,6 +3,9 @@ IS_INSTALLED=`dpkg -l | grep "{{ DF_MODULE_NAME }}"`
 if [ -z "${IS_INSTALLED}" ]; then
     sudo rm -rf "{{ install_dir.1 }}"
 fi
+{% if dependencies %}
+sudo apt-get install -y {{ dependencies|join:" " }}
+{% endif %}
 sudo dpkg -i "{{ tmp_dir.1 }}/{{ package_filename }}"
 sudo -H -u "{{ DF_MODULE_NAME }}" "{{ processes.django.command_line }}" migrate
 cat << EOF | sudo tee "{{ install_dir.1 }}/etc/{{ DF_MODULE_NAME }}/settings.ini"

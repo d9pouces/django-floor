@@ -7,8 +7,8 @@ the corresponding Django setting value and how to convert from one format to the
 """
 
 from djangofloor.conf.callables import allauth_providers
-from djangofloor.conf.fields import CharConfigField, IntegerConfigField, BooleanConfigField, ConfigField, bool_setting, \
-    ListConfigField, FloatConfigField
+from djangofloor.conf.fields import CharConfigField, IntegerConfigField, BooleanConfigField, ConfigField, \
+    bool_setting, ListConfigField, FloatConfigField
 
 __author__ = 'Matthieu Gallet'
 
@@ -58,18 +58,21 @@ BASE_MAPPING = [
     CharConfigField('global.language_code', 'LANGUAGE_CODE', help_str='default to fr_FR'),
     CharConfigField('global.listen_address', 'LISTEN_ADDRESS',
                     help_str='address used by your web server.'),
+    CharConfigField('global.ssl_keyfile', 'DF_SERVER_SSL_KEY',
+                    help_str='Private SSL key (if you do not use a reverse proxy with SSL)'),
+    CharConfigField('global.ssl_certfile', 'DF_SERVER_SSL_CERTIFICATE',
+                    help_str='Public SSL certificate (if you do not use a reverse proxy with SSL)'),
     CharConfigField('global.server_url', 'SERVER_BASE_URL',
                     help_str='Public URL of your website. \n'
-                             'Default to "http://listen_address" but should '
-                             'be ifferent if you use a reverse proxy like '
-                             'Apache or Nginx. Example: http://www.example.org.'),
+                             'Default to "http://{listen_address}/" but should '
+                             'be different if you use a reverse proxy like '
+                             'Apache or Nginx. Example: http://www.example.org/.'),
     IntegerConfigField('server.timeout', 'DF_SERVER_TIMEOUT', help_str='Workers silent for more than this many '
                                                                        'seconds are killed and restarted.'),
     IntegerConfigField('server.threads', 'DF_SERVER_THREADS',
                        help_str='The number of Gunicorn threads for handling requests.'),
     IntegerConfigField('server.processes', 'DF_SERVER_PROCESSES',
                        help_str='The number of Gunicorn processes for handling requests.'),
-
 
     CharConfigField('global.time_zone', 'TIME_ZONE', help_str='default to Europe/Paris'),
     CharConfigField('global.log_remote_url', 'LOG_REMOTE_URL',

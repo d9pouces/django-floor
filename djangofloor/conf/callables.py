@@ -7,6 +7,7 @@
 # noinspection PyUnresolvedReferences
 from urllib.parse import urlparse
 
+import re
 from django.utils.crypto import get_random_string
 
 
@@ -144,6 +145,25 @@ def url_parse_ssl(settings_dict):
 
 
 url_parse_ssl.required_settings = ['SERVER_BASE_URL']
+
+
+def use_x_forwarded_for(settings_dict):
+    """Return `True` if this server is assumed to be behind a reverse proxy.
+     Heuristic: the external port (in SERVER_PORT) is different from the actually listened port (in LISTEN_ADDRESS).
+
+     >>> use_x_forwarded_for({'SERVER_PORT': 8000, 'LISTEN_ADDRESS': 'localhost:8000'})
+     False
+     >>> use_x_forwarded_for({'SERVER_PORT': 443, 'LISTEN_ADDRESS': 'localhost:8000'})
+     True
+
+    """
+    listen_address, sep, listen_port = settings_dict['LISTEN_ADDRESS'].rpartition(':')
+    if not re.match(r'\d+', listen_port):
+        raise ValueError('Invalid LISTEN_ADDRESS port %s' % listen_port)
+    return int(listen_port) != settings_dict['SERVER_PORT']
+
+
+use_x_forwarded_for.required_settings = ['SERVER_PORT', 'LISTEN_ADDRESS']
 
 
 def project_name(settings_dict):

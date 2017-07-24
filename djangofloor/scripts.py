@@ -9,6 +9,7 @@ import logging.config
 import os
 import re
 import shutil
+import ssl
 import subprocess
 import sys
 from argparse import ArgumentParser
@@ -182,8 +183,10 @@ def django():
         return commands
 
     management.get_commands = get_commands
-
-    return execute_from_command_line(sys.argv)
+    try:
+        return execute_from_command_line(sys.argv)
+    except BrokenPipeError:
+        pass
 
 
 def gunicorn():
@@ -191,7 +194,7 @@ def gunicorn():
 
     :return:
     """
-    # noinspection PyPackageRequirements
+    # noinspection PyPackageRequirements,PyUnresolvedReferences
     from gunicorn.app.wsgiapp import run
     set_env()
     from django.conf import settings
@@ -210,6 +213,8 @@ def gunicorn():
     parser.add_argument('--threads', default=settings.DF_SERVER_THREADS, type=int)
     parser.add_argument('-w', '--workers', default=settings.DF_SERVER_PROCESSES, type=int)
     parser.add_argument('-t', '--timeout', default=settings.DF_SERVER_TIMEOUT, type=int)
+    parser.add_argument('--keyfile', default=settings.DF_SERVER_SSL_KEY)
+    parser.add_argument('--certfile', default=settings.DF_SERVER_SSL_CERTIFICATE)
     parser.add_argument('--reload', default=False, action='store_true')
     if use_gevent:
         parser.add_argument('-k', '--worker-class', default='geventwebsocket.gunicorn.workers.GeventWebSocketWorker')
@@ -225,6 +230,8 @@ def gunicorn():
         __set_default_option(options, 'threads')
         __set_default_option(options, 'workers')
         __set_default_option(options, 'timeout')
+        __set_default_option(options, 'keyfile')
+        __set_default_option(options, 'certfile')
         if settings.DEBUG and not options.reload:
             sys.argv += ['--reload']
     application = 'djangofloor.wsgi.gunicorn_runserver:application'
@@ -241,14 +248,18 @@ def aiohttp():
         base_django.setup()
     logging.config.dictConfig(settings.LOGGING)
     from djangofloor.wsgi.aiohttp_runserver import run_server
-
+    if settings.DF_SERVER_SSL_KEY and settings.DF_SERVER_SSL_CERTIFICATE:
+        sslcontext = ssl.create_default_context()
+        sslcontext.load_cert_chain(settings.DF_SERVER_SSL_CERTIFICATE, settings.DF_SERVER_SSL_KEY)
+    else:
+        sslcontext = None
     parser = ArgumentParser(usage="%(prog)s subcommand [options] [args]", add_help=False)
     parser.add_argument('-b', '--bind', default=settings.LISTEN_ADDRESS)
     options, args = parser.parse_known_args()
     host, sep, port = options.bind.partition(':')
     host = host or settings.SERVER_NAME
     port = int(port) or settings.SERVER_PORT
-    return run_server(host, port)
+    return run_server(host, port, sslcontext=sslcontext)
 
 
 def celery():
@@ -317,7 +328,7 @@ def create_project():
                       ]
     for key, text, default_value in default_values:
         if key == 'package_name':
-            default_value = re.sub('[^a-z0-9_]', '_', template_values['project_name'].lower())
+            default_value = re.sub(r'[^a-z0-9_]', '_', template_values['project_name'].lower())
             while default_value[0:1] in '0123456789_':
                 default_value = default_value[1:]
         value = None
@@ -330,7 +341,7 @@ def create_project():
 
     if template_values['use_celery'] == 'y':
         template_values['celery_script'] = ("'%s-celery = djangofloor.scripts:celery',\n"
-                                            "                                    ")  % template_values['package_name']
+                                            "                                    ") % template_values['package_name']
         template_values['celery_script_name'] = '%s-celery.py' % template_values['package_name']
     else:
         template_values['celery_script'] = ''
