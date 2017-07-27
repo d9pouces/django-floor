@@ -1,6 +1,7 @@
 import base64
 import logging
 import select
+import socketserver
 from hashlib import sha1
 from wsgiref import util
 
@@ -8,10 +9,8 @@ from django.conf import settings
 from django.core.management.commands import runserver
 from django.core.servers.basehttp import WSGIServer, WSGIRequestHandler, ServerHandler
 from django.core.wsgi import get_wsgi_application
-from django.utils.encoding import force_str
 from django.utils import six
-# noinspection PyUnresolvedReferences
-from django.utils.six.moves import socketserver
+from django.utils.encoding import force_str
 
 from djangofloor.wsgi.websocket import WebSocket
 from djangofloor.wsgi.wsgi_server import WebsocketWSGIServer, HandshakeError, UpgradeRequiredError
