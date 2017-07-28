@@ -1,4 +1,3 @@
-# -*- coding=utf-8 -*-
 """Python shortcuts for JS signals
 ===============================
 
