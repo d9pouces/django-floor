@@ -113,7 +113,7 @@ def signals(request):
     template_values = {'SIGNALS': valid_signal_names, 'FUNCTIONS': functions,
                        'WEBSOCKET_HEARTBEAT': settings.WEBSOCKET_HEARTBEAT,
                        'CSRF_COOKIE_NAME': settings.CSRF_COOKIE_NAME,
-                       'CSRF_HEADER_NAME': csrf_header_name[5:].replace('_', '-')}
+                       'DEBUG': settings.DEBUG, 'CSRF_HEADER_NAME': csrf_header_name[5:].replace('_', '-')}
     if settings.WEBSOCKET_URL:
         template_values['WEBSOCKET_URL'] = '%s://%s%s' % (protocol, site_name, settings.WEBSOCKET_URL)
     return TemplateResponse(request, 'djangofloor/signals.html', template_values, content_type=__get_js_mimetype())
