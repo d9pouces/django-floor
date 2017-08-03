@@ -47,6 +47,7 @@ CELERY_MAPPING = [
     CharConfigField('celery.host', 'CELERY_HOST', help_str='Redis Celery DB host'),
     CharConfigField('celery.password', 'CELERY_PASSWORD', help_str='Redis Celery DB password (if required)'),
     IntegerConfigField('celery.port', 'CELERY_PORT', help_str='Redis Celery DB port'),
+    IntegerConfigField('celery.processes', 'CELERY_PROCESSES', help_str='number of Celery processes'),
 ]
 
 BASE_MAPPING = [

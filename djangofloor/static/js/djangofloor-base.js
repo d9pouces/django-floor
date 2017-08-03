@@ -60,7 +60,7 @@ Here is the complete JavaScript API provided by DjangoFloor.
                 var msg = JSON.parse(e.data);
                 if (msg.signal && msg.signal_id) {
                     if ($.df.debug) {
-                        console.debug('received call ' + signal + '(' + opts + ') from server.');
+                        console.debug('received call ' + msg.signal + ' from server.');
                     }
                     $.df.call(msg.signal, msg.opts, msg.signal_id);
                 }
@@ -132,7 +132,7 @@ Here is the complete JavaScript API provided by DjangoFloor.
             $.df._signalIds[id] = true;
         }
         if ($.df.debug) {
-            console.debug('call ' + signal + '(' + opts + ').');
+            console.debug('call ' + signal, opts);
         }
         for (i = 0; i < $.df._registered_signals[signal].length; i += 1) {
             $.df._registered_signals[signal][i](opts, id);

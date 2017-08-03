@@ -415,3 +415,4 @@ CELERY_HOST = 'localhost'  # aliased in settings.ini as "[celery]host"
 CELERY_PORT = 6379  # aliased in settings.ini as "[celery]port"
 CELERY_DB = 4  # aliased in settings.ini as "[celery]db"
 CELERY_PASSWORD = ''  # aliased in settings.ini as "[celery]password"
+CELERY_PROCESSES = 1

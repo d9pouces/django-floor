@@ -265,8 +265,13 @@ def aiohttp():
 def celery():
     set_env()
     from celery.bin.celery import main as celery_main
+    from django.conf import settings
     parser = ArgumentParser(usage="%(prog)s subcommand [options] [args]", add_help=False)
     parser.add_argument('-A', '--app', action='store', default='djangofloor')
+    parser.add_argument('-c', '--concurrency', action='store', default=settings.CELERY_PROCESSES,
+                        help='Number of child processes processing the queue. The'
+                        'default is the number of CPUs available on your'
+                        'system.')
     options, extra_args = parser.parse_known_args()
     sys.argv[1:] = extra_args
     __set_default_option(options, 'app')
