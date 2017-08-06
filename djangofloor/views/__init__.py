@@ -48,7 +48,7 @@ def robots(request):
     current_site = get_current_site(request)
     base_url = add_domain(current_site.domain, '/', request.is_secure())[:-1]
     template_values = {'base_url': base_url}
-    return TemplateResponse('djangofloor/robots.txt', template_values, content_type='text/plain')
+    return TemplateResponse(request, 'djangofloor/robots.txt', template_values, content_type='text/plain')
 
 
 @lru_cache()

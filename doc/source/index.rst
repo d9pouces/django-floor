@@ -37,8 +37,9 @@ DjangoFloor in a nutshell
   | Root project path [.] test
   cd test
   python setup.py develop
-  myproject-django migrate
+  echo "DEBUG = True" > local_settings.py
   myproject-django collectstatic --noinput
+  myproject-django migrate
   myproject-django runserver
   # open a new terminal window
   myproject-celery worker

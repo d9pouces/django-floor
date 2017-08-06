@@ -12,6 +12,7 @@ import datetime
 
 from django.conf import settings
 from django.contrib.auth.models import Group
+from django.contrib.sites.models import Site
 from django.db import models
 from django.db.models import F
 from django.db.models import Q
@@ -178,3 +179,4 @@ def apply_post_migrate_settings(sender, **kwargs):
     if not hasattr(apply_post_migrate_settings, 'applied'):  # must be called once, but the signal is called for all app
         merger.call_method_on_config_values('post_migrate')
         apply_post_migrate_settings.applied = True
+    Site.objects.filter(pk=1).update(name=settings.SERVER_NAME, domain=settings.SERVER_NAME)
