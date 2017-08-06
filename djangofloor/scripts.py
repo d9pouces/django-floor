@@ -368,6 +368,12 @@ def create_project():
             os.remove(dst_dir)
 
     for root, dirnames, filenames in os.walk(template_base_path):
+        index = 0
+        while index < len(dirnames):
+            if dirnames[index] in ('__pycache__', ):
+                del dirnames[index]
+            else:
+                index += 1
         for dirname in dirnames:
             src_path = os.path.join(root, dirname)
             dst_path = os.path.relpath(src_path, template_base_path)
