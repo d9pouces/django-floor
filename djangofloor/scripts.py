@@ -275,6 +275,7 @@ def celery():
     options, extra_args = parser.parse_known_args()
     sys.argv[1:] = extra_args
     __set_default_option(options, 'app')
+    __set_default_option(options, 'concurrency')
     celery_main(sys.argv)
 
 

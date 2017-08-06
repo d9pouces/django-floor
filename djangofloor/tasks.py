@@ -21,7 +21,7 @@ from django.conf import settings
 from django.utils.lru_cache import lru_cache
 from django.utils.module_loading import import_string
 from django.utils.six import text_type
-from redis import StrictRedis
+from redis import StrictRedis, ConnectionPool
 
 from djangofloor.decorators import REGISTERED_SIGNALS, SignalConnection, REGISTERED_FUNCTIONS, FunctionConnection, \
     DynamicQueueName
@@ -41,11 +41,15 @@ BROADCAST = [[]]
 _signal_encoder = import_string(settings.WEBSOCKET_SIGNAL_ENCODER)
 _topic_serializer = import_string(settings.WEBSOCKET_TOPIC_SERIALIZER)
 
+__values = {'host': settings.WEBSOCKET_REDIS_HOST,
+            'port': ':%s' % settings.WEBSOCKET_REDIS_PORT if settings.WEBSOCKET_REDIS_PORT else '',
+            'db': settings.WEBSOCKET_REDIS_DB,
+            'password': ':%s@' % settings.WEBSOCKET_REDIS_PASSWORD if settings.WEBSOCKET_REDIS_PASSWORD else ''}
+redis_connection_pool = ConnectionPool.from_url('redis://%(password)s%(host)s%(port)s/%(db)s' % __values)
 
-# noinspection PyCallingNonCallable
-@lru_cache()
-def _get_redis_connection():
-    return StrictRedis(**settings.WEBSOCKET_REDIS_CONNECTION)
+
+def get_websocket_redis_connection():
+    return StrictRedis(connection_pool=redis_connection_pool)
 
 
 def set_websocket_topics(request, *topics):
@@ -70,7 +74,7 @@ by the client.
         topic_strings.add(_topic_serializer(request, USER))
     topic_strings.add(_topic_serializer(request, WINDOW))
     topic_strings.add(_topic_serializer(request, BROADCAST))
-    connection = _get_redis_connection()
+    connection = get_websocket_redis_connection()
     redis_key = '%s%s' % (prefix, token)
     connection.delete(redis_key)
     for topic in topic_strings:
@@ -189,8 +193,8 @@ def _call_signal(window_info, signal_name, to=None, kwargs=None, countdown=None,
 
 
 def _call_ws_signal(signal_name, signal_id, serialized_topic, kwargs):
-    # connection = _get_redis_connection()
-    connection = StrictRedis(**settings.WEBSOCKET_REDIS_CONNECTION)
+    connection = get_websocket_redis_connection()
+    # connection = StrictRedis(**settings.WEBSOCKET_REDIS_CONNECTION)
     serialized_message = json.dumps({'signal': signal_name, 'opts': kwargs, 'signal_id': signal_id},
                                     cls=_signal_encoder)
     topic = settings.WEBSOCKET_REDIS_PREFIX + serialized_topic
@@ -199,8 +203,8 @@ def _call_ws_signal(signal_name, signal_id, serialized_topic, kwargs):
 
 
 def _return_ws_function_result(window_info, result_id, result, exception=None):
-    # connection = _get_redis_connection()
-    connection = StrictRedis(**settings.WEBSOCKET_REDIS_CONNECTION)
+    connection = get_websocket_redis_connection()
+    # connection = StrictRedis(**settings.WEBSOCKET_REDIS_CONNECTION)
     json_msg = {'result_id': result_id, 'result': result, 'exception': text_type(exception) if exception else None}
     serialized_message = json.dumps(json_msg, cls=_signal_encoder)
     serialized_topic = _topic_serializer(window_info, WINDOW)

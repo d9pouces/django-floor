@@ -33,6 +33,7 @@ Here is the documentation of the complete API.
   djangofloor/tasks
   djangofloor/templatetags/djangofloor
   djangofloor/templatetags/pipeline
+  djangofloor/tests
   djangofloor/urls
   djangofloor/utils
   djangofloor/views

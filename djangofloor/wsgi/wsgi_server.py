@@ -9,23 +9,18 @@ Structure of the redis database, with `prefix = settings.WEBSOCKET_REDIS_PREFIX`
 import json
 import logging
 import sys
-
-import django
-if django.VERSION[:2] >= (1, 7):
-    django.setup()
 from django.conf import settings
 import django.utils.six as six
 from django.core import signing
-from django.utils.lru_cache import lru_cache
 from django.utils.module_loading import import_string
 # noinspection PyUnresolvedReferences
 from django.utils.six.moves import http_client
 from djangofloor.decorators import REGISTERED_FUNCTIONS
-from redis import StrictRedis
 
 from djangofloor.wsgi.window_info import WindowInfo
 # noinspection PyProtectedMember
-from djangofloor.tasks import _call_signal, SERVER, _server_function_call, import_signals_and_functions
+from djangofloor.tasks import _call_signal, SERVER, _server_function_call, import_signals_and_functions, \
+    get_websocket_redis_connection
 
 from django.contrib.auth import get_user
 from django.core.handlers.wsgi import WSGIRequest
@@ -51,12 +46,6 @@ topic_serializer = import_string(settings.WEBSOCKET_TOPIC_SERIALIZER)
 signal_decoder = import_string(settings.WEBSOCKET_SIGNAL_DECODER)
 
 
-# noinspection PyCallingNonCallable
-@lru_cache()
-def _get_redis_connection():
-    return StrictRedis(**settings.WEBSOCKET_REDIS_CONNECTION)
-
-
 def get_websocket_topics(request):
     signed_token = request.GET.get('token', '')
     try:
@@ -64,7 +53,7 @@ def get_websocket_topics(request):
     except signing.BadSignature:
         return []
     redis_key = '%s%s' % (settings.WEBSOCKET_REDIS_PREFIX, token)
-    connection = _get_redis_connection()
+    connection = get_websocket_redis_connection()
     topics = connection.lrange(redis_key, 0, -1)
     return [x.decode('utf-8') for x in topics]
 
@@ -74,7 +63,7 @@ class WebsocketWSGIServer(object):
         """
         redis_connection can be overriden by a mock object.
         """
-        self._redis_connection = redis_connection or _get_redis_connection()
+        self._redis_connection = redis_connection or get_websocket_redis_connection()
 
     def upgrade_websocket(self, environ, start_reponse):
         raise NotImplementedError
