@@ -22,7 +22,6 @@ Deactivate redis
 
 To disable background tasks, websockets and Redis cache, you must change these settings:
 
-  * `CACHES = {'default': {'BACKEND': 'django.core.cache.backends.locmem.LocMemCache', 'LOCATION': 'unique-snowflake'}}`
   * `WEBSOCKET_URL = None`
   * `USE_CELERY = False`
 

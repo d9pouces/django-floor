@@ -27,14 +27,18 @@ DjangoFloor assumes that some requirements are available:
 DjangoFloor in a nutshell
 -------------------------
 
+
+Assuming a Redis database is working on localhost:
+
 .. code-block:: bash
 
-  pip install djangofloor[extra]
+  pip install djangofloor django-debug-toolbar django-redis-sessions django-redis
   djangofloor-createproject
   | Your new project name [MyProject]
   | Python package name [myproject]
   | Initial version [0.1]
   | Root project path [.] test
+  | Use background tasks or websockets [y]
   cd test
   python setup.py develop
   echo "DEBUG = True" > local_settings.py
@@ -45,6 +49,25 @@ DjangoFloor in a nutshell
   myproject-celery worker
 
 And open your browser on http://localhost:9000/ :)
+
+If you do not want to play with Redis:
+
+.. code-block:: bash
+
+  pip install djangofloor django-debug-toolbar
+  djangofloor-createproject
+  | Your new project name [MyProject]
+  | Python package name [myproject]
+  | Initial version [0.1]
+  | Root project path [.] test
+  | Use background tasks or websockets [y] n
+  cd test
+  python setup.py develop
+  echo "DEBUG = True" > local_settings.py
+  myproject-django collectstatic --noinput
+  myproject-django migrate
+  myproject-django runserver
+
 
 Overview
 ========

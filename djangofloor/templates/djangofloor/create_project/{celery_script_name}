@@ -1,4 +1,2 @@
 from djangofloor.scripts import celery
-
-__author__ = 'Matthieu Gallet'
 celery()

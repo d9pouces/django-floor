@@ -329,7 +329,7 @@ def create_project():
     default_values = [('project_name', 'Your new project name', 'MyProject'),
                       ('package_name', 'Python package name', ''),
                       ('version', 'Initial version', '0.1'),
-                      ('dst_dir', 'Root project path', '.'),
+                      ('dst_dir', 'Root project path', 'project'),
                       ('use_celery', 'Use background tasks or websockets', 'y'),
                       ]
     for key, text, default_value in default_values:
@@ -346,12 +346,14 @@ def create_project():
     dst_dir = template_values['dst_dir']
 
     if template_values['use_celery'] == 'y':
+        template_values['settings'] = ''
         template_values['celery_script'] = ("'%s-celery = djangofloor.scripts:celery',\n"
                                             "                                    ") % template_values['package_name']
         template_values['celery_script_name'] = '%s-celery.py' % template_values['package_name']
     else:
         template_values['celery_script'] = ''
         template_values['celery_script_name'] = ''
+        template_values['settings'] = """WEBSOCKET_URL = None\nUSE_CELERY = False\n"""
 
     if os.path.exists(dst_dir):
         value = ''
