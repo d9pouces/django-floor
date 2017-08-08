@@ -68,6 +68,23 @@ If you do not want to play with Redis:
   myproject-django migrate
   myproject-django runserver
 
+You can easily create an admin user and a standard user:
+
+.. code-block:: bash
+
+  cat << EOF | myproject-django shell
+  from django.contrib.auth.models import User
+  if User.objects.filter(username='admin').count() == 0:
+      u = User(username='admin')
+      u.is_superuser = True
+      u.is_staff = True
+      u.set_password('admin')
+      u.save()
+  if User.objects.filter(username='user').count() == 0:
+      u = User(username='user')
+      u.set_password('user')
+      u.save()
+  EOF
 
 Overview
 ========
