@@ -112,10 +112,11 @@ class DjangoFloorMiddleware(BaseRemoteUserMiddleware):
         # If the user is already authenticated and that user is the user we are
         # getting passed in the headers, then the correct user is already
         # persisted in the session and we don't need to continue.
-        cleaned_username = self.clean_username(username, request)
-        if request.user.is_authenticated and request.user.get_username() == cleaned_username:
-            request.remote_username = cleaned_username
-            return
+        if request.user.is_authenticated:
+            cleaned_username = self.clean_username(username, request)
+            if request.user.get_username() == cleaned_username:
+                request.remote_username = cleaned_username
+                return
         # We are seeing this user for the first time in this session, attempt
         # to authenticate the user.
         user = auth.authenticate(remote_user=username)
@@ -124,7 +125,7 @@ class DjangoFloorMiddleware(BaseRemoteUserMiddleware):
             # by logging the user in.
             request.user = user
             auth.login(request, user)
-            request.remote_username = cleaned_username
+            request.remote_username = user.username
 
     # noinspection PyMethodMayBeStatic
     def format_remote_username(self, remote_username):
