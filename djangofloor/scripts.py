@@ -195,8 +195,10 @@ def gunicorn():
     :return:
     """
     # noinspection PyPackageRequirements,PyUnresolvedReferences
-    from gunicorn.app.wsgiapp import run
     set_env()
+    import django
+    django.setup()
+    from gunicorn.app.wsgiapp import run
     from django.conf import settings
     use_gevent = False
     try:
