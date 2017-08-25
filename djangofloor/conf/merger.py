@@ -203,7 +203,7 @@ class SettingMerger(object):
             if values:
                 return self.__formatter.format(obj, **values)
         elif isinstance(obj, ConfigValue):
-            return obj.get_value(self)
+            return self.analyze_raw_value(obj.get_value(self))
         elif isinstance(obj, list) or isinstance(obj, tuple):
             result = []
             for sub_obj in obj:
