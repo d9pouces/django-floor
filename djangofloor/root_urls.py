@@ -28,7 +28,8 @@ if settings.DF_URL_CONF:
 else:
     extra_urls = []
 prefix = '^' + settings.URL_PREFIX[1:]
-urlpatterns = [url(prefix + 'jsi18n/$', javascript_catalog, {'packages': ('djangofloor', 'django.contrib.admin'), }),
+urlpatterns = [url(prefix + 'jsi18n/$', javascript_catalog, {'packages': ('djangofloor', 'django.contrib.admin'), },
+                   name='jsi18n'),
                url(prefix + '%s(?P<path>.*)$' % settings.MEDIA_URL[1:], serve, {'document_root': settings.MEDIA_ROOT}),
                url(prefix + '%s(?P<path>.*)$' % settings.STATIC_URL[1:], serve,
                    {'document_root': settings.STATIC_ROOT}),
