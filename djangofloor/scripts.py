@@ -83,6 +83,8 @@ def get_merger_from_env():
     extra_values = {'DF_MODULE_NAME': module_name}
     if script:
         extra_values['SCRIPT_NAME'] = script
+    else:
+        extra_values['SCRIPT_NAME'] = 'noscript'
     return SettingMerger(fields_provider, config_providers, extra_values=extra_values)
 
 

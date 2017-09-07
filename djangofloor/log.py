@@ -130,6 +130,20 @@ class RemoveDuplicateWarnings(logging.Filter):
         return result
 
 
+class SlowQueryCallback:
+    def __init__(self, duration: float):
+        self.duration = duration or 30.
+
+    def __call__(self, record):
+        return record.duration > self.duration
+
+    def __repr__(self):
+        return 'lambda record: record.duration > %s' % self.duration
+
+    def __str__(self):
+        return 'lambda record: record.duration > %s' % self.duration
+
+
 # noinspection PyTypeChecker
 def log_configuration(settings_dict):
     """Generate a log configuration depending on a few parameters:
@@ -166,7 +180,7 @@ def log_configuration(settings_dict):
         'colorized': {'()': 'djangofloor.log.ColorizedFormatter'}}
     filters = {'remove_duplicate_warnings': {'()': 'djangofloor.log.RemoveDuplicateWarnings'},
                'slow_queries': {'()': 'django.utils.log.CallbackFilter',
-                                'callback': lambda record: record.duration > slow_query_duration}}
+                                'callback': SlowQueryCallback(slow_query_duration)}}
     server_loggers = ['aiohttp.access', 'gunicorn.access', 'django.server', 'geventwebsocket.handler']
 
     loggers = {'django': {'handlers': [], 'level': 'WARN', 'propagate': True},
