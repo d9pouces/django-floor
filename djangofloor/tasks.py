@@ -145,6 +145,7 @@ def call(window_info, signal_name, to=None, kwargs=None, countdown=None, expires
 
 def _call_signal(window_info, signal_name, to=None, kwargs=None, countdown=None, expires=None, eta=None,
                  from_client=False):
+    import_signals_and_functions()
     window_info = WindowInfo.from_request(window_info)
     if kwargs is None:
         kwargs = {}
@@ -157,6 +158,8 @@ def _call_signal(window_info, signal_name, to=None, kwargs=None, countdown=None,
     to_server = False
     for topic in to:
         if topic is SERVER:
+            if signal_name not in REGISTERED_SIGNALS:
+                logger.debug('Signal "%s" is unknown by the server.' % signal_name)
             to_server = True
         else:
             serialized_topic = _topic_serializer(window_info, topic)
@@ -169,7 +172,6 @@ def _call_signal(window_info, signal_name, to=None, kwargs=None, countdown=None,
         celery_kwargs['eta'] = eta
     if countdown:
         celery_kwargs['countdown'] = countdown
-    import_signals_and_functions()
     queues = {x.get_queue(window_info, kwargs) for x in REGISTERED_SIGNALS.get(signal_name, [])}
     window_info_as_dict = None
     if window_info:

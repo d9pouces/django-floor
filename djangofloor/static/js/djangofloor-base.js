@@ -124,6 +124,9 @@ Here is the complete JavaScript API provided by DjangoFloor.
 */
         var i;
         if ($.df._registered_signals[signal] === undefined) {
+            if ($.df.debug) {
+                console.debug('unknown call ' + signal + ' (both from client and from the server).');
+            }
             return false;
         }
         else if ((id !== undefined) && ($.df._signalIds[id] !== undefined)) {
