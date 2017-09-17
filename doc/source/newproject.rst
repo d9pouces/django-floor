@@ -293,3 +293,15 @@ If you use this latter option, open your favorite browser to `http://localhost:1
 FPM supports many options. You can tweak its behaviour with a config file provided by the `--config` option.
 You can display an example of such config file with the `--show-config` (since this option requires to run almost the whole process,
 it can takes some time).
+
+Using PyCharm
+-------------
+
+PyCharm Pro can handle Django projects. However, it requires a complete settings file to work.
+DjangoFloor can luckily generate the required file:
+
+.. code-block:: bash
+
+  myproject-django config python > pycharm_settings.py
+
+Since this file is easily created, you do not have to commit this file to your version control system.

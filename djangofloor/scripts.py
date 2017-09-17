@@ -48,6 +48,13 @@ def get_merger_from_env():
    * ./local_settings.py (overrides ./local_settings.ini)
 
     """
+    # required if set_env is not called
+    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'djangofloor.conf.settings')
+    if 'PYCHARM_DJANGO_MANAGE_MODULE' in os.environ:
+        pycharm_matcher = re.match(r'^([\w_\-.]+)-(\w+)(\.py|\.pyc|)$', os.environ['PYCHARM_DJANGO_MANAGE_MODULE'])
+        if pycharm_matcher:
+            os.environ.setdefault('DF_CONF_NAME', '%s:%s' % pycharm_matcher.groups()[:2])
+    os.environ.setdefault('DF_CONF_NAME', '%s:%s' % ('django', 'django'))
 
     module_name, sep, script = os.environ['DF_CONF_NAME'].partition(':')
     module_name = module_name.replace('-', '_')
@@ -104,7 +111,7 @@ def set_env(command_name=None):
     if command_name is None:
         command_name = os.path.basename(sys.argv[0])
     # project name
-    script_re = re.match(r'^([\w_\-.]+)-(\w+)(\.py|\.pyc|)$',
+    script_re = re.match(r'^([\w_\-.]+)-(\w+)(\.py|\.pyc)?$',
                          command_name)
     if script_re:
         conf_name = '%s:%s' % (script_re.group(1), script_re.group(2))
@@ -151,7 +158,7 @@ def control():
         print(invalid_script)
         return 1
     os.environ['DF_CONF_NAME'] = '%s:%s' % (project_name, script)
-    script_re = re.match(r'^([\w_\-.]+)-ctl(\.py|\.pyc|)$', os.path.basename(sys.argv[0]))
+    script_re = re.match(r'^([\w_\-.]+)-ctl(\.py|\.pyc)?$', os.path.basename(sys.argv[0]))
     if script_re:
         sys.argv[0] = '%s-%s%s' % (script_re.group(1), script, script_re.group(2))
     if command:
@@ -200,6 +207,7 @@ def gunicorn():
     set_env()
     import django
     django.setup()
+    # noinspection PyUnresolvedReferences,PyPackageRequirements
     from gunicorn.app.wsgiapp import run
     from django.conf import settings
     use_gevent = False

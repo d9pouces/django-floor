@@ -250,7 +250,7 @@ class Command(TemplatedBaseCommand):
                                                               'from the source dir.')
         parser.add_argument('--clean', help='Remove temporary dirs',
                             action='store_true', default=False)
-        parser.add_argument('--distrib', default=self.vagrant_distrib, choices=self.available_distributions)
+        parser.add_argument('--distrib', default=self.vagrant_distrib, choices=tuple(self.available_distributions))
         parser.add_argument('--no-destroy', default=False, action='store_true',
                             help='Do not destroy the Vagrant virtual machine')
         parser.add_argument('--run-package', default=False, action='store_true',
