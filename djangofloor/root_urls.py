@@ -51,7 +51,7 @@ if settings.DF_INDEX_VIEW:
     index_view = get_view_from_string(settings.DF_INDEX_VIEW)
     urlpatterns += [url(prefix + '$', index_view, name='index')]
 if settings.DEBUG and settings.USE_DEBUG_TOOLBAR:
-    # noinspection PyPackageRequirements
+    # noinspection PyPackageRequirements,PyUnresolvedReferences
     import debug_toolbar
     urlpatterns += [url(prefix + '__debug__/', include(debug_toolbar.urls)), ]
 if settings.USE_ALL_AUTH:

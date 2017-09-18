@@ -28,6 +28,9 @@ class SignalQueue:
     >>> fd.execute_delayed_signals()
     'test value'
 
+
+    Of course, you should use this example from a method of a :class:`django.test.TestCase`.
+
     """
     def __init__(self, immediate_execution: bool=False):
         self.immediate = immediate_execution
