@@ -165,6 +165,8 @@ CELERY_ACCEPT_CONTENT = ['json', 'yaml', 'msgpack']
 CELERY_APP = 'djangofloor'
 CELERY_CREATE_DIRS = True
 CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_BACKEND = '{BROKER_URL}'
+
 
 # django-npm
 NPM_EXECUTABLE_PATH = 'npm'
