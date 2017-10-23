@@ -179,4 +179,7 @@ def apply_post_migrate_settings(sender, **kwargs):
     if not hasattr(apply_post_migrate_settings, 'applied'):  # must be called once, but the signal is called for all app
         merger.call_method_on_config_values('post_migrate')
         apply_post_migrate_settings.applied = True
-    Site.objects.filter(pk=1).update(name=settings.SERVER_NAME, domain=settings.SERVER_NAME)
+    domain = settings.SERVER_NAME
+    if (settings.SERVER_PORT != 80 and not settings.USE_SSL) or (settings.SERVER_PORT != 443 and settings.USE_SSL):
+        domain = '%s:%s' % (settings.SERVER_NAME, settings.SERVER_PORT)
+    Site.objects.filter(pk=1).update(name=settings.SERVER_NAME, domain=domain)
