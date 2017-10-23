@@ -119,6 +119,7 @@ class WebsocketWSGIServer(object):
         try:
             unserialized_message = json.loads(message)
             kwargs = unserialized_message['opts']
+            logger.debug('WS message received "%s"' % message)
             if 'signal' in unserialized_message:
                 signal_name = unserialized_message['signal']
                 eta = int(unserialized_message.get('eta', 0)) or None

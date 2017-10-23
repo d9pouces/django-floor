@@ -1,0 +1,42 @@
+{% load bootstrap3 i18n l10n djangofloor %}
+<div class="col-md-4 col-sm-4 col-xs-12">
+    <div class="panel panel-info">
+        <div class="panel-heading">
+            <h3 class="panel-title">{% trans 'Exception handling' %}</h3>
+        </div>
+        <div class="panel-body">
+            <ul class="list-unstyled">
+                <li>
+                    <strong>{% trans 'Raise an exception' %}</strong>
+                </li>
+                <li>
+                    <a class="btn btn-sm btn-warning" href="{% url 'df:raise_exception' %}">{% trans 'in a HTTP request' %}</a>
+                    <a class="btn btn-sm btn-warning" onclick="return $.df.call('df.monitoring.raise_exception', {});"
+                       href="?">{% trans 'in a Celery queue.' %}</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+<div class="col-md-4 col-sm-4 col-xs-12">
+    <div class="panel panel-info">
+        <div class="panel-heading">
+            <h3 class="panel-title">{% trans 'Generate log message' %}</h3>
+        </div>
+        <div class="panel-body">
+            <ul class="list-unstyled">
+                <li>
+                    <form onchange="$.df.validateForm(this, 'djangofloor.validate.logname');"
+                          action="{% url 'df:generate_log' %}" method="post" id="checklog-form">
+                        {% csrf_token %}
+                        {% bootstrap_form logname_form %}
+                        <input class="btn btn-sm btn-warning" type="submit" value="{% trans 'Check HTTP logs' %}">
+                        <input class="btn btn-sm btn-warning" type="button"
+                               onclick="return $.df.call('df.monitoring.generate_log', {form: $('#checklog-form').serializeArray()});"
+                               value="{% trans 'Check Celery logs' %}">
+                    </form>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>

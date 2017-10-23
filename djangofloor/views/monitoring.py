@@ -14,10 +14,13 @@ import os
 
 import pip
 from django.conf import settings
-from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.http import Http404
+from django.http.response import HttpResponseRedirect
 from django.template.loader import get_template
 from django.template.response import TemplateResponse
+from django.urls import reverse
 from django.utils.module_loading import import_string
 from django.utils.safestring import mark_safe
 from django.utils.six import text_type
@@ -27,6 +30,7 @@ from pkg_resources import parse_requirements, Distribution
 
 from djangofloor.celery import app
 from djangofloor.conf.settings import merger
+from djangofloor.forms import LogNameForm
 from djangofloor.tasks import set_websocket_topics, import_signals_and_functions, get_expected_queues
 
 try:
@@ -258,6 +262,13 @@ class LogLastLines(MonitoringCheck):
         return filenames
 
 
+class LogAndExceptionCheck(MonitoringCheck):
+    template = 'djangofloor/bootstrap3/monitoring/errors.html'
+
+    def get_context(self, request):
+        return {'logname_form': LogNameForm()}
+
+
 system_checks = [import_string(x)() for x in settings.DF_SYSTEM_CHECKS]
 
 
@@ -271,3 +282,31 @@ def system_state(request):
     set_websocket_topics(request)
     return TemplateResponse(request, template='djangofloor/bootstrap3/system_state.html',
                             context=template_values)
+
+
+@never_cache
+@user_passes_test(lambda x: x.is_superuser)
+def raise_exception(request):
+    if not request.user.is_superuser:
+        raise Http404
+    messages.warning(request, _('An exception has been raised in a Django HTTP request'))
+    1 / 0
+
+
+@never_cache
+@user_passes_test(lambda x: x.is_superuser)
+def generate_log(request):
+    if not request.user.is_superuser:
+        raise Http404
+    form = LogNameForm(request.POST)
+    if form.is_valid():
+        logname = form.cleaned_data['log_name'] or form.cleaned_data['other_log_name'] or 'django.requests'
+        level = form.cleaned_data['level']
+        message = form.cleaned_data['message']
+        logger_ = logging.getLogger(logname)
+        logger_.log(int(level), message)
+        messages.success(request, _('message "%(message)s" logged to "%(logname)s" at level %(level)s.') %
+                         {'message': message, 'level': level, 'logname': logname})
+    else:
+        messages.error(request, _('please specify a message, a logger name and a log level.'))
+    return HttpResponseRedirect(redirect_to=reverse('df:system_state'))

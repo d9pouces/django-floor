@@ -194,8 +194,10 @@ DF_EXTRA_INSTALLED_APPS = []
 DF_SYSTEM_CHECKS = ['djangofloor.views.monitoring.RequestCheck',
                     'djangofloor.views.monitoring.System',
                     'djangofloor.views.monitoring.CeleryStats',
+                    'djangofloor.views.monitoring.LogAndExceptionCheck',
                     'djangofloor.views.monitoring.Packages',
-                    'djangofloor.views.monitoring.LogLastLines', ]
+                    'djangofloor.views.monitoring.LogLastLines',
+                    ]
 WINDOW_INFO_MIDDLEWARES = ['djangofloor.middleware.WindowKeyMiddleware',
                            'djangofloor.middleware.DjangoAuthMiddleware',
                            'djangofloor.middleware.Djangoi18nMiddleware',

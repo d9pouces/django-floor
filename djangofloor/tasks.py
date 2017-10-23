@@ -32,11 +32,23 @@ from djangofloor.wsgi.window_info import WindowInfo
 __author__ = 'Matthieu Gallet'
 logger = logging.getLogger('djangofloor.signals')
 
-SERVER = [[]]
-SESSION = [[]]
-WINDOW = [[]]
-USER = [[]]
-BROADCAST = [[]]
+
+class Constant:
+    def __init__(self, name):
+        self.name = name
+
+    def __str__(self):
+        return self.name
+
+    def __repr__(self):
+        return self.name
+
+
+SERVER = Constant('SERVER')
+SESSION = Constant('SESSION')
+WINDOW = Constant('WINDOW')
+USER = Constant('USER')
+BROADCAST = Constant('BROADCAST')
 
 _signal_encoder = import_string(settings.WEBSOCKET_SIGNAL_ENCODER)
 _topic_serializer = import_string(settings.WEBSOCKET_TOPIC_SERIALIZER)
@@ -156,6 +168,7 @@ def _call_signal(window_info, signal_name, to=None, kwargs=None, countdown=None,
         to = [USER]
     serialized_client_topics = []
     to_server = False
+    logger.debug('received signal "%s" to %r' % (signal_name, to))
     for topic in to:
         if topic is SERVER:
             if signal_name not in REGISTERED_SIGNALS:
@@ -238,6 +251,9 @@ def import_signals_and_functions():
                     logger.exception(e)
             except Exception as e:
                 logger.exception(e)
+
+    logger.debug('Found signals: %s' % ', '.join(['%s (%d)' % (k, len(v)) for (k, v) in REGISTERED_SIGNALS.items()]))
+    logger.debug('Found functions: %s' % ', '.join([str(k) for k in REGISTERED_FUNCTIONS]))
 
 
 @shared_task(serializer='json')

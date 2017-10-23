@@ -89,6 +89,9 @@ Here is the complete JavaScript API provided by DjangoFloor.
                 return;
             }
             var msg = JSON.stringify({signal: signal, opts: opts});
+            if ($.df.debug) {
+                console.debug('WS call "' + signal + '"', opts);
+            }
             if ($.df._wsConnection) {
                 $.df._wsConnection.send(msg);
             } else {
@@ -125,7 +128,7 @@ Here is the complete JavaScript API provided by DjangoFloor.
         var i;
         if ($.df._registered_signals[signal] === undefined) {
             if ($.df.debug) {
-                console.debug('unknown call ' + signal + ' (both from client and from the server).');
+                console.debug('unknown call "' + signal + '" (from both client and server).');
             }
             return false;
         }
@@ -135,7 +138,7 @@ Here is the complete JavaScript API provided by DjangoFloor.
             $.df._signalIds[id] = true;
         }
         if ($.df.debug) {
-            console.debug('call ' + signal, opts);
+            console.debug('call "' + signal + '"', opts);
         }
         for (i = 0; i < $.df._registered_signals[signal].length; i += 1) {
             $.df._registered_signals[signal][i](opts, id);

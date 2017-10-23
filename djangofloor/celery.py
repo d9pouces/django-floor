@@ -26,5 +26,6 @@ def setup_celery_logging(**kwargs):
     """Use to setup the logs, overriding the default Celery configuration """
     logging.config.dictConfig(settings.LOGGING)
 
+
 # Moving the call here works
 app.log.setup()
