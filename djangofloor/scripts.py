@@ -15,6 +15,7 @@ import sys
 from argparse import ArgumentParser
 
 from django.utils import autoreload
+from django.utils.autoreload import python_reloader
 from django.utils.six import text_type
 
 from djangofloor.conf.merger import SettingMerger
@@ -277,8 +278,8 @@ def aiohttp():
 
 def celery():
     set_env()
-    from celery.bin.celery import main as celery_main
     from django.conf import settings
+    from celery.bin.celery import main as celery_main
     parser = ArgumentParser(usage="%(prog)s subcommand [options] [args]", add_help=False)
     parser.add_argument('-A', '--app', action='store', default='djangofloor')
     parser.add_argument('-c', '--concurrency', action='store', default=settings.CELERY_PROCESSES,
@@ -289,8 +290,13 @@ def celery():
     sys.argv[1:] = extra_args
     __set_default_option(options, 'app')
     __set_default_option(options, 'concurrency')
-    # autoreload.main(restart_celery)
-    celery_main(sys.argv)
+    if settings.DEBUG:
+        import django
+        django.setup()
+        python_reloader(celery_main, (sys.argv, ), {})
+    else:
+
+        celery_main(sys.argv)
 
 
 def uwsgi():
