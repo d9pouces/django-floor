@@ -10,6 +10,7 @@ import re
 import sys
 import time
 import warnings
+from traceback import print_tb, print_stack, extract_stack
 
 from django.conf import settings
 from django.core.checks.messages import Warning
@@ -144,6 +145,15 @@ class SlowQueryCallback:
         return 'lambda record: record.duration > %s' % self.duration
 
 
+def resolve_command():
+    f = extract_stack()
+    for frame in f:
+        if frame.filename.endswith('djangofloor/scripts.py') and \
+                        frame.name in ('django', 'celery', 'uwsgi', 'gunicorn', 'aiohttp'):
+            return frame.name
+    return None
+
+
 # noinspection PyTypeChecker
 def log_configuration(settings_dict):
     """Generate a log configuration depending on a few parameters:
@@ -166,6 +176,22 @@ def log_configuration(settings_dict):
     log_directory = settings_dict['LOG_DIRECTORY']
     module_name = settings_dict['DF_MODULE_NAME']
     script_name = settings_dict['SCRIPT_NAME']
+    command_name = resolve_command()
+    if command_name == 'django' and len(sys.argv) > 1:
+        log_suffix = '%s-%s' % (script_name, sys.argv[1])
+    elif command_name == 'celery' and len(sys.argv) > 1:
+        log_suffix = '%s-%s' % (script_name, sys.argv[1])
+        if sys.argv[1] == 'worker':
+            index = -1
+            if '-Q' in sys.argv:
+                index = sys.argv.index('-Q') + 1
+            elif '--queues' in sys.argv:
+                index = sys.argv.index('--queues') + 1
+            if 0 <= index < len(sys.argv):
+                log_suffix += '-%s' % ('.'.join(sorted(sys.argv[index].split(','))))
+    else:
+        log_suffix = script_name
+
     debug = settings_dict['DEBUG']
     log_remote_url = settings_dict['LOG_REMOTE_URL']
 
@@ -215,7 +241,7 @@ def log_configuration(settings_dict):
     handlers.update({"mail_admins": {'class': 'djangofloor.log.AdminEmailHandler', 'level': 'ERROR', },
                      'info': {'class': 'logging.StreamHandler', 'level': 'INFO', 'stream': 'ext://sys.stdout',
                               'formatter': fmt_stdout}})
-    if log_directory is not None:
+    if log_directory:
         log_directory = os.path.normpath(log_directory)
         if not os.path.isdir(log_directory):
             settings_check_results.append(Warning('Missing directory, you can create it with \nmkdir -p "%s"' %
@@ -226,7 +252,7 @@ def log_configuration(settings_dict):
                 return error_handler
         else:
             def get_log_file_handler(suffix):
-                name = '%s-%s-%s.log' % (module_name, script_name, suffix)
+                name = '%s-%s-%s.log' % (module_name, log_suffix, suffix)
                 log_filename = os.path.join(log_directory, name)
                 try:
                     open(log_filename, 'a').close()

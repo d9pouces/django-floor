@@ -14,6 +14,7 @@ import subprocess
 import sys
 from argparse import ArgumentParser
 
+from django.utils import autoreload
 from django.utils.six import text_type
 
 from djangofloor.conf.merger import SettingMerger
@@ -288,6 +289,7 @@ def celery():
     sys.argv[1:] = extra_args
     __set_default_option(options, 'app')
     __set_default_option(options, 'concurrency')
+    # autoreload.main(restart_celery)
     celery_main(sys.argv)
 
 

@@ -80,6 +80,8 @@ BASE_MAPPING = [
                     help_str='Send logs to a syslog or systemd log daemon. \n'
                              'Examples: syslog+tcp://localhost:514/user, syslog:///local7, '
                              'syslog:///dev/log/daemon, logd:///project_name'),
+    CharConfigField('global.log_directory', 'LOG_DIRECTORY',
+                    help_str='Write all local logs to this directory.'),
     FloatConfigField('global.log_slow_queries_duration', 'LOG_SLOW_QUERIES_DURATION',
                      help_str='DB queries that take more than this threshold (in seconds) are logged.'
                               'Deactivated if left empty.'),

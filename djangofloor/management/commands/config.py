@@ -50,11 +50,11 @@ class Command(BaseCommand):
                 if setting_name not in merger.settings:
                     continue
                 value = merger.settings[setting_name]
-                self.stdout.write(self.style.NOTICE('%s = %r' % (setting_name, value)))
+                self.stdout.write(self.style.SUCCESS('%s = %r' % (setting_name, value)))
                 if verbosity <= 1:
                     continue
                 for provider_name, raw_value in merger.raw_settings[setting_name].items():
-                    self.stdout.write(self.style.WARNING('#   %s -> %r' % (provider_name or 'built-in', raw_value)))
+                    self.stdout.write(self.style.WARNING('    #   %s -> %r' % (provider_name or 'built-in', raw_value)))
         elif action == 'ini':
             if verbosity >= 3:
                 provider = merger.fields_provider
@@ -63,9 +63,9 @@ class Command(BaseCommand):
                 if not isinstance(provider, IniConfigProvider):
                     continue
                 elif provider.is_valid():
-                    self.stdout.write(self.style.NOTICE('#  - %s "%s"' % (provider.name, provider)))
+                    self.stdout.write(self.style.NOTICE('    #  - %s "%s"' % (provider.name, provider)))
                 elif verbosity >= 2:
-                    self.stdout.write(self.style.ERROR('#  - %s "%s"' % (provider.name, provider)))
+                    self.stdout.write(self.style.ERROR('    #  - %s "%s"' % (provider.name, provider)))
             provider = IniConfigProvider()
             merger.write_provider(provider, include_doc=verbosity >= 2)
             self.stdout.write(provider.to_str())
@@ -74,9 +74,9 @@ class Command(BaseCommand):
                 if not isinstance(provider, IniConfigProvider):
                     continue
                 elif provider.is_valid():
-                    self.stdout.write(self.style.NOTICE('#  - %s "%s"' % (provider.name, provider)))
+                    self.stdout.write(self.style.NOTICE('    #  - %s "%s"' % (provider.name, provider)))
                 else:
-                    self.stdout.write(self.style.ERROR('#  - %s "%s"' % (provider.name, provider)))
+                    self.stdout.write(self.style.ERROR('    #  - %s "%s"' % (provider.name, provider)))
             provider = IniConfigProvider()
             merger.write_provider(provider, include_doc=True)
             self.stdout.write(provider.to_str())
