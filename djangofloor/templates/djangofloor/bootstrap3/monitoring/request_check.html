@@ -65,7 +65,7 @@
                 <li><strong>{% trans 'Config files: ' %}</strong>
                     <ul class="list-unstyled">
                     {% for provider in settings_providers %}
-                    <li><span class="{% if provider.is_valid %}text-success{% else %}text-danger{% endif %}">{{ provider }}</span>{% if not provider.is_valid %} (not found){% endif %}{% endfor %}</li>
+                    <li>- <span class="{% if provider.is_valid %}text-success{% else %}text-danger{% endif %}">{{ provider }}</span>{% if not provider.is_valid %}{% trans ': not found' %}{% else %}{% trans ': loaded' %}{% endif %}{% endfor %}</li>
                         </ul>
                 </li>
                 
