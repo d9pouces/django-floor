@@ -5,7 +5,7 @@
             <h3 class="panel-title">{% trans 'Required packages' %}</h3>
         </div>
         <div class="panel-body">
-            <ul class="list-unstyled">
+            <ul class="list-unstyled" style="max-height: 275px; overflow-y: auto;">
                 {% for distrib in installed_distributions %}
                 <li>
                     <span class="label label-{{ distrib.2 }}">{% bootstrap_icon distrib.3 %}</span>&nbsp;

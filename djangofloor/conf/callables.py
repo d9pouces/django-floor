@@ -4,12 +4,12 @@
 
 """
 
+import re
 # noinspection PyUnresolvedReferences
 from urllib.parse import urlparse
 
-import re
 from django.utils.crypto import get_random_string
-
+from pkg_resources import get_distribution, DistributionNotFound
 
 from djangofloor.utils import is_package_present
 
@@ -263,3 +263,21 @@ def generate_secret_key(django_ready, length=60):
         return get_random_string(length=length)
     from django.conf import settings
     return settings.SECRET_KEY
+
+
+def required_packages(settings_dict):
+
+    def get_requirements(package_name):
+        try:
+            yield str(package_name)
+            d = get_distribution(package_name)
+            for r in d.requires():
+                for required_package in get_requirements(r):
+                    yield required_package
+        except DistributionNotFound:
+            pass
+
+    return list(set(get_requirements(settings_dict['DF_MODULE_NAME'])))
+
+
+required_packages.required_settings = ['DF_MODULE_NAME']

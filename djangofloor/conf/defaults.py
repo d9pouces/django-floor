@@ -11,7 +11,7 @@ from django.utils.translation import ugettext_lazy as _
 from djangofloor.conf.callables import database_engine, url_parse_server_name, \
     url_parse_server_protocol, url_parse_server_port, url_parse_prefix, url_parse_ssl, project_name, \
     authentication_backends, ldap_user_search, allauth_installed_apps, allowed_hosts, cache_setting, template_setting, \
-    generate_secret_key, use_x_forwarded_for
+    generate_secret_key, use_x_forwarded_for, required_packages
 from djangofloor.conf.config_values import Path, Directory, SettingReference, ExpandIterable, \
     CallableSetting, AutocreateFileContent
 from djangofloor.log import log_configuration
@@ -342,7 +342,7 @@ DF_MIDDLEWARE = []
 DF_REMOTE_USER_HEADER = None  # HTTP-REMOTE-USER
 DF_DEFAULT_GROUPS = [_('Users')]
 DF_TEMPLATE_CONTEXT_PROCESSORS = []
-DF_CHECKED_REQUIREMENTS = ['django>=1.11', 'celery', 'django-bootstrap3', 'redis', 'pip']
+DF_CHECKED_REQUIREMENTS = CallableSetting(required_packages)
 
 NPM_FILE_PATTERNS = {
     'bootstrap-notify': ['*.js'],
