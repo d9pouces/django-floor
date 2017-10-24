@@ -34,6 +34,7 @@ logger = logging.getLogger('djangofloor.signals')
 
 
 class Constant:
+    """Allow to define constants that can be nicely printed to stdout"""
     def __init__(self, name):
         self.name = name
 
@@ -44,6 +45,7 @@ class Constant:
         return self.name
 
 
+# special values for the "to" argument
 SERVER = Constant('SERVER')
 SESSION = Constant('SESSION')
 WINDOW = Constant('WINDOW')
@@ -61,6 +63,7 @@ redis_connection_pool = ConnectionPool.from_url('redis://%(password)s%(host)s%(p
 
 
 def get_websocket_redis_connection():
+    """Return a valid Redis connection, using a connection pool."""
     return StrictRedis(connection_pool=redis_connection_pool)
 
 
@@ -157,6 +160,12 @@ def call(window_info, signal_name, to=None, kwargs=None, countdown=None, expires
 
 def _call_signal(window_info, signal_name, to=None, kwargs=None, countdown=None, expires=None, eta=None,
                  from_client=False):
+    """actually calls a DF signal, dispatching them to their destination:
+
+    * only calls Celery tasks if a delay is required (`coutdown` argument)
+    * write messages to websockets if no delay is required
+
+    """
     import_signals_and_functions()
     window_info = WindowInfo.from_request(window_info)
     if kwargs is None:
