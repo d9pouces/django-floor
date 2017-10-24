@@ -28,7 +28,8 @@ def check_websockets(window_info):
 @signal(path='df.monitoring.raise_exception', is_allowed_to=is_superuser)
 def check_websockets(window_info):
     """Check what happens when an exception is raised in a Celery queue"""
-    notify(window_info, _('An exception has been raised in a Celery queue'), to=WINDOW, level=WARNING, style=BANNER)
+    notify(window_info, _('An exception (division by zero) has been raised in a Celery queue'), to=WINDOW,
+           level=WARNING, style=BANNER)
     1 / 0
 
 

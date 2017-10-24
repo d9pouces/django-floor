@@ -270,19 +270,19 @@ class Connection(object):
                 if k in kwargs:
                     kwargs[k] = v(kwargs[k])
             except ValueError:
-                logger.info('%s("%s"): Invalid value %r for argument "%s".' % (cls, self.path, kwargs[k], k))
+                logger.warning('%s("%s"): Invalid value %r for argument "%s".' % (cls, self.path, kwargs[k], k))
                 return None
             except TypeError:
-                logger.info('%s("%s"): Invalid value %r for argument "%s".' % (cls, self.path, kwargs[k], k))
+                logger.warning('%s("%s"): Invalid value %r for argument "%s".' % (cls, self.path, kwargs[k], k))
                 return None
         for k in self.required_arguments_names:
             if k not in kwargs:
-                logger.info('%s("%s"): Missing required argument "%s".' % (cls, self.path, k))
+                logger.warning('%s("%s"): Missing required argument "%s".' % (cls, self.path, k))
                 return None
         if not self.accept_kwargs:
             for k in kwargs:
                 if k not in self.accepted_argument_names:
-                    logger.info('%s("%s"): Invalid argument "%s".' % (cls, self.path, k))
+                    logger.warning('%s("%s"): Invalid argument "%s".' % (cls, self.path, k))
                     return None
         return kwargs
 

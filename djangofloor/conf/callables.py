@@ -18,6 +18,7 @@ __author__ = 'Matthieu Gallet'
 _default_engines = {'mysql': 'django.db.backends.mysql',
                     'oracle': 'django.db.backends.oracle',
                     'postgresql': 'django.db.backends.postgresql',
+                    'sqlite': 'django.db.backends.sqlite3',
                     'sqlite3': 'django.db.backends.sqlite3', }
 
 

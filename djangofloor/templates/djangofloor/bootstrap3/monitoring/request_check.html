@@ -63,7 +63,11 @@
                 <span class="label label-{% if request_site_valid %}success{% else %}warning{% endif %}">{{ request_site }}</span>
                 </li>{% endif %}
                 <li><strong>{% trans 'Config files: ' %}</strong>
-                {{ settings_providers|join:', ' }}</li>
+                    <ul class="list-unstyled">
+                    {% for provider in settings_providers %}
+                    <li><span class="{% if provider.is_valid %}text-success{% else %}text-danger{% endif %}">{{ provider }}</span>{% if not provider.is_valid %} (not found){% endif %}{% endfor %}</li>
+                        </ul>
+                </li>
                 
             </ul>
         </div>

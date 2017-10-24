@@ -226,7 +226,7 @@ class RequestCheck(MonitoringCheck):
         context['server_name'] = settings.SERVER_NAME
         context['server_name_valid'] = settings.SERVER_NAME == host
         context['debug'] = settings.DEBUG
-        context['settings_providers'] = [p for p in merger.providers if p.is_valid()]
+        context['settings_providers'] = [p for p in merger.providers]
         return context
 
 
@@ -289,7 +289,7 @@ def system_state(request):
 def raise_exception(request):
     if not request.user.is_superuser:
         raise Http404
-    messages.warning(request, _('An exception has been raised in a Django HTTP request'))
+    messages.warning(request, _('An exception (division by zero) has been raised in a Django HTTP request'))
     1 / 0
 
 
