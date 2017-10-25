@@ -3,13 +3,12 @@ written by Jeffrey Gelens (http://noppo.pro/) and licensed under the Apache Lice
 
 This websocket is only used for the debug server and not for the production server.
 """
-import logging
 import struct
 from socket import error as socket_error
 
-from djangofloor.wsgi.exceptions import WebSocketError, FrameTooLargeException
+import logging
 from djangofloor.wsgi.utf8validator import Utf8Validator
-
+from djangofloor.wsgi.exceptions import WebSocketError, FrameTooLargeException
 logger = logging.getLogger('django.request')
 
 

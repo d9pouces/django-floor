@@ -117,9 +117,9 @@ except ImportError:
 
             if not isinstance(ba, str):
                 ba = ba.decode()
-            l = len(ba)
+            length = len(ba)
 
-            for i in range(l):
+            for i in range(length):
                 # optimized version of decode(), since we are not interested in actual code points
 
                 self.state = Utf8Validator.UTF8VALIDATOR_DFA[
@@ -129,6 +129,6 @@ except ImportError:
                     self.i += i
                     return False, False, i, self.i
 
-            self.i += l
+            self.i += length
 
-            return True, self.state == Utf8Validator.UTF8_ACCEPT, l, self.i
+            return True, self.state == Utf8Validator.UTF8_ACCEPT, length, self.i

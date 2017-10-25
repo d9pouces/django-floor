@@ -10,7 +10,6 @@ import select
 
 from django.conf import settings
 from django.core.wsgi import get_wsgi_application
-
 from djangofloor.wsgi.wsgi_server import WebsocketWSGIServer
 
 __author__ = 'Matthieu Gallet'

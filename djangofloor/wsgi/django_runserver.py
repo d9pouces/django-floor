@@ -44,7 +44,7 @@ class WebsocketRunServer(WebsocketWSGIServer):
             # 5.2.1 (3)
             raise HandshakeError('Invalid key: {0}'.format(key))
 
-        sec_ws_accept = base64.b64encode(sha1(bytes(key) + self.WS_GUID).digest())
+        sec_ws_accept = base64.b64encode(sha1(key.encode('utf-8') + self.WS_GUID).digest())
         sec_ws_accept = sec_ws_accept.decode('ascii')
         headers = [
             ('Upgrade', 'websocket'),
@@ -54,7 +54,7 @@ class WebsocketRunServer(WebsocketWSGIServer):
         ]
         logger.debug('WebSocket request accepted, switching protocols')
         start_response(force_str('101 Switching Protocols'), headers)
-        start_response.finish_content()
+        start_response.__self__.finish_content()
         return WebSocket(environ['wsgi.input'])
 
     def get_ws_file_descriptor(self, websocket):
