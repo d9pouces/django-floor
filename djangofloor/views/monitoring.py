@@ -216,6 +216,8 @@ class RequestCheck(MonitoringCheck):
         context['allowed_host'] = host in settings.ALLOWED_HOSTS
         context['request_host'] = host
         context['request_site'] = None
+        context['cache_redis'] = settings.USE_REDIS_CACHE
+        context['session_redis'] = settings.USE_REDIS_SESSIONS
         # noinspection PyTypeChecker
         context['fake_username'] = getattr(settings, 'DF_FAKE_AUTHENTICATION_USERNAME', None)
         # noinspection PyTypeChecker

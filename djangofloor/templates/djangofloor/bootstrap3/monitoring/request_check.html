@@ -62,6 +62,14 @@
                 {% if request_site %}<li><strong>{% trans 'Request site (from the CurrentSiteMiddleware middleware):' %}</strong>
                 <span class="label label-{% if request_site_valid %}success{% else %}warning{% endif %}">{{ request_site }}</span>
                 </li>{% endif %}
+                <li><strong>{% trans 'Redis-based cache:' %}</strong>
+                    {% if cache_redis %}<span class="label label-success">{% bootstrap_icon 'ok' %}</span>
+                    {% else %}{% trans 'you should install "django-redis" to cache your pages in Redis.' %}{% endif %}
+                </li>
+                <li><strong>{% trans 'Redis-based sessions:' %}</strong>
+                    {% if session_redis %}<span class="label label-success">{% bootstrap_icon 'ok' %}</span>
+                    {% else %}{% trans 'you should install "django-redis-sessions" to store your sessions.' %}{% endif %}
+                </li>
                 <li><strong>{% trans 'Config files: ' %}</strong>
                     <ul class="list-unstyled">
                     {% for provider in settings_providers %}
