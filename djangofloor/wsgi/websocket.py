@@ -12,7 +12,6 @@ from djangofloor.wsgi.exceptions import WebSocketError, FrameTooLargeException
 logger = logging.getLogger('django.request')
 
 
-# noinspection PyMethodMayBeStatic
 class WebSocket(object):
     __slots__ = ('_closed', 'stream', 'utf8validator', 'utf8validate_last')
 
@@ -23,9 +22,9 @@ class WebSocket(object):
     OPCODE_PING = 0x09
     OPCODE_PONG = 0x0a
 
-    def __init__(self, wsgi_input):
+    def __init__(self, stream):
         self._closed = False
-        self.stream = Stream(wsgi_input)
+        self.stream = stream
         self.utf8validator = Utf8Validator()
         self.utf8validate_last = None
 
@@ -43,14 +42,15 @@ class WebSocket(object):
         If the conversion fails, the socket will be closed.
         """
         if not bytestring:
-            return u''
+            return ''
         try:
             return bytestring.decode('utf-8')
         except UnicodeDecodeError:
             self.close(1007)
             raise
 
-    def _encode_bytes(self, text):
+    @staticmethod
+    def _encode_bytes(text):
         """
         :returns: The utf-8 byte string equivalent of `text`.
         """
@@ -60,7 +60,8 @@ class WebSocket(object):
             text = str(text or '')
         return text.encode('utf-8')
 
-    def _is_valid_close_code(self, code):
+    @staticmethod
+    def _is_valid_close_code(code):
         """
         :returns: Whether the returned close code is a valid hybi return code.
         """
@@ -270,21 +271,6 @@ class WebSocket(object):
             logger.debug("Closed WebSocket")
             self._closed = True
             self.stream = None
-
-
-class Stream(object):
-    """
-    Wraps the handler's socket/rfile attributes and makes it in to a file like
-    object that can be read from/written to by the lower level websocket api.
-    """
-
-    __slots__ = ('read', 'write', 'fileno')
-
-    # noinspection PyProtectedMember
-    def __init__(self, wsgi_input):
-        self.read = wsgi_input.raw._sock.recv
-        self.write = wsgi_input.raw._sock.sendall
-        self.fileno = wsgi_input.fileno()
 
 
 class Header(object):

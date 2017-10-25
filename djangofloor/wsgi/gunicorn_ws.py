@@ -1,25 +1,22 @@
 import base64
 import logging
-import select
-import socketserver
 from hashlib import sha1
-from wsgiref import util
 
 from django.conf import settings
-from django.core.management.commands import runserver
-from django.core.servers.basehttp import WSGIServer, WSGIRequestHandler, ServerHandler
 from django.core.wsgi import get_wsgi_application
-from django.utils.encoding import force_str
+# noinspection PyPackageRequirements
+from eventlet.green import select
+# noinspection PyPackageRequirements
+from gunicorn.workers.async import ALREADY_HANDLED
 
+from djangofloor.wsgi.exceptions import UpgradeRequiredError, HandshakeError
 from djangofloor.wsgi.websocket import WebSocket
-from djangofloor.wsgi.wsgi_server import WebsocketWSGIServer, HandshakeError, UpgradeRequiredError
+from djangofloor.wsgi.wsgi_server import WebsocketWSGIServer
 
-util._hoppish = {}.__contains__
-__author__ = 'Matthieu Gallet'
-logger = logging.getLogger('django.request')
+logger = logging.getLogger(__name__)
 
 
-class WebsocketRunServer(WebsocketWSGIServer):
+class WebSocketWSGI(WebsocketWSGIServer):
     WS_GUID = b'258EAFA5-E914-47DA-95CA-C5AB0DC85B11'
     WS_VERSIONS = ('13', '8', '7')
 
@@ -28,6 +25,7 @@ class WebsocketRunServer(WebsocketWSGIServer):
         Attempt to upgrade the socket environ['wsgi.input'] into a websocket enabled connection.
         """
         websocket_version = environ.get('HTTP_SEC_WEBSOCKET_VERSION', '')
+        print('websocket_version %s' % websocket_version)
         if not websocket_version:
             raise UpgradeRequiredError
         elif websocket_version not in self.WS_VERSIONS:
@@ -53,9 +51,8 @@ class WebsocketRunServer(WebsocketWSGIServer):
             ('Sec-WebSocket-Version', str(websocket_version)),
         ]
         logger.debug('WebSocket request accepted, switching protocols')
-        start_response(force_str('101 Switching Protocols'), headers)
-        start_response.__self__.finish_content()
-        return DjangoWebSocket(environ['wsgi.input'])
+        start_response(str('101 Switching Protocols'), headers)
+        return GunicornWebSocket(environ['gunicorn.socket'], websocket_version)
 
     def get_ws_file_descriptor(self, websocket):
         return websocket.get_file_descriptor()
@@ -64,7 +61,7 @@ class WebsocketRunServer(WebsocketWSGIServer):
         return select.select(rlist, wlist, xlist, timeout)
 
     def flush_websocket(self, websocket):
-        return websocket.flush()
+        pass
 
     def ws_send_bytes(self, websocket, message):
         return websocket.send(message)
@@ -72,11 +69,15 @@ class WebsocketRunServer(WebsocketWSGIServer):
     def ws_receive_bytes(self, websocket):
         return websocket.receive()
 
+    def default_response(self):
+        return ALREADY_HANDLED
 
-class DjangoWebSocket(WebSocket):
 
-    def __init__(self, wsgi_input):
+class GunicornWebSocket(WebSocket):
+
+    def __init__(self, wsgi_input, version):
         super().__init__(Stream(wsgi_input))
+        self.version = version
 
 
 class Stream(object):
@@ -88,43 +89,22 @@ class Stream(object):
     __slots__ = ('read', 'write', 'fileno')
 
     # noinspection PyProtectedMember
-    def __init__(self, wsgi_input):
-        self.read = wsgi_input.raw._sock.recv
-        self.write = wsgi_input.raw._sock.sendall
-        self.fileno = wsgi_input.fileno()
+    def __init__(self, sock):
+        self.read = sock.recv
+        self.write = sock.sendall
+        self.fileno = sock.fileno()
 
 
-def run(addr, port, wsgi_handler, ipv6=False, threading=False, server_cls=WSGIServer):
-    """
-    Function to monkey patch the internal Django command: manage.py runserver
-    """
-    logger.info('Websocket support is enabled.')
-    server_address = (addr, port)
-    if not threading:
-        raise Exception("Django's Websocket server must run with threading enabled")
-    # noinspection PyUnusedLocal
-    server_cls = server_cls
-    ServerHandler.http_version = '1.1'
-    httpd_cls = type('WSGIServer', (socketserver.ThreadingMixIn, WSGIServer), {'daemon_threads': True})
-    httpd = httpd_cls(server_address, WSGIRequestHandler, ipv6=ipv6)
-    httpd.set_app(wsgi_handler)
-    httpd.serve_forever()
-
-
-if settings.WEBSOCKET_URL:
-    runserver.run = run
-
-
-django_ws_application = WebsocketRunServer()
+ws_application = WebSocketWSGI()
 http_application = get_wsgi_application()
 
 
-def django_application(environ, start_response):
+def application(environ, start_response):
     """
     Return a WSGI application which is patched to be used with websockets.
 
     :return: a HTTP app, or a WS app (depending on the URL path)
     """
     if settings.WEBSOCKET_URL and environ.get('PATH_INFO', '').startswith(settings.WEBSOCKET_URL):
-        return django_ws_application(environ, start_response)
+        return ws_application(environ, start_response)
     return http_application(environ, start_response)

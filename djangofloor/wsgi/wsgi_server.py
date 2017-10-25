@@ -63,7 +63,7 @@ class WebsocketWSGIServer(object):
         """
         self._redis_connection = redis_connection or get_websocket_redis_connection()
 
-    def upgrade_websocket(self, environ, start_reponse):
+    def upgrade_websocket(self, environ, start_response):
         raise NotImplementedError
 
     def select(self, rlist, wlist, xlist, timeout=None):
@@ -150,7 +150,7 @@ class WebsocketWSGIServer(object):
         Hijack the main loop from the original thread and listen on events on the Redis
         and the Websocket filedescriptors.
         """
-        response = http.HttpResponse(status=200, content='Websocket Closed')
+        response = self.default_response()
         websocket = None
         try:
             self.assure_protocol_requirements(environ)
@@ -191,6 +191,9 @@ class WebsocketWSGIServer(object):
                 start_response(force_str(status), headers)
                 logger.info('Finish non-websocket response with status code: {}'.format(response.status_code))
         return response
+
+    def default_response(self):
+        return http.HttpResponse(status=200, content='Websocket Closed')
 
     def get_ws_file_descriptor(self, websocket):
         raise NotImplementedError
