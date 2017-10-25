@@ -30,6 +30,7 @@ if python_version >= (3, 4):
 
 entry_points = {'console_scripts': ['djangofloor-createproject = djangofloor.scripts:create_project']}
 extras_requirements['deb'] = ['stdeb>=0.8.5']
+extras_requirements['gunicorn'] = ['gunicorn', 'eventlet']
 extras_requirements['extra'] = ['django-pipeline', 'django-debug-toolbar', 'django-redis-sessions',
                                 'django-redis', 'psutil']
 extras_requirements['doc'] = ['sphinx', 'sphinx_rtd_theme', 'sphinxcontrib-autoanysrc']

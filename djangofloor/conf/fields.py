@@ -7,8 +7,6 @@ Check :mod:`djangofloor.conf.mapping` for examples.
 
 import os
 
-from django.utils.six import text_type
-
 __author__ = 'Matthieu Gallet'
 
 MISSING_VALUE = [[]]
@@ -16,7 +14,7 @@ MISSING_VALUE = [[]]
 
 def bool_setting(value):
     """return `True` if the provided (lower-cased) text is one of ('1', 'ok', 'yes', 'true', 'on')"""
-    return text_type(value).lower() in {'1', 'ok', 'yes', 'true', 'on'}
+    return str(value).lower() in {'1', 'ok', 'yes', 'true', 'on'}
 
 
 def str_or_none(text):
@@ -26,7 +24,7 @@ def str_or_none(text):
 
 def str_or_blank(value):
     """return '' if the provided value is `None`, else return value"""
-    return '' if value is None else text_type(value)
+    return '' if value is None else str(value)
 
 
 def guess_relative_path(value):
@@ -126,7 +124,7 @@ class ListConfigField(ConfigField):
     def __init__(self, name, setting_name, **kwargs):
         def to_str(value):
             if value:
-                return ','.join([text_type(x) for x in value])
+                return ','.join([str(x) for x in value])
             return ''
         super(ListConfigField, self).__init__(name, setting_name, from_str=strip_split, to_str=to_str, **kwargs)
 

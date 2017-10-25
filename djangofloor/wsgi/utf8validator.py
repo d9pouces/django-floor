@@ -27,11 +27,6 @@
 #
 ##############################################################################
 
-from django.utils import six
-
-if six.PY3:
-    xrange = range
-
 # use Cython implementation of UTF8 validator if available
 try:
     # noinspection PyUnresolvedReferences,PyPackageRequirements
@@ -120,11 +115,11 @@ except ImportError:
             total amount of consumed bytes.
             """
 
-            if not isinstance(ba, six.text_type):
+            if not isinstance(ba, str):
                 ba = ba.decode()
             l = len(ba)
 
-            for i in xrange(l):
+            for i in range(l):
                 # optimized version of decode(), since we are not interested in actual code points
 
                 self.state = Utf8Validator.UTF8VALIDATOR_DFA[

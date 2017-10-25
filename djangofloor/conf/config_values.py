@@ -27,7 +27,6 @@ import os
 import warnings
 
 from django.utils.module_loading import import_string
-from django.utils.six import text_type
 
 __author__ = 'Matthieu Gallet'
 
@@ -114,10 +113,10 @@ class Path(ConfigValue):
         return value
 
     def __str__(self):
-        return text_type(self.value)
+        return str(self.value)
 
     def __repr__(self):
-        return "%s('%s')" % (self.__class__.__name__, text_type(self.value))
+        return "%s('%s')" % (self.__class__.__name__, str(self.value))
 
 
 class Directory(Path):
@@ -343,7 +342,7 @@ class CallableSetting(ConfigValue):
     """
 
     def __init__(self, value, *required):
-        if isinstance(value, text_type):
+        if isinstance(value, str):
             value = import_string(value)
         super(CallableSetting, self).__init__(value)
         if hasattr(value, 'required_settings'):

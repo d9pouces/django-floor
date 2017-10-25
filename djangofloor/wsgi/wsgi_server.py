@@ -9,25 +9,23 @@ Structure of the redis database, with `prefix = settings.WEBSOCKET_REDIS_PREFIX`
 import json
 import logging
 import sys
-from django.conf import settings
-import django.utils.six as six
-from django.core import signing
-from django.utils.module_loading import import_string
-# noinspection PyUnresolvedReferences
-from django.utils.six.moves import http_client
-from djangofloor.decorators import REGISTERED_FUNCTIONS
+from http import client
 
-from djangofloor.wsgi.window_info import WindowInfo
+from django import http
+from django.conf import settings
+from django.contrib.auth import get_user
+from django.core import signing
+from django.core.exceptions import PermissionDenied
+from django.core.handlers.wsgi import WSGIRequest
+from django.utils.encoding import force_str
+from django.utils.module_loading import import_string
+
+from djangofloor.decorators import REGISTERED_FUNCTIONS
 # noinspection PyProtectedMember
 from djangofloor.tasks import _call_signal, SERVER, _server_function_call, import_signals_and_functions, \
     get_websocket_redis_connection
-
-from django.contrib.auth import get_user
-from django.core.handlers.wsgi import WSGIRequest
-from django.core.exceptions import PermissionDenied
-from django import http
-from django.utils.encoding import force_str
 from djangofloor.wsgi.exceptions import WebSocketError, HandshakeError, UpgradeRequiredError
+from djangofloor.wsgi.window_info import WindowInfo
 
 try:
     # django >= 1.8 && python >= 2.7
@@ -110,7 +108,7 @@ class WebsocketWSGIServer(object):
 
     @staticmethod
     def publish_message(window_info, message):
-        if isinstance(message, six.binary_type):
+        if isinstance(message, bytes):
             message = message.decode('utf-8')
         if not message:
             return
@@ -185,12 +183,11 @@ class WebsocketWSGIServer(object):
                 websocket.close(code=1001, message='Websocket Closed')
             else:
                 logger.warning('Starting late response on websocket')
-                status_text = http_client.responses.get(response.status_code, 'UNKNOWN STATUS CODE')
+                status_text = client.responses.get(response.status_code, 'UNKNOWN STATUS CODE')
                 status = '{0} {1}'.format(response.status_code, status_text)
                 # noinspection PyProtectedMember
                 headers = response._headers.values()
-                if six.PY3:
-                    headers = list(headers)
+                headers = list(headers)
                 start_response(force_str(status), headers)
                 logger.info('Finish non-websocket response with status code: {}'.format(response.status_code))
         return response

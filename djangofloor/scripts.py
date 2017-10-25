@@ -14,9 +14,7 @@ import subprocess
 import sys
 from argparse import ArgumentParser
 
-from django.utils import autoreload
 from django.utils.autoreload import python_reloader
-from django.utils.six import text_type
 
 from djangofloor.conf.merger import SettingMerger
 from djangofloor.conf.providers import PythonModuleProvider, PythonFileProvider, IniConfigProvider, \
@@ -36,7 +34,7 @@ def __get_extra_option(name, default, *argnames):
 def __set_default_option(options, name):
     option_name = name.replace('_', '-')
     if getattr(options, name):
-        sys.argv += ['--%s' % option_name, text_type(getattr(options, name))]
+        sys.argv += ['--%s' % option_name, str(getattr(options, name))]
 
 
 def get_merger_from_env():
@@ -327,9 +325,9 @@ def uwsgi():
     if not options.no_enable_threads:
         cmd += ['--enable-threads']
     # cmd += ['--threads', text_type(options.threads)]
-    cmd += ['--http-socket', options.http_socket, '--reload-mercy', text_type(options.reload_mercy),
-            '--worker-reload-mercy', text_type(options.worker_reload_mercy),
-            '--mule-reload-mercy', text_type(options.mule_reload_mercy)]
+    cmd += ['--http-socket', options.http_socket, '--reload-mercy', str(options.reload_mercy),
+            '--worker-reload-mercy', str(options.worker_reload_mercy),
+            '--mule-reload-mercy', str(options.mule_reload_mercy)]
     cmd += list(extra_args)
     p = subprocess.Popen(cmd)
     p.wait()

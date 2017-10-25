@@ -10,15 +10,11 @@ import select
 
 from django.conf import settings
 from django.core.wsgi import get_wsgi_application
-from django.utils import six
+
 from djangofloor.wsgi.wsgi_server import WebsocketWSGIServer
 
 __author__ = 'Matthieu Gallet'
 logger = logging.getLogger('django.request')
-
-if six.PY3:
-    # noinspection PyShadowingBuiltins
-    xrange = range
 
 
 class GunicornWebsocketServer(WebsocketWSGIServer):
@@ -46,6 +42,7 @@ class GunicornWebsocketServer(WebsocketWSGIServer):
 
     def ws_receive_bytes(self, websocket):
         return websocket.receive()
+
 
 http_application = get_wsgi_application()
 ws_application = GunicornWebsocketServer()

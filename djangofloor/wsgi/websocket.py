@@ -3,19 +3,14 @@ written by Jeffrey Gelens (http://noppo.pro/) and licensed under the Apache Lice
 
 This websocket is only used for the debug server and not for the production server.
 """
+import logging
 import struct
 from socket import error as socket_error
 
-import logging
-from django.utils import six
-from djangofloor.wsgi.utf8validator import Utf8Validator
 from djangofloor.wsgi.exceptions import WebSocketError, FrameTooLargeException
+from djangofloor.wsgi.utf8validator import Utf8Validator
+
 logger = logging.getLogger('django.request')
-
-
-if six.PY3:
-    # noinspection PyShadowingBuiltins
-    xrange = range
 
 
 # noinspection PyMethodMayBeStatic
@@ -39,7 +34,7 @@ class WebSocket(object):
         # noinspection PyBroadException
         try:
             self.close()
-        except:
+        except Exception:
             # close() may fail if __init__ didn't complete
             pass
 
@@ -60,10 +55,10 @@ class WebSocket(object):
         """
         :returns: The utf-8 byte string equivalent of `text`.
         """
-        if isinstance(text, six.binary_type):
+        if isinstance(text, bytes):
             return text
-        if not isinstance(text, six.text_type):
-            text = six.text_type(text or '')
+        if not isinstance(text, str):
+            text = str(text or '')
         return text.encode('utf-8')
 
     def _is_valid_close_code(self, code):
@@ -143,7 +138,7 @@ class WebSocket(object):
         except socket_error:
             payload = ''
         except Exception as e:
-            logger.debug("{}: {}".format(type(e), six.text_type(e)))
+            logger.debug("{}: {}".format(type(e), str(e)))
             payload = ''
         if len(payload) != header.length:
             raise WebSocketError('Unexpected EOF reading frame payload')
@@ -238,7 +233,7 @@ class WebSocket(object):
         if opcode == self.OPCODE_TEXT:
             message = self._encode_bytes(message)
         elif opcode == self.OPCODE_BINARY:
-            message = six.binary_type(message)
+            message = bytes(message)
         header = Header.encode_header(True, opcode, '', len(message), 0)
         try:
             self.stream.write(header + message)
@@ -250,7 +245,7 @@ class WebSocket(object):
         Send a frame over the websocket with message as its payload
         """
         if binary is None:
-            binary = not isinstance(message, six.string_types)
+            binary = not isinstance(message, str)
         opcode = self.OPCODE_BINARY if binary else self.OPCODE_TEXT
         try:
             self.send_frame(message, opcode)
@@ -288,12 +283,8 @@ class Stream(object):
 
     # noinspection PyProtectedMember
     def __init__(self, wsgi_input):
-        if six.PY2:
-            self.read = wsgi_input._sock.recv
-            self.write = wsgi_input._sock.sendall
-        else:
-            self.read = wsgi_input.raw._sock.recv
-            self.write = wsgi_input.raw._sock.sendall
+        self.read = wsgi_input.raw._sock.recv
+        self.write = wsgi_input.raw._sock.sendall
         self.fileno = wsgi_input.fileno()
 
 
@@ -321,11 +312,9 @@ class Header(object):
     def mask_payload(self, payload):
         payload = bytearray(payload)
         mask = bytearray(self.mask)
-        for i in xrange(self.length):
+        for i in range(self.length):
             payload[i] ^= mask[i % 4]
-        if six.PY3:
-            return bytes(payload)
-        return str(payload)
+        return bytes(payload)
 
     # it's the same operation
     unmask_payload = mask_payload
@@ -394,10 +383,7 @@ class Header(object):
         """
         first_byte = opcode
         second_byte = 0
-        if six.PY2:
-            extra = ''
-        else:
-            extra = b''
+        extra = b''
         if fin:
             first_byte |= cls.FIN_MASK
         if flags & cls.RSV0_MASK:
@@ -420,6 +406,4 @@ class Header(object):
         if mask:
             second_byte |= cls.MASK_MASK
             extra += mask
-        if six.PY3:
-            return bytes([first_byte, second_byte]) + extra
-        return chr(first_byte) + chr(second_byte) + extra
+        return bytes([first_byte, second_byte]) + extra

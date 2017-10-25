@@ -6,6 +6,7 @@ Various templatetags provided by DjangoFloor.
 """
 import logging
 import warnings
+from urllib.parse import urljoin
 
 from django import template
 from django.conf import settings
@@ -16,8 +17,6 @@ from django.utils.encoding import force_text
 # noinspection PyProtectedMember
 from django.utils.html import _js_escapes
 from django.utils.safestring import mark_safe
-# noinspection PyUnresolvedReferences
-from django.utils.six.moves.urllib.parse import urljoin, urlparse
 
 from djangofloor.tasks import set_websocket_topics
 from djangofloor.utils import RemovedInDjangoFloor110Warning

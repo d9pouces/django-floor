@@ -20,7 +20,6 @@ from celery import shared_task
 from django.conf import settings
 from django.utils.lru_cache import lru_cache
 from django.utils.module_loading import import_string
-from django.utils.six import text_type
 from redis import StrictRedis, ConnectionPool
 
 from djangofloor.decorators import REGISTERED_SIGNALS, SignalConnection, REGISTERED_FUNCTIONS, FunctionConnection, \
@@ -229,7 +228,7 @@ def _call_ws_signal(signal_name, signal_id, serialized_topic, kwargs):
 def _return_ws_function_result(window_info, result_id, result, exception=None):
     connection = get_websocket_redis_connection()
     # connection = StrictRedis(**settings.WEBSOCKET_REDIS_CONNECTION)
-    json_msg = {'result_id': result_id, 'result': result, 'exception': text_type(exception) if exception else None}
+    json_msg = {'result_id': result_id, 'result': result, 'exception': str(exception) if exception else None}
     serialized_message = json.dumps(json_msg, cls=_signal_encoder)
     serialized_topic = _topic_serializer(window_info, WINDOW)
     if serialized_topic:

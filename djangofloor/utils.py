@@ -7,12 +7,11 @@ Define some utility functions like warning or walking through modules.
 
 import argparse
 import os
-import sys
 from argparse import ArgumentParser
+from importlib import import_module
 
 import pkg_resources
 from django.core.exceptions import ImproperlyConfigured
-from django.utils import six
 from django.utils.module_loading import import_string
 
 __author__ = 'Matthieu Gallet'
@@ -97,31 +96,6 @@ def _resolve_name(name, package, level):
         except ValueError:
             raise ValueError("attempted relative import beyond top-level package")
     return "%s.%s" % (package[:dot], name)
-
-
-if six.PY3:
-    # noinspection PyUnresolvedReferences
-    from importlib import import_module
-else:
-    def import_module(name, package=None):
-        """Import a module.
-
-        The 'package' argument is required when performing a relative import. It
-        specifies the package to use as the anchor point from which to resolve the
-        relative import to an absolute import.
-
-        """
-        if name.startswith('.'):
-            if not package:
-                raise TypeError("relative imports require the 'package' argument")
-            level = 0
-            for character in name:
-                if character != '.':
-                    break
-                level += 1
-            name = _resolve_name(name[level:], package, level)
-        __import__(name)
-        return sys.modules[name]
 
 
 def guess_version(defined_settings):

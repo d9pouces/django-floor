@@ -24,7 +24,6 @@ from django.template.response import TemplateResponse
 from django.templatetags.static import static
 from django.urls import reverse
 from django.utils.lru_cache import lru_cache
-from django.utils.six import binary_type
 from django.views.decorators.cache import never_cache
 from django.views.generic import TemplateView
 from djangofloor.decorators import REGISTERED_SIGNALS, REGISTERED_FUNCTIONS, everyone
@@ -146,7 +145,7 @@ def send_file(filepath, mimetype=None, force_download=False):
         (mimetype, encoding) = mimetypes.guess_type(filepath)
         if mimetype is None:
             mimetype = 'text/plain'
-    if isinstance(mimetype, binary_type):
+    if isinstance(mimetype, bytes):
         # noinspection PyTypeChecker
         mimetype = mimetype.decode('utf-8')
     filepath = os.path.abspath(filepath)

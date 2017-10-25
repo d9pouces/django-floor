@@ -25,7 +25,6 @@ except ImportError:
     # noinspection PyUnresolvedReferences,PyCompatibility
     from ConfigParser import ConfigParser
 import string
-from django.utils import six
 
 __author__ = 'Matthieu Gallet'
 
@@ -195,7 +194,7 @@ class SettingMerger(object):
         :param obj: object to analyze
         :return: the parsed setting
         """
-        if isinstance(obj, six.string_types):
+        if isinstance(obj, str):
             values = {}
             for (literal_text, field_name, format_spec, conversion) in self.__formatter.parse(obj):
                 if field_name is not None:

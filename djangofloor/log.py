@@ -10,14 +10,13 @@ import re
 import sys
 import time
 import warnings
-from traceback import print_tb, print_stack, extract_stack
+from traceback import extract_stack
+from urllib.parse import urlparse
 
 from django.conf import settings
 from django.core.checks.messages import Warning
 from django.core.management import color_style
 from django.utils.log import AdminEmailHandler as BaseAdminEmailHandler
-# noinspection PyUnresolvedReferences
-from django.utils.six.moves.urllib.parse import urlparse
 
 from djangofloor.checks import settings_check_results
 

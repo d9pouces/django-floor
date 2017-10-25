@@ -10,7 +10,7 @@ import os
 import sys
 from collections import OrderedDict
 
-from django.utils.six import StringIO
+from io import StringIO
 
 from djangofloor.conf.fields import ConfigField
 

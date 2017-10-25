@@ -23,7 +23,6 @@ from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils.module_loading import import_string
 from django.utils.safestring import mark_safe
-from django.utils.six import text_type
 from django.utils.translation import ugettext_lazy as _
 from django.views.decorators.cache import never_cache
 from pkg_resources import parse_requirements, Distribution
@@ -175,7 +174,7 @@ class CeleryStats(MonitoringCheck):
             if infos['broker'].get('virtual_host'):
                 url += infos['broker']['virtual_host']
             worker['broker'] = url
-            pids = [text_type(infos['pid'])] + [text_type(y) for y in infos['pool']['processes']]
+            pids = [str(infos['pid'])] + [str(y) for y in infos['pool']['processes']]
             worker['pid'] = ', '.join(pids)
             worker['threads'] = infos['pool']['max-concurrency']
             worker['timeouts'] = sum(infos['pool']['timeouts'])

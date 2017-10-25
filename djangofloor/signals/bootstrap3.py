@@ -4,8 +4,6 @@
 
 This module only defines shortcuts to existing JS signals that are linked to Boostrap3.
 """
-from django.utils.six import text_type
-
 from djangofloor.tasks import WINDOW, scall
 from djangofloor.wsgi.window_info import render_to_string
 
@@ -30,8 +28,8 @@ def notify(window_info, content, title=None, timeout=5000, style=NOTIFICATION, l
     :param level: one of `djangofloor.signals.bootstrap3.{INFO,DEFAULT,SUCCESS,DANGER,WARNING}`
     :param to: list of signal clients
     """
-    return scall(window_info, 'df.notify', to=to, content=content and text_type(content) or None,
-                 title=title and text_type(title) or None, timeout=timeout, style=style, level=level)
+    return scall(window_info, 'df.notify', to=to, content=content and str(content) or None,
+                 title=title and str(title) or None, timeout=timeout, style=style, level=level)
 
 
 def modal_show(window_info, html_content, width=None, to=WINDOW):
