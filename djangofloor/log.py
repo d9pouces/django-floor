@@ -146,10 +146,9 @@ class SlowQueryCallback:
 
 def resolve_command():
     f = extract_stack()
-    for frame in f:
-        if frame.filename.endswith('djangofloor/scripts.py') and \
-                        frame.name in ('django', 'celery', 'uwsgi', 'gunicorn', 'aiohttp'):
-            return frame.name
+    for (filename, line_number, name, text) in f:
+        if filename.endswith('djangofloor/scripts.py') and name in ('django', 'celery', 'uwsgi', 'gunicorn', 'aiohttp'):
+            return name
     return None
 
 
