@@ -22,7 +22,7 @@
             if (title) { htmlContent += "<span class=\"notify-title\">" + title + "</span>"; }
             if (content) { htmlContent += "<span class=\"notify-text\">" + content + "</span></div>"; }
             htmlContent += "</div>";
-            var messages = $('#messages');
+            var messages = $('#df_messages');
             messages.prepend(htmlContent);
             if (timeout > 0) { setTimeout(function () { $.df._closeHTMLNotification(notificationId); }, timeout); }
         }
@@ -35,7 +35,7 @@
 //            if (title) { htmlContent += "<h2>" + title + "</h2>"; }
 //            if (content) { htmlContent += "<p>" + content + "</p>"; }
 //            htmlContent += "</div>";
-//            var messages = $('#messages');
+//            var messages = $('#df_messages');
 //            messages.prepend(htmlContent);
 //            $('#' + notificationId).attr('data-role', 'dialog');
 //            window.showMetroDialog('#' + notificationId, undefined);

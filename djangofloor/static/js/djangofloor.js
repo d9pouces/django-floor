@@ -112,7 +112,7 @@ df.connect('df.messages.hide', function (options) {
             $(obj).remove();
         });
     } else {
-        $('#messages').each(function (index, obj) {
+        $('#df_messages').each(function (index, obj) {
             $(obj).slideUp(400, 'swing', function () {
                 $(obj).remove();
             });
@@ -125,7 +125,7 @@ df.connect('df.messages.hide', function (options) {
  */
 df.connect('df.messages.show', function (options) {
     "use strict";
-    var durationMs, level, messages = $('#messages'), content, mid;
+    var durationMs, level, messages = $('#df_messages'), content, mid;
     df.__message_count += 1;
     mid = 'df_message_' + df.__message_count;
     if (options.level === undefined) {
@@ -246,7 +246,7 @@ $(function () {
         baseModal.removeData('bs.modal');
         baseModal.find(".modal-content").html('');
     });
-    $('#messages div').each(function (index, obj) {
+    $('#df_messages div').each(function (index, obj) {
         setTimeout(function () {
             $(obj).slideUp(400, 'swing', function () {
                 $(obj).remove();

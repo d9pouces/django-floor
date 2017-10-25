@@ -40,14 +40,19 @@ The div used by the modal is also emptied to force the update of its content whe
         if (level === undefined) { level = "info"; }
         if (style === "banner") {
             var messages = jQ('#df_messages');
-            content = '<div id="' + notificationId + '" class="alert alert-' + level + ' fade in"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>' + content + '</div>'
-            messages.prepend(content);
-            messages.slideDown();
-            if (timeout > 0) { setTimeout(function () { jQ.df._closeHTMLNotification(notificationId); }, timeout); }
+            if (messages[0] === undefined) {
+                style = "notification";
+                console.warn('Please add <div id="df_messages"></div> somewhere in your HTML code.');
+            } else {
+                content = '<div id="' + notificationId + '" class="alert alert-' + level + ' fade in"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>' + content + '</div>'
+                messages.prepend(content);
+                messages.slideDown();
+                if (timeout > 0) { setTimeout(function () { jQ.df._closeHTMLNotification(notificationId); }, timeout); }
+            }
         }
-        else if (style === "notification") {
+        if (style === "notification") {
             var keepOpen = (timeout === 0);
-            jQ.notify({message: content, title: title, icon: icon},
+            jQ.notify({message: content, title: '<strong>' + title + '</strong>', icon: icon},
                 {type: level, delay: timeout});
         }
         else if (style === "modal") {
@@ -59,7 +64,7 @@ The div used by the modal is also emptied to force the update of its content whe
             if (content) {
                 htmlContent += '<div class="modal-body"><p>' + content + '</p></div>';
             }
-            jQ.df.call('df', {html: htmlContent});
+            jQ.df.call('df.modal.show', {html: htmlContent});
             if (timeout > 0) {
                 setTimeout(function () { jQ.df.call('df.modal.hide'); }, timeout);
             }
@@ -144,6 +149,9 @@ The div used by the modal is also emptied to force the update of its content whe
     jQ.df.connect('df.modal.hide', function (opts) {
         "use strict";
         var baseModal = jQ('#df_modal');
+        if (opts === undefined) {
+            opts = {};
+        }
         if(opts.clean_stack) {
             jQ.df.__modal_respawn_index = -1;
             jQ.df.__modal_respawn_stack = [];
