@@ -52,7 +52,10 @@ The div used by the modal is also emptied to force the update of its content whe
         }
         if (style === "notification") {
             var keepOpen = (timeout === 0);
-            jQ.notify({message: content, title: '<strong>' + title + '</strong>', icon: icon},
+            if (title) {
+                title = '<strong>' + title + '</strong>';
+            }
+            jQ.notify({message: content, title: title, icon: icon},
                 {type: level, delay: timeout});
         }
         else if (style === "modal") {
