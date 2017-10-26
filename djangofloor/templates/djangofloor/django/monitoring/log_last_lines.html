@@ -1,0 +1,10 @@
+{% load bootstrap3 i18n l10n djangofloor %}
+<div class="module">
+    <h2>{% trans 'Last lines of logs' %}</h2>
+        {% for content in contents %}
+        <h4>{{ content.0 }}</h4>
+        <pre>{{ content.2 }}</pre>
+        {% empty %}
+        <div class="alert alert-warning">No log file is currently configured.</div>
+        {% endfor %}
+</div>

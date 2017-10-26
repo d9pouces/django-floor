@@ -1,0 +1,16 @@
+{% extends 'djangofloor/django/base.html' %}
+{% load i18n %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+<a href="{% url 'admin:index' %}">{% trans 'Home' %}</a>
+&rsaquo; {% trans 'System state' %}
+</div>
+{% endblock %}
+
+{% block content %}
+<h1>{% trans 'System state' %}</h1>
+<div id="content-main">
+    {% for component in components %}{{ component }}{% endfor %}
+</div>
+{% endblock %}

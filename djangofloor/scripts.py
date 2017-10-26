@@ -288,7 +288,7 @@ def celery():
     sys.argv[1:] = extra_args
     __set_default_option(options, 'app')
     __set_default_option(options, 'concurrency')
-    if settings.DEBUG:
+    if settings.DEBUG and 'worker' in extra_args:
         import django
         django.setup()
         python_reloader(celery_main, (sys.argv, ), {})

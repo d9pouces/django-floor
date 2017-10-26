@@ -59,9 +59,6 @@
                 <li><a href="{% url 'df:set_password' %}" title="{% trans 'Change your password' %}">{% bootstrap_icon 'edit' %}</a>
                 </li>
                 {% endif %}
-                {% if df_has_monitoring_view and user and user.is_superuser %}
-                <li><a href="{% url 'df:system_state' %}" title="{% trans 'Check system state' %}">{% bootstrap_icon 'eye-open' %}</a></li>
-                {% endif %}
                 {% if user and user.is_staff %}
                 <li><a href="{% url 'admin:index' %}" title="{% trans 'Admin' %}">{% bootstrap_icon 'cog' %}</a></li>
                 {% endif %}

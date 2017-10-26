@@ -1,0 +1,29 @@
+{% load i18n bootstrap3 djangofloor %}
+<div class="module" id="celery_stats">
+        <h2>{% trans 'Celery state' %}</h2>
+        <div class="panel-body">
+            <h3>{% trans 'Required Celery queues' %}</h3>
+            <ul class="list-unstyled">
+            {% for queue in expected_queues.items %}
+                <li>{% if queue.1.0 == 'danger' %}{% django_icon  'remove' %}{% else %}{% django_icon  'check' %}{% endif %} {{ queue.0 }}</li>
+            {% endfor %}
+            </ul>
+            <h3>{% trans 'Celery workers and active queues' %}</h3>
+            {% for worker in workers %}
+            <h5>
+                <span class="label label-{{ worker.state.0 }}">{% bootstrap_icon worker.state.1 %}</span>&nbsp;
+                {% trans 'worker' %} {{ worker.name }}</h5>
+            <ul class="list-unstyled">
+                <li><strong>{% trans 'broker: ' %}</strong> {{ worker.broker }}</li>
+                <li><strong>{% trans 'PID: ' %}</strong> {{ worker.pid }}</li>
+                <li><strong>{% trans 'thread number: ' %}</strong> {{ worker.threads }}</li>
+                <li><strong>{% trans 'timeouts: ' %}</strong> {{ worker.timeouts }}</li>
+                <li><strong>{% trans 'active queues: ' %}</strong> {{ worker.queues|join:', ' }}</li>
+            </ul>
+            {% empty %}
+            <ul class="messagelist">
+                <li class="error">{% trans 'No Celery worker detected' %}</li>
+            </ul>
+            {% endfor %}
+        </div>
+</div>

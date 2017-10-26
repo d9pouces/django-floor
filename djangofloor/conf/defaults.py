@@ -233,6 +233,11 @@ PIPELINE_CSS = {
         'source_filenames': SettingReference('DF_CSS'),
         'output_filename': 'css/default-all.css', 'extra_context': {'media': 'all'},
     },
+    'django': {
+        'source_filenames': ['vendor/font-awesome/css/font-awesome.min.css', 'admin/css/forms.css',
+                             'css/djangofloor-django.css', ExpandIterable('DF_CSS')],
+        'output_filename': 'css/django-all.css', 'extra_context': {'media': 'all'},
+    },
     'bootstrap3': {
         'source_filenames': ['vendor/bootstrap3/dist/css/bootstrap.min.css',
                              'vendor/bootstrap3/dist/css/bootstrap-theme.min.css',
@@ -255,6 +260,16 @@ PIPELINE_JS = {
             ExpandIterable('DF_JS')
         ],
         'output_filename': 'js/default.js',
+    },
+    'django': {
+        'source_filenames': [
+            'vendor/jquery/dist/jquery.min.js',
+            'js/djangofloor-base.js',
+            'vendor/bootstrap-notify/bootstrap-notify.js',
+            'js/djangofloor-django.js',
+            ExpandIterable('DF_JS')
+        ],
+        'output_filename': 'js/django.js',
     },
     'bootstrap3': {
         'source_filenames': [
@@ -332,7 +347,7 @@ HOST_PORT = '{SERVER_PORT}'
 DF_CSS = []
 DF_JS = []
 DF_INDEX_VIEW = 'djangofloor.views.IndexView'
-DF_SITE_SEARCH_VIEW = 'djangofloor.views.search.UserSearchView'
+DF_SITE_SEARCH_VIEW = None  # 'djangofloor.views.search.UserSearchView'
 DF_LOGIN_VIEW = 'djangofloor.views.auth.LoginView'
 DF_USER_SELF_REGISTRATION = True  # allow user to create their account themselves
 DF_PROJECT_NAME = CallableSetting(project_name)
@@ -343,7 +358,7 @@ DF_REMOTE_USER_HEADER = None  # HTTP-REMOTE-USER
 DF_DEFAULT_GROUPS = [_('Users')]
 DF_TEMPLATE_CONTEXT_PROCESSORS = []
 DF_CHECKED_REQUIREMENTS = CallableSetting(required_packages)
-
+DF_THEME = 'django'  # 'bootstrap3' or 'django'
 NPM_FILE_PATTERNS = {
     'bootstrap-notify': ['*.js'],
     'bootstrap3': ['dist/*'],

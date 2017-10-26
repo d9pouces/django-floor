@@ -5,14 +5,10 @@
             <h3 class="panel-title">{% trans 'Request and settings info' %}</h3>
         </div>
         <div class="panel-body">
-            {% if debug %}<div class="alert alert-danger">{% trans 'The DEBUG mode is activated. You should disable it for a production website.' %}</div>
-            {% endif %}
-            {% if fake_username %}<div class="alert alert-danger">{% trans 'The DF_FAKE_AUTHENTICATION_USERNAME is set. You should disable it for a production website.' %}</div>
-            {% endif %}
             <ul>
                 <li><strong>{% trans 'Websockets: ' %}</strong>
                 <span class="label label-danger" id="workingwebsockets">{% bootstrap_icon 'remove' %}</span>
-                    <small id="notworkingwebsockets">{% trans 'At least one Celery worker is required, as well as an uwgsi server.' %}</small>
+                    <small id="notworkingwebsockets">{% trans 'At least one Celery worker is required, as well as a websocket-compatible server.' %}</small>
                 </li>
                 <li><strong>{% trans 'User: '%}</strong>
                     {% if not user %}<span class="label label-danger">{% trans 'no user' %}</span>

@@ -1,0 +1,108 @@
+ul.list-unstyled li {
+    list-style: none;
+}
+a.button.button-lg {
+    padding: 10px 15px;
+    display: inline-block;
+}
+
+ul.messagelist li.success {
+    background: #ffefef url(../admin/img/icon-yes.svg) 40px 12px no-repeat;
+}
+ul.messagelist li.danger {
+    background: #ffefef url(../admin/img/icon-no.svg) 40px 12px no-repeat;
+}
+ul.messagelist li.default {
+    background: #f3f3f3;
+}
+ul.messagelist li.info {
+    background: #C7E0E9 url(../admin/img/icon-info.svg) 40px 12px no-repeat;
+    background-size: 16px auto;
+}
+
+ul.messagelist.compact li, ul.messagelist.compact li.success {
+    padding: 2px 10px 2px 65px;
+    margin: 0;
+    background: #dfd url(../admin/img/icon-yes.svg) 40px 5px no-repeat;
+}
+ul.messagelist.compact li.warning {
+    background: #ffc url(../admin/img/icon-alert.svg) 40px 5px no-repeat;
+}
+ul.messagelist.compact li.error, ul.messagelist.compact li.danger {
+    background: #ffefef url(../admin/img/icon-no.svg) 40px 5px no-repeat;
+}
+ul.messagelist.compact li.default {
+    background: #f3f3f3;
+}
+ul.messagelist.compact li.info {
+    background: #C7E0E9 url(../admin/img/icon-info.svg) 40px 5px no-repeat;
+    background-size: 16px auto;
+}
+
+i.di {
+    display: inline-block;
+    background-size: 16px auto;
+    width: 16px;
+    height: 17px;
+}
+i.di-check {
+    background: transparent url(../admin/img/icon-yes.svg) 0px 5px no-repeat;
+}
+i.di-info {
+    background-color: transparent;
+    background-image: url(../admin/img/icon-info.svg);
+    background-repeat: no-repeat;
+    background-position: 0px 4px;
+    background-size: 15px auto;
+}
+i.di-remove {
+    background: transparent url(../admin/img/icon-no.svg) 0px 5px no-repeat;
+}
+i.di-warning {
+    background: transparent url(../admin/img/icon-alert.svg) 0px 5px no-repeat;
+}
+
+pre {
+    background-color: #f8f8f8;
+    border: 1px solid #eee;
+    border-radius: 4px;
+    padding: 12px 14px;
+}
+
+body > div.col-xs-11.col-sm-4.alert {
+    background: #f3f3f3;
+    width: 25%;
+    padding-right: 20px;
+    padding-left: 8px;
+    padding-top: 4px;
+    padding-bottom: 4px;
+    border-radius: 4px;
+    min-height: 40px;
+    border: 1px solid #eee;
+}
+body > div.col-xs-11.col-sm-4.alert button.close {
+    font-weight: bold;
+    font-size: 20px;
+    background-color: transparent;
+    border-style: none;
+    cursor: pointer;
+}
+
+body > div.col-xs-11.col-sm-4.alert.alert-warning {
+    background: #ffc;
+}
+body > div.col-xs-11.col-sm-4.alert.alert-success {
+    background: #dfd;
+}
+body > div.col-xs-11.col-sm-4.alert.alert-danger {
+    background: #ffefef;
+    border: 1px solid #FFDCD4;
+}
+body > div.col-xs-11.col-sm-4.alert.alert-default {
+    background: #f3f3f3;
+    border: 1px solid #ddd;
+}
+body > div.col-xs-11.col-sm-4.alert.alert-info {
+    background-color: #C7E0E9;
+    border: 1px solid #78B8E9;
+}

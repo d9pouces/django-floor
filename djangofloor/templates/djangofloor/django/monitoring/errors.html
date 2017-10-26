@@ -1,0 +1,63 @@
+{% load bootstrap3 i18n l10n djangofloor %}
+<div class="module">
+    <h2>{% trans 'Check exception handling' %}</h2>
+    <p>{% trans 'A DivisionByZero exception will be raised in the selected process (webserver or Celery worker). You can check if the raised exception is gracefully handled by your supervision.' %}</p>
+
+    <div class="submit-row">
+        {% trans 'Select the process where the exception will be raised:' %}
+        <a class="button button-lg" href="{% url 'df:raise_exception' %}">{% trans 'in a HTTP request' %}</a>
+        <a class="button button-lg" onclick="return $.df.call('df.monitoring.raise_exception', {});" href="?">
+            {% trans 'in a Celery queue.' %}</a>
+    </div>
+</div>
+<div class="module">
+    <h2>{% trans 'Generate a log message' %}</h2>
+    <form onchange="$.df.validateForm(this, 'djangofloor.validate.logname');"
+          action="{% url 'df:generate_log' %}" method="post" id="checklog-form">
+        {% csrf_token %}
+        <div>
+            <fieldset class="module aligned ">
+                <div class="form-row field-domain">
+                    <div>
+                        <label class="required" for="id_log_name">{{ logname_form.log_name.label }}:</label>
+                        {{ logname_form.log_name }}
+                    </div>
+                </div>
+
+                <div class="form-row field-name">
+                    <div>
+                        <label class="required" for="id_other_log_name">{{ logname_form.other_log_name.label }}:</label>
+                        <input type="text" name="other_log_name"
+                               value="{% if logname_form.other_log_name.initial %}{{ logname_form.other_log_name.initial }}{% endif %}"
+                               class="vTextField" maxlength="50"
+                               required="" id="id_other_log_name">
+                    </div>
+                </div>
+
+                <div class="form-row field-name">
+                    <div>
+                        <label class="required" for="id_message">{{ logname_form.message.label }}:</label>
+                        <input type="text" name="message"
+                               value="{% if logname_form.message.initial %}{{ logname_form.message.initial }}{% endif %}"
+                               class="vTextField" maxlength="50"
+                               required="" id="id_message">
+                    </div>
+                </div>
+                <div class="form-row field-name">
+                    <div>
+                        <label class="required" for="id_level">{{ logname_form.level.label }}:</label>
+                        {{ logname_form.level }}
+                    </div>
+                </div>
+            </fieldset>
+
+            <div class="submit-row">{% trans 'Select the process that should write the message:' %}
+                <input type="submit" value="{% trans 'a HTTP request' %}">
+                <input type="button"
+                       onclick="return $.df.call('df.monitoring.generate_log', {form: $('#checklog-form').serializeArray()});"
+                       value="{% trans 'a Celery queue' %}">
+            </div>
+        </div>
+    </form>
+
+</div>

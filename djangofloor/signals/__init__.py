@@ -11,7 +11,8 @@ from django.utils.translation import ugettext as _
 
 from djangofloor.decorators import signal, is_staff, is_superuser, SerializedForm
 from djangofloor.forms import LogNameForm
-from djangofloor.signals.bootstrap3 import notify, WARNING, NOTIFICATION, BANNER
+from djangofloor.signals.bootstrap3 import notify, WARNING, NOTIFICATION, BANNER, SYSTEM, MODAL, INFO, DANGER, SUCCESS, \
+    DEFAULT
 from djangofloor.tasks import scall, WINDOW
 
 __author__ = 'Matthieu Gallet'
@@ -34,7 +35,7 @@ def check_websockets(window_info):
 
 
 @signal(path='df.monitoring.generate_log', is_allowed_to=is_superuser)
-def check_websockets(window_info, form: SerializedForm(LogNameForm)):
+def generate_log(window_info, form: SerializedForm(LogNameForm)):
     """Used for checking if websockets are functional or not for your installation. Called from the monitoring view."""
     if form.is_valid():
         logname = form.cleaned_data['log_name'] or form.cleaned_data['other_log_name'] or 'django.requests'

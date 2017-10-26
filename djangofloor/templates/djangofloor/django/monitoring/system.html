@@ -1,0 +1,33 @@
+{% load bootstrap3 i18n l10n djangofloor %}
+<div class="module">
+    <h2>{% trans 'System info' %}</h2>
+    <div class="panel-body">
+
+        <ul class="messagelist compact">
+        {% if not swap %}
+        <li class="warning">{% trans 'The "psutil" package is required to display system info' %}</li>
+        {% else %}
+            <li class="info"><strong>{% trans 'CPU(s):' %}</strong>
+                {{ cpu_count.1 }} {% trans 'cores' %}, {{ cpu_count.0 }} {% trans 'threads' %}
+            </li>
+            <li class="{{ cpu_average_usage|df_level }}"><strong>{% trans 'CPU average usage:' %}</strong> {{ cpu_average_usage }}%
+                <span class="sr-only">{{ cpu_average_usage|floatformat:'0' }}%</span>
+            </li>
+            <li class="{{ cpu_current_usage|df_level }}"><strong>{% trans 'CPU current usage:' %}</strong> {{ cpu_current_usage }}%
+                <span class="sr-only">{{ cpu_current_usage|floatformat:'0' }}%</span>
+            </li>
+            <li class="{{ memory.percent|df_level }}"><strong>{% trans 'Memory current usage:' %}</strong> {{ memory.percent }}% ({{ memory.used|filesizeformat }}/{{ memory.total|filesizeformat }})
+                <span class="sr-only">{{ memory.percent|floatformat:'0' }}%</span>
+            </li>
+            <li class="{{ swap.percent|df_level:'10:50' }}"><strong>{% trans 'Swap current usage:' %}</strong> {{ swap.percent }}% ({{ swap.used|filesizeformat }}/{{ swap.total|filesizeformat }})
+                <span class="sr-only">{{ swap.percent|floatformat:'0' }}%</span>
+            </li>
+            {% for disk in disks %}
+            <li class="{{ disk.1.percent|df_level }}"><strong>{% trans 'Disk:' %} {{ disk.0 }}</strong> {{ disk.1.percent }}% ({{ disk.1.used|filesizeformat }}/{{ disk.1.total|filesizeformat }})
+                <span class="sr-only">{{ disk.1.percent|floatformat:'0' }}%</span>
+            </li>
+            {% endfor %}
+        {% endif %}
+        </ul>
+    </div>
+</div>

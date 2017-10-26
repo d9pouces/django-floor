@@ -11,6 +11,7 @@ Non-authenticated users uses sessions for tracking read actions.
 import datetime
 
 from django.conf import settings
+from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
 from django.contrib.sites.models import Site
 from django.db import models
@@ -183,3 +184,6 @@ def apply_post_migrate_settings(sender, **kwargs):
     if (settings.SERVER_PORT != 80 and not settings.USE_SSL) or (settings.SERVER_PORT != 443 and settings.USE_SSL):
         domain = '%s:%s' % (settings.SERVER_NAME, settings.SERVER_PORT)
     Site.objects.filter(pk=1).update(name=settings.SERVER_NAME, domain=domain)
+    username = getattr(settings, 'DF_FAKE_AUTHENTICATION_USERNAME', None)
+    if username and settings.DEBUG and get_user_model().objects.filter(username=username).count() == 0:
+        get_user_model()(username=username, is_staff=True, is_superuser=True).save()

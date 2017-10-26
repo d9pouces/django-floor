@@ -67,7 +67,7 @@ class Packages(MonitoringCheck):
     """Check a list of given packages given by `settings.DF_CHECKED_REQUIREMENTS`.
     Each element is a requirement as listed by `pip freeze`.
     """
-    template = 'djangofloor/bootstrap3/monitoring/packages.html'
+    template = 'djangofloor/%s/monitoring/packages.html' % settings.DF_THEME
     """base template """
 
     def get_context(self, request):
@@ -116,7 +116,7 @@ class Packages(MonitoringCheck):
 
 
 class System(MonitoringCheck):
-    template = 'djangofloor/bootstrap3/monitoring/system.html'
+    template = 'djangofloor/%s/monitoring/system.html' % settings.DF_THEME
 
     def get_context(self, request):
         if psutil is None:
@@ -144,7 +144,7 @@ class System(MonitoringCheck):
 
 
 class CeleryStats(MonitoringCheck):
-    template = 'djangofloor/bootstrap3/monitoring/celery_stats.html'
+    template = 'djangofloor/%s/monitoring/celery_stats.html' % settings.DF_THEME
 
     def get_context(self, request):
         celery_stats = app.control.inspect().stats()
@@ -159,7 +159,13 @@ class CeleryStats(MonitoringCheck):
                 if queue_data['name'] in expected_queues:
                     # noinspection PyTypeChecker
                     expected_queues[queue_data['name']] = ('success', 'ok')
-
+        missing_queues = {x for (x, y) in expected_queues.items() if y[0] == 'danger'}
+        if len(missing_queues) == 1:
+            messages.error(request, _('There is no worker for the "%(name)s" Celery queue.') %
+                           {'name': missing_queues.pop()})
+        elif missing_queues:
+            messages.error(request, _('There is no worker for the the following Celery queues: %(name)s.') %
+                           {'name': ', '.join(sorted(missing_queues))})
         workers = []
         if celery_stats is None:
             celery_stats = {}
@@ -189,7 +195,7 @@ class CeleryStats(MonitoringCheck):
 
 
 class RequestCheck(MonitoringCheck):
-    template = 'djangofloor/bootstrap3/monitoring/request_check.html'
+    template = 'djangofloor/%s/monitoring/request_check.html' % settings.DF_THEME
 
     def get_context(self, request):
         def django_fmt(y):
@@ -227,12 +233,17 @@ class RequestCheck(MonitoringCheck):
         context['server_name'] = settings.SERVER_NAME
         context['server_name_valid'] = settings.SERVER_NAME == host
         context['debug'] = settings.DEBUG
+        if settings.DEBUG:
+            messages.warning(request, _('The DEBUG mode is activated. You should disable it for a production website.'))
+        if context['fake_username']:
+            messages.warning(request, _('DF_FAKE_AUTHENTICATION_USERNAME is set. '
+                                        'You should disable it for a production website.'))
         context['settings_providers'] = [p for p in merger.providers]
         return context
 
 
 class LogLastLines(MonitoringCheck):
-    template = 'djangofloor/bootstrap3/monitoring/log_last_lines.html'
+    template = 'djangofloor/%s/monitoring/log_last_lines.html' % settings.DF_THEME
 
     def get_context(self, request):
         contents = []
@@ -264,10 +275,11 @@ class LogLastLines(MonitoringCheck):
 
 
 class LogAndExceptionCheck(MonitoringCheck):
-    template = 'djangofloor/bootstrap3/monitoring/errors.html'
+    template = 'djangofloor/%s/monitoring/errors.html' % settings.DF_THEME
 
     def get_context(self, request):
-        return {'logname_form': LogNameForm()}
+        form = LogNameForm()
+        return {'logname_form': form}
 
 
 system_checks = [import_string(x)() for x in settings.DF_SYSTEM_CHECKS]
@@ -281,7 +293,7 @@ def system_state(request):
     components_values = [y.render(request) for y in system_checks]
     template_values = {'components': components_values}
     set_websocket_topics(request)
-    return TemplateResponse(request, template='djangofloor/bootstrap3/system_state.html',
+    return TemplateResponse(request, template='djangofloor/%s/system_state.html' % settings.DF_THEME,
                             context=template_values)
 
 
@@ -301,7 +313,7 @@ def generate_log(request):
         raise Http404
     form = LogNameForm(request.POST)
     if form.is_valid():
-        logname = form.cleaned_data['log_name'] or form.cleaned_data['other_log_name'] or 'django.requests'
+        logname = form.cleaned_data['other_log_name'] or form.cleaned_data['log_name'] or 'django.requests'
         level = form.cleaned_data['level']
         message = form.cleaned_data['message']
         logger_ = logging.getLogger(logname)

@@ -102,6 +102,13 @@ def fontawesome_icon(name, large=False, fixed=False, spin=False, li=False, rotat
     ))
 
 
+@register.simple_tag
+def django_icon(name, color=None):
+    """Add font-awesome icons in your HTML code"""
+    return mark_safe('<i class="di di-{name}" {color}></i>'.
+                     format(name=name, color='style="color:%s;"' % color if color else ''))
+
+
 @register.filter(name='df_level')
 def df_level(value, bounds='80:95'):
     """Convert a numeric value to "success", "warning" or "danger".

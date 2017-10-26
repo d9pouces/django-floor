@@ -1,0 +1,14 @@
+{% load i18n djangofloor %}
+<div class="module" id="packages">
+    <h2>{% trans 'Required Python packages' %}</h2>
+    <div class="panel-body">
+        <ul class="list-unstyled" style="max-height: 275px; overflow-y: auto;">
+            {% for distrib in installed_distributions %}
+            <li>
+                {% if distrib.3 == 'danger' %}{% django_icon 'remove' %}{% elif distrib.3 == 'warning' %}{% django_icon 'warning' %}{% else %}{% django_icon 'check' %}{% endif %}
+                {{ distrib.0 }} {% if distrib.1 %}{{ distrib.1 }} {% endif %}{% if distrib.4 %} ({{ distrib.4|join:", " }}){% endif %}
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
