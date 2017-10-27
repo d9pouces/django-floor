@@ -1,0 +1,11 @@
+{% extends 'djangofloor/django/base.html' %}
+{% load i18n %}
+{% block title %}{% trans 'System state' %}{% endblock %}
+
+{% block branding %}
+<h1 id="site-name"><a href="{% url df_index_view %}">{{ df_project_name }}</a></h1>
+{% endblock %}
+
+{% block content %}
+
+{% endblock %}

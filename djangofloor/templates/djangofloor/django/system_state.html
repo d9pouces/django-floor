@@ -1,5 +1,20 @@
-{% extends 'djangofloor/django/base.html' %}
-{% load i18n %}
+{% extends "admin/base_site.html" %}
+{% load i18n pipeline djangofloor %}
+{% block extrahead %}
+{% stylesheet 'django' %}
+{% javascript 'django' %}
+{% df_init_websocket %}
+{% endblock %}
+
+{% block title %}{% trans 'System state' %}{% endblock %}
+
+{% block messages %}
+    <ul class="messagelist" id="df_messages">
+    {% for message in messages %}
+      <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message|capfirst }}</li>
+    {% endfor %}
+    </ul>
+{% endblock messages %}
 
 {% block breadcrumbs %}
 <div class="breadcrumbs">

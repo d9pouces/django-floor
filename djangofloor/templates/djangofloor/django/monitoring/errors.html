@@ -26,11 +26,10 @@
 
                 <div class="form-row field-name">
                     <div>
-                        <label class="required" for="id_other_log_name">{{ logname_form.other_log_name.label }}:</label>
+                        <label for="id_other_log_name">{{ logname_form.other_log_name.label }}:</label>
                         <input type="text" name="other_log_name"
                                value="{% if logname_form.other_log_name.initial %}{{ logname_form.other_log_name.initial }}{% endif %}"
-                               class="vTextField" maxlength="50"
-                               required="" id="id_other_log_name">
+                               class="vTextField" maxlength="50" id="id_other_log_name">
                     </div>
                 </div>
 

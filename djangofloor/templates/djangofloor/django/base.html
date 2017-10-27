@@ -15,13 +15,11 @@
 {% block title %}{% trans 'Documentation' %}{% endblock %}
 
 {% block messages %}
-
     <ul class="messagelist" id="df_messages">
     {% for message in messages %}
       <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message|capfirst }}</li>
     {% endfor %}
     </ul>
-
 {% endblock messages %}
 
 {% block content %}

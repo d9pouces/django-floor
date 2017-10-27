@@ -26,7 +26,7 @@
                     {% if secure_proxy_ssl_header %}
                 <li><strong>{% trans 'Secure proxy SSL HTTP header: ' %}</strong>{{ secure_proxy_ssl_header.0|upper }} =
                     {% if secure_proxy_ssl_header.2 %}{% django_icon 'check' %}{{ secure_proxy_ssl_header.1 }}
-                    {% elif secure_proxy_ssl_header.1 %}{% fontawesome_icon 'warning' %}{{ secure_proxy_ssl_header.1 }}
+                    {% elif secure_proxy_ssl_header.1 %}{% django_icon 'warning' %}{{ secure_proxy_ssl_header.1 }}
                     {% else %}{% django_icon 'remove' %} {% trans 'empty header' %}<br> <small>
                         {% trans 'Please ensure that a HTTPS access is available and that the webserver provide the right header (without the HTTP prefix).' %}
                     </small>
@@ -43,11 +43,11 @@
                 {% endif %}
                 <li><strong>{% trans 'Server names allowed to POST requests: ' %}</strong>{{ allowed_hosts|join:', ' }}</li>
                 <li><strong>{% trans 'Requested server name:' %}</strong>
-                    {% if allowed_host %}{% django_icon 'check' %}{% else %}{% fontawesome_icon 'warning' %}{% endif %}
+                    {% if allowed_host %}{% django_icon 'check' %}{% else %}{% django_icon 'warning' %}{% endif %}
                 {% if request_host %}{{ request_host }}{% else %}empty{% endif %}
                 </li>
                 <li><strong>{% trans 'Expected server name:' %}</strong>
-                    {% if server_name_valid %}{% django_icon 'check' %}{% else %}{% fontawesome_icon 'warning' %}{% endif %}
+                    {% if server_name_valid %}{% django_icon 'check' %}{% else %}{% django_icon 'warning' %}{% endif %}
                 {{ server_name }}
                 </li>
                 {% if request_site %}<li><strong>{% trans 'Request site (from the CurrentSiteMiddleware middleware):' %}</strong>
