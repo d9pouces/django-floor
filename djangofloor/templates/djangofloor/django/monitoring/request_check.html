@@ -2,11 +2,11 @@
 <div class="module">
         <h2>{% trans 'Request and settings info' %}</h2>
 
-            <ul>
+            <ul>{% if websockets_required %}
                 <li><strong>{% trans 'Websockets: ' %}</strong>
                 <span class="label label-danger" id="workingwebsockets">{% django_icon 'remove' %}</span>
                     <small id="notworkingwebsockets">{% trans 'At least one Celery worker is required, as well as a websocket-compatible server.' %}</small>
-                </li>
+                </li>{% endif %}
                 <li><strong>{% trans 'Connected user: '%}</strong>
                     {% if not user %}{% django_icon 'remove' %} {% trans 'no user' %}
                     {% elif not user.is_authenticated %}{% django_icon 'warning' %}  {% trans 'anonymous user' %}
@@ -68,7 +68,7 @@
                 </li>
 
             </ul>
-
+{% if websockets_required %}
     <script type="application/javascript">
         window.onload = function () {
             $.df.connect('df.monitoring.checked_ws', function () {
@@ -79,4 +79,5 @@
             setTimeout(function () { $.df.call('df.monitoring.check_ws', {}); }, 500);
         };
     </script>
+{% endif %}
 </div>

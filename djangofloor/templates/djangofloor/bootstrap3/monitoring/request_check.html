@@ -6,10 +6,11 @@
         </div>
         <div class="panel-body">
             <ul>
+                {% if websockets_required %}
                 <li><strong>{% trans 'Websockets: ' %}</strong>
                 <span class="label label-danger" id="workingwebsockets">{% bootstrap_icon 'remove' %}</span>
                     <small id="notworkingwebsockets">{% trans 'At least one Celery worker is required, as well as a websocket-compatible server.' %}</small>
-                </li>
+                </li>{% endif %}
                 <li><strong>{% trans 'User: '%}</strong>
                     {% if not user %}<span class="label label-danger">{% trans 'no user' %}</span>
                     {% elif not user.is_authenticated %}<span class="label label-warning">{% trans 'anonymous user' %}</span>
@@ -75,7 +76,7 @@
                 
             </ul>
         </div>
-    </div>
+    </div>{% if websockets_required %}
     <script type="application/javascript">
         window.onload = function () {
             $.df.connect('df.monitoring.checked_ws', function () {
@@ -86,5 +87,5 @@
             });
             setTimeout(function () { $.df.call('df.monitoring.check_ws', {}); }, 500);
         };
-    </script>
+    </script>{% endif %}
 </div>

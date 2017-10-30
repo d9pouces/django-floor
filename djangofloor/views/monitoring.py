@@ -12,7 +12,7 @@ import codecs
 import logging
 import os
 
-import pip
+import pkg_resources
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
@@ -43,6 +43,16 @@ except ImportError:
 __author__ = 'Matthieu Gallet'
 logger = logging.getLogger('django.requests')
 
+stdlib_pkgs = ('python', 'wsgiref', 'argparse')
+
+
+def get_installed_distributions():
+    """
+    Return a list of installed Distribution objects.
+    Simplified version of the version provided by pip.
+    """
+    return [d for d in pkg_resources.working_set if d.key not in ('python', 'wsgiref', 'argparse')]
+
 
 class MonitoringCheck(object):
     """Base widget of the monitoring view."""
@@ -72,7 +82,7 @@ class Packages(MonitoringCheck):
 
     def get_context(self, request):
         """provide the installed distributions to the template"""
-        distributions = self.get_installed_distributions(pip.get_installed_distributions(),
+        distributions = self.get_installed_distributions(get_installed_distributions(),
                                                          settings.DF_CHECKED_REQUIREMENTS)
         return {'installed_distributions': distributions}
 
@@ -147,6 +157,8 @@ class CeleryStats(MonitoringCheck):
     template = 'djangofloor/%s/monitoring/celery_stats.html' % settings.DF_THEME
 
     def get_context(self, request):
+        if not settings.USE_CELERY:
+            return {'celery_required': False}
         celery_stats = app.control.inspect().stats()
         import_signals_and_functions()
         expected_queues = {x: ('danger', 'remove') for x in get_expected_queues()}
@@ -191,7 +203,7 @@ class CeleryStats(MonitoringCheck):
             worker['queues'] = list({y['name'] for y in queue_stats.get(key, [])})
             worker['queues'].sort()
             workers.append(worker)
-        return {'workers': workers, 'expected_queues': expected_queues}
+        return {'workers': workers, 'expected_queues': expected_queues, 'celery_required': True}
 
 
 class RequestCheck(MonitoringCheck):
@@ -224,6 +236,8 @@ class RequestCheck(MonitoringCheck):
         context['request_site'] = None
         context['cache_redis'] = settings.USE_REDIS_CACHE
         context['session_redis'] = settings.USE_REDIS_SESSIONS
+        context['websockets_required'] = settings.WEBSOCKET_URL is not None
+        context['celery_required'] = settings.USE_CELERY
         # noinspection PyTypeChecker
         context['fake_username'] = getattr(settings, 'DF_FAKE_AUTHENTICATION_USERNAME', None)
         # noinspection PyTypeChecker
