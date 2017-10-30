@@ -10,8 +10,12 @@ import warnings
 from collections import OrderedDict
 from distutils.version import LooseVersion
 
+import sys
 from django import get_version
 from django.conf import LazySettings
+from django.core.management import color_style
+from django.core.management.base import OutputWrapper
+from django.core.management.color import no_style
 from django.utils.functional import empty
 
 from djangofloor.conf.config_values import ExpandIterable, ConfigValue, SettingReference
@@ -93,7 +97,7 @@ class SettingMerger(object):
     """Load different settings modules and config files and merge them.
     """
 
-    def __init__(self, fields_provider, providers, extra_values=None):
+    def __init__(self, fields_provider, providers, extra_values=None, stdout=None, stderr=None, no_color=False):
         self.fields_provider = fields_provider or PythonConfigFieldsProvider(None)
         extra_values = extra_values or {}
         self.providers = providers or []
@@ -105,6 +109,13 @@ class SettingMerger(object):
             self.raw_settings[key][None] = value
         # raw_settings[setting_name][str(provider) or None] = raw_value
         self.__working_stack = set()
+        self.stdout = OutputWrapper(stdout or sys.stdout)
+        self.stderr = OutputWrapper(stderr or sys.stderr)
+        if no_color:
+            self.style = no_style()
+        else:
+            self.style = color_style()
+            self.stderr.style_func = self.style.ERROR
 
     def add_provider(self, provider):
         self.providers.append(provider)
@@ -180,7 +191,15 @@ class SettingMerger(object):
             if not isinstance(raw_value, ConfigValue):
                 continue
             final_value = self.settings[setting_name]
-            getattr(raw_value, method_name)(self, final_value)
+            try:
+                getattr(raw_value, method_name)(self, setting_name, final_value)
+            except Exception as e:
+                provider_name = None
+                for provider_name, raw_value in self.raw_settings[setting_name].items():
+                    pass
+                if provider_name:
+                    self.stdout.write(self.style.ERROR('Invalid value "%s" in %s for %s (%s)' %
+                                                       (raw_value, provider_name or 'built-in', setting_name, e)))
 
     def analyze_raw_value(self, obj):
         """Parse the object for replacing variables by their values.

@@ -82,9 +82,6 @@ BASE_MAPPING = [
                              'syslog:///dev/log/daemon, logd:///project_name'),
     CharConfigField('global.log_directory', 'LOG_DIRECTORY',
                     help_str='Write all local logs to this directory.'),
-    FloatConfigField('global.log_slow_queries_duration', 'LOG_SLOW_QUERIES_DURATION',
-                     help_str='DB queries that take more than this threshold (in seconds) are logged.'
-                              'Deactivated if left empty.'),
     BooleanConfigField('global.log_remote_access', 'LOG_REMOTE_ACCESS',
                        help_str='If true, log of HTTP connections are also sent to syslog/logd'),
     CharConfigField('database.db', 'DATABASE_NAME', help_str='Main database name (or path of the sqlite3 database)'),

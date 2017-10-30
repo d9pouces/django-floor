@@ -48,26 +48,26 @@ class ConfigValue(object):
         raise NotImplementedError
 
     # noinspection PyMethodMayBeStatic
-    def pre_collectstatic(self, merger, value):
+    def pre_collectstatic(self, merger, setting_name, value):
         """Called before the "collectstatic" command (at least the one provided by Djangofloor).
         Could be used for creating public files or directories (static files, required directories...).
         """
         pass
 
     # noinspection PyMethodMayBeStatic
-    def pre_migrate(self, merger, value):
+    def pre_migrate(self, merger, setting_name, value):
         """Called before the "migrate" command.
         Could be used for creating private files (like the SECRET_KEY file)
         """
         pass
 
     # noinspection PyMethodMayBeStatic
-    def post_collectstatic(self, merger, value):
+    def post_collectstatic(self, merger, setting_name, value):
         """Called after the "collectstatic" command"""
         pass
 
     # noinspection PyMethodMayBeStatic
-    def post_migrate(self, merger, value):
+    def post_migrate(self, merger, setting_name, value):
         """Called after the "migrate" command"""
         pass
 
@@ -98,7 +98,7 @@ you need to use :class:`RawValue` for using values that should be formatted.
 class Path(ConfigValue):
     """Represent any path on the filesystem."""
 
-    def __init__(self, value, mode=0o755):
+    def __init__(self, value, mode=None):
         super().__init__(value)
         self.mode = mode
 
@@ -118,6 +118,30 @@ class Path(ConfigValue):
     def __repr__(self):
         return "%s('%s')" % (self.__class__.__name__, str(self.value))
 
+    @staticmethod
+    def makedirs(merger, dirname):
+        if not dirname or os.path.isdir(dirname):
+            return
+        elif os.path.exists(dirname):
+            merger.stderr.write('%s already exists and is not a directory.')
+            return
+        merger.stdout.write('Creating directory %s' % dirname)
+        try:
+            os.makedirs(dirname)
+        except Exception as e:
+            merger.stderr.write('Unable to create directory %s (%s)' % (dirname, e))
+
+    def chmod(self, merger, filename):
+        if not filename or not os.path.isfile(filename):
+            return
+        if self.mode is None or (os.stat(filename).st_mode & 0o777) == self.mode:
+            return
+        merger.stdout.write('Change mode of %s to 0o%o' % (filename, self.mode))
+        try:
+            os.chmod(filename, self.mode)
+        except Exception as e:
+            merger.stderr.write('Unable to change mode of %s (%s)' % (filename, e))
+
 
 class Directory(Path):
     """Represent a directory on the filesystem, that is automatically created by the "migrate" and "collectstatic"
@@ -135,14 +159,13 @@ class Directory(Path):
             value += '/'
         return value
 
-    def pre_collectstatic(self, merger, value):
-        if not os.path.isdir(value):
-            os.makedirs(value)
-        if self.mode and (os.stat(value).st_mode & 0o777) != self.mode:
-            os.chmod(value, self.mode)
+    def pre_collectstatic(self, merger, setting_name, value):
+        self.makedirs(merger, value)
+        self.chmod(merger, value)
 
-    def pre_migrate(self, merger, value):
-        self.pre_collectstatic(merger, value)
+    def pre_migrate(self, merger, setting_name, value):
+        self.makedirs(merger, value)
+        self.chmod(merger, value)
 
 
 class File(Path):
@@ -161,25 +184,27 @@ class File(Path):
         value = os.path.normpath(value)
         return value
 
-    def pre_collectstatic(self, merger, value):
-        filename = merger.analyze_raw_value(self.value)
-        dirname = os.path.dirname(filename)
-        if not os.path.isdir(dirname):
-            os.makedirs(dirname)
-        if os.path.isfile(value) and self.mode is not None:
-            os.chmod(value, self.mode)
+    def pre_collectstatic(self, merger, setting_name, value):
+        if value is None:
+            return
+        self.makedirs(merger, os.path.dirname(value))
+        self.chmod(merger, value)
 
-    def pre_migrate(self, merger, value):
-        self.pre_collectstatic(merger, value)
+    def pre_migrate(self, merger, setting_name, value):
+        self.pre_collectstatic(merger, setting_name, value)
 
 
-class AutocreateFile(File):
-    """Represent a file name. Its parent directory is automatically created by the "collectstatic" command.
-     If the file does not exist, the provided callable is used when the "migrate" command is called.
+class AutocreateFileContent(File):
+    """Return the content of an existing file, or automatically write it and returns the content of the created file.
+    Content must be a unicode string.
+    The first argument of the provided `create_function` is the name of the file to create.
 
-     The first argument of the provided `create_function` is the name of the file to create.
-     If `create_function` is `None`, then an empty file is created.
-     """
+    The file is only written when the "migrate" Django command is called.
+    The first arg of the provided `create_function` is a bool, in addition of your own *args and **kwargs:
+        * `True` when Django is ready and your function is called for writing the file during the "migrate" command
+        * `False` when Django is not ready and your function is called for loading settings
+
+    """
 
     def __init__(self, value, create_function, mode=None, *args, **kwargs):
         """
@@ -188,8 +213,8 @@ class AutocreateFile(File):
         :param create_function: called when the file does not exist.
             Must return a text string.
         :param mode: mode of the create file (chmod value, like 0o755 for a file readable by everyone)
-        :param args: args passed to the `create_function`
-        :param kwargs:  keyword args passed to the `create_function`
+        :param args: extra args passed to the `create_function`
+        :param kwargs:  extra keyword args passed to the `create_function`
 
         """
         super().__init__(value, mode=mode)
@@ -197,44 +222,22 @@ class AutocreateFile(File):
         self.args = args
         self.kwargs = kwargs
 
-    def pre_migrate(self, merger, value):
-        self.pre_collectstatic(merger, value)
-        if os.path.isfile(value):
-            return
-        if self.create_function is None:
-            open(value, 'w').close()
-        else:
-            self.create_function(value, *self.args, **self.kwargs)
-        if self.mode is not None and os.path.isfile(value):
-            os.chmod(value, self.mode)
-
-
-class AutocreateFileContent(AutocreateFile):
-    """Return the content of an existing file, or automatically write it and returns the content of the created file.
-    Content must be a unicode string.
-
-    The file is only written when the "migrate" Django command is called.
-    The first arg of the provided `create_function` is a bool, in addition of your *args and **kwargs:
-        * `True` when Django is ready and your function is called for writing the file during the "migrate" command
-        * `False` when Django is not ready and your function is called for loading settings
-
-    """
-
-    def pre_migrate(self, merger, value):
+    def pre_migrate(self, merger, setting_name, value):
         filename = merger.analyze_raw_value(self.value)
-        if os.path.isfile(filename):
+        if filename is None or os.path.isfile(filename):  # empty filename, or it already exists => nothing to do
             return
         result = self.create_function(True, *self.args, **self.kwargs)
-        dirname = os.path.dirname(filename)
-        try:
-            if not os.path.isdir(dirname):
-                os.makedirs(dirname)
-            with open(filename, 'w', encoding='utf-8') as fd:
-                fd.write(result)
-            if self.mode is not None:
-                os.chmod(filename, self.mode)
-        except PermissionError:
-            print('Unable to modify %s: permission denied.' % value)
+        if result is not None:
+            self.makedirs(merger, os.path.dirname(filename))
+            merger.stdout.write('Writing new value to %s' % filename)
+            try:
+                with open(filename, 'w', encoding='utf-8') as fd:
+                    fd.write(result)
+            except Exception as e:
+                merger.stderr.write('Unable to write content of %s (%s)' % (filename, e))
+            self.chmod(merger, filename)
+        else:
+            merger.stderr.write('Invalid content for %s (%s)' % filename)
 
     def get_value(self, merger):
         """ Return the value
@@ -249,6 +252,14 @@ class AutocreateFileContent(AutocreateFile):
         else:
             result = self.create_function(False, *self.args, **self.kwargs)
         return result
+
+
+class AutocreateFile(AutocreateFileContent):
+    """Represent a file name. Its parent directory is automatically created by the "collectstatic" command.
+     """
+
+    def __init__(self, value, mode=None, *args, **kwargs):
+        super().__init__(value, lambda x: '', mode=mode, *args, **kwargs)
 
 
 class SettingReference(ConfigValue):

@@ -8,6 +8,7 @@ import subprocess
 from argparse import ArgumentParser
 from configparser import ConfigParser
 from io import StringIO
+from subprocess import CalledProcessError
 
 from django.conf import settings
 from django.template.loader import render_to_string
@@ -201,7 +202,9 @@ class Command(TemplatedBaseCommand):
     packaging_config_files = ['dev/config-packaging.ini']
     available_distributions = {'ubuntu/precise64': 'deb', 'ubuntu/trusty64': 'deb', 'ubuntu/wily64': 'deb',
                                'ubuntu/xenial64': 'deb', 'ubuntu/yakkety64': 'deb', 'ubuntu/zesty64': 'deb',
-                               'debian/jessie64': 'deb', 'debian/wheezy64': 'deb'}
+                               'ubuntu/artful64': 'deb',
+                               'debian/jessie64': 'deb', 'debian/wheezy64': 'deb',
+                               }
     BUILD_PACKAGE = 1
     SHOW_CONFIG = 2
     DO_NOT_DESTROY_VAGRANT = 4
@@ -229,7 +232,7 @@ class Command(TemplatedBaseCommand):
         self.template_context = {}
         self.verbose_mode = False
         self.source_dir = '.'
-        self.vagrant_distrib = 'ubuntu/xenial64'
+        self.vagrant_distrib = 'ubuntu/artful64'
         self.written_files_locations = []
         self.processes = {}
 
@@ -314,6 +317,8 @@ class Command(TemplatedBaseCommand):
                 self.show_config(self.available_distributions[self.vagrant_distrib])
             if self.run_options & self.RUN_PACKAGE_AFTER_BUILD:
                 self.run_package()
+        except CalledProcessError:
+            pass
         finally:
             self.destroy_vagrant_box()
 
@@ -554,7 +559,18 @@ class Command(TemplatedBaseCommand):
             if vagrant_filename is None:
                 vagrant_filename = os.path.join(self.vagrant_tmp_dir, script_name)
             cmd = ['vagrant', 'ssh', '-c', 'sudo %s %s' % (binary, vagrant_filename)]
-            subprocess.check_call(cmd, cwd=self.vagrant_box_dir)
+            try:
+                env = {}
+                env.update(os.environ)
+                env.update({
+                    'LC_CTYPE': 'en_US.UTF-8',
+                    'LC_MESSAGES': 'en_US.UTF-8',
+                    'LC_ALL': 'en_US.UTF-8',
+                })
+                subprocess.check_call(cmd, cwd=self.vagrant_box_dir, env=env)
+            except CalledProcessError as e:
+                self.stderr.write('%s returned non-zero exit status.' % ' '.join(cmd))
+                raise e
 
     def get_config_parser(self):
         parser = ConfigParser()

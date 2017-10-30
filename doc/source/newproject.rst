@@ -265,18 +265,10 @@ There are several ways to distribute your application, like:
 
   * source Python files,
   * Docker files,
-  * standard packages for your distribution (e.g. .deb files for Ubuntu and Debian)
-
-Again, there are two methods for building a .deb package:
-
-  * a small package that only contains your application, with a package dependency for each Python dependency.
-  This is the cleanest way, but that requires to package every Python dependency, and you may have many conflicts
-  between versions. Of course, this is the selected method for official packages.
-  * a big package that contains everything (your application, its Python dependencies, Python itself, and standard
-  database servers like Redis and PostgreSQL).
-
-Packages created by DjangoFloor (and its Django command `"packaging`") are between these two methods, since it is a virtualenv (using the Python 3 provided
-by your distribution) created in /opt and simply packaged as-is. All dependencies are installed inside this virtualenv.
+  * standard packages for your distribution (e.g. .deb files for Ubuntu and Debian).
+    To avoid the packaging of all your dependencies (and conflicts with packages proposed by the distribution), only
+    the Python 3 of your distribution is used: a virtualenv is created in /opt and packaged as-is.
+    All dependencies are installed inside this virtualenv.
 
 Here is the description of the whole process:
 
