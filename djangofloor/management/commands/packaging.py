@@ -203,7 +203,7 @@ class Command(TemplatedBaseCommand):
     available_distributions = {'ubuntu/precise64': 'deb', 'ubuntu/trusty64': 'deb', 'ubuntu/wily64': 'deb',
                                'ubuntu/xenial64': 'deb', 'ubuntu/yakkety64': 'deb', 'ubuntu/zesty64': 'deb',
                                'ubuntu/artful64': 'deb',
-                               'debian/jessie64': 'deb', 'debian/wheezy64': 'deb',
+                               'debian/wheezy64': 'deb', 'debian/jessie64': 'deb', 'debian/stretch64': 'deb',
                                }
     BUILD_PACKAGE = 1
     SHOW_CONFIG = 2
