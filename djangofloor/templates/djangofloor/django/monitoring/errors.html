@@ -1,13 +1,17 @@
 {% load bootstrap3 i18n l10n djangofloor %}
 <div class="module">
     <h2>{% trans 'Check exception handling' %}</h2>
+  {% if celery_required %}
     <p>{% trans 'A DivisionByZero exception will be raised in the selected process (webserver or Celery worker). You can check if the raised exception is gracefully handled by your supervision.' %}</p>
+  {% else %}
+    <p>{% trans 'A DivisionByZero exception will be raised. You can check if the raised exception is gracefully handled by your supervision.' %}</p>
+  {% endif %}
 
     <div class="submit-row">
-        {% trans 'Select the process where the exception will be raised:' %}
-        <a class="button button-lg" href="{% url 'df:raise_exception' %}">{% trans 'in a HTTP request' %}</a>
+        {% if celery_required %}{% trans 'Select the process where the exception will be raised:' %}{% endif %}
+        <a class="button button-lg" href="{% url 'df:raise_exception' %}">{% trans 'raise an exception in a HTTP request' %}</a>{% if celery_required %}
         <a class="button button-lg" onclick="return $.df.call('df.monitoring.raise_exception', {});" href="?">
-            {% trans 'in a Celery queue.' %}</a>
+            {% trans 'raise an exception in a Celery queue.' %}</a>{% endif %}
     </div>
 </div>
 <div class="module">
@@ -50,11 +54,11 @@
                 </div>
             </fieldset>
 
-            <div class="submit-row">{% trans 'Select the process that should write the message:' %}
-                <input type="submit" value="{% trans 'a HTTP request' %}">
+            <div class="submit-row">{% if celery_required %}{% trans 'Select the process that should write the message:' %}{% endif %}
+                <input type="submit" value="{% trans 'write log in a HTTP request' %}">{% if celery_required %}
                 <input type="button"
                        onclick="return $.df.call('df.monitoring.generate_log', {form: $('#checklog-form').serializeArray()});"
-                       value="{% trans 'a Celery queue' %}">
+                       value="{% trans 'write log in a Celery queue' %}">{% endif %}
             </div>
         </div>
     </form>

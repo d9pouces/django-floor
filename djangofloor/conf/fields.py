@@ -7,6 +7,10 @@ Check :mod:`djangofloor.conf.mapping` for examples.
 
 import os
 
+from django.core.checks import Error
+
+from djangofloor.checks import settings_check_results
+
 __author__ = 'Matthieu Gallet'
 
 MISSING_VALUE = [[]]
@@ -63,20 +67,16 @@ class ConfigField(object):
     """Class that maps an option in a .ini file to a setting.
 
     :param name: the section and the option in a .ini file (like "database.engine")
-    :type name: `str`
     :param setting_name: the name of the setting (like "DATABASE_ENGINE")
-    :type setting_name: `str`
     :param from_str: any callable that takes a text value and returns an object. Default to `str_or_none`
     :type from_str: `callable`
     :param to_str: any callable that takes the Python value and that converts it to str. Default to `str`
     :type to_str: `callable`
     :param help_str: any text that can serve has help in documentation.
-    :type help_str: `str`
     :param default: the value that will be used in documentation. The current setting value is used if equal to `None`.
-    :type default: `object`
     """
-    def __init__(self, name, setting_name, from_str=str, to_str=str_or_blank, help_str=None,
-                 default=None):
+    def __init__(self, name: str, setting_name: str, from_str=str, to_str=str_or_blank,
+                 help_str: str=None, default: object=None):
         self.name = name
         self.setting_name = setting_name
         self.from_str = from_str
@@ -92,19 +92,19 @@ class CharConfigField(ConfigField):
     """Accepts str values. If `allow_none`, then `None` replaces any empty value."""
     def __init__(self, name, setting_name, allow_none=True, **kwargs):
         from_str = str_or_none if allow_none else str
-        super(CharConfigField, self).__init__(name, setting_name, from_str=from_str, to_str=str_or_blank, **kwargs)
+        super().__init__(name, setting_name, from_str=from_str, to_str=str_or_blank, **kwargs)
 
 
 class IntegerConfigField(ConfigField):
     """Accept integer values. If `allow_none`, then `None` replaces any empty values (other `0` is used)."""
     def __init__(self, name, setting_name, allow_none=True, **kwargs):
         if allow_none:
-            def from_str(value):
+            def from_str(value: str):
                 return int(value) if value else None
         else:
-            def from_str(value):
+            def from_str(value: str):
                 return int(value) if value else 0
-        super(IntegerConfigField, self).__init__(name, setting_name, from_str=from_str, to_str=str_or_blank, **kwargs)
+        super().__init__(name, setting_name, from_str=from_str, to_str=str_or_blank, **kwargs)
 
 
 class FloatConfigField(ConfigField):
@@ -116,7 +116,7 @@ class FloatConfigField(ConfigField):
         else:
             def from_str(value):
                 return float(value) if value else 0.0
-        super(FloatConfigField, self).__init__(name, setting_name, from_str=from_str, to_str=str_or_blank, **kwargs)
+        super().__init__(name, setting_name, from_str=from_str, to_str=str_or_blank, **kwargs)
 
 
 class ListConfigField(ConfigField):
@@ -126,7 +126,7 @@ class ListConfigField(ConfigField):
             if value:
                 return ','.join([str(x) for x in value])
             return ''
-        super(ListConfigField, self).__init__(name, setting_name, from_str=strip_split, to_str=to_str, **kwargs)
+        super().__init__(name, setting_name, from_str=strip_split, to_str=to_str, **kwargs)
 
 
 class BooleanConfigField(ConfigField):
@@ -140,7 +140,49 @@ class BooleanConfigField(ConfigField):
                 if not value:
                     return None
                 return bool_setting(value)
+
+            def to_str(value):
+                if value is None:
+                    return ''
+                return str(bool(value)).lower()
         else:
             def from_str(value):
                 return bool_setting(value)
-        super(BooleanConfigField, self).__init__(name, setting_name, from_str=from_str, to_str=str_or_blank, **kwargs)
+
+            def to_str(value):
+                return str(bool(value)).lower()
+        super().__init__(name, setting_name, from_str=from_str, to_str=to_str, **kwargs)
+
+
+class ChoiceConfigFile(ConfigField):
+    """Only allow a limited set of values in the .ini file.
+    The available values must be given as :class:`str`.
+
+    Choices must be a :class:`dict`, mapping .ini (string) values to actual values.
+
+    If an invalid value is provided by the user, then `None` is returned, but an error is displayed
+    through the Django check system.
+    """
+    def __init__(self, name, setting_name, choices, help_str='', **kwargs):
+
+        def from_str(value):
+            if value not in choices:
+                valid = ', '.join(['"%s"' % x for x in choices])
+                settings_check_results.append(Error('Invalid value "%s". Valid choices: %s.' %
+                                                    (value, valid), obj='djangofloor.conf.settings',
+                                                    id='djangofloor.E003'))
+            return choices.get(value)
+
+        def to_str(value):
+            for k, v in choices.items():
+                if v == value:
+                    return str(k)
+            return ''
+
+        valid_values = ', '.join(['"%s"' % x for x in choices])
+        if help_str:
+            help_str += ' Valid choices: %s' % valid_values
+        else:
+            help_str = 'Valid choices: %s' % valid_values
+
+        super().__init__(name, setting_name, from_str=from_str, to_str=to_str, help_str=help_str, **kwargs)

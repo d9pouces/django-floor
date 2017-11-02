@@ -99,13 +99,20 @@ def _resolve_name(name, package, level):
 
 
 def guess_version(defined_settings):
-    """Guesss the project version. Expect __version__ in `your_project/__init__.py`
+    """Guesss the project version.
+    Expect an installed version (findable with pkg_resources) or __version__ in `your_project/__init__.py`.
+    If not found
 
     :param defined_settings: all already defined settings (dict)
     :type defined_settings: :class:`dict`
     :return: should be something like `"1.2.3"`
     :rtype: :class:`str`
     """
+    try:
+        project_distribution = pkg_resources.get_distribution(defined_settings['DF_MODULE_NAME'])
+        return project_distribution.version
+    except pkg_resources.DistributionNotFound:
+        pass
     try:
         return import_string('%s.__version__' % defined_settings['DF_MODULE_NAME'])
     except ImportError:

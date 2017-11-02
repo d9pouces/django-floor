@@ -117,6 +117,8 @@ class DjangoFloorMiddleware(BaseRemoteUserMiddleware):
             if request.user.get_username() == cleaned_username:
                 request.remote_username = cleaned_username
                 return
+            else:
+                self._remove_invalid_user(request)
         # We are seeing this user for the first time in this session, attempt
         # to authenticate the user.
         user = auth.authenticate(remote_user=username)

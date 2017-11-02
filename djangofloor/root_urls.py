@@ -54,7 +54,7 @@ if settings.DEBUG and settings.USE_DEBUG_TOOLBAR:
     # noinspection PyPackageRequirements,PyUnresolvedReferences
     import debug_toolbar
     urlpatterns += [url(prefix + '__debug__/', include(debug_toolbar.urls)), ]
-if settings.USE_ALL_AUTH:
+if settings.ALLAUTH_PROVIDERS:
     urlpatterns += [url(r'^accounts/', include('allauth.urls')), ]
 
 # urlpatterns += [url(r'^df/signal/(?P<signal>[\w\.\-_]+)\.json$', legacy.signal_call, name='df_signal_call'),

@@ -61,20 +61,23 @@ Or you can use when you deploy it:
 OAuth2 authentication
 ---------------------
 
-The package `django-allauth <http://django-allauth.readthedocs.io/en/latest/>`_ perfectly handles OAuth2 authentication from many providers. Please check its own documentation. Of course, it must be installed separately (it is not a dependency of Djangofloor) and `USE_ALL_AUTH` must be set to `True` (it should be valid since DjangoFloor autodetects the installed packages).
-However, Djangofloor can help you. If `ALLAUTH_PROVIDERS` is defined (in your project defaults or in the deployment settings), then the following things are transparently done:
+The package `django-allauth <http://django-allauth.readthedocs.io/en/latest/>`_ perfectly handles OAuth2 authentication from many providers.
+Please check its own documentation.
+Of course, it must be installed separately (it is not a dependency of Djangofloor) and at least one provider must be given in `ALLAUTH_PROVIDERS`.
 
-  * `ALLAUTH_INSTALLED_APPS` contains the list of all corresponding Django apps (this list will be inserted `INSTALLED_APPS`),
+
+  * `INSTALLED_APPS` will contain the list of all required Django apps ,
   * :mod:`allauth.urls` is inserted in root urls,
   * :class:`allauth.account.auth_backends.AuthenticationBackend` is added to authentication backends.
 
-Of course, templates must be written. You can use when you deploy it, if :mod:`djangofloor.conf.mapping`.`ALLAUTH_MAPPING` is added to your `iniconf` mapping:
+Of course, templates must be written.
+You can define OAuth2 providers in a .ini config file:
 
 .. code-block:: ini
   :caption: /etc/yourproject/settings.ini
 
   [auth]
-  oauth2_providers = amazon,asana,bitbucket,tumblr
+  oauth2_providers = github,asana,bitbucket,tumblr
 
 LDAP authentication
 -------------------
@@ -84,7 +87,7 @@ And again, DjangoFloor can help you to use it.
 If `AUTH_LDAP_SERVER_URI` is set, then:
 
   * :class:`django_auth_ldap.backend.LDAPBackend` is added to authentication backends,
-  * the setting `AUTH_LDAP_USER_SEARCH` is built from `AUTH_LDAP_SEARCH_BASE` and `AUTH_LDAP_FILTER`.
+  * the setting `AUTH_LDAP_USER_SEARCH` is built from `AUTH_LDAP_USER_SEARCH_BASE` and `AUTH_LDAP_FILTER`.
 
 .. code-block:: ini
   :caption: /etc/yourproject/settings.ini

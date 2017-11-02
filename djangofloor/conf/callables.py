@@ -4,14 +4,21 @@
 
 """
 
+import grp
+import os
+import pwd
 import re
 # noinspection PyUnresolvedReferences
+from collections import OrderedDict
 from urllib.parse import urlparse
 
+from django.core.checks import Error
 from django.utils.crypto import get_random_string
+from django.utils.module_loading import import_string
 from pkg_resources import get_distribution, DistributionNotFound
 
-from djangofloor.utils import is_package_present
+from djangofloor.checks import settings_check_results
+from djangofloor.conf.config_values import ExpandIterable
 
 __author__ = 'Matthieu Gallet'
 
@@ -24,7 +31,30 @@ _default_engines = {'mysql': 'django.db.backends.mysql',
 
 def database_engine(settings_dict):
     """Allow to use aliases for database engines, as well as the default dotted name"""
-    return _default_engines.get(settings_dict['DATABASE_ENGINE'].lower(), settings_dict['DATABASE_ENGINE'])
+    engine = _default_engines.get(settings_dict['DATABASE_ENGINE'].lower(), settings_dict['DATABASE_ENGINE'])
+    if engine == 'django.db.backends.postgresql':
+        try:
+            get_distribution('psycopg2')
+        except DistributionNotFound:
+            settings_check_results.append(
+                Error('Python package "psycopg2" is required to use PostgreSQL as main database.',
+                      obj='djangofloor.conf.settings', id='djangofloor.E001'))
+    elif engine == 'django.db.backends.oracle':
+        try:
+            get_distribution('cx_Oracle')
+        except DistributionNotFound:
+            settings_check_results.append(
+                Error('Python package "cx_Oracle" is required to use Oracle as main database.',
+                      obj='djangofloor.conf.settings', id='djangofloor.E003'))
+    elif engine == 'django.db.backends.mysql':
+        try:
+            get_distribution('mysqlclient')
+        except DistributionNotFound:
+            settings_check_results.append(
+                Error('Python package "mysqlclient" is required to use MySQL as main database.',
+                      obj='djangofloor.conf.settings', id='djangofloor.E002'))
+
+    return engine
 
 
 database_engine.required_settings = ['DATABASE_ENGINE']
@@ -183,20 +213,69 @@ def project_name(settings_dict):
 project_name.required_settings = ['DF_MODULE_NAME']
 
 
-def authentication_backends(settings_dict):
-    result = []
-    if settings_dict['DF_REMOTE_USER_HEADER']:
-        result.append('djangofloor.backends.DefaultGroupsRemoteUserBackend')
-    if settings_dict['AUTH_LDAP_SERVER_URI'] and is_package_present('django_auth_ldap'):
-        result.append('django_auth_ldap.backend.LDAPBackend')
-    result.append('django.contrib.auth.backends.ModelBackend')
-    if settings_dict['ALLAUTH_PROVIDERS'] and settings_dict['USE_ALL_AUTH']:
-        result.append('allauth.account.auth_backends.AuthenticationBackend')
-    return result
+# noinspection PyMethodMayBeStatic,PyUnusedLocal
+class AuthenticationBackends:
+    required_settings = ['ALLAUTH_PROVIDERS', 'DF_REMOTE_USER_HEADER', 'AUTH_LDAP_SERVER_URI',
+                         'USE_PAM_AUTHENTICATION']
+
+    def __call__(self, settings_dict):
+        backends = []
+        backends += self.process_remote_user(settings_dict)
+        backends += self.process_django(settings_dict)
+        backends += self.process_django_ldap(settings_dict)
+        backends += self.process_allauth(settings_dict)
+        backends += self.process_pam(settings_dict)
+        return backends
+
+    def process_django(self, settings_dict):
+        return ['django.contrib.auth.backends.ModelBackend']
+
+    def process_remote_user(self, settings_dict):
+        if settings_dict['DF_REMOTE_USER_HEADER']:
+            return ['djangofloor.backends.DefaultGroupsRemoteUserBackend']
+        return []
+
+    def process_allauth(self, settings_dict):
+        if not settings_dict['ALLAUTH_PROVIDERS']:
+            return []
+        try:
+            get_distribution('django-allauth')
+            return ['allauth.account.auth_backends.AuthenticationBackend']
+        except DistributionNotFound:
+            return []
+
+    def process_django_ldap(self, settings_dict):
+        if settings_dict['AUTH_LDAP_SERVER_URI']:
+            try:
+                get_distribution('django-auth-ldap')
+            except DistributionNotFound:
+                settings_check_results.append(Error('Python package "django-auth-ldap" is required to '
+                                                    'use LDAP authentications.',
+                                                    obj='djangofloor.conf.settings', id='djangofloor.E008'))
+                return []
+        return ['django_auth_ldap.backend.LDAPBackend']
+
+    def process_pam(self, settings_dict):
+        if not settings_dict['USE_PAM_AUTHENTICATION']:
+            return []
+        try:
+            get_distribution('django_pam')
+        except DistributionNotFound:
+            settings_check_results.append(Error('Python package "django_pam" is required to '
+                                                'use PAM authentication.',
+                                                obj='djangofloor.conf.settings', id='djangofloor.E006'))
+            return []
+        # check if the current user is in the shadow group
+        username = pwd.getpwuid(os.getuid()).pw_name
+        if not any(x.gr_name == 'shadow' and username in x.gr_mem for x in grp.getgrall()):
+            settings_check_results.append(Error('The user "%s" must belong to the "shadow" group to use PAM '
+                                                'authentication.' % username,
+                                                obj='djangofloor.conf.settings', id='djangofloor.E007'))
+            return []
+        return ['django_pam.auth.backends.PAMBackend']
 
 
-authentication_backends.required_settings = ['ALLAUTH_PROVIDERS', 'DF_REMOTE_USER_HEADER', 'AUTH_LDAP_SERVER_URI',
-                                             'USE_ALL_AUTH']
+authentication_backends = AuthenticationBackends()
 
 
 def template_setting(settings_dict):
@@ -221,41 +300,145 @@ template_setting.required_settings = ['DEBUG', 'TEMPLATE_DIRS', 'TEMPLATE_CONTEX
 
 
 def ldap_user_search(settings_dict):
-    if settings_dict['AUTH_LDAP_SERVER_URI']:
-        if not is_package_present('django_auth_ldap'):
-            print("Package django-auth-ldap must be installed to use LDAP authentication.")
+    if settings_dict['AUTH_LDAP_SERVER_URI'] and settings_dict['AUTH_LDAP_USER_SEARCH_BASE']:
+        try:
+            # noinspection PyPackageRequirements,PyUnresolvedReferences
+            import ldap
+            # noinspection PyUnresolvedReferences
+            from django_auth_ldap.config import LDAPSearch
+        except ImportError:
             return None
-        # noinspection PyUnresolvedReferences
-        import ldap
-        # noinspection PyUnresolvedReferences
-        from django_auth_ldap.config import LDAPSearch
-        return LDAPSearch(settings_dict['AUTH_LDAP_SEARCH_BASE'], ldap.SCOPE_SUBTREE, settings_dict['AUTH_LDAP_FILTER'])
+        return LDAPSearch(settings_dict['AUTH_LDAP_USER_SEARCH_BASE'], ldap.SCOPE_SUBTREE,
+                          settings_dict['AUTH_LDAP_FILTER'])
     return None
 
 
-ldap_user_search.required_settings = ['AUTH_LDAP_SEARCH_BASE', 'AUTH_LDAP_SERVER_URI', 'AUTH_LDAP_FILTER']
+ldap_user_search.required_settings = ['AUTH_LDAP_USER_SEARCH_BASE', 'AUTH_LDAP_SERVER_URI', 'AUTH_LDAP_FILTER']
 
 
-def allauth_installed_apps(settings_dict):
-    if not settings_dict['USE_ALL_AUTH']:
-        return []
-    elif not is_package_present('allauth'):
-        print("Package django-allauth must be installed to use OAuth2 authentication.")
-        return []
-    return ['allauth', 'allauth.account', 'allauth.socialaccount'] + \
-           ['allauth.socialaccount.providers.%s' % k for k in settings_dict['ALLAUTH_PROVIDERS']
-            if k in allauth_providers]
+def ldap_group_search(settings_dict):
+    if settings_dict['AUTH_LDAP_SERVER_URI'] and settings_dict['AUTH_LDAP_GROUP_SEARCH_BASE']:
+        try:
+            # noinspection PyPackageRequirements,PyUnresolvedReferences
+            import ldap
+            # noinspection PyUnresolvedReferences
+            from django_auth_ldap.config import LDAPSearch
+        except ImportError:
+            return None
+        return LDAPSearch(settings_dict['AUTH_LDAP_GROUP_SEARCH_BASE'], ldap.SCOPE_SUBTREE, '(objectClass=*)')
+    return None
 
 
-allauth_installed_apps.required_settings = ['ALLAUTH_PROVIDERS', 'USE_ALL_AUTH']
-allauth_providers = {'amazon', 'angellist', 'asana', 'auth0', 'baidu', 'basecamp', 'bitbucket', 'bitbucket_oauth2',
-                     'bitly', 'coinbase', 'daum', 'digitalocean', 'discord', 'douban', 'draugiem', 'dropbox',
-                     'dropbox_oauth2', 'edmodo', 'eveonline', 'evernote', 'facebook', 'feedly', 'fivehundredpx',
-                     'flickr', 'foursquare', 'fxa', 'github', 'gitlab', 'google', 'hubic', 'instagram', 'kakao',
-                     'line', 'linkedin', 'linkedin_oauth2', 'mailru', 'mailchimp', 'naver', 'odnoklassniki',
-                     'openid', 'orcid', 'paypal', 'persona', 'pinterest', 'reddit', 'robinhood', 'shopify',
-                     'slack', 'soundcloud', 'spotify', 'stackexchange', 'stripe', 'tumblr', 'twentythreeandme',
-                     'twitch', 'twitter', 'untappd', 'vimeo', 'vk', 'weibo', 'weixin', 'windowslive', 'xing'}
+ldap_group_search.required_settings = ['AUTH_LDAP_GROUP_SEARCH_BASE', 'AUTH_LDAP_SERVER_URI']
+
+
+def ldap_attribute_map(settings_dict):
+    result = {}
+    if settings_dict['AUTH_LDAP_USER_FIRST_NAME']:
+        result['first_name'] = settings_dict['AUTH_LDAP_USER_FIRST_NAME']
+    if settings_dict['AUTH_LDAP_USER_LAST_NAME']:
+        result['last_name'] = settings_dict['AUTH_LDAP_USER_LAST_NAME']
+    if settings_dict['AUTH_LDAP_USER_EMAIL']:
+        result['email'] = settings_dict['AUTH_LDAP_USER_EMAIL']
+    return result
+
+
+ldap_attribute_map.required_settings = ['AUTH_LDAP_USER_FIRST_NAME', 'AUTH_LDAP_USER_LAST_NAME', 'AUTH_LDAP_USER_EMAIL']
+
+
+def ldap_boolean_attribute_map(settings_dict):
+    result = {}
+    if settings_dict['AUTH_LDAP_USER_IS_ACTIVE']:
+        result['is_active'] = settings_dict['AUTH_LDAP_USER_IS_ACTIVE']
+    if settings_dict['AUTH_LDAP_USER_IS_STAFF']:
+        result['is_staff'] = settings_dict['AUTH_LDAP_USER_IS_STAFF']
+    if settings_dict['AUTH_LDAP_USER_IS_ACTIVE']:
+        result['is_superuser'] = settings_dict['AUTH_LDAP_USER_IS_SUPERUSER']
+    return result
+
+
+ldap_boolean_attribute_map.required_settings = ['AUTH_LDAP_USER_IS_ACTIVE', 'AUTH_LDAP_USER_IS_STAFF',
+                                                'AUTH_LDAP_USER_IS_SUPERUSER']
+
+
+def ldap_group_class(settings_dict):
+    if settings_dict['AUTH_LDAP_SERVER_URI']:
+        try:
+            cls = import_string(settings_dict['AUTH_LDAP_GROUP_NAME'])
+            return cls()
+        except ImportError:
+            return None
+    return None
+
+
+ldap_group_class.required_settings = ['AUTH_LDAP_GROUP_NAME', 'AUTH_LDAP_SERVER_URI']
+
+
+class InstalledApps:
+    """Provide a complete `INSTALLED_APPS` list, transparently adding common third-party packages.
+     Specifically handle apps required by django-allauth (one by allowed method).
+
+    """
+    default_apps = [
+        'django.contrib.auth',
+        'django.contrib.contenttypes',
+        'django.contrib.sessions',
+        'django.contrib.messages',
+        'django.contrib.humanize',
+        'django.contrib.sitemaps',
+        'django.contrib.sites',
+        ExpandIterable('DF_INSTALLED_APPS'),
+        'bootstrap3',
+        'djangofloor',
+        'django.contrib.staticfiles',
+        'django.contrib.admin',
+    ]
+    common_third_parties = OrderedDict([
+        ('USE_DEBUG_TOOLBAR', 'debug_toolbar',),
+        ('USE_PIPELINE', 'pipeline',),
+        ('USE_REST_FRAMEWORK', 'rest_framework',),
+        ('USE_PAM_AUTHENTICATION', 'django_pam'),
+    ])
+    required_settings = ['ALLAUTH_PROVIDERS', ] + list(common_third_parties)
+    allauth_providers = {'amazon', 'angellist', 'asana', 'auth0', 'baidu', 'basecamp', 'bitbucket', 'bitbucket_oauth2',
+                         'bitly', 'coinbase', 'daum', 'digitalocean', 'discord', 'douban', 'draugiem', 'dropbox',
+                         'dropbox_oauth2', 'edmodo', 'eveonline', 'evernote', 'facebook', 'feedly', 'fivehundredpx',
+                         'flickr', 'foursquare', 'fxa', 'github', 'gitlab', 'google', 'hubic', 'instagram', 'kakao',
+                         'line', 'linkedin', 'linkedin_oauth2', 'mailru', 'mailchimp', 'naver', 'odnoklassniki',
+                         'openid', 'orcid', 'paypal', 'persona', 'pinterest', 'reddit', 'robinhood', 'shopify',
+                         'slack', 'soundcloud', 'spotify', 'stackexchange', 'stripe', 'tumblr', 'twentythreeandme',
+                         'twitch', 'twitter', 'untappd', 'vimeo', 'vk', 'weibo', 'weixin', 'windowslive', 'xing'}
+
+    def __call__(self, settings_dict):
+        apps = self.default_apps
+        apps += self.process_django_allauth(settings_dict)
+        apps += self.process_third_parties(settings_dict)
+        return apps
+
+    def process_third_parties(self, settings_dict):
+        return [v for (k, v) in self.common_third_parties.items() if settings_dict[k]]
+
+    def process_django_allauth(self, settings_dict):
+        if not settings_dict['ALLAUTH_PROVIDERS']:
+            return []
+        try:
+            get_distribution('django-allauth')
+        except DistributionNotFound:
+            settings_check_results.append(
+                Error('Python package "django-allauth" is required to use OAuth2 or OpenID authentications.',
+                      obj='djangofloor.conf.settings', id='djangofloor.E004'))
+            return []
+        if 'django.contrib.sites' not in self.default_apps:
+            settings_check_results.append(
+                Error('"django.contrib.sites" app must be enabled.', obj='djangofloor.conf.settings',
+                      id='djangofloor.E005'))
+            return []
+        return ['allauth', 'allauth.account', 'allauth.socialaccount'] + \
+               ['allauth.socialaccount.providers.%s' % k for k in settings_dict['ALLAUTH_PROVIDERS']
+                if k in self.allauth_providers]
+
+
+installed_apps = InstalledApps()
 
 
 def generate_secret_key(django_ready, length=60):
@@ -266,7 +449,6 @@ def generate_secret_key(django_ready, length=60):
 
 
 def required_packages(settings_dict):
-
     def get_requirements(package_name):
         try:
             yield str(package_name)

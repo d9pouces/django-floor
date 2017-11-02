@@ -10,8 +10,9 @@ from django.utils.translation import ugettext_lazy as _
 
 from djangofloor.conf.callables import database_engine, url_parse_server_name, \
     url_parse_server_protocol, url_parse_server_port, url_parse_prefix, url_parse_ssl, project_name, \
-    authentication_backends, ldap_user_search, allauth_installed_apps, allowed_hosts, cache_setting, template_setting, \
-    generate_secret_key, use_x_forwarded_for, required_packages
+    authentication_backends, ldap_user_search, allowed_hosts, cache_setting, template_setting, \
+    generate_secret_key, use_x_forwarded_for, required_packages, installed_apps, ldap_attribute_map, \
+    ldap_boolean_attribute_map, ldap_group_search, ldap_group_class
 from djangofloor.conf.config_values import Path, Directory, SettingReference, ExpandIterable, \
     CallableSetting, AutocreateFileContent
 from djangofloor.log import log_configuration
@@ -37,6 +38,7 @@ USE_PIPELINE = is_package_present('pipeline')
 USE_DEBUG_TOOLBAR = is_package_present('debug_toolbar')
 USE_REST_FRAMEWORK = is_package_present('rest_framework')
 USE_ALL_AUTH = is_package_present('allauth')
+
 # ######################################################################################################################
 #
 # settings that can be kept as-is
@@ -57,28 +59,7 @@ DEBUG = False
 # you should create a "local_settings.py" with "DEBUG = True" at the root of your project
 DEFAULT_FROM_EMAIL = 'webmaster@{SERVER_NAME}'
 FILE_UPLOAD_TEMP_DIR = Directory('{LOCAL_PATH}/tmp-uploads')
-INSTALLED_APPS = [
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.humanize',
-    'django.contrib.sitemaps',
-    'django.contrib.sites',
-    ExpandIterable('DF_INSTALLED_APPS'),
-    ExpandIterable('ALLAUTH_INSTALLED_APPS'),
-    'bootstrap3',
-    'djangofloor',
-    'django.contrib.staticfiles',
-    'django.contrib.admin',
-]
-if USE_DEBUG_TOOLBAR:
-    INSTALLED_APPS.append('debug_toolbar')
-if USE_PIPELINE:
-    INSTALLED_APPS.append('pipeline')
-if USE_REST_FRAMEWORK:
-    INSTALLED_APPS.append('rest_framework')
-INSTALLED_APPS.append(ExpandIterable('DF_EXTRA_INSTALLED_APPS'))
+INSTALLED_APPS = CallableSetting(installed_apps)
 LOGGING = CallableSetting(log_configuration)
 MANAGERS = SettingReference('ADMINS')
 MEDIA_ROOT = Directory('{LOCAL_PATH}/media')
@@ -180,7 +161,7 @@ SERVER_NAME = CallableSetting(url_parse_server_name)  # ~ www.example.org
 SERVER_PORT = CallableSetting(url_parse_server_port)  # ~ 443
 SERVER_PROTOCOL = CallableSetting(url_parse_server_protocol)  # ~ "https"
 URL_PREFIX = CallableSetting(url_parse_prefix)  # ~ /prefix/
-USE_HTTP_BASIC_AUTH = True  # HTTP-Authorization
+USE_HTTP_BASIC_AUTH = False  # HTTP-Authorization
 USE_SSL = CallableSetting(url_parse_ssl)  # ~ True
 USE_X_FORWARDED_FOR = CallableSetting(use_x_forwarded_for)  # X-Forwarded-For
 USE_X_SEND_FILE = False  # Apache module
@@ -190,7 +171,6 @@ DF_PROJECT_VERSION = CallableSetting(guess_version)
 DF_REMOVED_DJANGO_COMMANDS = {'startapp', 'startproject'}
 DF_PUBLIC_SIGNAL_LIST = True
 # do not check for each WS signal/function before sending its name to the client
-DF_EXTRA_INSTALLED_APPS = []
 DF_SYSTEM_CHECKS = ['djangofloor.views.monitoring.RequestCheck',
                     'djangofloor.views.monitoring.System',
                     'djangofloor.views.monitoring.CeleryStats',
@@ -299,7 +279,6 @@ PIPELINE_JS_COMPRESSOR = 'pipeline.compressors.jsmin.JSMinCompressor'
 ACCOUNT_EMAIL_SUBJECT_PREFIX = '[{SERVER_NAME}] '
 ACCOUNT_EMAIL_VERIFICATION = None
 ALLAUTH_PROVIDERS = []
-ALLAUTH_INSTALLED_APPS = CallableSetting(allauth_installed_apps)
 
 # Django-Debug-Toolbar
 DEBUG_TOOLBAR_CONFIG = {'JQUERY_URL': '{STATIC_URL}vendor/jquery/dist/jquery.min.js', }
@@ -322,12 +301,36 @@ BOOTSTRAP3 = {
 AUTH_LDAP_SERVER_URI = None
 AUTH_LDAP_BIND_DN = ""
 AUTH_LDAP_BIND_PASSWORD = ""
-AUTH_LDAP_SEARCH_BASE = 'ou=users,dc=example,dc=com'
+AUTH_LDAP_USER_SEARCH_BASE = 'ou=users,dc=example,dc=com'
 AUTH_LDAP_FILTER = '(uid=%(user)s)'
 AUTH_LDAP_USER_SEARCH = CallableSetting(ldap_user_search)
 AUTH_LDAP_USER_DN_TEMPLATE = None
 AUTH_LDAP_START_TLS = False
-
+AUTH_LDAP_USER_ATTR_MAP = CallableSetting(ldap_attribute_map)
+AUTH_LDAP_USER_FLAGS_BY_GROUP = CallableSetting(ldap_boolean_attribute_map)
+AUTH_LDAP_MIRROR_GROUPS = False
+AUTH_LDAP_USER_IS_ACTIVE = None
+AUTH_LDAP_USER_IS_STAFF = None
+AUTH_LDAP_USER_IS_SUPERUSER = None
+AUTH_LDAP_USER_FIRST_NAME = None
+AUTH_LDAP_USER_LAST_NAME = None
+AUTH_LDAP_USER_EMAIL = None
+AUTH_LDAP_GROUP_TYPE = CallableSetting(ldap_group_class)
+AUTH_LDAP_GROUP_NAME = 'posix'
+AUTH_LDAP_ALWAYS_UPDATE_USER = True
+AUTH_LDAP_REQUIRE_GROUP = None
+AUTH_LDAP_DENY_GROUP = None
+# Cache group memberships for an hour to minimize LDAP traffic
+AUTH_LDAP_CACHE_GROUPS = True
+AUTH_LDAP_GROUP_CACHE_TIMEOUT = 3600
+# Use LDAP group membership to calculate group permissions.
+AUTH_LDAP_FIND_GROUP_PERMS = False
+AUTH_LDAP_GROUP_SEARCH = CallableSetting(ldap_group_search)
+AUTH_LDAP_AUTHORIZE_ALL_USERS = True
+# https://bitbucket.org/illocution/django-auth-ldap/pull-requests/29/kerberos-bind-method-to-provide-multi/diff
+# KRB5_CCACHE = None
+# KRB5_KEYTAB = None
+# KRB5_PRINCIPAL = None
 # django-cors-headers
 CORS_ORIGIN_WHITELIST = ('{SERVER_NAME}', '{SERVER_NAME}:{SERVER_PORT}')
 CORS_REPLACE_HTTPS_REFERER = False
@@ -336,6 +339,9 @@ CORS_REPLACE_HTTPS_REFERER = False
 DEFAULT_HOST = '{SERVER_NAME}'
 HOST_SCHEME = '{SERVER_PROTOCOL}://'
 HOST_PORT = '{SERVER_PORT}'
+
+# django—pam
+USE_PAM_AUTHENTICATION = False
 
 # ######################################################################################################################
 #
@@ -352,7 +358,8 @@ DF_LOGIN_VIEW = 'djangofloor.views.auth.LoginView'
 DF_USER_SELF_REGISTRATION = True  # allow user to create their account themselves
 DF_PROJECT_NAME = CallableSetting(project_name)
 DF_URL_CONF = '{DF_MODULE_NAME}.urls.urlpatterns'
-DF_INSTALLED_APPS = ['{DF_MODULE_NAME}']
+# noinspection PyUnresolvedReferences
+DF_INSTALLED_APPS = ['{DF_MODULE_NAME}']  # your django app!
 DF_MIDDLEWARE = []
 DF_REMOTE_USER_HEADER = None  # HTTP-REMOTE-USER
 DF_DEFAULT_GROUPS = [_('Users')]
@@ -410,7 +417,7 @@ if 'lib' in __split_path:
 SERVER_BASE_URL = 'http://{LISTEN_ADDRESS}/'  # aliased in settings.ini as "[global]server_url"
 LOG_DIRECTORY = Directory('{LOCAL_PATH}/log')
 
-# django_redis
+# django_redis (cache)
 CACHE_REDIS_PROTOCOL = 'redis'  # aliased in settings.ini as "[cache]protocol"
 CACHE_REDIS_HOST = 'localhost'  # aliased in settings.ini as "[cache]host"
 CACHE_REDIS_PORT = 6379  # aliased in settings.ini as "[cache]port"

@@ -35,7 +35,6 @@ __author__ = 'Matthieu Gallet'
 _deprecated_settings = {
     'BIND_ADDRESS': SettingReference('LISTEN_ADDRESS'),
     'BROKER_DB': SettingReference('CELERY_DB'),
-    'FLOOR_AUTHENTICATION_HEADER': SettingReference('DF_REMOTE_USER_HEADER'),
     'FLOOR_BACKUP_SINGLE_TRANSACTION': None,
     'FLOOR_EXTRA_CSS': SettingReference('DF_CSS'),
     'FLOOR_EXTRA_JS': SettingReference('DF_JS'),
@@ -100,6 +99,7 @@ class SettingMerger(object):
     def __init__(self, fields_provider, providers, extra_values=None, stdout=None, stderr=None, no_color=False):
         self.fields_provider = fields_provider or PythonConfigFieldsProvider(None)
         extra_values = extra_values or {}
+        self.extra_values = extra_values
         self.providers = providers or []
         self.__formatter = string.Formatter()
         self.settings = {}

@@ -16,6 +16,7 @@ from django.conf import settings
 from django.contrib.auth.backends import RemoteUserBackend
 from django.contrib.auth.models import Group
 from django.utils.encoding import force_text
+from django.utils.functional import cached_property
 
 try:
     # noinspection PyPackageRequirements
@@ -35,6 +36,19 @@ class DefaultGroupsRemoteUserBackend(RemoteUserBackend):
 
      """
 
+    @cached_property
+    def ldap_backend(self):
+        # noinspection PyUnresolvedReferences
+        from django_auth_ldap.backend import LDAPBackend
+        return LDAPBackend()
+
+    def authenticate(self, request, remote_user):
+        if settings.AUTH_LDAP_SERVER_URI and settings.AUTH_LDAP_ALWAYS_UPDATE_USER:
+            user = self.ldap_backend.populate_user(remote_user)
+            if user:
+                return user
+        return super().authenticate(request, remote_user)
+
     def configure_user(self, user):
         """
         Configures a user after creation and returns the updated user.
@@ -45,6 +59,7 @@ class DefaultGroupsRemoteUserBackend(RemoteUserBackend):
             if group_name not in _CACHED_GROUPS:
                 _CACHED_GROUPS[group_name] = Group.objects.get_or_create(name=force_text(group_name))[0]
             user.groups.add(_CACHED_GROUPS[group_name])
+
         return user
 
 

@@ -50,9 +50,9 @@ By default, DjangoFloor provides a complete URL configuration:
   * favicon through `'favicon'`,
   * Django admin site,
   * javascript translation (i18n),
-  * URLs for `django-all—auth` if `USE_ALL_AUTH`,
-  * Django-REST-Framework if `USE_REST_FRAMEWORK`,
-  * Django debug toolbar if `USE_DEBUG_TOOLBAR` and `DEBUG`.
+  * URLs for `django-all—auth` if at least one method is required,
+  * Django-REST-Framework if the package is installed,
+  * Django debug toolbar if the package is installed and `DEBUG` is set.
 
 To this list is added the list provided by `DF_URL_CONF`.
 

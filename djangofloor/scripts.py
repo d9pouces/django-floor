@@ -37,7 +37,7 @@ def __set_default_option(options, name):
         sys.argv += ['--%s' % option_name, str(getattr(options, name))]
 
 
-def get_merger_from_env():
+def get_merger_from_env() -> SettingMerger:
     """ Should be used after set_env(); determine all available settings in this order:
 
    * djangofloor.defaults

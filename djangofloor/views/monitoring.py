@@ -293,7 +293,7 @@ class LogAndExceptionCheck(MonitoringCheck):
 
     def get_context(self, request):
         form = LogNameForm()
-        return {'logname_form': form}
+        return {'logname_form': form, 'celery_required': settings.USE_CELERY}
 
 
 system_checks = [import_string(x)() for x in settings.DF_SYSTEM_CHECKS]

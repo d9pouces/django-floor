@@ -8,7 +8,7 @@ from djangofloor import decorators
 from djangofloor.conf.providers import IniConfigProvider
 from djangofloor.conf.settings import merger
 from djangofloor.tasks import import_signals_and_functions
-from djangofloor.utils import remove_arguments_from_help
+from djangofloor.utils import remove_arguments_from_help, guess_version
 
 __author__ = 'Matthieu Gallet'
 
@@ -16,6 +16,7 @@ __author__ = 'Matthieu Gallet'
 class Command(BaseCommand):
     help = 'show the current configuration.' \
            'Can display as python file ("config python") or as .ini file ("config ini"). Use -v 2 to display more info.'
+    requires_system_checks = False
 
     def add_arguments(self, parser):
         assert isinstance(parser, ArgumentParser)
@@ -35,15 +36,18 @@ class Command(BaseCommand):
         action = options['action']
         verbosity = options['verbosity']
         if action == 'python':
-            self.stdout.write(self.style.NOTICE('# ' + '-' * 80))
-            self.stdout.write(self.style.NOTICE(_('# Djangofloor version %(version)s') % {'version': version, }))
-            self.stdout.write(self.style.NOTICE('# Configuration providers:'))
+            self.stdout.write(self.style.SUCCESS('# ' + '-' * 80))
+            self.stdout.write(self.style.SUCCESS(_('# Djangofloor version %(version)s') % {'version': version, }))
+            self.stdout.write(self.style.SUCCESS(_('# %(project)s version %(version)s') %
+                                                 {'version': guess_version(merger.settings),
+                                                  'project': merger.settings['DF_PROJECT_NAME']}))
+            self.stdout.write(self.style.SUCCESS('# Configuration providers:'))
             for provider in merger.providers:
                 if provider.is_valid():
-                    self.stdout.write(self.style.NOTICE('#  - %s "%s"' % (provider.name, provider)))
+                    self.stdout.write(self.style.SUCCESS('#  - %s "%s"' % (provider.name, provider)))
                 elif verbosity > 1:
-                    self.stdout.write(self.style.ERROR('#  - %s "%s"' % (provider.name, provider)))
-            self.stdout.write(self.style.NOTICE('# ' + '-' * 80))
+                    self.stdout.write(self.style.ERROR('#  - %s "%s" (not found)' % (provider.name, provider)))
+            self.stdout.write(self.style.SUCCESS('# ' + '-' * 80))
             setting_names = list(merger.raw_settings)
             setting_names.sort()
             for setting_name in setting_names:
@@ -56,16 +60,15 @@ class Command(BaseCommand):
                 for provider_name, raw_value in merger.raw_settings[setting_name].items():
                     self.stdout.write(self.style.WARNING('    #   %s -> %r' % (provider_name or 'built-in', raw_value)))
         elif action == 'ini':
-            if verbosity >= 3:
-                provider = merger.fields_provider
-                self.stdout.write(self.style.NOTICE('; list of fields in %s "%s"' % (provider.name, provider)))
+            if verbosity >= 2:
+                self.stdout.write(self.style.SUCCESS('# read configuration files:'))
             for provider in merger.providers:
                 if not isinstance(provider, IniConfigProvider):
                     continue
                 elif provider.is_valid():
-                    self.stdout.write(self.style.NOTICE('    #  - %s "%s"' % (provider.name, provider)))
+                    self.stdout.write(self.style.SUCCESS('    #  - %s "%s"' % (provider.name, provider)))
                 elif verbosity >= 2:
-                    self.stdout.write(self.style.ERROR('    #  - %s "%s"' % (provider.name, provider)))
+                    self.stdout.write(self.style.ERROR('    #  - %s "%s" (not found)' % (provider.name, provider)))
             provider = IniConfigProvider()
             merger.write_provider(provider, include_doc=verbosity >= 2)
             self.stdout.write(provider.to_str())
@@ -74,7 +77,7 @@ class Command(BaseCommand):
                 if not isinstance(provider, IniConfigProvider):
                     continue
                 elif provider.is_valid():
-                    self.stdout.write(self.style.NOTICE('    #  - %s "%s"' % (provider.name, provider)))
+                    self.stdout.write(self.style.SUCCESS('    #  - %s "%s"' % (provider.name, provider)))
                 else:
                     self.stdout.write(self.style.ERROR('    #  - %s "%s"' % (provider.name, provider)))
             provider = IniConfigProvider()

@@ -1,7 +1,8 @@
-"""Allow dependencies between settings
-===================================
+"""Complex settings at runtime
+===========================
 
-By default, setting files are plain Python files, and you can not reference settings different Python files.
+Allow to define settings based on references to other settings (overriden in other config files).
+
 Examples:
 
 .. code-block:: python
@@ -18,7 +19,7 @@ Examples:
   DEBUG = True
 
 
-Since the second file overrides the first one, `TEMPLATE_DEBUG` has the same value as `DEBUG` and is `True`.
+Since the second file overrides the first one, `TEMPLATE_DEBUG` always has the same value as `DEBUG` (`True`).
 
 """
 

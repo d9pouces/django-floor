@@ -6,9 +6,9 @@ The `INI_MAPPING` must be a list of :class:`djangofloor.conf.fields.ConfigField`
 the corresponding Django setting value and how to convert from one format to the another.
 """
 
-from djangofloor.conf.callables import allauth_providers
+from djangofloor.conf.callables import InstalledApps
 from djangofloor.conf.fields import CharConfigField, IntegerConfigField, BooleanConfigField, ConfigField, \
-    bool_setting, ListConfigField, FloatConfigField
+    bool_setting, ListConfigField, ChoiceConfigFile
 
 __author__ = 'Matthieu Gallet'
 
@@ -106,39 +106,95 @@ BASE_MAPPING = [
 
 SENDFILE_MAPPING = [
     BooleanConfigField('global.use_apache', 'USE_X_SEND_FILE',
-                       help_str='"true" if Apache is used as reverse-proxy and mod_xsendfile.'),
+                       help_str='"true" if Apache is used as reverse-proxy with mod_xsendfile.'
+                                'The X-SENDFILE header must be allowed from file directories'),
     ConfigField('global.use_nginx', 'X_ACCEL_REDIRECT', from_str=x_accel_converter,
                 to_str=lambda x: 'True' if x else 'False',
-                help_str='"true" is nginx is used as reverse-proxy and x-accel-redirect.'),
+                help_str='"true" is nginx is used as reverse-proxy with x-accel-redirect.'
+                         'The media directory (and url) must be allowed in the Nginx configuration.'),
 ]
 
 AUTH_MAPPING = [
+    BooleanConfigField('auth.pam', 'USE_PAM_AUTHENTICATION',
+                       help_str='Set to "true" if you want to activate PAM authentication'),
+
     CharConfigField('auth.remote_user_header', 'DF_REMOTE_USER_HEADER',
-                    help_str='Set it if you want to use HTTP authentication, a common value is "HTTP-REMOTE-USER".'),
+                    help_str='Set it if the reverse-proxy authenticates users, a common value is "HTTP-REMOTE-USER".'),
     ListConfigField('auth.remote_user_groups', 'DF_DEFAULT_GROUPS',
-                    help_str='Comma-separated list of groups, for new users that automatically created '
-                             'when authenticated by a HTTP header.'),
+                    help_str='Comma-separated list of groups, for new users that are automatically created '
+                             'when authenticated by remote_user_header. Ignored if groups are read from a LDAP '
+                             'server. '),
+
     BooleanConfigField('auth.allow_basic_auth', 'USE_HTTP_BASIC_AUTH',
                        help_str='Set to "true" if you want to allow HTTP basic auth, using the Django database.'),
+
     CharConfigField('auth.ldap_server_url', 'AUTH_LDAP_SERVER_URI',
                     help_str='URL of your LDAP server, like "ldap://ldap.example.com". '
-                             'Python packages "pyldap" and "django-auth-ldap" must be installed.'),
+                             'Python packages "pyldap" and "django-auth-ldap" must be installed.'
+                             'Can be used for retrieving attributes of users authenticated by the reverse proxy'),
     CharConfigField('auth.ldap_bind_dn', 'AUTH_LDAP_BIND_DN', help_str='Bind dn for LDAP authentication'),
     CharConfigField('auth.ldap_bind_password', 'AUTH_LDAP_BIND_PASSWORD',
                     help_str='Bind password for LDAP authentication'),
-    CharConfigField('auth.ldap_search_base', 'AUTH_LDAP_SEARCH_BASE',
-                    help_str='Search base for LDAP authentication, like "ou=users,dc=example,dc=com".'),
+    CharConfigField('auth.ldap_user_search_base', 'AUTH_LDAP_USER_SEARCH_BASE',
+                    help_str='Search base for LDAP authentication by direct after an search, '
+                             'like "ou=users,dc=example,dc=com".'),
     CharConfigField('auth.ldap_filter', 'AUTH_LDAP_FILTER',
-                    help_str='Filter for LDAP authentication, like "(uid=%(user)s)".'),
+                    help_str='Filter for LDAP authentication, like "(uid=%%(user)s)" (the default),'
+                             ' the double "%%" is required in .ini files.'),
     CharConfigField('auth.ldap_direct_bind', 'AUTH_LDAP_USER_DN_TEMPLATE',
-                    help_str='Set it for a direct LDAP bind, like "uid=%(user)s,ou=users,dc=example,dc=com"'),
-    BooleanConfigField('auth.ldap_start_tls', 'AUTH_LDAP_START_TLS', 'Set to "true" if you want to use StartTLS.'),
-
+                    help_str='Set it for a direct LDAP bind and to skip the LDAP search, '
+                             'like "uid=%%(user)s,ou=users,dc=example,dc=com". '
+                             '%%(user)s is the only allowed variable and the double "%%" is required in .ini files.'),
+    BooleanConfigField('auth.ldap_start_tls', 'AUTH_LDAP_START_TLS',
+                       help_str='Set to "true" if you want to use StartTLS.'),
+    CharConfigField('auth.ldap_first_name', 'AUTH_LDAP_USER_FIRST_NAME',
+                    help_str='LDAP attribute for the user\'s first name, like "givenName".'),
+    CharConfigField('auth.ldap_last_name', 'AUTH_LDAP_USER_LAST_NAME',
+                    help_str='LDAP attribute for the user\'s last name, like "sn".'),
+    CharConfigField('auth.ldap_email', 'AUTH_LDAP_USER_EMAIL',
+                    help_str='LDAP attribute for the user\'s email, like "email".'),
+    CharConfigField('auth.ldap_is_active', 'AUTH_LDAP_USER_IS_ACTIVE',
+                    help_str='LDAP group DN for active users, like "cn=active,ou=groups,dc=example,dc=com"'),
+    CharConfigField('auth.ldap_is_staff', 'AUTH_LDAP_USER_IS_STAFF',
+                    help_str='LDAP group DN for staff users, like "cn=staff,ou=groups,dc=example,dc=com".'),
+    CharConfigField('auth.ldap_is_superuser', 'AUTH_LDAP_USER_IS_SUPERUSER',
+                    help_str='LDAP group DN for superusers, like "cn=superuser,ou=groups,dc=example,dc=com".'),
+    CharConfigField('auth.ldap_require_group', 'AUTH_LDAP_REQUIRE_GROUP',
+                    help_str='only authenticates users belonging to this group. Must be something like '
+                             '"cn=enabled,ou=groups,dc=example,dc=com".'),
+    CharConfigField('auth.ldap_deny_group', 'AUTH_LDAP_DENY_GROUP',
+                    help_str='authentication is denied for users belonging to this group. Must be something like '
+                             '"cn=disabled,ou=groups,dc=example,dc=com".'),
+    BooleanConfigField('auth.ldap_mirror_groups', 'AUTH_LDAP_MIRROR_GROUPS',
+                       help_str='Mirror LDAP groups at each user login'),
+    CharConfigField('auth.ldap_group_search_base', 'AUTH_LDAP_GROUP_SEARCH_BASE',
+                    help_str='Search base for LDAP groups, like "ou=groups,dc=example,dc=com"'),
+    ChoiceConfigFile('auth.ldap_group_type', 'AUTH_LDAP_GROUP_NAME',
+                     choices={'posix': 'django_auth_ldap.config.PosixGroupType',
+                              'nis': 'django_auth_ldap.config.NISGroupType',
+                              'GroupOfNames': 'django_auth_ldap.config.GroupOfNamesType',
+                              'NestedGroupOfNames': 'django_auth_ldap.config.NestedGroupOfNamesType',
+                              'GroupOfUniqueNames': 'django_auth_ldap.config.GroupOfUniqueNamesType',
+                              'NestedGroupOfUniqueNames': 'django_auth_ldap.config.NestedGroupOfUniqueNamesType',
+                              'ActiveDirectory': 'django_auth_ldap.config.ActiveDirectoryGroupType',
+                              'NestedActiveDirectory': 'django_auth_ldap.config.NestedActiveDirectoryGroupType',
+                              'OrganizationalRole': 'django_auth_ldap.config.OrganizationalRoleGroupType',
+                              'NestedOrganizationalRole': 'django_auth_ldap.config.NestedOrganizationalRoleGroupType',
+                              }
+                     ,
+                     help_str='Type of LDAP groups.'),
+    # CharConfigField('auth.ldap_krb5_ccache', 'KRB5_CCACHE',
+    #                 help_str='If your LDAP server needs a Kerberos authentication, '
+    #                          'path of the ccache file (optional).'),
+    # CharConfigField('auth.ldap_krb5_keytab', 'KRB5_KEYTAB',
+    #                 help_str='If your LDAP server needs a Kerberos authentication, path of the client keytab.'),
+    # CharConfigField('auth.ldap_krb5_principal', 'KRB5_PRINCIPAL',
+    #                 help_str='Principal to use for Kerberos authentication on the LDAP server.'),
 ]
 ALLAUTH_MAPPING = [
     ListConfigField('auth.oauth2_providers', 'ALLAUTH_PROVIDERS',
                     help_str='Comma-separated OAuth2 providers, among "%s". "django-allauth" package must be installed.'
-                             % '","'.join(allauth_providers)),
+                             % '","'.join(InstalledApps.allauth_providers)),
 ]
 
-INI_MAPPING = BASE_MAPPING + REDIS_MAPPING + CELERY_MAPPING + AUTH_MAPPING
+INI_MAPPING = BASE_MAPPING + REDIS_MAPPING + CELERY_MAPPING + AUTH_MAPPING + ALLAUTH_MAPPING

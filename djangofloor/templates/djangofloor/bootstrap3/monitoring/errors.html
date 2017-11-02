@@ -10,9 +10,9 @@
                     <strong>{% trans 'Raise an exception' %}</strong>
                 </li>
                 <li>
-                    <a class="btn btn-sm btn-warning" href="{% url 'df:raise_exception' %}">{% trans 'in a HTTP request' %}</a>
+                    <a class="btn btn-sm btn-warning" href="{% url 'df:raise_exception' %}">{% trans 'in a HTTP request' %}</a>{% if celery_required %}
                     <a class="btn btn-sm btn-warning" onclick="return $.df.call('df.monitoring.raise_exception', {});"
-                       href="?">{% trans 'in a Celery queue.' %}</a>
+                       href="?">{% trans 'in a Celery queue.' %}</a>{% endif %}
                 </li>
             </ul>
         </div>
@@ -31,9 +31,10 @@
                         {% csrf_token %}
                         {% bootstrap_form logname_form %}
                         <input class="btn btn-sm btn-warning" type="submit" value="{% trans 'Check HTTP logs' %}">
+                      {% if celery_required %}
                         <input class="btn btn-sm btn-warning" type="button"
                                onclick="return $.df.call('df.monitoring.generate_log', {form: $('#checklog-form').serializeArray()});"
-                               value="{% trans 'Check Celery logs' %}">
+                               value="{% trans 'Check Celery logs' %}">{% endif %}
                     </form>
                 </li>
             </ul>
