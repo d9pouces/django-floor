@@ -17,14 +17,14 @@ Authentication sources
   * allauth (OAuth2, OpenId, Persona) (OK — excepting templates)
   * PAM (OK - templates to check)
 
-  * Disable user auto create ?
+  * Disable user auto create ? => ALLOW_USER_CREATION
+    => works for allauth?
   * LDAP groups (OK for REMOTE_USER but SASL)
 
   * check doc
   * check all templates (with and without allauth)
   * monitoring:
     * logs => display all files
-    * display allowed auth methods
     * Celery : add the number of waiting tasks by queue
 
   * in the Django check, add some info checks (=> new methods in monitoring.py)
@@ -35,5 +35,3 @@ Authentication sources
     * is all Redis valid?
     * is DEBUG mode deactivated?
     * activated authentication methods
-
-

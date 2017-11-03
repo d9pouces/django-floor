@@ -37,7 +37,7 @@ You can override this view by changing the provided template.
     def get(self, request, *args, **kwargs):
         creation_form = None
         authentication_form = AuthenticationForm(request)
-        if settings.DF_USER_SELF_REGISTRATION:
+        if settings.DF_ALLOW_USER_CREATION:
             creation_form = UserCreationForm()
         set_websocket_topics(request)
         redirect_to = request.POST.get(REDIRECT_FIELD_NAME, request.GET.get(REDIRECT_FIELD_NAME, '/'))
@@ -59,7 +59,7 @@ You can override this view by changing the provided template.
             return HttpResponseRedirect(redirect_to)
         elif 'password' in request.POST:
             messages.warning(request, _('Invalid username or password.'))
-        elif settings.DF_USER_SELF_REGISTRATION:
+        elif settings.DF_ALLOW_USER_CREATION:
             creation_form = UserCreationForm(request.POST)
             if creation_form.is_valid():
                 creation_form.save()

@@ -1,0 +1,36 @@
+{% load bootstrap3 i18n l10n djangofloor %}
+<div class="module">
+    <h2>{% trans 'Authentication' %}</h2>
+    <ul>
+
+        <li><strong>{% trans 'Password authentication of local users: ' %}</strong>
+        {% if local_users %}{% django_icon 'check' %}{% else %}{% django_icon 'remove' %}{% endif %}
+        </li>
+        {% if local_users %}<li><strong>{% trans 'Allow visitors to create an account: ' %}</strong>{% if allow_user_creation %}{% django_icon 'check' %}{% else %}{% django_icon 'remove' %}{% endif %}</li>{% endif %}
+
+        <li><strong>{% trans 'Social external authentications: ' %}</strong> {% if allauth %}{{ allauth|join:', ' }}
+          {% else %}{% django_icon 'remove' %}{% endif %}
+        </li>
+
+        <li><strong>{% trans 'PAM authentication: ' %}</strong>
+        {% if pam %}{% django_icon 'check' %}{% else %}{% django_icon 'remove' %}{% endif %}
+        </li>
+
+        <li><strong>{% trans 'Basic HTTP authentication: ' %}</strong>
+        {% if basic_auth %}{% django_icon 'check' %}{% else %}{% django_icon 'remove' %}{% endif %}
+        </li>
+
+        <li><strong>{% trans 'HTTP authentication by header: ' %}</strong>
+          {% if remote_user %}{% django_icon 'check' %} ({{ remote_user|upper }}){% else %}{% django_icon 'remove' %}{% endif %}
+        </li>
+        {% if remote_user %}<li><strong>{% trans 'Automatically create new users: ' %}</strong>{% if allow_user_creation %}{% django_icon 'check' %}{% else %}{% django_icon 'remove' %}{% endif %}</li>{% endif %}
+        {% if remote_user and remote_user_groups %}<li><strong>{% trans 'Groups of new users: '%}</strong>{{ remote_user_groups|join:', ' }}</li>{% endif %}
+
+        <li><strong>{% trans 'LDAP authentication: ' %}</strong>
+        {% if ldap %}{% django_icon 'check' %}{% else %}{% django_icon 'remove' %}{% endif %}
+        </li>
+
+        <li><strong>{% trans 'Maximum time between successive authentications: ' %}</strong>{{ session_age }}</li>
+
+    </ul>
+</div>

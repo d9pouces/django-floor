@@ -115,11 +115,20 @@ SENDFILE_MAPPING = [
 ]
 
 AUTH_MAPPING = [
+    BooleanConfigField('auth.local_users', 'DF_ALLOW_LOCAL_USERS',
+                       help_str='Set to "false" to deactivate local database of users.'),
     BooleanConfigField('auth.pam', 'USE_PAM_AUTHENTICATION',
                        help_str='Set to "true" if you want to activate PAM authentication'),
-
+    BooleanConfigField('auth.create_users', 'DF_ALLOW_USER_CREATION',
+                       help_str='Set to "false" if users cannot create their account themselvers, or '
+                                'only if existing users can by authenticated by the reverse-proxy.'),
+    IntegerConfigField('auth.session_duration', 'SESSION_COOKIE_AGE',
+                       help_str='Duration of the connection sessions '
+                                '(in seconds, default to 1,209,600 s / 14 days)'),
     CharConfigField('auth.remote_user_header', 'DF_REMOTE_USER_HEADER',
-                    help_str='Set it if the reverse-proxy authenticates users, a common value is "HTTP-REMOTE-USER".'),
+                    help_str='Set it if the reverse-proxy authenticates users, a common value is "HTTP-REMOTE-USER". '
+                             'Note: the HTTP- prefix is automatically added, just set REMOTE-USER in the '
+                             'reverse-proxy configuration. '),
     ListConfigField('auth.remote_user_groups', 'DF_DEFAULT_GROUPS',
                     help_str='Comma-separated list of groups, for new users that are automatically created '
                              'when authenticated by remote_user_header. Ignored if groups are read from a LDAP '

@@ -14,12 +14,12 @@
                     {% endif %}
                 </li>
                 <li>
-                    <strong>{% trans 'Remote address: ' %}</strong>{% django_icon 'check' %} {{ remote_address }}
+                    <strong>{% trans 'User IP address: ' %}</strong>{% django_icon 'check' %} {{ remote_address }}
                 </li>
                 {% if remote_user %}
-                <li><strong>{% trans 'Remote user HTTP header: ' %}</strong>{{ remote_user.0|upper }} =
+                <li><strong>{% trans 'User HTTP header: ' %}</strong>{{ remote_user.0|upper }} =
                     {% if remote_user.1 %}{% django_icon 'check' %} {{ remote_user.1 }}
-                    {% else %}{% django_icon 'remove' %} {% trans 'empty' %} <small>{% trans 'Please ensure that your web server is correctly set to provide the right header (without the HTTP prefix).' %}</small>
+                    {% else %}{% django_icon 'remove' %} {% trans 'empty header' %}
                     {% endif %}
                 </li>
                 {% endif %}
@@ -46,7 +46,7 @@
                     {% if allowed_host %}{% django_icon 'check' %}{% else %}{% django_icon 'warning' %}{% endif %}
                 {% if request_host %}{{ request_host }}{% else %}empty{% endif %}
                 </li>
-                <li><strong>{% trans 'Expected server name:' %}</strong>
+                <li><strong>{% trans 'Configuration server name:' %}</strong>
                     {% if server_name_valid %}{% django_icon 'check' %}{% else %}{% django_icon 'warning' %}{% endif %}
                 {{ server_name }}
                 </li>

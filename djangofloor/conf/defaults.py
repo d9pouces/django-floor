@@ -91,6 +91,7 @@ SECURE_HSTS_SECONDS = 0
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')  # X-Forwarded-Proto or None
 SECURE_SSL_REDIRECT = SettingReference('USE_SSL')
 SECURE_FRAME_DENY = SettingReference('USE_SSL')
+SESSION_COOKIE_AGE = 1209600
 TEMPLATES = CallableSetting(template_setting)
 TEMPLATE_DEBUG = False  # SettingReference('DEBUG')
 TEMPLATE_DIRS = ()
@@ -172,6 +173,7 @@ DF_REMOVED_DJANGO_COMMANDS = {'startapp', 'startproject'}
 DF_PUBLIC_SIGNAL_LIST = True
 # do not check for each WS signal/function before sending its name to the client
 DF_SYSTEM_CHECKS = ['djangofloor.views.monitoring.RequestCheck',
+                    'djangofloor.views.monitoring.AuthenticationCheck',
                     'djangofloor.views.monitoring.System',
                     'djangofloor.views.monitoring.CeleryStats',
                     'djangofloor.views.monitoring.Packages',
@@ -187,6 +189,8 @@ DF_SERVER_THREADS = 2
 DF_SERVER_PROCESSES = 2
 DF_SERVER_SSL_KEY = None
 DF_SERVER_SSL_CERTIFICATE = None
+DF_ALLOW_USER_CREATION = True
+DF_ALLOW_LOCAL_USERS = True
 
 WEBSOCKET_URL = '/ws/'  # set to None if you do not use websockets
 WEBSOCKET_REDIS_CONNECTION = {'host': '{WEBSOCKET_REDIS_HOST}', 'port': SettingReference('WEBSOCKET_REDIS_PORT'),
@@ -355,7 +359,6 @@ DF_JS = []
 DF_INDEX_VIEW = 'djangofloor.views.IndexView'
 DF_SITE_SEARCH_VIEW = None  # 'djangofloor.views.search.UserSearchView'
 DF_LOGIN_VIEW = 'djangofloor.views.auth.LoginView'
-DF_USER_SELF_REGISTRATION = True  # allow user to create their account themselves
 DF_PROJECT_NAME = CallableSetting(project_name)
 DF_URL_CONF = '{DF_MODULE_NAME}.urls.urlpatterns'
 # noinspection PyUnresolvedReferences

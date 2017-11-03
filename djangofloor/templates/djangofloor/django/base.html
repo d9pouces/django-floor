@@ -1,8 +1,13 @@
 {% extends "admin/base_site.html" %}
-{% load i18n pipeline djangofloor %}
+{% load i18n djangofloor %}
 {% block extrahead %}
-{% stylesheet 'django' %}
-{% javascript 'django' %}
+<script src="{% static 'vendor/jquery/dist/jquery.min.js' %}" type="application/javascript" charset="utf-8"></script>
+<script src="{% static 'js/djangofloor-base.js' %}" type="application/javascript" charset="utf-8"></script>
+<script src="{% static 'vendor/bootstrap-notify/bootstrap-notify.js' %}" type="application/javascript" charset="utf-8"></script>
+<script src="{% static 'js/djangofloor-django.js' %}" type="application/javascript" charset="utf-8"></script>
+<link href="{% static 'vendor/font-awesome/css/font-awesome.min.css' %}"/>
+<link href="{% static 'admin/css/forms.css' %}"/>
+<link href="{% static 'css/djangofloor-django.css' %}"/>
 {% df_init_websocket %}
 {% endblock %}
 

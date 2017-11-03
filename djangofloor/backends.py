@@ -36,6 +36,10 @@ class DefaultGroupsRemoteUserBackend(RemoteUserBackend):
 
      """
 
+    @property
+    def create_unknown_user(self):
+        return settings.DF_ALLOW_USER_CREATION
+
     @cached_property
     def ldap_backend(self):
         # noinspection PyUnresolvedReferences

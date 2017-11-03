@@ -216,7 +216,7 @@ project_name.required_settings = ['DF_MODULE_NAME']
 # noinspection PyMethodMayBeStatic,PyUnusedLocal
 class AuthenticationBackends:
     required_settings = ['ALLAUTH_PROVIDERS', 'DF_REMOTE_USER_HEADER', 'AUTH_LDAP_SERVER_URI',
-                         'USE_PAM_AUTHENTICATION']
+                         'USE_PAM_AUTHENTICATION', 'DF_ALLOW_LOCAL_USERS']
 
     def __call__(self, settings_dict):
         backends = []
@@ -228,7 +228,9 @@ class AuthenticationBackends:
         return backends
 
     def process_django(self, settings_dict):
-        return ['django.contrib.auth.backends.ModelBackend']
+        if settings_dict['DF_ALLOW_LOCAL_USERS']:
+            return ['django.contrib.auth.backends.ModelBackend']
+        return []
 
     def process_remote_user(self, settings_dict):
         if settings_dict['DF_REMOTE_USER_HEADER']:

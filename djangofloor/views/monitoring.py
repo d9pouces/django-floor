@@ -9,6 +9,7 @@ You should install the :mod:`psutil` module to add server info (like the CPU usa
 
 """
 import codecs
+import datetime
 import logging
 import os
 
@@ -294,6 +295,27 @@ class LogAndExceptionCheck(MonitoringCheck):
     def get_context(self, request):
         form = LogNameForm()
         return {'logname_form': form, 'celery_required': settings.USE_CELERY}
+
+
+class AuthenticationCheck(MonitoringCheck):
+    """Presents all activated authentication methods
+    """
+    template = 'djangofloor/%s/monitoring/authentication.html' % settings.DF_THEME
+
+    def get_context(self, request):
+        context = {
+            'ldap': bool(settings.AUTH_LDAP_SERVER_URI),
+            'allow_user_creation': settings.DF_ALLOW_USER_CREATION,
+            'session_age': datetime.timedelta(seconds=settings.SESSION_COOKIE_AGE),
+            'basic_auth': settings.USE_HTTP_BASIC_AUTH,
+            'remote_user': settings.DF_REMOTE_USER_HEADER,
+            'remote_user_groups': settings.DF_DEFAULT_GROUPS,
+            'allauth': settings.ALLAUTH_PROVIDERS,
+            'pam': settings.USE_PAM_AUTHENTICATION,
+            'local_users': settings.DF_ALLOW_LOCAL_USERS,
+        }
+
+        return context
 
 
 system_checks = [import_string(x)() for x in settings.DF_SYSTEM_CHECKS]
