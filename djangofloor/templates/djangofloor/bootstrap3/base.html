@@ -46,11 +46,11 @@
             </form>
             {% endif %}{% endblock %}
 
-            {% block navbar-login %}{% if df_has_login_view %}
+            {% block navbar-login %}
             <ul class="nav navbar-nav navbar-right">
                 {% if debug %}<li><a><span class="label label-danger">{% trans 'DEBUG mode is activated' %}</span></a></li>{% endif %}
                 {% if user.is_anonymous %}
-                <li><a title="{% trans 'Log-in' %}" href="{% url 'login' %}">{% bootstrap_icon 'log-in' %}</a></li>
+                <li><a title="{% trans 'Log-in' %}" href="{% url 'df:login' %}">{% bootstrap_icon 'log-in' %}</a></li>
                 {% elif df_remote_username %}
                 <li><a>{{ user }}</a></li>
                 {% else %}
@@ -63,7 +63,7 @@
                 <li><a href="{% url 'admin:index' %}" title="{% trans 'Admin' %}">{% bootstrap_icon 'cog' %}</a></li>
                 {% endif %}
             </ul>
-            {% endif %}{% endblock %}
+            {% endblock %}
         </div>
     </div>
 </nav>

@@ -22,6 +22,11 @@ class RemovedInDjangoFloor110Warning(DeprecationWarning):
     pass
 
 
+class RemovedInDjangoFloor200Warning(DeprecationWarning):
+    """Used for displaying functions or modules that will be removed in a near future."""
+    pass
+
+
 def is_package_present(package_name):
     """Return True is the `package_name` package is presend in your current Python environment."""
     try:

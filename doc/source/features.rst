@@ -37,14 +37,14 @@ By default, DjangoFloor provides a complete URL configuration:
 
   * index view given by `DF_INDEX_VIEW` (through `'index'`),
   * static and media files,
-  * simple authentication pages:
+  * simple authentication pages that use :mod:`django.contrib.auth.views` (or :mod:`allauth.account.views` is `USE_ALL_AUTH` is `True`):
 
-        * `'login'` if `DF_LOGIN_VIEW` is defined (the URL is `LOGIN_URL`),
+        * `'df:login'`,
         * `'df:logout'`,
         * `'df:password_reset'`,
         * `'df:set_password'`,
 
-  * signal definitions through `'df:signals'` if `WEBSOCKET_URL`,
+  * signal definitions through `'df:signals'` if `WEBSOCKET_URL` is not empty,
   * monitoring view through `'df:system_state'` if `DF_SYSTEM_CHECKS` is not empty,
   * global search view through `'df:site_search'` if `DF_SITE_SEARCH_VIEW` is not empty,
   * favicon through `'favicon'`,

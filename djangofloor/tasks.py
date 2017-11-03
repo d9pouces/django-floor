@@ -24,7 +24,7 @@ from redis import StrictRedis, ConnectionPool
 
 from djangofloor.decorators import REGISTERED_SIGNALS, SignalConnection, REGISTERED_FUNCTIONS, FunctionConnection, \
     DynamicQueueName
-from djangofloor.utils import import_module, RemovedInDjangoFloor110Warning
+from djangofloor.utils import import_module, RemovedInDjangoFloor200Warning
 from djangofloor.wsgi.exceptions import NoWindowKeyException
 from djangofloor.wsgi.window_info import WindowInfo
 
@@ -132,7 +132,7 @@ def call(window_info, signal_name, to=None, kwargs=None, countdown=None, expires
     :param eta: check the Celery doc (in a nutshell: datetime of running this signal)
     """
     if sharing or request or other_kwargs:
-        warnings.warn('djangofloor.tasks.call prototype has been changed.', RemovedInDjangoFloor110Warning)
+        warnings.warn('djangofloor.tasks.call prototype has been changed.', RemovedInDjangoFloor200Warning)
         # noinspection PyProtectedMember
         from djangofloor.df_ws4redis import _sharing_to_topics
         window_info, signal_name = signal_name, window_info
@@ -291,7 +291,7 @@ def _server_signal_call(signal_name, window_info_dict, kwargs=None, from_client=
             result = connection(window_info, **new_kwargs)
             # TODO remove the following part
             if isinstance(result, list):
-                warnings.warn('signals should not return list anymore.', RemovedInDjangoFloor110Warning)
+                warnings.warn('signals should not return list anymore.', RemovedInDjangoFloor200Warning)
                 for data in result:
                     call(window_info, data['signal'], to=[WINDOW, SERVER], kwargs=data['options'])
     except Exception as e:
@@ -326,19 +326,19 @@ def _server_function_call(function_name, window_info_dict, result_id, kwargs=Non
 def import_signals():
     """.. deprecated:: 1.0 do not use it"""
     warnings.warn('djangofloor.tasks.import_signals() has been replaced by '
-                  'djangofloor.tasks.import_signals_and_functions()', RemovedInDjangoFloor110Warning)
+                  'djangofloor.tasks.import_signals_and_functions()', RemovedInDjangoFloor200Warning)
     return import_signals_and_functions()
 
 
 def get_signal_encoder():
     """.. deprecated:: 1.0 do not use it"""
-    warnings.warn('djangofloor.tasks.get_signal_encoder is deprecated', RemovedInDjangoFloor110Warning)
+    warnings.warn('djangofloor.tasks.get_signal_encoder is deprecated', RemovedInDjangoFloor200Warning)
     return _signal_encoder
 
 
 def get_signal_decoder():
     """.. deprecated:: 1.0 do not use it"""
-    warnings.warn('djangofloor.tasks.get_signal_decoder is deprecated', RemovedInDjangoFloor110Warning)
+    warnings.warn('djangofloor.tasks.get_signal_decoder is deprecated', RemovedInDjangoFloor200Warning)
     from djangofloor.wsgi.wsgi_server import signal_decoder
     return signal_decoder
 
@@ -346,14 +346,14 @@ def get_signal_decoder():
 @shared_task(serializer='json')
 def signal_task(signal_name, request_dict, from_client, kwargs):
     """.. deprecated:: 1.0 do not use it"""
-    warnings.warn('djangofloor.tasks.signal_task is deprecated.', RemovedInDjangoFloor110Warning)
+    warnings.warn('djangofloor.tasks.signal_task is deprecated.', RemovedInDjangoFloor200Warning)
     return _server_signal_call(signal_name, request_dict, kwargs=kwargs, from_client=from_client, to_server=True)
 
 
 @shared_task(serializer='json')
 def delayed_task(signal_name, request_dict, sharing, from_client, kwargs):
     """.. deprecated:: 1.0 do not use it"""
-    warnings.warn('djangofloor.tasks.delayed_task is deprecated.', RemovedInDjangoFloor110Warning)
+    warnings.warn('djangofloor.tasks.delayed_task is deprecated.', RemovedInDjangoFloor200Warning)
     import_signals()
     window_info = WindowInfo.from_dict(request_dict)
     # noinspection PyProtectedMember
@@ -367,7 +367,7 @@ def df_call(signal_name, request, sharing=None, from_client=False, kwargs=None, 
     """.. deprecated:: 1.0, do not use it"""
     # noinspection PyUnusedLocal
     from_client = from_client
-    warnings.warn('djangofloor.tasks.df_call is deprecated.', RemovedInDjangoFloor110Warning)
+    warnings.warn('djangofloor.tasks.df_call is deprecated.', RemovedInDjangoFloor200Warning)
     # noinspection PyProtectedMember
     from djangofloor.df_ws4redis import _sharing_to_topics
     to = _sharing_to_topics(request, sharing) + [SERVER]

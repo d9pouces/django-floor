@@ -216,7 +216,7 @@ project_name.required_settings = ['DF_MODULE_NAME']
 # noinspection PyMethodMayBeStatic,PyUnusedLocal
 class AuthenticationBackends:
     required_settings = ['ALLAUTH_PROVIDERS', 'DF_REMOTE_USER_HEADER', 'AUTH_LDAP_SERVER_URI',
-                         'USE_PAM_AUTHENTICATION', 'DF_ALLOW_LOCAL_USERS']
+                         'USE_PAM_AUTHENTICATION', 'DF_ALLOW_LOCAL_USERS', 'USE_ALL_AUTH']
 
     def __call__(self, settings_dict):
         backends = []
@@ -238,7 +238,7 @@ class AuthenticationBackends:
         return []
 
     def process_allauth(self, settings_dict):
-        if not settings_dict['ALLAUTH_PROVIDERS']:
+        if not settings_dict['USE_ALL_AUTH'] and not settings_dict['ALLAUTH_PROVIDERS']:
             return []
         try:
             get_distribution('django-allauth')
@@ -401,7 +401,7 @@ class InstalledApps:
         ('USE_REST_FRAMEWORK', 'rest_framework',),
         ('USE_PAM_AUTHENTICATION', 'django_pam'),
     ])
-    required_settings = ['ALLAUTH_PROVIDERS', ] + list(common_third_parties)
+    required_settings = ['ALLAUTH_PROVIDERS', 'USE_ALL_AUTH'] + list(common_third_parties)
     allauth_providers = {'amazon', 'angellist', 'asana', 'auth0', 'baidu', 'basecamp', 'bitbucket', 'bitbucket_oauth2',
                          'bitly', 'coinbase', 'daum', 'digitalocean', 'discord', 'douban', 'draugiem', 'dropbox',
                          'dropbox_oauth2', 'edmodo', 'eveonline', 'evernote', 'facebook', 'feedly', 'fivehundredpx',
@@ -421,7 +421,7 @@ class InstalledApps:
         return [v for (k, v) in self.common_third_parties.items() if settings_dict[k]]
 
     def process_django_allauth(self, settings_dict):
-        if not settings_dict['ALLAUTH_PROVIDERS']:
+        if not settings_dict['USE_ALL_AUTH'] and not settings_dict['ALLAUTH_PROVIDERS']:
             return []
         try:
             get_distribution('django-allauth')
@@ -435,9 +435,12 @@ class InstalledApps:
                 Error('"django.contrib.sites" app must be enabled.', obj='djangofloor.conf.settings',
                       id='djangofloor.E005'))
             return []
-        return ['allauth', 'allauth.account', 'allauth.socialaccount'] + \
+        result = ['allauth', 'allauth.account']
+        if settings_dict['ALLAUTH_PROVIDERS']:
+            result += ['allauth.socialaccount'] + \
                ['allauth.socialaccount.providers.%s' % k for k in settings_dict['ALLAUTH_PROVIDERS']
                 if k in self.allauth_providers]
+        return result
 
 
 installed_apps = InstalledApps()

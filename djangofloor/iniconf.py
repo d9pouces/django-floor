@@ -2,12 +2,12 @@
 import warnings
 
 from djangofloor.conf import fields, mapping
-from djangofloor.utils import RemovedInDjangoFloor110Warning
+from djangofloor.utils import RemovedInDjangoFloor200Warning
 
 __author__ = 'Matthieu Gallet'
 
 warnings.warn('djangofloor.iniconf module and its functions are moved to djangofloor.conf.fields',
-              RemovedInDjangoFloor110Warning)
+              RemovedInDjangoFloor200Warning)
 
 
 def bool_setting(value):

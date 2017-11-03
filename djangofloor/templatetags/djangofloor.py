@@ -19,7 +19,7 @@ from django.utils.html import _js_escapes
 from django.utils.safestring import mark_safe
 
 from djangofloor.tasks import set_websocket_topics
-from djangofloor.utils import RemovedInDjangoFloor110Warning
+from djangofloor.utils import RemovedInDjangoFloor200Warning
 from djangofloor.wsgi.wsgi_server import signer
 
 __author__ = 'Matthieu Gallet'
@@ -177,7 +177,7 @@ def df_underline(value, kind='='):
 @register.simple_tag(takes_context=False)
 def df_deprecation(value):
     """.. deprecated:: 1.0 do not use it"""
-    warnings.warn(value, RemovedInDjangoFloor110Warning)
+    warnings.warn(value, RemovedInDjangoFloor200Warning)
     return ''
 
 
@@ -185,14 +185,14 @@ def df_deprecation(value):
 @register.simple_tag(takes_context=True)
 def df_window_key(context):
     """.. deprecated:: 1.0 do not use it"""
-    warnings.warn('df_window_key template tag has been replaced by df_init_websocket', RemovedInDjangoFloor110Warning)
+    warnings.warn('df_window_key template tag has been replaced by df_init_websocket', RemovedInDjangoFloor200Warning)
     return df_init_websocket(context)
 
 
 @register.filter
 def df_inivalue(value):
     """.. deprecated:: 1.0 do not use it"""
-    warnings.warn('df_inivalue template tag will be removed', RemovedInDjangoFloor110Warning)
+    warnings.warn('df_inivalue template tag will be removed', RemovedInDjangoFloor200Warning)
     if not value:
         return ''
     return mark_safe('\n    '.join(value.splitlines()))

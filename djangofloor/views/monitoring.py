@@ -16,6 +16,7 @@ import os
 import pkg_resources
 from django.conf import settings
 from django.contrib import messages
+from django.contrib.admin import site
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.http import Http404
 from django.http.response import HttpResponseRedirect
@@ -322,12 +323,13 @@ system_checks = [import_string(x)() for x in settings.DF_SYSTEM_CHECKS]
 
 
 @never_cache
-@login_required(login_url='login')
+@login_required(login_url='df:login')
 def system_state(request):
     if not request.user or not request.user.is_superuser:
         raise Http404
     components_values = [y.render(request) for y in system_checks]
-    template_values = {'components': components_values}
+    template_values = {'components': components_values, 'site_header': site.site_header,
+                       'site_title': site.site_title, 'title': _('System state')}
     set_websocket_topics(request)
     return TemplateResponse(request, template='djangofloor/%s/system_state.html' % settings.DF_THEME,
                             context=template_values)

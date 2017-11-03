@@ -70,7 +70,7 @@ def __getattr__(self, name):
     if name in _deprecated_settings:
         new_content = _deprecated_settings[name]
         if name not in _warned_settings:
-            from djangofloor.utils import RemovedInDjangoFloor110Warning
+            from djangofloor.utils import RemovedInDjangoFloor200Warning
             f = traceback.extract_stack()
             is_debug = any(filename[0].endswith('/debug.py') for filename in f)
             if not is_debug:
@@ -80,7 +80,7 @@ def __getattr__(self, name):
                     msg += 'Replaced by %s' % new_content.value
                 else:
                     msg += new_content or ''
-                warnings.warn(msg, RemovedInDjangoFloor110Warning, stacklevel=2)
+                warnings.warn(msg, RemovedInDjangoFloor200Warning, stacklevel=2)
             _warned_settings.add(name)
         if isinstance(new_content, SettingReference):
             return getattr(self, new_content.value)

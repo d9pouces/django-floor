@@ -1,0 +1,29 @@
+{% extends "djangofloor/django/base.html" %}
+{% load i18n static %}
+
+{% block extrastyle %}{{ block.super }}<link rel="stylesheet" type="text/css" href="{% static 'admin/css/login.css' %}" />
+{{ form.media }}
+{% endblock %}
+
+{% block bodyclass %}{{ block.super }} login{% endblock %}
+
+{% block breadcrumbs %}{% endblock %}
+
+{% block content %}
+<div id="content-main">
+
+<p class="errornote">
+{% blocktrans trimmed %}
+    Logout successful.
+{% endblocktrans %}
+</p>
+<p>{% trans "Thanks for spending some quality time with the Web site today." %}</p>
+<p>
+  {% if df_has_index_view %}
+    <a href="{% url 'index' %}">{% trans 'Return to the site' %}</a>
+  {% else %}
+    <a href="/">{% trans 'Return to the site' %}</a>
+  {% endif %}
+  </p>
+</div>
+{% endblock %}

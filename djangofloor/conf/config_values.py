@@ -312,9 +312,9 @@ class DeprecatedSetting(ConfigValue):
         :type merger: :class:`djangofloor.utils.SettingMerger`
         """
         if merger.has_setting_value(self.value) and merger.get_setting_value(self.value):
-            from djangofloor.utils import RemovedInDjangoFloor110Warning
+            from djangofloor.utils import RemovedInDjangoFloor200Warning
             warnings.warn('"%s" setting should not be used anymore. %s' % (self.value, self.msg),
-                          RemovedInDjangoFloor110Warning)
+                          RemovedInDjangoFloor200Warning)
             return merger.get_setting_value(self.value)
         return merger.analyze_raw_value(self.default)
 

@@ -45,7 +45,7 @@ from django.utils.crypto import get_random_string
 from django.utils.deprecation import MiddlewareMixin, CallableBool
 from django.utils.translation import get_language_from_request
 
-from djangofloor.utils import RemovedInDjangoFloor110Warning
+from djangofloor.utils import RemovedInDjangoFloor200Warning
 
 __author__ = 'Matthieu Gallet'
 
@@ -343,7 +343,7 @@ class IEMiddleware(MiddlewareMixin):
     def __init__(self, get_response=None):
         super(IEMiddleware, self).__init__(get_response=get_response)
         warnings.warn('djangofloor.middleware.IEMiddleware has been replaced by '
-                      'djangofloor.middleware.DjangoFloorMiddleware', RemovedInDjangoFloor110Warning)
+                      'djangofloor.middleware.DjangoFloorMiddleware', RemovedInDjangoFloor200Warning)
 
     # noinspection PyMethodMayBeStatic
     def process_request(self, request):
@@ -360,7 +360,7 @@ class RemoteUserMiddleware(BaseRemoteUserMiddleware):
     def __init__(self, get_response=None):
         super(RemoteUserMiddleware, self).__init__(get_response=get_response)
         warnings.warn('djangofloor.middleware.RemoteUserMiddleware has been replaced by '
-                      'djangofloor.middleware.DjangoFloorMiddleware', RemovedInDjangoFloor110Warning)
+                      'djangofloor.middleware.DjangoFloorMiddleware', RemovedInDjangoFloor200Warning)
     header = settings.DF_REMOTE_USER_HEADER
 
     def process_request(self, request):
@@ -410,7 +410,7 @@ class FakeAuthenticationMiddleware(MiddlewareMixin):
     def __init__(self, get_response=None):
         super(FakeAuthenticationMiddleware, self).__init__(get_response=get_response)
         warnings.warn('djangofloor.middleware.FakeAuthenticationMiddleware has been replaced by '
-                      'djangofloor.middleware.DjangoFloorMiddleware', RemovedInDjangoFloor110Warning)
+                      'djangofloor.middleware.DjangoFloorMiddleware', RemovedInDjangoFloor200Warning)
     group_cache = {}
 
     # noinspection PyMethodMayBeStatic
@@ -439,7 +439,7 @@ class BasicAuthMiddleware(MiddlewareMixin):
     def __init__(self, get_response=None):
         super(BasicAuthMiddleware, self).__init__(get_response=get_response)
         warnings.warn('djangofloor.middleware.BasicAuthMiddleware has been replaced by '
-                      'djangofloor.middleware.DjangoFloorMiddleware', RemovedInDjangoFloor110Warning)
+                      'djangofloor.middleware.DjangoFloorMiddleware', RemovedInDjangoFloor200Warning)
 
     # noinspection PyMethodMayBeStatic
     def process_request(self, request):

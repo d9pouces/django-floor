@@ -16,8 +16,9 @@ __author__ = 'Matthieu Gallet'
 app_name = 'djangofloor'
 urlpatterns = [
     url(r'^logout/', auth.logout, name='logout'),
+    url(r'^login/', auth.login, name='login'),
     url(r'^password_reset/', auth.password_reset, name='password_reset'),
-    url(r'^set_password/', auth.set_password, name='set_password'),
+    url(r'^password_change/', auth.set_password, name='set_password'),
 ]
 
 if settings.WEBSOCKET_URL:

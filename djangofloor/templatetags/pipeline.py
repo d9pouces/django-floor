@@ -11,7 +11,7 @@ from django import template
 from django.conf import settings
 from django.utils.safestring import mark_safe
 
-from djangofloor.utils import RemovedInDjangoFloor110Warning
+from djangofloor.utils import RemovedInDjangoFloor200Warning
 
 if settings.USE_PIPELINE:
     try:
@@ -59,7 +59,7 @@ def javascript(key):
 
     def fmt(filename):
         if filename in _deprecated_files and filename not in _warned_files:
-            warnings.warn('%s is deprecated' % filename, RemovedInDjangoFloor110Warning, stacklevel=2)
+            warnings.warn('%s is deprecated' % filename, RemovedInDjangoFloor200Warning, stacklevel=2)
             _warned_files.add(filename)
         return '<script src="%s%s" %s></script>' % (settings.STATIC_URL, filename, extra)
 

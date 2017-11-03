@@ -4,10 +4,10 @@
 You can use the default admin view to create new notifications for your users.
 There are actions to activate or deactivate these notifications.
 """
-
-
+from django.conf import settings
 from django.contrib import admin
 from django.contrib import messages
+from django.contrib.admin import site
 from django.template.defaultfilters import truncatewords
 from django.utils.translation import ugettext_lazy as _
 
@@ -65,4 +65,6 @@ class NotificationAdmin(admin.ModelAdmin):
     actions = ['activate', 'deactivate']
 
 
+site.site_title = _('%(project)s administration') % {'project': settings.DF_PROJECT_NAME}
+site.site_header = _('%(project)s (administration)') % {'project': settings.DF_PROJECT_NAME}
 # site.register(Notification, NotificationAdmin)

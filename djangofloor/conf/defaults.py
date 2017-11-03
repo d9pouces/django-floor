@@ -117,6 +117,8 @@ WSGI_APPLICATION = 'djangofloor.wsgi.django_runserver.django_application'
 # django.contrib.auth
 AUTHENTICATION_BACKENDS = CallableSetting(authentication_backends)
 LOGIN_URL = '/admin/login/'
+LOGIN_REDIRECT_URL = '{URL_PREFIX}'
+# LOGOUT_REDIRECT_URL = '{URL_PREFIX}'
 
 # django.contrib.sessions
 if USE_REDIS_SESSIONS:
@@ -161,7 +163,7 @@ DATA_PATH = Directory('{LOCAL_PATH}/data')
 SERVER_NAME = CallableSetting(url_parse_server_name)  # ~ www.example.org
 SERVER_PORT = CallableSetting(url_parse_server_port)  # ~ 443
 SERVER_PROTOCOL = CallableSetting(url_parse_server_protocol)  # ~ "https"
-URL_PREFIX = CallableSetting(url_parse_prefix)  # ~ /prefix/
+URL_PREFIX = CallableSetting(url_parse_prefix)  # something like "/prefix/" (most probably just "/")
 USE_HTTP_BASIC_AUTH = False  # HTTP-Authorization
 USE_SSL = CallableSetting(url_parse_ssl)  # ~ True
 USE_X_FORWARDED_FOR = CallableSetting(use_x_forwarded_for)  # X-Forwarded-For
@@ -283,6 +285,9 @@ PIPELINE_JS_COMPRESSOR = 'pipeline.compressors.jsmin.JSMinCompressor'
 ACCOUNT_EMAIL_SUBJECT_PREFIX = '[{SERVER_NAME}] '
 ACCOUNT_EMAIL_VERIFICATION = None
 ALLAUTH_PROVIDERS = []
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_AUTHENTICATION_METHOD = 'username_email'
+ACCOUNT_DEFAULT_HTTP_PROTOCOL = '{SERVER_PROTOCOL}'
 
 # Django-Debug-Toolbar
 DEBUG_TOOLBAR_CONFIG = {'JQUERY_URL': '{STATIC_URL}vendor/jquery/dist/jquery.min.js', }
@@ -358,7 +363,6 @@ DF_CSS = []
 DF_JS = []
 DF_INDEX_VIEW = 'djangofloor.views.IndexView'
 DF_SITE_SEARCH_VIEW = None  # 'djangofloor.views.search.UserSearchView'
-DF_LOGIN_VIEW = 'djangofloor.views.auth.LoginView'
 DF_PROJECT_NAME = CallableSetting(project_name)
 DF_URL_CONF = '{DF_MODULE_NAME}.urls.urlpatterns'
 # noinspection PyUnresolvedReferences

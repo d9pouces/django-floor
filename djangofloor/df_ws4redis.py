@@ -6,7 +6,7 @@ from django.utils.encoding import force_text
 from django.utils.lru_cache import lru_cache
 
 from djangofloor.tasks import SESSION, WINDOW, BROADCAST, USER, call
-from djangofloor.utils import RemovedInDjangoFloor110Warning
+from djangofloor.utils import RemovedInDjangoFloor200Warning
 from djangofloor.wsgi.window_info import WindowInfo, Session
 
 __author__ = 'Matthieu Gallet'
@@ -18,7 +18,7 @@ def get_pk(kind, value):
         return get_user_model().objects.get(username=value).pk
 
 
-warnings.warn('djangofloor.df_ws4redis module and its functions will be removed', RemovedInDjangoFloor110Warning)
+warnings.warn('djangofloor.df_ws4redis module and its functions will be removed', RemovedInDjangoFloor200Warning)
 
 
 def ws_call(signal_name, request, sharing, kwargs):

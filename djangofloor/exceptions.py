@@ -9,10 +9,10 @@ messages to end-user.
 import warnings
 
 from django.utils.translation import ugettext as _
-from djangofloor.utils import RemovedInDjangoFloor110Warning
+from djangofloor.utils import RemovedInDjangoFloor200Warning
 
 __author__ = 'Matthieu Gallet'
-warnings.warn('djangofloor.exceptions module and its functions will be removed', RemovedInDjangoFloor110Warning)
+warnings.warn('djangofloor.exceptions module and its functions will be removed', RemovedInDjangoFloor200Warning)
 
 
 class ApiException(Exception):

@@ -57,7 +57,7 @@ from django.conf import settings
 from django.http import QueryDict
 from django.utils.encoding import force_text
 
-from djangofloor.utils import RemovedInDjangoFloor110Warning
+from djangofloor.utils import RemovedInDjangoFloor200Warning
 
 try:
     from inspect import signature
@@ -557,7 +557,7 @@ def connect(fn=None, path=None, delayed=False, allow_from_client=True, auth_requ
     """.. deprecated:: 1.0 do not use it"""
     delayed = delayed
     if not delayed:
-        warnings.warn('The "delayed" argument is deprecated and useless.', RemovedInDjangoFloor110Warning)
+        warnings.warn('The "delayed" argument is deprecated and useless.', RemovedInDjangoFloor200Warning)
     if allow_from_client and auth_required:
         is_allowed_to = is_authenticated
     elif allow_from_client:

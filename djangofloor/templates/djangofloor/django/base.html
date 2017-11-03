@@ -1,5 +1,5 @@
 {% extends "admin/base_site.html" %}
-{% load i18n djangofloor %}
+{% load i18n djangofloor static %}
 {% block extrahead %}
 <script src="{% static 'vendor/jquery/dist/jquery.min.js' %}" type="application/javascript" charset="utf-8"></script>
 <script src="{% static 'js/djangofloor-base.js' %}" type="application/javascript" charset="utf-8"></script>
@@ -11,18 +11,14 @@
 {% df_init_websocket %}
 {% endblock %}
 
-{% block breadcrumbs %}
-<div class="breadcrumbs">
-<a href="{% url 'admin:index' %}">{% trans 'Home' %}</a>
-&rsaquo; {% trans 'Documentation' %}
-</div>
+{% block branding %}
+<h1 id="site-name"><a href="{% url 'admin:index' %}">{{ site_header|default:df_project_name }}</a></h1>
 {% endblock %}
-{% block title %}{% trans 'Documentation' %}{% endblock %}
 
 {% block messages %}
     <ul class="messagelist" id="df_messages">
     {% for message in messages %}
-      <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message|capfirst }}</li>
+      <li {% if message.tags %}class="{{ message.tags }}"{% endif %}>{{ message|capfirst }}</li>
     {% endfor %}
     </ul>
 {% endblock messages %}

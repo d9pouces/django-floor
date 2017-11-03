@@ -31,7 +31,7 @@ from djangofloor.wsgi.window_info import WindowInfo
 # noinspection PyProtectedMember
 from djangofloor.tasks import _call_signal
 from djangofloor.tasks import import_signals_and_functions, get_signal_decoder, get_signal_encoder, SERVER
-from djangofloor.utils import RemovedInDjangoFloor110Warning
+from djangofloor.utils import RemovedInDjangoFloor200Warning
 
 __author__ = 'Matthieu Gallet'
 
@@ -199,7 +199,7 @@ Arguments are passed in the request body, serialized as JSON.
     :type signal: :class:`str`
 """
     warnings.warn('djangofloor.views.signal_call is deprecated. Use websockets instead.',
-                  RemovedInDjangoFloor110Warning)
+                  RemovedInDjangoFloor200Warning)
     request.window_key = request.GET.get('window_key')
     if request.body:
         kwargs = json.loads(request.body.decode('utf-8'), cls=get_signal_decoder())
@@ -220,14 +220,14 @@ def get_signal_calls(request):
     Return all signals called by Python code as a JSON-list
     """
     warnings.warn('djangofloor.views.get_signal_calls is deprecated. Use websockets instead.',
-                  RemovedInDjangoFloor110Warning)
+                  RemovedInDjangoFloor200Warning)
     return JsonResponse([], safe=False)
 
 
 def index(request):
     """.. deprecated:: 1.0"""
     warnings.warn('djangofloor.views.index is deprecated. Use class-based index view instead.',
-                  RemovedInDjangoFloor110Warning)
+                  RemovedInDjangoFloor200Warning)
     if settings.FLOOR_INDEX is not None:
         return HttpResponseRedirect(reverse(settings.FLOOR_INDEX))
     template_values = {}
