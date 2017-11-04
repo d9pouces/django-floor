@@ -10,6 +10,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm, PasswordResetForm, UsernameField
 from django.contrib.auth.views import LogoutView, LoginView, PasswordResetView, PasswordChangeView
 from django.http import HttpResponseRedirect
+from django.urls import reverse
+from django.views.decorators.cache import never_cache
 
 from djangofloor.decorators import validate_form, everyone
 
@@ -50,6 +52,7 @@ class SignupView(LoginView):
         return kwargs
 
 
+@never_cache
 def login(request):
     """return the django.contrib.auth or the django-allauth login view"""
     if settings.USE_ALL_AUTH:
@@ -58,6 +61,7 @@ def login(request):
     return LoginView.as_view()(request)
 
 
+@never_cache
 def signup(request):
     """return the django.contrib.auth or the django-allauth login view"""
     if settings.USE_ALL_AUTH:
@@ -66,6 +70,7 @@ def signup(request):
     return SignupView.as_view()(request)
 
 
+@never_cache
 def logout(request):
     """return the django.contrib.auth or the django-allauth logout view"""
     if settings.USE_ALL_AUTH:
@@ -74,6 +79,7 @@ def logout(request):
     return LogoutView.as_view()(request)
 
 
+@never_cache
 def password_reset(request):
     """Display a password reset form"""
     if settings.USE_ALL_AUTH:
@@ -82,6 +88,7 @@ def password_reset(request):
     return PasswordResetView.as_view()(request)
 
 
+@never_cache
 @login_required(login_url='df:login')
 def set_password(request):
     """Define a new password for the user"""

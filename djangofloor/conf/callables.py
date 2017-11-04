@@ -435,10 +435,9 @@ class InstalledApps:
                 Error('"django.contrib.sites" app must be enabled.', obj='djangofloor.conf.settings',
                       id='djangofloor.E005'))
             return []
-        result = ['allauth', 'allauth.account']
+        result = ['allauth', 'allauth.account', 'allauth.socialaccount']
         if settings_dict['ALLAUTH_PROVIDERS']:
-            result += ['allauth.socialaccount'] + \
-               ['allauth.socialaccount.providers.%s' % k for k in settings_dict['ALLAUTH_PROVIDERS']
+            result += ['allauth.socialaccount.providers.%s' % k for k in settings_dict['ALLAUTH_PROVIDERS']
                 if k in self.allauth_providers]
         return result
 

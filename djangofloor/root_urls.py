@@ -8,8 +8,6 @@ If DjangoDebugToolbar is present, then its URL is also registered.
 from django.conf import settings
 from django.conf.urls import url, include
 from django.contrib import admin
-from django.contrib.auth import urls as auth_urls
-from django.contrib.auth import views as auth_views
 from django.utils.module_loading import import_string
 from django.views.i18n import javascript_catalog
 from django.views.static import serve
@@ -17,7 +15,7 @@ from django.views.static import serve
 from djangofloor import urls
 from djangofloor.scripts import load_celery
 from djangofloor.utils import get_view_from_string
-from djangofloor.views import favicon, robots, auth
+from djangofloor.views import favicon, robots
 
 __author__ = 'Matthieu Gallet'
 
@@ -44,28 +42,16 @@ urlpatterns = [url(prefix + r'jsi18n/$', javascript_catalog, {'packages': ('djan
                url(prefix + r'favicon\.ico$', favicon, name='favicon'),
                ] + list(extra_urls)
 
-urlpatterns += [url(prefix + 'admin/', include(admin_urls[:2]))]
+urlpatterns += [url(prefix + r'admin/', include(admin_urls[:2]))]
 if settings.USE_REST_FRAMEWORK:
-    urlpatterns += [url(prefix + 'api-auth/', include('rest_framework.urls', namespace='rest_framework'))]
+    urlpatterns += [url(prefix + r'api-auth/', include('rest_framework.urls', namespace='rest_framework'))]
 if settings.DF_INDEX_VIEW:
-    index_view = get_view_from_string(settings.DF_INDEX_VIEW)
-    urlpatterns += [url(prefix + '$', index_view, name='index')]
+    urlpatterns += [url(prefix + r'$', get_view_from_string(settings.DF_INDEX_VIEW), name='index')]
 if settings.DEBUG and settings.USE_DEBUG_TOOLBAR:
     # noinspection PyPackageRequirements,PyUnresolvedReferences
     import debug_toolbar
-
-    urlpatterns += [url(prefix + '__debug__/', include(debug_toolbar.urls)), ]
+    urlpatterns += [url(prefix + r'__debug__/', include(debug_toolbar.urls)), ]
 if settings.USE_ALL_AUTH:
-    urlpatterns += [url(prefix + r'accounts/', include('allauth.urls', namespace='allauth')), ]
+    urlpatterns += [url(prefix + r'accounts/', include('allauth.urls'))]
 else:
-    urlpatterns += [
-        url(prefix + r'auth/password_reset_done/$', auth_views.PasswordResetDoneView.as_view(),
-            name='password_reset_done'),
-        url(prefix + r'auth/reset/done/$', auth_views.PasswordResetCompleteView.as_view(),
-            name='password_reset_complete'),
-        url(prefix + r'auth/reset/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})/$',
-            auth_views.PasswordResetConfirmView.as_view(), name='password_reset_confirm'),
-        url(prefix + r'password_change/done/$', auth_views.PasswordChangeDoneView.as_view(),
-            name='password_change_done'),
-        url(prefix + r'auth/', (auth_urls, 'auth', 'auth')),
-    ]
+    urlpatterns += [url(prefix + r'auth/', include('django.contrib.auth.urls'))]
