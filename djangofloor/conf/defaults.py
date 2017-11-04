@@ -288,6 +288,7 @@ ALLAUTH_PROVIDERS = []
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_AUTHENTICATION_METHOD = 'username_email'
 ACCOUNT_DEFAULT_HTTP_PROTOCOL = '{SERVER_PROTOCOL}'
+ACCOUNT_ADAPTER = 'djangofloor.views.allauth.AccountAdapter'
 
 # Django-Debug-Toolbar
 DEBUG_TOOLBAR_CONFIG = {'JQUERY_URL': '{STATIC_URL}vendor/jquery/dist/jquery.min.js', }
