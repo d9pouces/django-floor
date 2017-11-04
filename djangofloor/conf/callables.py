@@ -17,12 +17,13 @@ from django.utils.crypto import get_random_string
 from django.utils.module_loading import import_string
 from pkg_resources import get_distribution, DistributionNotFound
 
-from djangofloor.checks import settings_check_results
+from djangofloor.checks import settings_check_results, missing_package
 from djangofloor.conf.config_values import ExpandIterable
 
 __author__ = 'Matthieu Gallet'
 
 _default_engines = {'mysql': 'django.db.backends.mysql',
+                    'mariadb': 'django.db.backends.mysql',
                     'oracle': 'django.db.backends.oracle',
                     'postgresql': 'django.db.backends.postgresql',
                     'sqlite': 'django.db.backends.sqlite3',
@@ -36,24 +37,17 @@ def database_engine(settings_dict):
         try:
             get_distribution('psycopg2')
         except DistributionNotFound:
-            settings_check_results.append(
-                Error('Python package "psycopg2" is required to use PostgreSQL as main database.',
-                      obj='djangofloor.conf.settings', id='djangofloor.E001'))
+            missing_package('psycopg2', ' to use PostgreSQL database')
     elif engine == 'django.db.backends.oracle':
         try:
             get_distribution('cx_Oracle')
         except DistributionNotFound:
-            settings_check_results.append(
-                Error('Python package "cx_Oracle" is required to use Oracle as main database.',
-                      obj='djangofloor.conf.settings', id='djangofloor.E003'))
+            missing_package('cx_Oracle', ' to use Oracle database')
     elif engine == 'django.db.backends.mysql':
         try:
             get_distribution('mysqlclient')
         except DistributionNotFound:
-            settings_check_results.append(
-                Error('Python package "mysqlclient" is required to use MySQL as main database.',
-                      obj='djangofloor.conf.settings', id='djangofloor.E002'))
-
+            missing_package('mysqlclient', ' to use MySQL or MariaDB database')
     return engine
 
 
@@ -216,11 +210,12 @@ project_name.required_settings = ['DF_MODULE_NAME']
 # noinspection PyMethodMayBeStatic,PyUnusedLocal
 class AuthenticationBackends:
     required_settings = ['ALLAUTH_PROVIDERS', 'DF_REMOTE_USER_HEADER', 'AUTH_LDAP_SERVER_URI',
-                         'USE_PAM_AUTHENTICATION', 'DF_ALLOW_LOCAL_USERS', 'USE_ALL_AUTH']
+                         'USE_PAM_AUTHENTICATION', 'DF_ALLOW_LOCAL_USERS', 'USE_ALL_AUTH', 'RADIUS_SERVER']
 
     def __call__(self, settings_dict):
         backends = []
         backends += self.process_remote_user(settings_dict)
+        backends += self.process_radius(settings_dict)
         backends += self.process_django(settings_dict)
         backends += self.process_django_ldap(settings_dict)
         backends += self.process_allauth(settings_dict)
@@ -246,15 +241,24 @@ class AuthenticationBackends:
         except DistributionNotFound:
             return []
 
+    def process_radius(self, settings_dict):
+        if not settings_dict['RADIUS_SERVER']:
+            return []
+        try:
+            get_distribution('django-radius')
+        except DistributionNotFound:
+            missing_package('django-radius', ' to use RADIUS authentication')
+            return []
+        return ['radiusauth.backends.RADIUSBackend']
+
     def process_django_ldap(self, settings_dict):
-        if settings_dict['AUTH_LDAP_SERVER_URI']:
-            try:
-                get_distribution('django-auth-ldap')
-            except DistributionNotFound:
-                settings_check_results.append(Error('Python package "django-auth-ldap" is required to '
-                                                    'use LDAP authentications.',
-                                                    obj='djangofloor.conf.settings', id='djangofloor.E008'))
-                return []
+        if not settings_dict['AUTH_LDAP_SERVER_URI']:
+            return []
+        try:
+            get_distribution('django-auth-ldap')
+        except DistributionNotFound:
+            missing_package('django-auth-ldap', ' to use LDAP authentication')
+            return []
         return ['django_auth_ldap.backend.LDAPBackend']
 
     def process_pam(self, settings_dict):
@@ -263,16 +267,14 @@ class AuthenticationBackends:
         try:
             get_distribution('django_pam')
         except DistributionNotFound:
-            settings_check_results.append(Error('Python package "django_pam" is required to '
-                                                'use PAM authentication.',
-                                                obj='djangofloor.conf.settings', id='djangofloor.E006'))
+            missing_package('django-pam', ' to use PAM authentication')
             return []
         # check if the current user is in the shadow group
         username = pwd.getpwuid(os.getuid()).pw_name
         if not any(x.gr_name == 'shadow' and username in x.gr_mem for x in grp.getgrall()):
             settings_check_results.append(Error('The user "%s" must belong to the "shadow" group to use PAM '
                                                 'authentication.' % username,
-                                                obj='djangofloor.conf.settings', id='djangofloor.E007'))
+                                                obj='djangofloor.conf.settings', id='djangofloor.E004'))
             return []
         return ['django_pam.auth.backends.PAMBackend']
 
@@ -426,14 +428,12 @@ class InstalledApps:
         try:
             get_distribution('django-allauth')
         except DistributionNotFound:
-            settings_check_results.append(
-                Error('Python package "django-allauth" is required to use OAuth2 or OpenID authentications.',
-                      obj='djangofloor.conf.settings', id='djangofloor.E004'))
+            missing_package('django-allauth', ' to use OAuth2 or OpenID authentication')
             return []
         if 'django.contrib.sites' not in self.default_apps:
             settings_check_results.append(
                 Error('"django.contrib.sites" app must be enabled.', obj='djangofloor.conf.settings',
-                      id='djangofloor.E005'))
+                      id='djangofloor.E003'))
             return []
         result = ['allauth', 'allauth.account', 'allauth.socialaccount']
         if settings_dict['ALLAUTH_PROVIDERS']:

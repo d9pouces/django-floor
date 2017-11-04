@@ -63,15 +63,14 @@
     Only administrators can create new user accounts.
 {% endblocktrans %}
 </p>
-<p>
+  {% endif %}
+<p class="login-footer">
   {% if df_has_index_view %}
     <a href="{% url 'index' %}">{% trans 'Return to the site' %}</a>
   {% else %}
     <a href="/">{% trans 'Return to the site' %}</a>
   {% endif %}
   </p>
-
-  {% endif %}
 </div>
 
 {% endblock %}

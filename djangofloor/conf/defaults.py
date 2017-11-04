@@ -353,6 +353,12 @@ HOST_PORT = '{SERVER_PORT}'
 # django—pam
 USE_PAM_AUTHENTICATION = False
 
+# django-radius
+RADIUS_SERVER = None
+RADIUS_PORT = None
+RADIUS_SECRET = None
+
+
 # ######################################################################################################################
 #
 # settings that should be customized for each project

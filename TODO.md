@@ -13,6 +13,7 @@ Authentication sources
   * LDAP (OK but SASL)
   * SMTP
   * two-factor
+  * radius (OK)
   * PAM (OK)
   * check doc
   * monitoring:

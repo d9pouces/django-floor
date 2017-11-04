@@ -145,7 +145,7 @@ body > div.col-xs-11.col-sm-4.alert.alert-info {
     margin-left: 6px;
 }
 
-.allauth .login-footer {
+.allauth .login-footer, .login .login-footer {
     margin-top: 30px;
     text-align: center;
 }

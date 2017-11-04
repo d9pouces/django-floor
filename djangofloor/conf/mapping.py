@@ -134,6 +134,11 @@ AUTH_MAPPING = [
                              'when authenticated by remote_user_header. Ignored if groups are read from a LDAP '
                              'server. '),
 
+    CharConfigField('auth.radius_server', 'RADIUS_SERVER', help_str='IP or FQDN of the Radius server. '
+                                                                    'Python package "django-radius" is required.'),
+    IntegerConfigField('auth.radius_port', 'RADIUS_PORT', help_str='port of the Radius server.'),
+    CharConfigField('auth.radius_secret', 'RADIUS_SECRET', help_str='Shared secret if the Radius server'),
+
     BooleanConfigField('auth.allow_basic_auth', 'USE_HTTP_BASIC_AUTH',
                        help_str='Set to "true" if you want to allow HTTP basic auth, using the Django database.'),
 
