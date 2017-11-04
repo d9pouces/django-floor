@@ -156,17 +156,17 @@ AUTH_MAPPING = [
                              '%%(user)s is the only allowed variable and the double "%%" is required in .ini files.'),
     BooleanConfigField('auth.ldap_start_tls', 'AUTH_LDAP_START_TLS',
                        help_str='Set to "true" if you want to use StartTLS.'),
-    CharConfigField('auth.ldap_first_name', 'AUTH_LDAP_USER_FIRST_NAME',
+    CharConfigField('auth.ldap_first_name_attribute', 'AUTH_LDAP_USER_FIRST_NAME',
                     help_str='LDAP attribute for the user\'s first name, like "givenName".'),
-    CharConfigField('auth.ldap_last_name', 'AUTH_LDAP_USER_LAST_NAME',
+    CharConfigField('auth.ldap_last_name_attribute', 'AUTH_LDAP_USER_LAST_NAME',
                     help_str='LDAP attribute for the user\'s last name, like "sn".'),
-    CharConfigField('auth.ldap_email', 'AUTH_LDAP_USER_EMAIL',
+    CharConfigField('auth.ldap_email_attribute', 'AUTH_LDAP_USER_EMAIL',
                     help_str='LDAP attribute for the user\'s email, like "email".'),
-    CharConfigField('auth.ldap_is_active', 'AUTH_LDAP_USER_IS_ACTIVE',
+    CharConfigField('auth.ldap_is_active_group', 'AUTH_LDAP_USER_IS_ACTIVE',
                     help_str='LDAP group DN for active users, like "cn=active,ou=groups,dc=example,dc=com"'),
-    CharConfigField('auth.ldap_is_staff', 'AUTH_LDAP_USER_IS_STAFF',
+    CharConfigField('auth.ldap_is_staff_group', 'AUTH_LDAP_USER_IS_STAFF',
                     help_str='LDAP group DN for staff users, like "cn=staff,ou=groups,dc=example,dc=com".'),
-    CharConfigField('auth.ldap_is_superuser', 'AUTH_LDAP_USER_IS_SUPERUSER',
+    CharConfigField('auth.ldap_is_superuser_group', 'AUTH_LDAP_USER_IS_SUPERUSER',
                     help_str='LDAP group DN for superusers, like "cn=superuser,ou=groups,dc=example,dc=com".'),
     CharConfigField('auth.ldap_require_group', 'AUTH_LDAP_REQUIRE_GROUP',
                     help_str='only authenticates users belonging to this group. Must be something like '
@@ -201,7 +201,7 @@ AUTH_MAPPING = [
     #                 help_str='Principal to use for Kerberos authentication on the LDAP server.'),
 ]
 ALLAUTH_MAPPING = [
-    ListConfigField('auth.oauth2_providers', 'ALLAUTH_PROVIDERS',
+    ListConfigField('auth.social_providers', 'ALLAUTH_PROVIDERS',
                     help_str='Comma-separated OAuth2 providers, among "%s". "django-allauth" package must be installed.'
                              % '","'.join(InstalledApps.allauth_providers)),
 ]

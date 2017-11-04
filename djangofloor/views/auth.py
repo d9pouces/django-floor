@@ -10,7 +10,6 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm, PasswordResetForm, UsernameField
 from django.contrib.auth.views import LogoutView, LoginView, PasswordResetView, PasswordChangeView
 from django.http import HttpResponseRedirect
-from django.urls import reverse
 from django.views.decorators.cache import never_cache
 
 from djangofloor.decorators import validate_form, everyone
