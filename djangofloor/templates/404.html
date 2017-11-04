@@ -6,25 +6,19 @@
 {% endblock %}
 
 {% block bodyclass %}{{ block.super }} login{% endblock %}
-
+{% block head_title %}{% trans 'Page not found' %}{% endblock %}
 {% block breadcrumbs %}{% endblock %}
-{% block title %}{% trans 'Logged out' %} | {{ site_title|default:df_project_name }}{% endblock %}
-
+{% block title %}{% trans 'Page not found' %}{% endblock %}
 {% block content %}
 <div id="content-main">
-
+<h1>{% trans 'Error 404: page not found' %}</h1>
 <p class="errornote">
 {% blocktrans trimmed %}
-    Logout successful.
+    Oops, the page your requested cannot be found. Maybe you followed a bad link?
 {% endblocktrans %}
 </p>
-<p>{% trans "Thanks for spending some quality time with the Web site today." %}</p>
 <p class="login-footer">
-  {% if df_has_index_view %}
-    <a href="{% url 'index' %}">{% trans 'Return to the homepage' %}</a>
-  {% else %}
-    <a href="/">{% trans 'Return to the homepage' %}</a>
-  {% endif %}
-  </p>
+  {% if df_has_index_view %}<a href="{% url 'index' %}">{% trans 'Return to the homepage' %}</a>{% else %}<a href="/">{% trans 'Return to the homepage' %}</a>{% endif %}
+</p>
 </div>
 {% endblock %}

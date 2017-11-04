@@ -12,7 +12,7 @@ Authentication sources
 
   * LDAP (OK but SASL)
   * SMTP
-  * two-factor
+  * two-factor https://github.com/percipient/django-allauth-2fa
   * radius (OK)
   * PAM (OK)
   * check doc

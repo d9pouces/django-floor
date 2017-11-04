@@ -149,3 +149,11 @@ body > div.col-xs-11.col-sm-4.alert.alert-info {
     margin-top: 30px;
     text-align: center;
 }
+.allauth input[type=text], .allauth input[type=password], .allauth input[type=email] {
+    clear: both;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin: 2px 0;
+    display: inline-block;
+}
