@@ -3,7 +3,7 @@
     <h2>{% trans 'Authentication' %}</h2>
     <ul>
 
-        <li><strong>{% trans 'Password authentication of local users: ' %}</strong>
+        <li><strong>{% trans 'Local passwords: ' %}</strong>
         {% if local_users %}{% django_icon 'check' %}{% else %}{% django_icon 'remove' %}{% endif %}
         </li>
         {% if local_users %}<li><strong>{% trans 'Allow visitors to create an account: ' %}</strong>{% if allow_user_creation %}{% django_icon 'check' %}{% else %}{% django_icon 'remove' %}{% endif %}</li>{% endif %}

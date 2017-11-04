@@ -106,3 +106,13 @@ body > div.col-xs-11.col-sm-4.alert.alert-info {
     background-color: #C7E0E9;
     border: 1px solid #78B8E9;
 }
+
+
+.login .form-row #id_newpassword1, .login .form-row #id_newpassword2, .login .form-row #id_password1, .login .form-row #id_password2, .login .form-row #id_email {
+    clear: both;
+    padding: 8px;
+    width: 100%;
+    -webkit-box-sizing: border-box;
+       -moz-box-sizing: border-box;
+            box-sizing: border-box;
+}

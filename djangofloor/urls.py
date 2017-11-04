@@ -19,6 +19,7 @@ urlpatterns = [
     url(r'^login/', auth.login, name='login'),
     url(r'^password_reset/', auth.password_reset, name='password_reset'),
     url(r'^password_change/', auth.set_password, name='set_password'),
+    url(r'^signup/', auth.signup, name='signup'),
 ]
 
 if settings.WEBSOCKET_URL:

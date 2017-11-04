@@ -8,7 +8,7 @@
       {% with ok='<span class="label label-success"><span class="glyphicon glyphicon-ok"></span></span>' ko='<span class="label label-danger"><span class="glyphicon glyphicon-remove"></span></span>' %}
       <ul class="list-unstyled">
 
-        <li><strong>{% trans 'Password authentication of local users: ' %}</strong>
+        <li><strong>{% trans 'Local passwords: ' %}</strong>
           {% if local_users %}{{ ok }}{% else %}{{ ko }}{% endif %}
         </li>
         {% if local_users %}
