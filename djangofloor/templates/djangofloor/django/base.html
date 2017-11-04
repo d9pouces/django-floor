@@ -10,6 +10,7 @@
 <link href="{% static 'css/djangofloor-django.css' %}" rel="stylesheet" type="text/css" />
 {% df_init_websocket %}
 {% endblock %}
+{% block title %}{{ title }} | {{ site_title|default:df_project_name }}{% endblock %}
 
 {% block branding %}
 <h1 id="site-name"><a href="{% url 'admin:index' %}">{{ site_header|default:df_project_name }}</a></h1>

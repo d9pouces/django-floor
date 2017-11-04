@@ -8,6 +8,7 @@
 {% block bodyclass %}{{ block.super }} login{% endblock %}
 
 {% block breadcrumbs %}{% endblock %}
+{% block title %}{% trans 'Logged out' %} | {{ site_title|default:df_project_name }}{% endblock %}
 
 {% block content %}
 <div id="content-main">

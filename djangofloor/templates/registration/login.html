@@ -4,6 +4,7 @@
 {% block extrastyle %}{{ block.super }}<link rel="stylesheet" type="text/css" href="{% static 'admin/css/login.css' %}" />
 {{ form.media }}
 {% endblock %}
+{% block title %}{% trans 'Login' %} | {{ site_title|default:df_project_name }}{% endblock %}
 
 {% block bodyclass %}{{ block.super }} login{% endblock %}
 
