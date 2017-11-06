@@ -41,6 +41,15 @@ urlpatterns = [url(prefix + r'jsi18n/$', javascript_catalog, {'packages': ('djan
                    {'document_root': settings.STATIC_ROOT, 'path': 'favicon/apple-touch-icon-precomposed.png'}),
                url(prefix + r'favicon\.ico$', favicon, name='favicon'),
                ] + list(extra_urls)
+if settings.USE_ALL_AUTH:
+    # noinspection PyPackageRequirements
+    from allauth.account.views import login as allauth_login
+    urlpatterns += [
+        url(prefix + r'admin/login/$', allauth_login),
+        url(prefix + r'accounts/', include('allauth.urls'))
+    ]
+else:
+    urlpatterns += [url(prefix + r'auth/', include('django.contrib.auth.urls'))]
 
 urlpatterns += [url(prefix + r'admin/', include(admin_urls[:2]))]
 if settings.USE_REST_FRAMEWORK:
@@ -51,7 +60,3 @@ if settings.DEBUG and settings.USE_DEBUG_TOOLBAR:
     # noinspection PyPackageRequirements,PyUnresolvedReferences
     import debug_toolbar
     urlpatterns += [url(prefix + r'__debug__/', include(debug_toolbar.urls)), ]
-if settings.USE_ALL_AUTH:
-    urlpatterns += [url(prefix + r'accounts/', include('allauth.urls'))]
-else:
-    urlpatterns += [url(prefix + r'auth/', include('django.contrib.auth.urls'))]

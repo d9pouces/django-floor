@@ -25,6 +25,7 @@ __author__ = 'Matthieu Gallet'
 _default_engines = {'mysql': 'django.db.backends.mysql',
                     'mariadb': 'django.db.backends.mysql',
                     'oracle': 'django.db.backends.oracle',
+                    'postgres': 'django.db.backends.postgresql',
                     'postgresql': 'django.db.backends.postgresql',
                     'sqlite': 'django.db.backends.sqlite3',
                     'sqlite3': 'django.db.backends.sqlite3', }
@@ -52,6 +53,30 @@ def database_engine(settings_dict):
 
 
 database_engine.required_settings = ['DATABASE_ENGINE']
+
+
+def databases(settings_dict):
+    engine = database_engine(settings_dict)
+    name = settings_dict['DATABASE_NAME']
+    user = settings_dict['DATABASE_USER']
+    options = settings_dict['DATABASE_OPTIONS']
+    password = settings_dict['DATABASE_PASSWORD']
+    host = settings_dict['DATABASE_HOST']
+    port = settings_dict['DATABASE_PORT']
+    if 'DATABASE_URL' in os.environ:  # Used on Heroku environment
+        parsed = urlparse(os.environ['DATABASE_URL'])
+        engine = database_engine({'DATABASE_ENGINE': parsed.scheme})
+        user = parsed.username
+        name = parsed.path[1:]
+        password = parsed.password
+        host = parsed.hostname
+        port = parsed.port
+    return {'default': {'ENGINE': engine, 'NAME': name, 'USER': user, 'OPTIONS': options, 'PASSWORD': password,
+                        'HOST': host, 'PORT': port}}
+
+
+databases.required_settings = ['DATABASE_ENGINE', 'DATABASE_NAME', 'DATABASE_USER', 'DATABASE_OPTIONS',
+                               'DATABASE_PASSWORD', 'DATABASE_HOST', 'DATABASE_PORT']
 
 
 def allowed_hosts(settings_dict):
@@ -438,7 +463,7 @@ class InstalledApps:
         result = ['allauth', 'allauth.account', 'allauth.socialaccount']
         if settings_dict['ALLAUTH_PROVIDERS']:
             result += ['allauth.socialaccount.providers.%s' % k for k in settings_dict['ALLAUTH_PROVIDERS']
-                if k in self.allauth_providers]
+                       if k in self.allauth_providers]
         return result
 
 

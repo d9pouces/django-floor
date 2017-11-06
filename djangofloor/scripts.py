@@ -133,39 +133,30 @@ def load_celery():
 
 
 def control():
-    """Main user function, with commands for deploying, migrating data, backup or running services
     """
-    conf_name = set_env()
-    project_name = conf_name.partition(':')[0]
-    try:
-        # noinspection PyPackageRequirements
-        from gevent import monkey
-        monkey.patch_all()
-    except ImportError:
-        # noinspection PyUnusedLocal
-        monkey = None
-    from django.conf import settings
-    command_commands = settings.COMMON_COMMANDS
-    cmd = sys.argv[1] if len(sys.argv) > 1 else ''
-    script, command = command_commands.get(cmd, (None, None))
-    invalid_script = 'Invalid script name: %(cmd)s' % {'cmd': script}
-    invalid_command = 'Usage: %(name)s %(cmd)s' % {'name': sys.argv[0], 'cmd': '|'.join(command_commands)}
-    if cmd not in command_commands:
-        print(invalid_command)
-        return 1
-    scripts = {'django': django, 'gunicorn': gunicorn, 'celery': celery, 'uwsgi': uwsgi, 'aiohttp': aiohttp}
-    if script not in scripts:
-        print(invalid_script)
-        return 1
-    os.environ['DF_CONF_NAME'] = '%s:%s' % (project_name, script)
-    script_re = re.match(r'^([\w_\-.]+)-ctl(\.py|\.pyc)?$', os.path.basename(sys.argv[0]))
-    if script_re:
-        sys.argv[0] = '%s-%s%s' % (script_re.group(1), script, script_re.group(2))
-    if command:
-        sys.argv[1] = command
-    else:
-        sys.argv[1:2] = []
-    return scripts[script]()
+    A single command to rule them all… Replace django, gunicorn/aiohttp and celery commands.
+    "myproject-ctl" command
+
+    "worker" -> changed as "myproject-celery" "worker"
+    "server" -> changed as "myproject-aiohttp"
+    "celery" -> changed as "myproject-celery" command
+    other value -> changed as "myproject-django" command
+
+    """
+    command = sys.argv[1] if len(sys.argv) >= 2 else None
+    if command == 'worker':
+        return celery()
+    elif command == 'celery':
+        del sys.argv[1]
+        return celery()
+    elif command == 'server':
+        del sys.argv[1]
+        set_env()
+        from django.conf import settings
+        if settings.DF_WEBSERVER == 'aiohttp':
+            return aiohttp()
+        return gunicorn()
+    return django()
 
 
 def django():
@@ -186,7 +177,8 @@ def django():
     import django
     django.setup()
     from django.core import management
-    commands = {x: y for (x, y) in management.get_commands().items() if x not in settings.DF_REMOVED_DJANGO_COMMANDS}
+    commands = {x: y for (x, y) in management.get_commands().items()
+                if x not in settings.DF_REMOVED_DJANGO_COMMANDS}
 
     def get_commands():
         return commands
@@ -288,12 +280,11 @@ def celery():
     sys.argv[1:] = extra_args
     __set_default_option(options, 'app')
     __set_default_option(options, 'concurrency')
-    if settings.DEBUG and 'worker' in extra_args:
+    if settings.DEBUG and 'worker' in extra_args and '-h' not in extra_args:
         import django
         django.setup()
         python_reloader(celery_main, (sys.argv, ), {})
     else:
-
         celery_main(sys.argv)
 
 

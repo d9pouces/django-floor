@@ -440,6 +440,7 @@ class Command(TemplatedBaseCommand):
         for target_filename in sorted(writers):  # fix the writing order
             writer = writers[target_filename]
             writer.write(self.host_package_dir, self.template_context, dry_mode=False, verbose_mode=self.verbose_mode)
+        # noinspection PyUnresolvedReferences
         script_content = render_to_string('djangofloor/vagrant/systemd-web.service', self.template_context)
         # noinspection PyStringFormat
         filename = os.path.join(self.host_package_dir, 'etc', 'systemd', 'system',
@@ -451,6 +452,7 @@ class Command(TemplatedBaseCommand):
         local_template_context.update(self.template_context)
         for queue in get_expected_queues():
             local_template_context['queue'] = queue
+            # noinspection PyUnresolvedReferences
             script_content = render_to_string('djangofloor/vagrant/systemd-worker.service', local_template_context)
             # noinspection PyStringFormat
             filename = os.path.join(self.host_package_dir, 'etc', 'systemd', 'system',

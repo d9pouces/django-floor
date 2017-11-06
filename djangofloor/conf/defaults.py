@@ -12,7 +12,7 @@ from djangofloor.conf.callables import database_engine, url_parse_server_name, \
     url_parse_server_protocol, url_parse_server_port, url_parse_prefix, url_parse_ssl, project_name, \
     authentication_backends, ldap_user_search, allowed_hosts, cache_setting, template_setting, \
     generate_secret_key, use_x_forwarded_for, required_packages, installed_apps, ldap_attribute_map, \
-    ldap_boolean_attribute_map, ldap_group_search, ldap_group_class
+    ldap_boolean_attribute_map, ldap_group_search, ldap_group_class, databases
 from djangofloor.conf.config_values import Path, Directory, SettingReference, ExpandIterable, \
     CallableSetting, AutocreateFileContent
 from djangofloor.log import log_configuration
@@ -50,11 +50,8 @@ ALLOWED_HOSTS = CallableSetting(allowed_hosts)
 CACHES = CallableSetting(cache_setting)
 CSRF_COOKIE_DOMAIN = '{SERVER_NAME}'
 CSRF_TRUSTED_ORIGINS = ['{SERVER_NAME}', '{SERVER_NAME}:{SERVER_PORT}']
-DATABASES = {'default': {
-    'ENGINE': CallableSetting(database_engine), 'NAME': '{DATABASE_NAME}', 'USER': '{DATABASE_USER}',
-    'OPTIONS': SettingReference('DATABASE_OPTIONS'),
-    'PASSWORD': '{DATABASE_PASSWORD}', 'HOST': '{DATABASE_HOST}', 'PORT': '{DATABASE_PORT}'},
-}
+DATABASES = CallableSetting(databases)
+
 DEBUG = False
 # you should create a "local_settings.py" with "DEBUG = True" at the root of your project
 DEFAULT_FROM_EMAIL = 'webmaster@{SERVER_NAME}'
@@ -193,6 +190,9 @@ DF_SERVER_SSL_KEY = None
 DF_SERVER_SSL_CERTIFICATE = None
 DF_ALLOW_USER_CREATION = True
 DF_ALLOW_LOCAL_USERS = True
+# name of the script name that redirects to djangofloor.scripts:aiohttp (in setup.py/console_scripts)
+DF_UNIQUE_COMMAND_NAME = '{DF_MODULE_NAME}-ctl'
+DF_WEBSERVER = 'aiohttp'  # must be "aiohttp" or "gunicorn"
 
 WEBSOCKET_URL = '/ws/'  # set to None if you do not use websockets
 WEBSOCKET_REDIS_CONNECTION = {'host': '{WEBSOCKET_REDIS_HOST}', 'port': SettingReference('WEBSOCKET_REDIS_PORT'),
