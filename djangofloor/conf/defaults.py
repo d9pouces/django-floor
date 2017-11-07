@@ -8,11 +8,11 @@ import os
 
 from django.utils.translation import ugettext_lazy as _
 
-from djangofloor.conf.callables import database_engine, url_parse_server_name, \
+from djangofloor.conf.callables import url_parse_server_name, \
     url_parse_server_protocol, url_parse_server_port, url_parse_prefix, url_parse_ssl, project_name, \
     authentication_backends, ldap_user_search, allowed_hosts, cache_setting, template_setting, \
     generate_secret_key, use_x_forwarded_for, required_packages, installed_apps, ldap_attribute_map, \
-    ldap_boolean_attribute_map, ldap_group_search, ldap_group_class, databases
+    ldap_boolean_attribute_map, ldap_group_search, ldap_group_class, databases, excluded_django_commands
 from djangofloor.conf.config_values import Path, Directory, SettingReference, ExpandIterable, \
     CallableSetting, AutocreateFileContent
 from djangofloor.log import log_configuration
@@ -53,6 +53,7 @@ CSRF_TRUSTED_ORIGINS = ['{SERVER_NAME}', '{SERVER_NAME}:{SERVER_PORT}']
 DATABASES = CallableSetting(databases)
 
 DEBUG = False
+DEVELOPMENT = True
 # you should create a "local_settings.py" with "DEBUG = True" at the root of your project
 DEFAULT_FROM_EMAIL = 'webmaster@{SERVER_NAME}'
 FILE_UPLOAD_TEMP_DIR = Directory('{LOCAL_PATH}/tmp-uploads')
@@ -168,7 +169,7 @@ USE_X_SEND_FILE = False  # Apache module
 X_ACCEL_REDIRECT = []  # paths used by nginx
 DF_FAKE_AUTHENTICATION_USERNAME = None
 DF_PROJECT_VERSION = CallableSetting(guess_version)
-DF_REMOVED_DJANGO_COMMANDS = {'startapp', 'startproject'}
+DF_REMOVED_DJANGO_COMMANDS = CallableSetting(excluded_django_commands)
 DF_PUBLIC_SIGNAL_LIST = True
 # do not check for each WS signal/function before sending its name to the client
 DF_SYSTEM_CHECKS = ['djangofloor.views.monitoring.RequestCheck',

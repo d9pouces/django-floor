@@ -492,3 +492,21 @@ def required_packages(settings_dict):
 
 
 required_packages.required_settings = ['DF_MODULE_NAME']
+
+
+class ExcludedDjangoCommands:
+    required_settings = ['DEVELOPMENT', 'USE_CELERY']
+
+    def __call__(self, settings_dict):
+        result = {'startproject', 'diffsettings', }
+        if not settings_dict['DEVELOPMENT']:
+            result |= {'startapp', 'findstatic', 'npm', 'packaging',
+                       'gen_dev_files', 'gen_install', 'dockerize',  'bdist_deb_django',
+                       'makemigrations', 'makemessages', 'inspectdb', 'compilemessages',
+                       'remove_stale_contenttypes', 'squashmigrations', 'testserver', 'test'}
+        if not settings_dict['USE_CELERY']:
+            result |= {'celery', 'worker'}
+        return result
+
+
+excluded_django_commands = ExcludedDjangoCommands()

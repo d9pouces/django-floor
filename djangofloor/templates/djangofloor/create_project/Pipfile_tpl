@@ -3,7 +3,7 @@ url = "https://pypi.python.org/simple"
 verify_ssl = true
 
 [packages]
-djangofloor = "*"
+djangofloor = ">=1.0.30"
 
 [requires]
 python_version = "3.6"

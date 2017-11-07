@@ -165,7 +165,7 @@ def django():
     """
     set_env()
     from django.conf import settings
-    from django.core.management import execute_from_command_line
+
     parser = ArgumentParser(usage="%(prog)s subcommand [options] [args]", add_help=False)
     options, extra_args = parser.parse_known_args()
     env_set = bool(os.environ.get('DF_CONF_SET', ''))
@@ -185,6 +185,7 @@ def django():
 
     management.get_commands = get_commands
     try:
+        from djangofloor.management import execute_from_command_line
         return execute_from_command_line(sys.argv)
     except BrokenPipeError:
         pass
