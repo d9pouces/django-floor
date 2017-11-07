@@ -503,7 +503,8 @@ class ExcludedDjangoCommands:
             result |= {'startapp', 'findstatic', 'npm', 'packaging',
                        'gen_dev_files', 'gen_install', 'dockerize',  'bdist_deb_django',
                        'makemigrations', 'makemessages', 'inspectdb', 'compilemessages',
-                       'remove_stale_contenttypes', 'squashmigrations', 'testserver', 'test'}
+                       'remove_stale_contenttypes', 'squashmigrations', 'testserver', 'test',
+                       'runserver'}
         if not settings_dict['USE_CELERY']:
             result |= {'celery', 'worker'}
         return result
