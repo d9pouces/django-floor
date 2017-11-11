@@ -28,6 +28,9 @@ import os
 import warnings
 
 from django.utils.module_loading import import_string
+from django.core.checks import Warning
+
+from djangofloor.checks import settings_check_results
 
 __author__ = 'Matthieu Gallet'
 
@@ -158,6 +161,10 @@ class Directory(Path):
         value = os.path.normpath(value)
         if not value.endswith('/'):
             value += '/'
+        if not os.path.isdir(value):
+            settings_check_results.append(
+                Warning('"%s" is not a directory.' % value, obj='djangofloor.conf.settings',
+                        id='djangofloor.W001'))
         return value
 
     def pre_collectstatic(self, merger, setting_name, value):
@@ -183,6 +190,10 @@ class File(Path):
         """
         value = merger.analyze_raw_value(self.value)
         value = os.path.normpath(value)
+        if not os.path.isfile(value):
+            settings_check_results.append(
+                Warning('"%s" does not exist.' % value, obj='djangofloor.conf.settings',
+                        id='djangofloor.W002'))
         return value
 
     def pre_collectstatic(self, merger, setting_name, value):
@@ -251,6 +262,9 @@ class AutocreateFileContent(File):
             with codecs.open(filename, 'r', encoding='utf-8') as fd:
                 result = fd.read()
         else:
+            settings_check_results.append(
+                Warning('"%s" does not exist.' % filename, obj='djangofloor.conf.settings',
+                        id='djangofloor.W003'))
             result = self.create_function(False, *self.args, **self.kwargs)
         return result
 

@@ -376,11 +376,10 @@ DF_URL_CONF = '{DF_MODULE_NAME}.urls.urlpatterns'
 # noinspection PyUnresolvedReferences
 DF_INSTALLED_APPS = ['{DF_MODULE_NAME}']  # your django app!
 DF_MIDDLEWARE = []
-DF_REMOTE_USER_HEADER = None  # HTTP-REMOTE-USER
+DF_REMOTE_USER_HEADER = None  # HTTP_REMOTE_USER
 DF_DEFAULT_GROUPS = [_('Users')]
 DF_TEMPLATE_CONTEXT_PROCESSORS = []
 DF_CHECKED_REQUIREMENTS = CallableSetting(required_packages)
-DF_THEME = 'django'  # 'bootstrap3' or 'django'
 NPM_FILE_PATTERNS = {
     'bootstrap-notify': ['*.js'],
     'bootstrap3': ['dist/*'],

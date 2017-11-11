@@ -51,6 +51,7 @@ def get_merger_from_env() -> SettingMerger:
     # required if set_env is not called
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'djangofloor.conf.settings')
     if 'PYCHARM_DJANGO_MANAGE_MODULE' in os.environ:
+        # noinspection EmptyAlternationBranch
         pycharm_matcher = re.match(r'^([\w_\-.]+)-(\w+)(\.py|\.pyc|)$', os.environ['PYCHARM_DJANGO_MANAGE_MODULE'])
         if pycharm_matcher:
             os.environ.setdefault('DF_CONF_NAME', '%s:%s' % pycharm_matcher.groups()[:2])
@@ -273,14 +274,17 @@ def celery():
     from celery.bin.celery import main as celery_main
     parser = ArgumentParser(usage="%(prog)s subcommand [options] [args]", add_help=False)
     parser.add_argument('-A', '--app', action='store', default='djangofloor')
-    parser.add_argument('-c', '--concurrency', action='store', default=settings.CELERY_PROCESSES,
-                        help='Number of child processes processing the queue. The'
-                        'default is the number of CPUs available on your'
-                        'system.')
+    is_worker = len(sys.argv) > 1 and sys.argv[1] == 'worker'
+    if is_worker:
+        parser.add_argument('-c', '--concurrency', action='store', default=settings.CELERY_PROCESSES,
+                            help='Number of child processes processing the queue. The'
+                            'default is the number of CPUs available on your'
+                            'system.')
     options, extra_args = parser.parse_known_args()
     sys.argv[1:] = extra_args
     __set_default_option(options, 'app')
-    __set_default_option(options, 'concurrency')
+    if is_worker:
+        __set_default_option(options, 'concurrency')
     if settings.DEBUG and 'worker' in extra_args and '-h' not in extra_args:
         import django
         django.setup()
@@ -357,12 +361,7 @@ def create_project():
 
     if template_values['use_celery'] == 'y':
         template_values['settings'] = ''
-        template_values['celery_script'] = ("'%s-celery = djangofloor.scripts:celery',\n"
-                                            "                                    ") % template_values['package_name']
-        template_values['celery_script_name'] = '%s-celery.py' % template_values['package_name']
     else:
-        template_values['celery_script'] = ''
-        template_values['celery_script_name'] = ''
         template_values['settings'] = """WEBSOCKET_URL = None\nUSE_CELERY = False\n"""
 
     if os.path.exists(dst_dir):

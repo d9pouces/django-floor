@@ -15,7 +15,7 @@ from urllib.parse import urlparse
 from django.core.checks import Error
 from django.utils.crypto import get_random_string
 from django.utils.module_loading import import_string
-from pkg_resources import get_distribution, DistributionNotFound
+from pkg_resources import get_distribution, DistributionNotFound, VersionConflict
 
 from djangofloor.checks import settings_check_results, missing_package
 from djangofloor.conf.config_values import ExpandIterable
@@ -478,24 +478,26 @@ def generate_secret_key(django_ready, length=60):
 
 
 def required_packages(settings_dict):
-    def get_requirements(package_name):
+    def get_requirements(package_name, parent=None):
         try:
             yield str(package_name)
             d = get_distribution(package_name)
             for r in d.requires():
-                for required_package in get_requirements(r):
-                    yield required_package
+                for required_package in get_requirements(r, parent=package_name):
+                    yield str(required_package)
         except DistributionNotFound:
-            pass
+            missing_package(str(package_name), ' required by %s' % parent)
+        except VersionConflict:
+            missing_package(str(package_name), ' required by %s' % parent)
 
-    return list(set(get_requirements(settings_dict['DF_MODULE_NAME'])))
+    return list(set(get_requirements(settings_dict['DF_MODULE_NAME'], parent=settings_dict['DF_MODULE_NAME'])))
 
 
 required_packages.required_settings = ['DF_MODULE_NAME']
 
 
 class ExcludedDjangoCommands:
-    required_settings = ['DEVELOPMENT', 'USE_CELERY']
+    required_settings = ['DEVELOPMENT', 'USE_CELERY', 'DEBUG']
 
     def __call__(self, settings_dict):
         result = {'startproject', 'diffsettings', }
@@ -503,10 +505,11 @@ class ExcludedDjangoCommands:
             result |= {'startapp', 'findstatic', 'npm', 'packaging',
                        'gen_dev_files', 'gen_install', 'dockerize',  'bdist_deb_django',
                        'makemigrations', 'makemessages', 'inspectdb', 'compilemessages',
-                       'remove_stale_contenttypes', 'squashmigrations', 'testserver', 'test',
-                       'runserver'}
+                       'remove_stale_contenttypes', 'squashmigrations'}
         if not settings_dict['USE_CELERY']:
             result |= {'celery', 'worker'}
+        if not settings_dict['DEBUG']:
+            result |= {'testserver', 'test', 'runserver'}
         return result
 
 

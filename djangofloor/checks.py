@@ -12,6 +12,7 @@ import sys
 import os
 from django.core.checks import register, Error
 
+
 __author__ = 'Matthieu Gallet'
 
 settings_check_results = []
@@ -31,4 +32,11 @@ def missing_package(package_name, desc=''):
 # noinspection PyUnusedLocal
 @register()
 def settings_check(app_configs, **kwargs):
+    from djangofloor.views.monitoring import MonitoringCheck
+    from django.utils.module_loading import import_string
+    from djangofloor.conf.settings import merger
+    for check_str in merger.settings['DF_SYSTEM_CHECKS']:
+        check = import_string(check_str)()
+        if isinstance(check, MonitoringCheck):
+            check.check_commandline()
     return settings_check_results

@@ -32,7 +32,6 @@ def context_base(request):
         * `df_user_agent`: user agent provided by the HttpRequest
         * `df_window_key`: a random value provided by each HttpRequest (allowing to identify each browser window)
         * `df_has_ws_topics`: True if some websockets topics are provided to the HttpRequest
-        * `df_theme`: settings.DF_THEME
 
     :param request: a HTTP request
     :type request: :class:`django.http.HttpRequest`
@@ -70,7 +69,6 @@ def context_base(request):
         'df_session_id': request.COOKIES.get(settings.SESSION_COOKIE_NAME),
         'df_has_ws_topics': getattr(request, 'has_websocket_topics', False),
         'df_http_request': request,
-        'df_theme': settings.DF_THEME,
         'df_user': df_user,
         'df_index_view': df_index_view,
         'df_language_code': df_language_code,

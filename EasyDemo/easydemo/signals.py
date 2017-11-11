@@ -47,7 +47,7 @@ def print_sig2(window_info, content=''):
 
 @signal(is_allowed_to=everyone, path='demo.chat.receive')
 def chat_receive(window_info, content=''):
-    matcher = re.match('^@([\w\-_]+).*', content)
+    matcher = re.match(r'^@([\w\-_]+).*', content)
     if matcher:
         dest = 'chat-%s' % matcher.group(1)
     else:

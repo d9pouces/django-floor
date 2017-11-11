@@ -126,8 +126,8 @@ AUTH_MAPPING = [
                        help_str='Duration of the connection sessions '
                                 '(in seconds, default to 1,209,600 s / 14 days)'),
     CharConfigField('auth.remote_user_header', 'DF_REMOTE_USER_HEADER',
-                    help_str='Set it if the reverse-proxy authenticates users, a common value is "HTTP-REMOTE-USER". '
-                             'Note: the HTTP- prefix is automatically added, just set REMOTE-USER in the '
+                    help_str='Set it if the reverse-proxy authenticates users, a common value is "HTTP_REMOTE_USER". '
+                             'Note: the HTTP_ prefix is automatically added, just set REMOTE_USER in the '
                              'reverse-proxy configuration. '),
     ListConfigField('auth.remote_user_groups', 'DF_DEFAULT_GROUPS',
                     help_str='Comma-separated list of groups, for new users that are automatically created '

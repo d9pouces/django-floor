@@ -10,6 +10,7 @@ from djangofloor.conf.providers import IniConfigProvider
 from djangofloor.conf.settings import merger
 from djangofloor.tasks import import_signals_and_functions, get_expected_queues
 from djangofloor.utils import remove_arguments_from_help, guess_version
+from djangofloor.wsgi.window_info import render_to_string
 
 __author__ = 'Matthieu Gallet'
 
@@ -18,14 +19,22 @@ class Command(BaseCommand):
     help = 'show the current configuration.' \
            'Can display as python file ("config python") or as .ini file ("config ini"). Use -v 2 to display more info.'
     requires_system_checks = False
+    options = {
+        'python': 'display the current config as Python module',
+        'ini': 'display the current config as .ini file',
+        'heroku': 'display a configuration valid to deploy on Heroku',
+        'apache': 'display an example of Apache config',
+        'nginx': 'display an example of Nginx config',
+        'systemd': 'display an example of systemd config',
+        'supervisor': 'display an example of Supervisor config',
+    }
+    if settings.USE_CELERY:
+        options['signals'] = 'show the defined signals and remote functions'
 
     def add_arguments(self, parser):
         assert isinstance(parser, ArgumentParser)
-        parser.add_argument('action', default='show', choices=('python', 'ini', 'signals', 'heroku'),
-                            help=('"python": display the current config as Python module,\n'
-                                  '"ini": display the current config as .ini file,\n'
-                                  '"heroku": display a configuration valid to deploy on Heroku,\n'
-                                  '"signals": show the defined signals and remote functions'))
+        parser.add_argument('action', default='show', choices=self.options,
+                            help=',\n'.join(['"%s": %s' % x for x in self.options.items()]))
         remove_arguments_from_help(parser, {'--settings', '--traceback', '--pythonpath'})
 
     def handle(self, *args, **options):
@@ -45,6 +54,18 @@ class Command(BaseCommand):
             self.show_signals_config()
         elif action == 'heroku':
             self.show_heroku_config()
+        elif action == 'apache':
+            self.show_external_config('djangofloor/config/apache.conf')
+        elif action == 'nginx':
+            self.show_external_config('djangofloor/config/nginx.conf')
+        elif action == 'systemd':
+            self.show_external_config('djangofloor/config/systemd.conf')
+        elif action == 'supervisor':
+            self.show_external_config('djangofloor/config/supervisor.conf')
+
+    def show_external_config(self, config):
+        content = render_to_string(config, merger.settings)
+        self.stdout.write(content)
 
     def show_signals_config(self):
         import_signals_and_functions()

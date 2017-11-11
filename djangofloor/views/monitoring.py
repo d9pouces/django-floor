@@ -18,6 +18,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.admin import site
 from django.contrib.auth.decorators import login_required, user_passes_test
+from django.core.checks import Info
 from django.http import Http404
 from django.http.response import HttpResponseRedirect
 from django.template.loader import get_template
@@ -30,6 +31,7 @@ from django.views.decorators.cache import never_cache
 from pkg_resources import parse_requirements, Distribution
 
 from djangofloor.celery import app
+from djangofloor.checks import settings_check_results
 from djangofloor.conf.settings import merger
 from djangofloor.forms import LogNameForm
 from djangofloor.tasks import set_websocket_topics, import_signals_and_functions, get_expected_queues
@@ -74,12 +76,15 @@ class MonitoringCheck(object):
         """ provide the context required to render the widget"""
         return {}
 
+    def check_commandline(self):
+        pass
+
 
 class Packages(MonitoringCheck):
     """Check a list of given packages given by `settings.DF_CHECKED_REQUIREMENTS`.
     Each element is a requirement as listed by `pip freeze`.
     """
-    template = 'djangofloor/%s/monitoring/packages.html' % settings.DF_THEME
+    template = 'djangofloor/django/monitoring/packages.html'
     """base template """
 
     def get_context(self, request):
@@ -128,7 +133,8 @@ class Packages(MonitoringCheck):
 
 
 class System(MonitoringCheck):
-    template = 'djangofloor/%s/monitoring/system.html' % settings.DF_THEME
+    template = 'djangofloor/django/monitoring/system.html'
+    excluded_mountpoints = {'/dev', }
 
     def get_context(self, request):
         if psutil is None:
@@ -142,21 +148,38 @@ class System(MonitoringCheck):
         swap = psutil.swap_memory()
         disks = []
         for y in psutil.disk_partitions(all=True):
+            if y.mountpoint in self.excluded_mountpoints:
+                continue
             # noinspection PyBroadException
             try:
                 disk_data = (y.mountpoint, psutil.disk_usage(y.mountpoint))
                 if disk_data[1].total > 0:
                     disks.append(disk_data)
-            except:
+            except Exception:
                 pass
         # disks = [(y.mountpoint, psutil.disk_usage(y.mountpoint)) for y in psutil.disk_partitions(all=True)]
         # disks = [x for x in disks if x[1].total > 0]
         return {'cpu_count': cpu_count, 'memory': memory, 'cpu_average_usage': cpu_average_usage,
                 'cpu_current_usage': cpu_current_usage, 'swap': swap, 'disks': disks}
 
+    def check_commandline(self):
+        if psutil is None:
+            return
+        for y in psutil.disk_partitions(all=True):
+            if y.mountpoint in self.excluded_mountpoints:
+                continue
+            # noinspection PyBroadException
+            try:
+                usage = psutil.disk_usage(y.mountpoint)
+                if usage.total > 0 and usage.percent > 95:
+                    msg = '%s is almost full (%s %%).' % (y.mountpoint, usage.percent)
+                    settings_check_results.append(Info(msg, obj='djangofloor.monitoring', id='djangofloor.I001'))
+            except Exception:
+                pass
+
 
 class CeleryStats(MonitoringCheck):
-    template = 'djangofloor/%s/monitoring/celery_stats.html' % settings.DF_THEME
+    template = 'djangofloor/django/monitoring/celery_stats.html'
 
     def get_context(self, request):
         if not settings.USE_CELERY:
@@ -209,7 +232,7 @@ class CeleryStats(MonitoringCheck):
 
 
 class RequestCheck(MonitoringCheck):
-    template = 'djangofloor/%s/monitoring/request_check.html' % settings.DF_THEME
+    template = 'djangofloor/django/monitoring/request_check.html'
 
     def get_context(self, request):
         def django_fmt(y):
@@ -259,7 +282,7 @@ class RequestCheck(MonitoringCheck):
 
 
 class LogLastLines(MonitoringCheck):
-    template = 'djangofloor/%s/monitoring/log_last_lines.html' % settings.DF_THEME
+    template = 'djangofloor/django/monitoring/log_last_lines.html'
 
     def get_context(self, request):
         contents = []
@@ -291,7 +314,7 @@ class LogLastLines(MonitoringCheck):
 
 
 class LogAndExceptionCheck(MonitoringCheck):
-    template = 'djangofloor/%s/monitoring/errors.html' % settings.DF_THEME
+    template = 'djangofloor/django/monitoring/errors.html'
 
     def get_context(self, request):
         form = LogNameForm()
@@ -301,7 +324,7 @@ class LogAndExceptionCheck(MonitoringCheck):
 class AuthenticationCheck(MonitoringCheck):
     """Presents all activated authentication methods
     """
-    template = 'djangofloor/%s/monitoring/authentication.html' % settings.DF_THEME
+    template = 'djangofloor/django/monitoring/authentication.html'
 
     def get_context(self, request):
         context = {
@@ -331,7 +354,7 @@ def system_state(request):
     template_values = {'components': components_values, 'site_header': site.site_header,
                        'site_title': site.site_title, 'title': _('System state')}
     set_websocket_topics(request)
-    return TemplateResponse(request, template='djangofloor/%s/system_state.html' % settings.DF_THEME,
+    return TemplateResponse(request, template='djangofloor/%s/system_state.html',
                             context=template_values)
 
 
