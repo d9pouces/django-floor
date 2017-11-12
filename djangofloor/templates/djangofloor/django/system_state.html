@@ -5,6 +5,7 @@
 {% javascript 'django' %}
 {% df_init_websocket %}
 {% endblock %}
+{% block title %}{% trans 'System state' %}{% endblock %}
 
 {% block messages %}
     <ul class="messagelist" id="df_messages">

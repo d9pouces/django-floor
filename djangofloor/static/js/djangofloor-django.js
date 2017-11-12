@@ -7,14 +7,14 @@ The div used by the modal is also emptied to force the update of its content whe
 
 */
 
-(function(jQ) {
+(function($) {
     var notification = function (style, level, content, title, icon, timeout) {
-        var notificationId = "df_messages" + jQ.df._notificationId++;
+        var notificationId = "df_messages" + $.df._notificationId++;
         if (timeout === undefined) { timeout = 0; }
         if (style === undefined) { style = "notification"; }
         if (level === undefined) { level = "info"; }
         if (style === "banner") {
-            var messages = jQ('#df_messages');
+            var messages = $('#df_messages');
             if (messages[0] === undefined) {
                 style = "notification";
                 console.warn('Please add <ul id="df_messages"></ul> somewhere in your HTML code.');
@@ -22,7 +22,7 @@ The div used by the modal is also emptied to force the update of its content whe
                 content = '<li id="' + notificationId + '" class="' + level + ' fade in">' + content + '</li>'
                 messages.prepend(content);
                 messages.slideDown();
-                if (timeout > 0) { setTimeout(function () { jQ.df._closeHTMLNotification(notificationId); }, timeout); }
+                if (timeout > 0) { setTimeout(function () { $.df._closeHTMLNotification(notificationId); }, timeout); }
             }
         }
         if (style === "notification") {
@@ -30,7 +30,7 @@ The div used by the modal is also emptied to force the update of its content whe
             if (title) {
                 title = '<strong>' + title + '</strong>';
             }
-            jQ.notify({message: content, title: title, icon: icon},
+            $.notify({message: content, title: title, icon: icon},
                 {type: level, delay: timeout});
         }
         else if (style === "modal") {
@@ -42,17 +42,42 @@ The div used by the modal is also emptied to force the update of its content whe
             if (content) {
                 htmlContent += '<div class="modal-body"><p>' + content + '</p></div>';
             }
-            jQ.df.call('df.modal.show', {html: htmlContent});
+            $.df.call('df.modal.show', {html: htmlContent});
             if (timeout > 0) {
-                setTimeout(function () { jQ.df.call('df.modal.hide'); }, timeout);
+                setTimeout(function () { $.df.call('df.modal.hide'); }, timeout);
             }
        }
         else if (style === "system") {
-            jQ.df._systemNotification(notificationId, level, content, title, icon, timeout);
+            $.df._systemNotification(notificationId, level, content, title, icon, timeout);
         }
     };
+    $.df.validateForm = function (form, fn) {
+        $.dfws[fn]({data: $(form).serializeArray()}).then(function(data) {
+            var index, formGroup, formInput, key, helpText;
+            var errors = data.errors, helpTexts = data.help_texts;
+            $(form).find('input').each(function (index, formInput) {
+                key = formInput ? formInput.name : undefined;
+                if (key) {
+                    $(formInput).addClass((errors[key] === undefined) ? 'has-success' : 'has-error');
+                    $(formInput).removeClass((errors[key] === undefined) ? 'has-error' : 'has-success');
+                }
+            });
+            $(form).find('select').each(function (index, formInput) {
+                key = formInput ? formInput.name : undefined;
+                if (key) {
+                    $(formInput).addClass((errors[key] === undefined) ? 'has-success' : 'has-error');
+                    $(formInput).removeClass((errors[key] === undefined) ? 'has-error' : 'has-success');
+                }
+            });
+            if(data.valid) {
+                $(form).find('input[type=submit]').removeAttr("disabled");
+            } else {
+                $(form).find('input[type=submit]').attr("disabled", "disabled");
+            }
+        });
+    };
 
-    jQ.df.connect("df.notify", function (opts, id) {
+    $.df.connect("df.notify", function (opts, id) {
 /*"""
 .. function:: df.notify(opts)
 
@@ -74,4 +99,4 @@ The div used by the modal is also emptied to force the update of its content whe
         notification(opts.style, opts.level, opts.content, opts.title, opts.icon, opts.timeout);
     });
 
-}(jQuery));
+}($uery));

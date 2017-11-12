@@ -27,6 +27,7 @@ __author__ = 'Matthieu Gallet'
 # ######################################################################################################################
 try:
     import django_redis  # does not work with is_package_present (???)
+
     USE_REDIS_CACHE = True
 except ImportError:
     django_redis = None
@@ -149,7 +150,6 @@ CELERY_ACCEPT_CONTENT = ['json', 'yaml', 'msgpack']
 CELERY_APP = 'djangofloor'
 CELERY_CREATE_DIRS = True
 CELERY_TASK_SERIALIZER = 'json'
-
 
 # django-npm
 NPM_EXECUTABLE_PATH = 'npm'
@@ -294,7 +294,7 @@ ACCOUNT_ADAPTER = 'djangofloor.views.allauth.AccountAdapter'
 # Django-Debug-Toolbar
 DEBUG_TOOLBAR_CONFIG = {'JQUERY_URL': '{STATIC_URL}vendor/jquery/dist/jquery.min.js', }
 DEBUG_TOOLBAR_PATCH_SETTINGS = False
-INTERNAL_IPS = ('127.0.0.1', '::1', 'localhost', )
+INTERNAL_IPS = ('127.0.0.1', '::1', 'localhost',)
 
 # Django-Bootstrap3
 BOOTSTRAP3 = {
@@ -358,7 +358,6 @@ USE_PAM_AUTHENTICATION = False
 RADIUS_SERVER = None
 RADIUS_PORT = None
 RADIUS_SECRET = None
-
 
 # ######################################################################################################################
 #
@@ -430,6 +429,15 @@ if 'lib' in __split_path:
     LOCAL_PATH = Directory('/%s/var/{DF_MODULE_NAME}' % prefix)
 SERVER_BASE_URL = 'http://{LISTEN_ADDRESS}/'  # aliased in settings.ini as "[global]server_url"
 LOG_DIRECTORY = Directory('{LOCAL_PATH}/log')
+LOG_EXCLUDED_COMMANDS = {'clearsessions', 'check', 'compilemessages', 'collectstatic', 'config',
+                         'createcachetable', 'changepassword', 'createsuperuser',
+                         'dumpdb', 'dbshell', 'dumpdata', 'flush', 'loaddata',
+                         'gen_dev_files', 'inspectdb', 'makemessages', 'makemigrations',
+                         'migrate', 'npm', 'packaging', 'ping_google', 'remove_stale_contenttypes',
+                         'sendtestemail', 'shell', 'showmigrations', 'sqlflush', 'sqlmigrate',
+                         'sqlsequencereset', 'squashmigrations', 'startapp', 'test', 'testserver', }
+# these Django commands do not write log (only on stdout)
+PID_DIRECTORY = Directory('{LOCAL_PATH}/run')
 
 # django_redis (cache)
 CACHE_REDIS_PROTOCOL = 'redis'  # aliased in settings.ini as "[cache]protocol"

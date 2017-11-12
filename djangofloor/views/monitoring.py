@@ -18,7 +18,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.admin import site
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.core.checks import Info
+from django.core.checks import Info, Warning
 from django.http import Http404
 from django.http.response import HttpResponseRedirect
 from django.template.loader import get_template
@@ -35,6 +35,7 @@ from djangofloor.checks import settings_check_results
 from djangofloor.conf.settings import merger
 from djangofloor.forms import LogNameForm
 from djangofloor.tasks import set_websocket_topics, import_signals_and_functions, get_expected_queues
+from djangofloor.views.admin import admin_context
 
 try:
     # noinspection PyPackageRequirements
@@ -280,6 +281,12 @@ class RequestCheck(MonitoringCheck):
         context['settings_providers'] = [p for p in merger.providers]
         return context
 
+    def check_commandline(self):
+        if settings.DEBUG:
+
+            settings_check_results.append(Warning('The DEBUG mode is activated. You should disable it in production',
+                                                  obj='configuration', id='djangofloor.W007'))
+
 
 class LogLastLines(MonitoringCheck):
     template = 'djangofloor/django/monitoring/log_last_lines.html'
@@ -308,7 +315,11 @@ class LogLastLines(MonitoringCheck):
                 continue
             handlers += logger_obj.handlers
         handlers = [x for x in handlers if isinstance(x, logging.FileHandler)]
-        filenames = list({x.baseFilename for x in handlers})
+        filenames = {x.baseFilename for x in handlers}
+        if settings.LOG_DIRECTORY:
+            filenames |= {os.path.join(settings.LOG_DIRECTORY, x) for x in os.listdir(settings.LOG_DIRECTORY)
+                          if x.endswith('.log')}
+        filenames = list(filenames)
         filenames.sort()
         return filenames
 
@@ -351,11 +362,11 @@ def system_state(request):
     if not request.user or not request.user.is_superuser:
         raise Http404
     components_values = [y.render(request) for y in system_checks]
-    template_values = {'components': components_values, 'site_header': site.site_header,
-                       'site_title': site.site_title, 'title': _('System state')}
+    template_values = admin_context({'components': components_values, 'site_header': site.site_header,
+                                     'site_title': site.site_title, 'title': _('System state'),
+                                     'has_permission': request.user.is_active and request.user.is_staff})
     set_websocket_topics(request)
-    return TemplateResponse(request, template='djangofloor/%s/system_state.html',
-                            context=template_values)
+    return TemplateResponse(request, template='djangofloor/django/system_state.html', context=template_values)
 
 
 @never_cache

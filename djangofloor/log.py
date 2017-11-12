@@ -143,14 +143,6 @@ class RemoveDuplicateWarnings(logging.Filter):
         return result
 
 
-def resolve_command():
-    f = extract_stack()
-    for (filename, line_number, name, text) in f:
-        if filename.endswith('djangofloor/scripts.py') and name in ('django', 'celery', 'uwsgi', 'gunicorn', 'aiohttp'):
-            return name
-    return None
-
-
 # noinspection PyMethodMayBeStatic
 class LogConfiguration:
     """Generate a log configuration depending on a few parameters:
@@ -173,7 +165,7 @@ class LogConfiguration:
     *  `SERVER_PORT`: the public port (probably 80 or 443)
     """
     required_settings = ['DEBUG', 'DF_MODULE_NAME', 'SCRIPT_NAME', 'LOG_DIRECTORY', 'LOG_REMOTE_URL',
-                         'LOG_REMOTE_ACCESS', 'SERVER_NAME', 'SERVER_PORT']
+                         'LOG_REMOTE_ACCESS', 'SERVER_NAME', 'SERVER_PORT', 'LOG_EXCLUDED_COMMANDS']
     request_loggers = ['aiohttp.access', 'gunicorn.access', 'django.server', 'geventwebsocket.handler']
 
     def __init__(self):
@@ -187,17 +179,20 @@ class LogConfiguration:
         self.log_directory = None
         self.server_name = None
         self.server_port = None
+        self.excluded_commands = {}
 
     def __call__(self, settings_dict):
         self.module_name = settings_dict['DF_MODULE_NAME']
         self.server_name = settings_dict['SERVER_NAME']
         self.server_port = settings_dict['SERVER_PORT']
+        self.excluded_commands = settings_dict['LOG_EXCLUDED_COMMANDS']
         self.formatters = self.get_default_formatters()
         self.filters = self.get_default_filters()
         self.loggers = self.get_default_loggers()
         self.handlers = self.get_default_handlers()
         self.root = self.get_default_root()
-        self.log_suffix = self.get_logfile_suffix(settings_dict['SCRIPT_NAME'], sys.argv)
+        self.log_suffix = self.get_smart_command_name(self.module_name, settings_dict['SCRIPT_NAME'], sys.argv,
+                                                      self.excluded_commands)
         self.log_directory = settings_dict['LOG_DIRECTORY']
         config = {'version': 1, 'disable_existing_loggers': True, 'formatters': self.formatters,
                   'filters': self.filters, 'handlers': self.handlers, 'loggers': self.loggers, 'root': self.root}
@@ -214,7 +209,7 @@ class LogConfiguration:
                 self.add_handler(logger, 'stderr', level='INFO', formatter='django.server')
             return config
         has_handler = False
-        if self.log_directory:
+        if self.log_directory and self.log_suffix:
             self.add_handler('ROOT', 'warning', level='WARN')
             self.add_handler('ROOT', 'error', level='ERROR')
             for logger in self.request_loggers:
@@ -222,12 +217,16 @@ class LogConfiguration:
             has_handler = True
         has_handler = has_handler or self.add_remote_collector(settings_dict['LOG_REMOTE_URL'],
                                                                settings_dict['LOG_REMOTE_ACCESS'])
-        if not has_handler:  # no file and no logd/syslog => we print to the console (like the debug mode)
+        if not has_handler or not self.log_suffix:
+            # (no file or interactive command) and no logd/syslog => we print to the console (like the debug mode)
             self.add_handler('ROOT', 'stdout', level='WARN', formatter='colorized')
             for logger in self.request_loggers:
                 self.add_handler(logger, 'stderr', formatter='django.server')
         self.root['handlers'].append('mail_admins')
         return config
+
+    def __repr__(self):
+        return '%s.%s' % (self.__module__, 'log_configuration')
 
     def add_remote_collector(self, log_remote_url, log_remote_access):
         has_handler = False
@@ -353,7 +352,7 @@ class LogConfiguration:
                 import systemd.journal
             except ImportError:
                 warning = Warning('Unable to import systemd.journal (required to log with journlad)',
-                                  hint=None, obj='systemd.journal', id='djangofloor.W006')
+                                  hint=None, obj='configuration', id='djangofloor.W006')
                 settings_check_results.append(warning)
                 # replace logd by writing to a plain-text log
                 self.add_handler(logger, level.lower(), level=level)
@@ -368,7 +367,7 @@ class LogConfiguration:
                 settings_check_results.append(warning)
                 self.add_handler(logger, 'stdout', level=level, **kwargs)
                 return
-            basename = '%s-%s-%s.log' % (self.module_name, self.log_suffix, filename)
+            basename = '%s-%s.log' % (self.log_suffix, filename)
             log_filename = os.path.join(log_directory, basename)
             try:
                 remove = not os.path.exists(log_filename)
@@ -380,7 +379,7 @@ class LogConfiguration:
                                    hint=None, obj=log_directory, id='djangofloor.W005')
                 settings_check_results.append(warning_)
                 self.add_handler(logger, 'stdout', level=level, **kwargs)
-            handler_name = '%s.%s.%s' % (self.module_name, self.log_suffix, filename)
+            handler_name = '%s.%s' % (self.log_suffix, filename)
             handler = {'class': 'logging.handlers.RotatingFileHandler', 'maxBytes': 1000000, 'backupCount': 3,
                        'formatter': 'nocolor', 'filename': log_filename, 'level': level}
 
@@ -391,20 +390,31 @@ class LogConfiguration:
         else:
             self.loggers[logger]['handlers'].append(handler_name)
 
-    def get_logfile_suffix(self, script_name, argv):
-        command_name = resolve_command()
-        if command_name == 'django' and len(argv) > 1:
-            if argv[1][:1] == '-' or argv[1] in ('shell', 'collectstatic', 'migrate', 'config', 'clearsessions',
-                                                 'packaging', 'dumpdb', 'loaddata', 'dbshell', 'dumpdata',
-                                                 'showmigrations', 'sendtestemail', 'check', 'sqlflush', 'sqlmigrate',
-                                                 'sqlsequencereset', 'test', 'testserver'):
-                # for these commands, we keep a single log file
-                log_suffix = script_name
+    @staticmethod
+    def get_smart_command_name(module_name, script_name, argv, excluded_commands=None):
+        """Return a "smart" name for the current command line.
+        If it's an interactive Django command (think to "migrate"), returns None
+        It it's the celery worker process, specify the running queues in the name
+        Otherwise, add the Django command in the name.
+
+        :param module_name:
+        :param script_name:
+        :param argv:
+        :param excluded_commands:
+        :return:
+        """
+        # command_name = LogConfiguration.resolve_command()
+        first_arg = argv[1] if len(argv) >= 2 else script_name
+        if len(argv) == 1 and script_name in ('django', 'control', 'celery'):
+            return None
+        if script_name == 'django':
+            if first_arg[:1] == '-' or (excluded_commands and first_arg in excluded_commands):
+                return None
             else:
-                log_suffix = '%s-%s' % (script_name, argv[1])
-        elif command_name == 'celery' and len(argv) > 1:
-            log_suffix = '%s-%s' % (script_name, argv[1])
-            if argv[1] == 'worker':
+                log_suffix = '%s-%s-%s' % (module_name, script_name, first_arg)
+        elif script_name == 'celery':
+            log_suffix = '%s-%s' % (module_name, script_name)
+            if 'worker' in argv:
                 index = -1
                 if '-Q' in argv:
                     index = argv.index('-Q') + 1
@@ -412,9 +422,22 @@ class LogConfiguration:
                     index = argv.index('--queues') + 1
                 if 0 <= index < len(argv):
                     log_suffix += '-%s' % ('.'.join(sorted(argv[index].split(','))))
+            elif 'beat' in argv:
+                log_suffix = '%s-%s-%s' % (module_name, script_name, 'beat')
+            else:
+                return None
         else:
-            log_suffix = script_name
+            log_suffix = '%s-%s' % (module_name, script_name)
         return log_suffix
+
+    @staticmethod
+    def resolve_command():
+        f = extract_stack()
+        for (filename, line_number, name, text) in f:
+            if filename.endswith('djangofloor/scripts.py') and name in ('django', 'celery', 'uwsgi', 'gunicorn',
+                                                                        'aiohttp', 'control', 'server'):
+                return name
+        return None
 
 
 log_configuration = LogConfiguration()

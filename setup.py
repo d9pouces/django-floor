@@ -29,7 +29,6 @@ if python_version >= (3, 4):
     install_requirements += ['aiohttp-wsgi', 'aiohttp>=2,<3', 'asyncio_redis']
 
 entry_points = {'console_scripts': ['djangofloor-createproject = djangofloor.scripts:create_project']}
-extras_requirements['deb'] = ['stdeb>=0.8.5']
 extras_requirements['gunicorn'] = ['gunicorn', 'eventlet']
 extras_requirements['extra'] = ['django-pipeline', 'django-debug-toolbar', 'django-redis-sessions',
                                 'django-redis', 'psutil']

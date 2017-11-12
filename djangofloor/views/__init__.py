@@ -118,13 +118,6 @@ def signals(request):
     return TemplateResponse(request, 'djangofloor/signals.html', template_values, content_type=__get_js_mimetype())
 
 
-# noinspection PyUnusedLocal
-def test_logging(request):
-    """always fail: kust useful for checking log configuration """
-    x = 1 / 0
-    return HttpResponse(x)
-
-
 def send_file(filepath, mimetype=None, force_download=False):
     """Send a local file. This is not a Django view, but a function that is called at the end of a view.
 

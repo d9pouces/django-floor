@@ -126,25 +126,27 @@ class Path(ConfigValue):
     def makedirs(merger, dirname):
         if not dirname or os.path.isdir(dirname):
             return
-        elif os.path.exists(dirname):
-            merger.stderr.write('%s already exists and is not a directory.')
+        dirname = os.path.abspath(dirname)
+        if os.path.exists(dirname):
+            merger.stderr.write('\'%s\' already exists and is not a directory.')
             return
-        merger.stdout.write('Creating directory %s' % dirname)
+        merger.stdout.write('Creating directory \'%s\'' % dirname)
         try:
             os.makedirs(dirname)
         except Exception as e:
-            merger.stderr.write('Unable to create directory %s (%s)' % (dirname, e))
+            merger.stderr.write('Unable to create directory \'%s\' (%s)' % (dirname, e))
 
     def chmod(self, merger, filename):
         if not filename or not os.path.isfile(filename):
             return
+        filename = os.path.abspath(filename)
         if self.mode is None or (os.stat(filename).st_mode & 0o777) == self.mode:
             return
-        merger.stdout.write('Change mode of %s to 0o%o' % (filename, self.mode))
+        merger.stdout.write('Change mode of \'%s\' to 0o%o' % (filename, self.mode))
         try:
             os.chmod(filename, self.mode)
         except Exception as e:
-            merger.stderr.write('Unable to change mode of %s (%s)' % (filename, e))
+            merger.stderr.write('Unable to change mode of \'%s\' (%s)' % (filename, e))
 
 
 class Directory(Path):
@@ -163,8 +165,8 @@ class Directory(Path):
             value += '/'
         if not os.path.isdir(value):
             settings_check_results.append(
-                Warning('"%s" is not a directory.' % value, obj='djangofloor.conf.settings',
-                        id='djangofloor.W001'))
+                Warning('\'%s\' is not a directory. Run the \'collectstatic\' command to fix this problem.' % value,
+                        obj='configuration', id='djangofloor.W001'))
         return value
 
     def pre_collectstatic(self, merger, setting_name, value):
@@ -192,7 +194,7 @@ class File(Path):
         value = os.path.normpath(value)
         if not os.path.isfile(value):
             settings_check_results.append(
-                Warning('"%s" does not exist.' % value, obj='djangofloor.conf.settings',
+                Warning('\'%s\' does not exist.' % value, obj='configuration',
                         id='djangofloor.W002'))
         return value
 
@@ -239,17 +241,18 @@ class AutocreateFileContent(File):
         if filename is None or os.path.isfile(filename):  # empty filename, or it already exists => nothing to do
             return
         result = self.create_function(True, *self.args, **self.kwargs)
+        filename = os.path.abspath(filename)
         if result is not None:
             self.makedirs(merger, os.path.dirname(filename))
-            merger.stdout.write('Writing new value to %s' % filename)
+            merger.stdout.write('Writing new value to \'%s\'' % filename)
             try:
                 with open(filename, 'w', encoding='utf-8') as fd:
                     fd.write(result)
             except Exception as e:
-                merger.stderr.write('Unable to write content of %s (%s)' % (filename, e))
+                merger.stderr.write('Unable to write content of \'%s\' (%s)' % (filename, e))
             self.chmod(merger, filename)
         else:
-            merger.stderr.write('Invalid content for %s (%s)' % filename)
+            merger.stderr.write('Invalid empty content for \'%s\'' % filename)
 
     def get_value(self, merger):
         """ Return the value
@@ -263,8 +266,8 @@ class AutocreateFileContent(File):
                 result = fd.read()
         else:
             settings_check_results.append(
-                Warning('"%s" does not exist.' % filename, obj='djangofloor.conf.settings',
-                        id='djangofloor.W003'))
+                Warning('\'%s\' does not exist. Run the \'migrate\' command to fix this problem.' % filename,
+                        obj='configuration', id='djangofloor.W003'))
             result = self.create_function(False, *self.args, **self.kwargs)
         return result
 

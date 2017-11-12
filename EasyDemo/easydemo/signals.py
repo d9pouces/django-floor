@@ -14,11 +14,15 @@ logger2 = logging.getLogger('djangofloor.signals')
 # noinspection PyUnusedLocal
 @signal(is_allowed_to=everyone, path='demo.slow_signal', queue='slow')
 def slow_signal(window_info, content=''):
-    logger.warning('wait for 10 seconds [éà]…')
+    logger.warning('wait for 10 seconds [with some special chars to check the encoding: éà]…')
+    scall(window_info, 'df.notify', to=[BROADCAST, SERVER],
+          content="A second message should be display in ten seconds.",
+          level='success', timeout=2, style='notification')
     time.sleep(10)
     logger.warning('10 seconds: done.')
     scall(window_info, 'demo.print_sig2', to=[BROADCAST, SERVER],
-          content='This message is sent by a dedicated Celery queue [éà]')
+          content='This message is sent by a dedicated Celery queue'
+                  ' [with some special chars to check the encoding: éà]')
 
 
 @signal(is_allowed_to=everyone, path='demo.print_sig1')
@@ -40,7 +44,8 @@ def print_sig1(window_info, content=''):
 @signal(is_allowed_to=everyone, path='demo.print_sig2')
 def print_sig2(window_info, content=''):
     scall(window_info, 'df.notify', to=[BROADCAST, SERVER],
-          content="Server notification that causes an error in the Celery queue[éà] [%r]" % content,
+          content="Server notification that causes an error in the Celery queue"
+                  "[with some special chars for checking encoding: éà] [%r]" % content,
           level='warning', timeout=2, style='notification')
     1/0
 

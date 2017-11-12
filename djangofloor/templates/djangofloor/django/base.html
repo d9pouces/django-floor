@@ -10,10 +10,32 @@
 <link href="{% static 'css/djangofloor-django.css' %}" rel="stylesheet" type="text/css" />
 {% df_init_websocket %}
 {% endblock %}
+
 {% block title %}{{ title }} | {{ site_title|default:df_project_name }}{% endblock %}
 
 {% block branding %}
-<h1 id="site-name"><a href="{% url 'admin:index' %}">{{ site_header|default:df_project_name }}</a></h1>
+<h1 id="site-name"><a href="{% url df_index_view %}">{{ site_header|default:df_project_name }}</a></h1>
+{% endblock %}
+
+{% block usertools %}
+<div id="user-tools">
+  {% if user.is_authenticated %}
+    {% block welcome-msg %}
+        <strong>{% firstof user.get_short_name user.get_username %}</strong>
+    {% endblock %}
+    {% block userlinks %}
+        {% if user.is_staff %}
+            <a href="{% url 'admin:index' %}">{% fontawesome_icon 'wrench' %}</a> /
+        {% endif %}
+        {% if user.has_usable_password %}
+        <a href="{% url 'df:set_password' %}">{% trans 'Change password' %}</a> /
+        {% endif %}
+        <a href="{% url 'df:logout' %}">{% trans 'Log out' %}</a>
+    {% endblock %}
+  {% else %}
+        <a href="{% url 'df:login' %}">{% trans 'Log in' %}</a>
+  {% endif %}
+</div>
 {% endblock %}
 
 {% block messages %}
@@ -24,8 +46,18 @@
     </ul>
 {% endblock messages %}
 
+
+{% block breadcrumbs %}
+{% if breadcrumbs %}
+<div class="breadcrumbs">
+{% for breadcrumb in breadcrumbs %}{% if not forloop.first %} &rsaquo; {% endif %}
+  {% if breadcrumb.0 %}<a href="{{ breadcrumb.0 }}">{{ breadcrumb.1 }}</a>{% else %}{{ breadcrumb.1 }}{% endif %}
+{% endfor %}
+</div>
+{% endif %}
+{% endblock %}
+
+
 {% block content %}
-
-
 {% endblock %}
 

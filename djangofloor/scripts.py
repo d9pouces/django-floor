@@ -56,7 +56,6 @@ def get_merger_from_env() -> SettingMerger:
         if pycharm_matcher:
             os.environ.setdefault('DF_CONF_NAME', '%s:%s' % pycharm_matcher.groups()[:2])
     os.environ.setdefault('DF_CONF_NAME', '%s:%s' % ('django', 'django'))
-
     module_name, sep, script = os.environ['DF_CONF_NAME'].partition(':')
     module_name = module_name.replace('-', '_')
     if sep != ':':
@@ -96,7 +95,7 @@ def get_merger_from_env() -> SettingMerger:
     return SettingMerger(fields_provider, config_providers, extra_values=extra_values)
 
 
-def set_env(command_name=None):
+def set_env(command_name=None, script_name=None):
     """Set the environment variable `DF_CONF_NAME` with the project name and the script name
     The value looks like "project_name:celery" or "project_name:django"
 
@@ -112,10 +111,9 @@ def set_env(command_name=None):
     if command_name is None:
         command_name = os.path.basename(sys.argv[0])
     # project name
-    script_re = re.match(r'^([\w_\-.]+)-(\w+)(\.py|\.pyc)?$',
-                         command_name)
+    script_re = re.match(r'^([\w_\-.]+)-(\w+)(\.py|\.pyc)?$', command_name)
     if script_re:
-        conf_name = '%s:%s' % (script_re.group(1), script_re.group(2))
+        conf_name = '%s:%s' % (script_re.group(1), script_name or script_re.group(2))
     else:
         conf_name = __get_extra_option('dfproject', 'djangofloor', '--dfproject')
     os.environ.setdefault('DF_CONF_NAME', conf_name)
@@ -144,19 +142,23 @@ def control():
     other value -> changed as "myproject-django" command
 
     """
+
     command = sys.argv[1] if len(sys.argv) >= 2 else None
     if command == 'worker':
+        set_env(script_name='celery')
         return celery()
     elif command == 'celery':
+        set_env(script_name='celery')
         del sys.argv[1]
         return celery()
     elif command == 'server':
+        set_env(script_name='server')
         del sys.argv[1]
-        set_env()
         from django.conf import settings
         if settings.DF_WEBSERVER == 'aiohttp':
             return aiohttp()
         return gunicorn()
+    set_env(script_name='django')
     return django()
 
 

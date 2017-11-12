@@ -1,44 +1,75 @@
-{% extends 'djangofloor/bootstrap3/base.html' %}
-{% load bootstrap3 demo cache %}
+{% extends 'djangofloor/django/base.html' %}
+{% load i18n demo cache %}
 {% block content %}
-<h1>{{ title }}</h1>
-<div class="panel panel-warning">
-    <div class="panel-heading">You should run</div>
-    <div class="panel-body">
-        <ul class="list-unstyled">
-            <li><pre>easydemo-django collectstatic --noinput</pre></li>
-            <li><pre>easydemo-django migrate</pre></li>
-            <li><pre>easydemo-django createsuperuser</pre></li>
-            <li><pre>easydemo-celery worker -Q slow,celery</pre></li>
-            <li><pre>easydemo-django runserver</pre></li>
-        </ul>
-    </div>
+<pre>
+  easydemo-ctl collectstatic --noinput  # {% trans 'create required directories and prepare CSS/JS files' %}
+  easydemo-ctl migrate  # {% trans 'create the database' %}
+  easydemo-ctl createsuperuser  # {% trans 'create a superuser' %}
+  easydemo-ctl worker -Q slow,celery  # r{% trans 'un a background worker' %}
+  easydemo-ctl server  # {% trans '(in another window) run a webserver' %}
+</pre>
+
+
+<div class="module">
+  <h2>{% trans 'Javascript and websockets' %}</h2>
+  <div>
+<p>
+  <button class="button"
+          onclick="return $.dfws.test_function({}).then(function(x) { $.df.call('df.notify', {content: 'Result: ' + x}); });">
+    Test Functions
+  </button>
+    <button class="button"
+          onclick="return $.df.call('demo.print_sig1', {content: 'Client notification [éà]'});">
+    Test Signals
+  </button>
+  <button class="button" onclick="return $.df.call('demo.slow_signal', {content: 'Slow signal [éà]'});">
+    Test slow Signals (specific Celery queue)
+  </button>
+  <button class="button"
+          onclick="return $.df.call('demo.show_modal', {message: '{{ message }}', level: {{ level }} +1});">Show a new
+    modal
+  </button>
+    <button class="button"
+            onclick="return $.df.call('html.download_file', {'url': '{% url  'download_file' %}'});">Download a file
+    </button>
+
+</p>
+  </div>
 </div>
-<div class="btn-group">
-    <button class="btn btn-success btn-sm" onclick="return $.dfws.test_function({}).then(function(x) { $.df.call('df.notify', {content: 'Result: ' + x}); });">
-        Test Functions
-    </button>
-    <button class="btn btn-success btn-sm" onclick="return $.df.call('demo.print_sig1', {content: 'Client notification [éà]'});">
-        Test Signals
-    </button>
-    <button class="btn btn-success btn-sm" onclick="return $.df.call('demo.slow_signal', {content: 'Slow signal [éà]'});">
-        Test slow Signals (specific Celery queue)
-    </button>
-    <button class="btn btn-success btn-sm" onclick="return $.df.call('demo.show_modal', {message: '{{ message }}', level: {{ level }} +1});">Show a new modal</button>
-</div>
+
+
+<div class="module">
+  <h2>{% trans 'Form demo' %}</h2>
+  <div>
 <form id="testForm" onchange="$.df.validateForm(this, 'validate_test');" action="?" method="post">
-    {% csrf_token %}
-    {% bootstrap_form form %}
-    <input type="submit" class="btn btn-success" value="Valider">
+  {% csrf_token %}
+  {{ form }}
+  <input type="submit" class="btn btn-success" value="Valider">
 </form>
-<h3>Cached pages ({% cache 60 sidebar %}Cached template value: {% demo_template_tag 1 %}{% endcache %})</h3>
-<small>Non-cached template value: {% demo_template_tag %}</small>
+
+  </div>
+</div>
+
+
+<div class="module">
+  <h2>{% trans 'Caching system' %}</h2>
+  <div>
+    {% if debug %}
+    <p>{% trans 'The DEBUG mode is active; cache is deactivated.' %}</p>
+  {% endif %}
+<h3>{% trans 'Cached template fragment: ' %}{% cache 60 sidebar %} {% demo_template_tag 1 %}{% endcache %}</h3>
+    <p>{% trans 'This value should be cached by the template engine.' %}</p>
+<h3>{% trans 'Non-cached value: ' %}{% cache 60 sidebar %} {% demo_template_tag 1 %}{% endcache %}</h3>
+    <p>{% trans 'This value should not be cached by the template engine (but may be cached if the whole page is cached).' %}</p>
 <ul>
-    <li><a href="{% url 'chat' %}">Simple chat system</a></li>
-    <li><a href="{% url 'cache_60' %}">Cached during 60s</a></li>
-    <li><a href="{% url 'cache_vary_on_headers' %}">Cached vary on headers</a></li>
-    <li><a href="{% url 'cache_private' %}">Cached for authenticated users</a></li>
-    <li><a href="{% url 'cache_nevercache' %}">Never cached</a></li>
-    <li><button onclick="return $.df.call('html.download_file', {'url': '{% url  'download_file' %}'});" class="btn btn-sm btn-default">Download a file</button></li>
+  <li><a href="{% url 'chat' %}">Simple chat system</a></li>
+  <li><a href="{% url 'cache_60' %}">Cached during 60s</a></li>
+  <li><a href="{% url 'cache_vary_on_headers' %}">Cached vary on headers</a></li>
+  <li><a href="{% url 'cache_private' %}">Cached for authenticated users</a></li>
+  <li><a href="{% url 'cache_nevercache' %}">Never cached</a></li>
 </ul>
+
+  </div>
+</div>
+
 {% endblock %}

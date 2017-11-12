@@ -28,7 +28,7 @@
                     {% if secure_proxy_ssl_header.2 %}{% django_icon 'check' %}{{ secure_proxy_ssl_header.1 }}
                     {% elif secure_proxy_ssl_header.1 %}{% django_icon 'warning' %}{{ secure_proxy_ssl_header.1 }}
                     {% else %}{% django_icon 'remove' %} {% trans 'empty header' %}<br> <small>
-                        {% trans 'Please ensure that a HTTPS access is available and that the webserver provide the right header (without the HTTP prefix).' %}
+                        {% trans 'Please ensure that a HTTPS access is available and that the webserver provides the right header (without the HTTP prefix).' %}
                     </small>
                     {% endif %}
                 </li>
@@ -54,8 +54,9 @@
                 <span class="label label-{% if request_site_valid %}success{% else %}warning{% endif %}">{{ request_site }}</span>
                 </li>{% endif %}
                 <li><strong>{% trans 'Redis-based cache:' %}</strong>
-                    {% if cache_redis %}{% django_icon 'check' %}
-                    {% else %}{% django_icon 'remove' %} {% trans 'you should install "django-redis" to cache your pages in Redis.' %}{% endif %}
+                    {% if cache_redis and not debug %}{% django_icon 'check' %}
+                    {% elif not cache_redis %}{% django_icon 'remove' %} {% trans 'you should install "django-redis" to cache your pages in Redis.' %}
+                    {% else %}{% django_icon 'remove' %} {% trans 'you must deactivate the DEBUG mode to activate the cache.' %}{% endif %}
                 </li>
                 <li><strong>{% trans 'Redis-based sessions:' %}</strong>
                     {% if session_redis %}{% django_icon 'check' %}

@@ -21,10 +21,13 @@ TODO
     * activated authentication methods
 
   * documentation generated for new projects
-    (generate project and generate doc)
-  * documentation for
+  * documentation for developpers
+  * documentation for new projects
   * remove Bootstrap 3?
-  * modal and notifications without bootstrap
+  * check cache system
+  * modal without bootstrap
+  * PID files in a directory
+  * display all logs in a directory
 
 Authentication sources
 ----------------------
@@ -34,3 +37,11 @@ Authentication sources
   * two-factor https://github.com/percipient/django-allauth-2fa
   * radius (OK)
   * PAM (OK)
+  * reCAPTCHA
+
+EasyDemo
+--------
+
+  * Javascript upload a file
+  * dynamic form validation
+  * check i18n

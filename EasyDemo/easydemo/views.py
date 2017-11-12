@@ -1,15 +1,18 @@
 import logging
 
-# noinspection PyUnresolvedReferences
-from django.http import HttpResponse
-from easydemo.forms import TestForm, ChatLoginForm
+from django.conf import settings
 from django.contrib import messages
+# noinspection PyUnresolvedReferences
+from django.contrib.admin import site
+from django.http import HttpResponse
 from django.template.response import TemplateResponse
 from django.views.decorators.cache import cache_control, cache_page
 from django.views.decorators.cache import never_cache
 from django.views.decorators.vary import vary_on_headers
 from django.views.generic import TemplateView
-from djangofloor.tasks import set_websocket_topics, WINDOW
+from easydemo.forms import TestForm, ChatLoginForm
+
+from djangofloor.tasks import set_websocket_topics
 
 logger = logging.getLogger('django.request')
 __author__ = 'Matthieu Gallet'
@@ -26,14 +29,14 @@ class IndexView(TemplateView):
         messages.error(request, 'Example of error message')
         set_websocket_topics(request)
         form = TestForm()
-        template_values = {'form': form, 'title': 'Hello, world!'}
+        template_values = {'form': form, 'title': 'Hello, world!', 'debug': settings.DEBUG}
         return self.render_to_response(template_values)
 
     def post(self, request):
         set_websocket_topics(request)
         form = TestForm(request.POST)
         form.is_valid()
-        template_values = {'form': form, 'title': 'Hello, world!'}
+        template_values = {'form': form, 'title': 'Hello, world!', 'debug': settings.DEBUG}
         return self.render_to_response(template_values)
 
 

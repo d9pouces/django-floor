@@ -299,9 +299,12 @@ class AuthenticationBackends:
         if not any(x.gr_name == 'shadow' and username in x.gr_mem for x in grp.getgrall()):
             settings_check_results.append(Error('The user "%s" must belong to the "shadow" group to use PAM '
                                                 'authentication.' % username,
-                                                obj='djangofloor.conf.settings', id='djangofloor.E004'))
+                                                obj='configuration', id='djangofloor.E004'))
             return []
         return ['django_pam.auth.backends.PAMBackend']
+
+    def __repr__(self):
+        return '%s.%s' % (self.__module__, 'authentication_backends')
 
 
 authentication_backends = AuthenticationBackends()
@@ -457,7 +460,7 @@ class InstalledApps:
             return []
         if 'django.contrib.sites' not in self.default_apps:
             settings_check_results.append(
-                Error('"django.contrib.sites" app must be enabled.', obj='djangofloor.conf.settings',
+                Error('"django.contrib.sites" app must be enabled.', obj='configuration',
                       id='djangofloor.E003'))
             return []
         result = ['allauth', 'allauth.account', 'allauth.socialaccount']
@@ -465,6 +468,9 @@ class InstalledApps:
             result += ['allauth.socialaccount.providers.%s' % k for k in settings_dict['ALLAUTH_PROVIDERS']
                        if k in self.allauth_providers]
         return result
+
+    def __repr__(self):
+        return '%s.%s' % (self.__module__, 'installed_apps')
 
 
 installed_apps = InstalledApps()
@@ -511,6 +517,9 @@ class ExcludedDjangoCommands:
         if not settings_dict['DEBUG']:
             result |= {'testserver', 'test', 'runserver'}
         return result
+
+    def __repr__(self):
+        return '%s.%s' % (self.__module__, 'excluded_django_commands')
 
 
 excluded_django_commands = ExcludedDjangoCommands()

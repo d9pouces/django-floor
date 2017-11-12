@@ -72,7 +72,7 @@ pre {
 body > div.col-xs-11.col-sm-4.alert {
     background: #f3f3f3;
     width: 25%;
-    padding-right: 20px;
+    padding-right: 30px;
     padding-left: 8px;
     padding-top: 4px;
     padding-bottom: 4px;
@@ -86,6 +86,7 @@ body > div.col-xs-11.col-sm-4.alert button.close {
     background-color: transparent;
     border-style: none;
     cursor: pointer;
+    margin-right: -7px;
 }
 
 body > div.col-xs-11.col-sm-4.alert.alert-warning {
@@ -107,6 +108,24 @@ body > div.col-xs-11.col-sm-4.alert.alert-info {
     border: 1px solid #78B8E9;
 }
 
+input.has-success {
+    border-color: #3c763d;
+    border-width: 2px;
+    -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);
+    box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);
+}
+input.has-warning {
+    border-color: #8a6d3b;
+    border-width: 2px;
+    -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);
+    box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);
+}
+input.has-error {
+    border-color: #a94442;
+    border-width: 2px;
+    -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);
+    box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);
+}
 
 .login .form-row #id_newpassword1, .login .form-row #id_newpassword2, .login .form-row #id_password1, .login .form-row #id_password2, .login .form-row #id_email {
     clear: both;
