@@ -13,6 +13,7 @@ import warnings
 from traceback import extract_stack
 from urllib.parse import urlparse
 
+import atexit
 from django.core.checks.messages import Warning
 from django.core.management import color_style
 from django.utils.log import AdminEmailHandler as BaseAdminEmailHandler
@@ -352,7 +353,7 @@ class LogConfiguration:
                 import systemd.journal
             except ImportError:
                 warning = Warning('Unable to import systemd.journal (required to log with journlad)',
-                                  hint=None, obj='configuration', id='djangofloor.W006')
+                                  hint=None, obj='configuration')
                 settings_check_results.append(warning)
                 # replace logd by writing to a plain-text log
                 self.add_handler(logger, level.lower(), level=level)
@@ -363,7 +364,7 @@ class LogConfiguration:
             log_directory = os.path.normpath(self.log_directory)
             if not os.path.isdir(log_directory):
                 warning = Warning('Missing directory, you can create it with \nmkdir -p "%s"' % log_directory,
-                                  hint=None, obj=log_directory, id='djangofloor.W004')
+                                  hint=None, obj=log_directory)
                 settings_check_results.append(warning)
                 self.add_handler(logger, 'stdout', level=level, **kwargs)
                 return
@@ -376,7 +377,7 @@ class LogConfiguration:
                     os.remove(log_filename)
             except PermissionError:
                 warning_ = Warning('Unable to write logs in "%s". Unsufficient rights?' % log_directory,
-                                   hint=None, obj=log_directory, id='djangofloor.W005')
+                                   hint=None, obj=log_directory)
                 settings_check_results.append(warning_)
                 self.add_handler(logger, 'stdout', level=level, **kwargs)
             handler_name = '%s.%s' % (self.log_suffix, filename)
@@ -406,14 +407,14 @@ class LogConfiguration:
         # command_name = LogConfiguration.resolve_command()
         first_arg = argv[1] if len(argv) >= 2 else script_name
         if len(argv) == 1 and script_name in ('django', 'control', 'celery'):
+            # these scripts just display some info and exists
             return None
         if script_name == 'django':
-            if first_arg[:1] == '-' or (excluded_commands and first_arg in excluded_commands):
+            if excluded_commands and first_arg in excluded_commands:
                 return None
-            else:
-                log_suffix = '%s-%s-%s' % (module_name, script_name, first_arg)
+            log_suffix = '%s-%s' % (module_name, first_arg)
         elif script_name == 'celery':
-            log_suffix = '%s-%s' % (module_name, script_name)
+            log_suffix = '%s-%s' % (module_name, 'worker')
             if 'worker' in argv:
                 index = -1
                 if '-Q' in argv:
@@ -423,10 +424,10 @@ class LogConfiguration:
                 if 0 <= index < len(argv):
                     log_suffix += '-%s' % ('.'.join(sorted(argv[index].split(','))))
             elif 'beat' in argv:
-                log_suffix = '%s-%s-%s' % (module_name, script_name, 'beat')
+                log_suffix = '%s-%s' % (module_name, 'beat')
             else:
                 return None
-        else:
+        else:  # probably 'server', 'gunicorn' or 'aiohttp'
             log_suffix = '%s-%s' % (module_name, script_name)
         return log_suffix
 
@@ -441,3 +442,75 @@ class LogConfiguration:
 
 
 log_configuration = LogConfiguration()
+
+
+class PidFilename:
+    required_settings = ['PID_DIRECTORY', 'SCRIPT_NAME', 'LOG_EXCLUDED_COMMANDS', 'DF_MODULE_NAME']
+
+    def __call__(self, settings_dict):
+        dirname = settings_dict['PID_DIRECTORY']
+        if not dirname or not os.path.isdir(dirname):
+            return None
+
+        info = self.get_command_info(settings_dict['DF_MODULE_NAME'], settings_dict['SCRIPT_NAME'],
+                                     sys.argv, settings_dict['LOG_EXCLUDED_COMMANDS'])
+        if info:
+            pid = os.getpid()
+            filename = os.path.join(dirname, '%s.pid' % pid)
+            with open(filename, 'w') as fd:
+                for k, v in sorted(info.items()):
+                    fd.write('%s=%s\n' % (k, v))
+
+            def remove_pid():
+                os.unlink(filename)
+
+            atexit.register(remove_pid)
+            return filename
+        return None
+
+    @staticmethod
+    def get_command_info(module_name, script_name, argv, excluded_commands=None):
+        """Return a "smart" name for the current command line.
+        If it's an interactive Django command (think to "migrate"), returns None
+        It it's the celery worker process, specify the running queues in the name
+        Otherwise, add the Django command in the name.
+
+        :param module_name:
+        :param script_name:
+        :param argv:
+        :param excluded_commands:
+        :return:
+        """
+        # command_name = LogConfiguration.resolve_command()
+        first_arg = argv[1] if len(argv) >= 2 else script_name
+        if len(argv) == 1 and script_name in ('django', 'control', 'celery'):
+            # these scripts just display some info and exists
+            return None
+        result = {'MODULE': module_name, 'COMMAND': first_arg, 'PID': os.getpid(),
+                  'SCRIPT_NAME': sys.argv[0]}
+        if script_name == 'django' and excluded_commands and first_arg in excluded_commands:
+                return None
+        elif script_name == 'celery':
+            if 'worker' in argv:
+                result['COMMAND'] = 'worker'
+                result['QUEUES'] = 'celery'
+                index = -1
+                if '-Q' in argv:
+                    index = argv.index('-Q') + 1
+                elif '--queues' in argv:
+                    index = argv.index('--queues') + 1
+                if 0 <= index < len(argv):
+                    result['QUEUES'] = '|'.join(sorted(argv[index].split(',')))
+            elif 'beat' in argv:
+                result['COMMAND'] = 'beat'
+            else:
+                return None
+        else:  # probably 'server', 'gunicorn' or 'aiohttp'
+            result['COMMAND'] = script_name
+        return result
+
+    def __repr__(self):
+        return '%s.pid_filename' % self.__module__
+
+
+pid_filename = PidFilename()

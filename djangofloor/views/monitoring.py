@@ -10,8 +10,10 @@ You should install the :mod:`psutil` module to add server info (like the CPU usa
 """
 import codecs
 import datetime
+import glob
 import logging
 import os
+import re
 
 import pkg_resources
 from django.conf import settings
@@ -163,6 +165,15 @@ class System(MonitoringCheck):
         return {'cpu_count': cpu_count, 'memory': memory, 'cpu_average_usage': cpu_average_usage,
                 'cpu_current_usage': cpu_current_usage, 'swap': swap, 'disks': disks}
 
+    @staticmethod
+    def check_pid(pid: str):
+        try:
+            os.kill(int(pid), 0)
+        except OSError:
+            return False
+        else:
+            return True
+
     def check_commandline(self):
         if psutil is None:
             return
@@ -174,9 +185,46 @@ class System(MonitoringCheck):
                 usage = psutil.disk_usage(y.mountpoint)
                 if usage.total > 0 and usage.percent > 95:
                     msg = '%s is almost full (%s %%).' % (y.mountpoint, usage.percent)
-                    settings_check_results.append(Info(msg, obj='djangofloor.monitoring', id='djangofloor.I001'))
+                    settings_check_results.append(Info(msg, obj='system'))
             except Exception:
                 pass
+        if settings.PID_DIRECTORY:
+            processes = self.get_expected_processes()
+            if settings.USE_CELERY:
+                processes.update({'worker (queue \'%s\')' % x: [] for x in get_expected_queues()})
+            for filename in glob.glob('%s/*.pid' % settings.PID_DIRECTORY):
+                # list all PID files and read them
+                with open(filename) as fd:
+                    data = {}
+                    for line in fd:
+                        key, sep, value = line.strip().partition('=')
+                        if sep == '=' and key == key.upper():
+                            data[key] = value
+                    command, pid = data.get('COMMAND'), data.get('PID')
+                    if command == 'worker' and data.get('QUEUES'):
+                        for queue in data['QUEUES'].split('|'):
+                            command = 'worker (queue \'%s\')' % queue
+                            if command and pid and re.match('^\d+$', pid):
+                                processes.setdefault(command, []).append(pid)
+                    elif command and pid and re.match('^\d+$', pid):
+                        processes.setdefault(command, []).append(pid)
+            for process, pids in processes.items():
+                if not pids:
+                    settings_check_results.append(Warning('Process %s = no such process' % process, obj='system'))
+                valid_pids = {pid for pid in pids if self.check_pid(pid)}
+                invalid_pids = {pid for pid in pids if pid not in valid_pids}
+                for pid in invalid_pids:
+                    msg = 'Process %s [stale PID] = %s (in \'%s%s.pid\')' \
+                          % (process, pid, settings.PID_DIRECTORY, pid)
+                    settings_check_results.append(Warning(msg, obj='system'))
+                if valid_pids:
+                    msg = 'Process %s = %s' % (process, ', '.join(valid_pids))
+                    settings_check_results.append(Info(msg, obj='system'))
+
+    @staticmethod
+    def get_expected_processes():
+        expected_processes = {'server': []}
+        return expected_processes
 
 
 class CeleryStats(MonitoringCheck):
@@ -285,7 +333,7 @@ class RequestCheck(MonitoringCheck):
         if settings.DEBUG:
 
             settings_check_results.append(Warning('The DEBUG mode is activated. You should disable it in production',
-                                                  obj='configuration', id='djangofloor.W007'))
+                                                  obj='configuration'))
 
 
 class LogLastLines(MonitoringCheck):

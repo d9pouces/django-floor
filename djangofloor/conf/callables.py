@@ -298,8 +298,7 @@ class AuthenticationBackends:
         username = pwd.getpwuid(os.getuid()).pw_name
         if not any(x.gr_name == 'shadow' and username in x.gr_mem for x in grp.getgrall()):
             settings_check_results.append(Error('The user "%s" must belong to the "shadow" group to use PAM '
-                                                'authentication.' % username,
-                                                obj='configuration', id='djangofloor.E004'))
+                                                'authentication.' % username, obj='configuration'))
             return []
         return ['django_pam.auth.backends.PAMBackend']
 
@@ -461,7 +460,7 @@ class InstalledApps:
         if 'django.contrib.sites' not in self.default_apps:
             settings_check_results.append(
                 Error('"django.contrib.sites" app must be enabled.', obj='configuration',
-                      id='djangofloor.E003'))
+                      id='djangofloor.E001'))
             return []
         result = ['allauth', 'allauth.account', 'allauth.socialaccount']
         if settings_dict['ALLAUTH_PROVIDERS']:

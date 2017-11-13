@@ -166,7 +166,7 @@ class Directory(Path):
         if not os.path.isdir(value):
             settings_check_results.append(
                 Warning('\'%s\' is not a directory. Run the \'collectstatic\' command to fix this problem.' % value,
-                        obj='configuration', id='djangofloor.W001'))
+                        obj='configuration'))
         return value
 
     def pre_collectstatic(self, merger, setting_name, value):
@@ -194,8 +194,7 @@ class File(Path):
         value = os.path.normpath(value)
         if not os.path.isfile(value):
             settings_check_results.append(
-                Warning('\'%s\' does not exist.' % value, obj='configuration',
-                        id='djangofloor.W002'))
+                Warning('\'%s\' does not exist.' % value, obj='configuration'))
         return value
 
     def pre_collectstatic(self, merger, setting_name, value):
@@ -267,7 +266,7 @@ class AutocreateFileContent(File):
         else:
             settings_check_results.append(
                 Warning('\'%s\' does not exist. Run the \'migrate\' command to fix this problem.' % filename,
-                        obj='configuration', id='djangofloor.W003'))
+                        obj='configuration'))
             result = self.create_function(False, *self.args, **self.kwargs)
         return result
 

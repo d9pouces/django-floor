@@ -15,7 +15,7 @@ from djangofloor.conf.callables import url_parse_server_name, \
     ldap_boolean_attribute_map, ldap_group_search, ldap_group_class, databases, excluded_django_commands
 from djangofloor.conf.config_values import Path, Directory, SettingReference, ExpandIterable, \
     CallableSetting, AutocreateFileContent
-from djangofloor.log import log_configuration
+from djangofloor.log import log_configuration, pid_filename
 from djangofloor.utils import is_package_present, guess_version
 
 __author__ = 'Matthieu Gallet'
@@ -438,6 +438,7 @@ LOG_EXCLUDED_COMMANDS = {'clearsessions', 'check', 'compilemessages', 'collectst
                          'sqlsequencereset', 'squashmigrations', 'startapp', 'test', 'testserver', }
 # these Django commands do not write log (only on stdout)
 PID_DIRECTORY = Directory('{LOCAL_PATH}/run')
+PID_FILENAME = CallableSetting(pid_filename)
 
 # django_redis (cache)
 CACHE_REDIS_PROTOCOL = 'redis'  # aliased in settings.ini as "[cache]protocol"

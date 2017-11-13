@@ -169,8 +169,7 @@ class ChoiceConfigFile(ConfigField):
             if value not in choices:
                 valid = ', '.join(['"%s"' % x for x in choices])
                 settings_check_results.append(Error('Invalid value "%s". Valid choices: %s.' %
-                                                    (value, valid), obj='djangofloor.conf.settings',
-                                                    id='djangofloor.E002'))
+                                                    (value, valid), obj='configuration'))
             return choices.get(value)
 
         def to_str(value):

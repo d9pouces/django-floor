@@ -26,7 +26,7 @@ def missing_package(package_name, desc=''):
     else:
         cmd = 'Try "sudo pip3 install %s" to install it.' % package_name
     settings_check_results.append(Error('Python package "%s" is required%s. %s' % (package_name, desc, cmd),
-                                        obj='configuration', id='djangofloor.E001'))
+                                        obj='configuration'))
 
 
 # noinspection PyUnusedLocal
