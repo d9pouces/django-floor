@@ -10,28 +10,14 @@ The div used by the modal is also emptied to force the update of its content whe
 (function(jQ) {
     var onHiddenModal = function () {
         "use strict";
-        var baseModal = jQ('#df_modal'), respawn = undefined, df = jQ.df;
+        var baseModal = jQ('#df_modal');
         baseModal.removeData('bs.modal');
         baseModal.find(".modal-content").html('');
-        while((df.__modal_respawn_index >= 0) && (!df.__modal_respawn_stack[df.__modal_respawn_index - 1])) {
-            df.__modal_respawn_index -= 1;
-        }
-        if(df.__modal_respawn_index >= 0) {
-            respawn = df.__modal_respawn_stack[df.__modal_respawn_index - 1];
-        }
-        if (respawn) {
-            df.__modal_respawn_index -= 2;
-            df.call(respawn.signal, respawn.options);
-        } else {
-            df.__modal_respawn_index = -1;
-        }
-        if (df.__modal_onhide) {
-            df.call(df.__modal_onhide.signal, df.__modal_onhide.options);
-            df.__modal_onhide = null;
+        if (jQ.df.__modal_onhide) {
+            jQ.df.call(jQ.df.__modal_onhide.signal, jQ.df.__modal_onhide.options);
+            jQ.df.__modal_onhide = null;
         }
     };
-    jQ.df.__modal_respawn_stack = [];
-    jQ.df.__modal_respawn_index = -1;
     jQ.df.__modal_onhide = null;
     var notification = function (style, level, content, title, icon, timeout) {
         var notificationId = "df_messages" + jQ.df._notificationId++;
@@ -79,26 +65,19 @@ The div used by the modal is also emptied to force the update of its content whe
     jQ("#df_modal").on('hidden.bs.modal', onHiddenModal);
     jQ.df.connect('df.modal.show', function (options) {
 /*"""
-.. function:: df.modal.show(opts)
+.. function:: $.df.modal.show(opts)
 
     Display a nice Bootstrap 3 modal window (!)
 
     .. code-block:: javascript
 
-        $.df.call('df.modal.show', {html: "Modal content!", width: "120px", clean_stack: true,
-            respawn: {signal: "signal.name", options: {...}}, onhide: {signal: "signal.name", options: {...}}});
+        $.df.call('df.modal.show', {html: "Modal content!", width: "120px",
+            onhide: {signal: "signal.name", options: {...}}});
 
     :param string html: Content of the modal (put inside the "modal-content" div element
     :param string width: Width of the display modal (optional)
-    :param boolean clean_stack: Clean the respawning stack (optional)
-    :param object respawn: signal to call for respawning the modal (see below, optional)
     :param object onhide: signal to call when this modal is hidden or closed (optional)
 
-
-    By design, only a single modal window can be displayed. If a modal "A" raises a second modal "B", "B" replaces "A"
-    and "A" will not be displayed if "B" is closed. However, when "B" is closed, the `respawn` signal of "A" is
-    called and can display again the "A" modal.
-    If `clean_stack` is true when "B" is displayed, then the `respawn` signal of "A" won't be called.
 
 */
         "use strict";
@@ -114,23 +93,12 @@ The div used by the modal is also emptied to force the update of its content whe
         } else {
             baseModal.find(".modal-dialog").removeAttr("style");
         }
-        if(options.clean_stack) {
-            jQ.df.__modal_respawn_index = -1;
-            jQ.df.__modal_respawn_stack = [];
-        }
-        if(options.respawn) {
-            jQ.df.__modal_respawn_index += 1;
-            while(jQ.df.__modal_respawn_index + 1 >= jQ.df.__modal_respawn_stack.length) {
-                jQ.df.__modal_respawn_stack.push(undefined);
-            }
-            jQ.df.__modal_respawn_stack[jQ.df.__modal_respawn_index] = options.respawn;
-        }
         jQ.df.__modal_onhide = options.onhide;
         baseModal.modal('show');
     });
     jQ.df.connect("df.notify", function (opts, id) {
 /*"""
-.. function:: df.notify(opts)
+.. function:: $.df.notify(opts)
 
     Display a notification to the user. Multiple styles are available: modal windows, Growl-like notifications,
     page-wide banners or system notification (out of the browser).
@@ -155,17 +123,8 @@ The div used by the modal is also emptied to force the update of its content whe
         if (opts === undefined) {
             opts = {};
         }
-        if(opts.clean_stack) {
-            jQ.df.__modal_respawn_index = -1;
-            jQ.df.__modal_respawn_stack = [];
-        }
         baseModal.modal('hide');
         baseModal.removeData('bs.modal');
-    });
-    jQ.df.connect('df.modal.clean_stack', function () {
-        "use strict";
-        jQ.df.__modal_respawn_index = -1;
-        jQ.df.__modal_respawn_stack = [];
     });
     jQ.df.validateForm = function (form, fn) {
         jQ.dfws[fn]({data: jQ(form).serializeArray()}).then(function(data) {

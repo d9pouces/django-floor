@@ -3,6 +3,7 @@ import time
 
 import re
 from djangofloor.decorators import signal, everyone
+from djangofloor.signals.bootstrap3 import render_to_modal
 from djangofloor.tasks import scall, BROADCAST, SERVER, WINDOW
 from djangofloor.wsgi.window_info import render_to_string
 
@@ -62,9 +63,5 @@ def chat_receive(window_info, content=''):
 
 @signal(is_allowed_to=everyone, path='demo.show_modal')
 def show_modal(window_info, message='Message', level=1):
-    content = render_to_string('easydemo/modal.html', {'message': message, 'level': level})
-    respawn = {'signal': 'demo.show_modal', 'options': {'message': '%s (-)' % message, 'level': level}}
-    if level % 2 == 0:
-        respawn = None
-    scall(window_info, 'df.modal.show', to=[BROADCAST], html=content,
-          respawn=respawn, clean_stack=level == 15)
+    render_to_modal(window_info, 'easydemo/modal.html', {'message': message, 'level': level},
+                    to=[BROADCAST])

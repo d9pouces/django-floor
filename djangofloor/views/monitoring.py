@@ -190,41 +190,46 @@ class System(MonitoringCheck):
                 pass
         if settings.PID_DIRECTORY:
             processes = self.get_expected_processes()
-            if settings.USE_CELERY:
-                processes.update({'worker (queue \'%s\')' % x: [] for x in get_expected_queues()})
             for filename in glob.glob('%s/*.pid' % settings.PID_DIRECTORY):
                 # list all PID files and read them
-                with open(filename) as fd:
-                    data = {}
-                    for line in fd:
-                        key, sep, value = line.strip().partition('=')
-                        if sep == '=' and key == key.upper():
-                            data[key] = value
-                    command, pid = data.get('COMMAND'), data.get('PID')
-                    if command == 'worker' and data.get('QUEUES'):
-                        for queue in data['QUEUES'].split('|'):
-                            command = 'worker (queue \'%s\')' % queue
-                            if command and pid and re.match('^\d+$', pid):
-                                processes.setdefault(command, []).append(pid)
-                    elif command and pid and re.match('^\d+$', pid):
-                        processes.setdefault(command, []).append(pid)
+                data = self.read_pid_file(filename)
+                self.analyse_pid_file(processes, data)
             for process, pids in processes.items():
                 if not pids:
-                    settings_check_results.append(Warning('Process %s = no such process' % process, obj='system'))
+                    settings_check_results.append(Warning('%s: no such process' % process, obj='system'))
                 valid_pids = {pid for pid in pids if self.check_pid(pid)}
                 invalid_pids = {pid for pid in pids if pid not in valid_pids}
                 for pid in invalid_pids:
-                    msg = 'Process %s [stale PID] = %s (in \'%s%s.pid\')' \
-                          % (process, pid, settings.PID_DIRECTORY, pid)
+                    msg = '%s: stale PID %s (in \'%s%s.pid\')' % (process, pid, settings.PID_DIRECTORY, pid)
                     settings_check_results.append(Warning(msg, obj='system'))
-                if valid_pids:
-                    msg = 'Process %s = %s' % (process, ', '.join(valid_pids))
-                    settings_check_results.append(Info(msg, obj='system'))
+
+    @staticmethod
+    def analyse_pid_file(processes, data):
+        command, pid = data.get('COMMAND'), data.get('PID')
+        if command == 'worker' and data.get('QUEUES'):
+            for queue in data['QUEUES'].split('|'):
+                command = 'worker (queue \'%s\')' % queue
+                if command and pid and re.match('^\d+$', pid):
+                    processes.setdefault(command, []).append(pid)
+        elif command and pid and re.match('^\d+$', pid):
+            processes.setdefault(command, []).append(pid)
+
+    @staticmethod
+    def read_pid_file(filename):
+        with open(filename) as fd:
+            data = {}
+            for line in fd:
+                key, sep, value = line.strip().partition('=')
+                if sep == '=' and key == key.upper():
+                    data[key] = value
+        return data
 
     @staticmethod
     def get_expected_processes():
-        expected_processes = {'server': []}
-        return expected_processes
+        processes = {'server': []}
+        if settings.USE_CELERY:
+            processes.update({'worker (queue \'%s\')' % x: [] for x in get_expected_queues()})
+        return processes
 
 
 class CeleryStats(MonitoringCheck):
