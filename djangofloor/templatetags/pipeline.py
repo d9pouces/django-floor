@@ -1,8 +1,9 @@
 """Emulate django-pipeline templatetags
 ====================================
 
-Allows you to use the same `javascript` and `stylesheet` template tags as with `django-pipeline`.
+Allows you to use the same `javascript` and `stylesheet` template tags if `django-pipeline` is not installed.
 If you add `django-pipeline` to your `settings.INSTALLED_APPS`, these versions are ignored, using the original ones.
+If you keep the default settings, `django-pipeline` is automatically detected and added, so you have nothing to do.
 
 """
 import warnings
