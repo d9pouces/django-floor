@@ -4,15 +4,16 @@ from django.conf import settings
 from django.contrib import messages
 # noinspection PyUnresolvedReferences
 from django.contrib.admin import site
-from django.http import HttpResponse
+from django.http import HttpResponse, Http404
 from django.template.response import TemplateResponse
 from django.views.decorators.cache import cache_control, cache_page
 from django.views.decorators.cache import never_cache
 from django.views.decorators.vary import vary_on_headers
 from django.views.generic import TemplateView
-from easydemo.forms import TestForm, ChatLoginForm
+from easydemo.forms import TestForm, ChatLoginForm, UploadFileForm, SimpleUploadFileForm
 
-from djangofloor.tasks import set_websocket_topics
+from djangofloor.signals import notify, SUCCESS, DANGER
+from djangofloor.tasks import set_websocket_topics, BROADCAST, scall, WINDOW
 
 logger = logging.getLogger('django.request')
 __author__ = 'Matthieu Gallet'
@@ -29,14 +30,22 @@ class IndexView(TemplateView):
         messages.error(request, 'Example of error message')
         set_websocket_topics(request)
         form = TestForm()
-        template_values = {'form': form, 'title': 'Hello, world!', 'debug': settings.DEBUG}
+        upload_form = UploadFileForm()
+        template_values = {'form': form, 'title': 'Hello, world!', 'debug': settings.DEBUG,
+                           'upload_form': upload_form, 'simple_upload_form': SimpleUploadFileForm()}
         return self.render_to_response(template_values)
 
     def post(self, request):
         set_websocket_topics(request)
         form = TestForm(request.POST)
-        form.is_valid()
-        template_values = {'form': form, 'title': 'Hello, world!', 'debug': settings.DEBUG}
+        if form.is_valid():
+            messages.info(request, 'Plain form is valid')
+        upload_form = UploadFileForm(request.POST, request.FILES)
+        if upload_form.is_valid():
+            messages.info(request, 'File upload form is valid')
+
+        template_values = {'form': form, 'title': 'Hello, world!', 'debug': settings.DEBUG,
+                           'upload_form': upload_form, 'simple_upload_form': SimpleUploadFileForm()}
         return self.render_to_response(template_values)
 
 
@@ -90,3 +99,14 @@ def download_file(request):
     response = HttpResponse('Text content', content_type='text/text')
     response['Content-Disposition'] = 'attachment;filename=somefile.txt'
     return response
+
+
+def upload_file(request):
+    if request.method != 'POST':
+        raise Http404
+    form = SimpleUploadFileForm(request.POST, request.FILES)
+    if form.is_valid():
+        notify(request, 'Thank you for uploading your file', level=SUCCESS)
+    else:
+        notify(request, 'An error happend when the file has been uploaded', level=DANGER)
+    return HttpResponse()

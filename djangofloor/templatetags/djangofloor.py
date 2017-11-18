@@ -15,7 +15,7 @@ from django.templatetags.static import PrefixNode, StaticNode
 from django.urls import reverse
 from django.utils.encoding import force_text
 # noinspection PyProtectedMember
-from django.utils.html import _js_escapes
+from django.utils.html import _js_escapes, escape
 from django.utils.safestring import mark_safe
 
 from djangofloor.tasks import set_websocket_topics
@@ -41,8 +41,10 @@ def df_init_websocket(context, *topics):
     signed_token = signer.sign(ws_token)
     protocol = 'wss' if settings.USE_SSL else 'ws'
     site_name = '%s:%s' % (settings.SERVER_NAME, settings.SERVER_PORT)
-    script = '$(document).ready(function() { $.df._wsConnect("%s://%s%s?token=%s&%s=%s"); });' % \
+    script = '$.df._wsConnect("%s://%s%s?token=%s&%s=%s");' % \
              (protocol, site_name, settings.WEBSOCKET_URL, signed_token, settings.SESSION_COOKIE_NAME, session_id)
+    script += '$.df._wsToken="%s";' % signed_token
+    script = '$(document).ready(function(){%s});' % script
     init_value = '<script type="application/javascript">%s</script>' % script
     init_value += '<script type="text/javascript" src="%s" charset="utf-8"></script>' % reverse('df:signals')
     return mark_safe(init_value)
@@ -107,6 +109,25 @@ def django_icon(name, color=None):
     """Add font-awesome icons in your HTML code"""
     return mark_safe('<i class="di di-{name}" {color}></i>'.
                      format(name=name, color='style="color:%s;"' % color if color else ''))
+
+
+@register.simple_tag
+def django_form(form):
+    result = ''
+    for field in form:
+        result += '<div class="form-row">'
+        if field.errors:
+            result += field.errors.as_ul()
+        if field.label_tag():
+            result += field.label_tag()
+        result += str(field)
+        if field.help_text:
+            result += '<div class="help">'
+            result += escape(field.help_text)
+            result += '</div>'
+        result += '</div>'
+    result += ''
+    return mark_safe(result)
 
 
 @register.filter(name='df_level')

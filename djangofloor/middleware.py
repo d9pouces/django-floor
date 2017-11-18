@@ -64,8 +64,12 @@ class DjangoFloorMiddleware(BaseRemoteUserMiddleware):
         header = header.upper().replace('-', '_')
 
     # noinspection PyMethodMayBeStatic
-    def process_request(self, request):
+    def process_request(self, request: HttpRequest):
         request.window_key = get_random_string(32, VALID_KEY_CHARS)
+        if request.is_ajax() and 'HTTP_WINDOW_KEY' in request.META:
+            from djangofloor.wsgi.wsgi_server import signer
+            signed_token = request.META['HTTP_WINDOW_KEY']
+            request.window_key = signer.unsign(signed_token)
         request.has_websocket_topics = False
         request.remote_username = None
 

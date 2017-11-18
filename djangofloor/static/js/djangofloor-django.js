@@ -52,7 +52,7 @@ The div used by the modal is also emptied to force the update of its content whe
         }
     };
     $.df.validateForm = function (form, fn) {
-        $.dfws[fn]({data: $(form).serializeArray()}).then(function(data) {
+        $.dfws[fn]({data: $.df.serializeArray(form)}).then(function(data) {
             var index, formGroup, formInput, key, helpText;
             var errors = data.errors, helpTexts = data.help_texts;
             $(form).find('input').each(function (index, formInput) {

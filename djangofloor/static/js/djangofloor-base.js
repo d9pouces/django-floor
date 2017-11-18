@@ -7,7 +7,7 @@ Here is the complete JavaScript API provided by DjangoFloor.
 (function($) {
     $.df = {};
     $.dfws = {};
-    $.df._wsToken = null;
+    $.df._wsToken = null;  /* contains the signed window key */
     $.df._wsConnection = null;
     $.df._notificationId = 1;
     $.df._wsFunctionCallId = 1;
@@ -75,7 +75,7 @@ Here is the complete JavaScript API provided by DjangoFloor.
             };
         };
         connection.onerror = function(e) {
-            console.error(e);
+            console.error("WS error: " + e);
         };
         connection.onclose = function(e) {
             $.df._wsConnection = null;
@@ -160,6 +160,45 @@ Here is the complete JavaScript API provided by DjangoFloor.
             $.df._registered_signals[signal] = [];
         }
         $.df._registered_signals[signal].push(fn);
+    };
+
+    $.df.serializeArray = function (form) {
+        var value = $(form).serializeArray();
+        $(form).find('input[type="file"]').each(function (index, element) {
+            if (element.files.length) {
+                value.push({name: element.name, value: element.files[0].name});
+            }
+        });
+        return value;
+    };
+
+/*"""
+.. function:: $.df.uploadFile(url, fileSelector, progressSelector)
+
+    Upload a file to the provided URL and update a progress bar element
+
+.. code-block:: html
+
+    <form onsubmit="return $.df.uploadFile("/app/upload", this, '#myProgressBar');" method="POST" >
+    <input type="text" name="content">
+    </form>;
+
+*/
+    $.df.uploadFile = function (url, fileSelector, progressSelector) {
+        $.ajax({url: url, type: 'POST', data: new FormData($(fileSelector)[0]), cache: false,
+                contentType: false, processData: false, headers: {'WINDOW-KEY': $.df._wsToken},
+                xhr: function() {
+                var myXhr = $.ajaxSettings.xhr();
+                if (myXhr.upload) {
+                    myXhr.upload.addEventListener('progress', function(e) {
+                        if (e.lengthComputable && progressSelector) {
+                            $(progressSelector).attr({value: e.loaded, max: e.total});
+                        }
+                    }, false);
+                }
+                return myXhr;
+            },
+        });
     };
     /**
 

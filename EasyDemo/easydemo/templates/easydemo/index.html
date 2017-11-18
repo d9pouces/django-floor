@@ -1,5 +1,5 @@
 {% extends 'djangofloor/django/base.html' %}
-{% load i18n demo cache %}
+{% load i18n demo cache staticfiles djangofloor %}
 {% block content %}
 <pre>
   easydemo-ctl check  # {% trans 'check if everything is correct' %}
@@ -16,37 +16,63 @@
 <div class="module">
   <h2>{% trans 'Javascript and websockets' %}</h2>
   <div>
-<p>
-  <button class="button"
-          onclick="return $.dfws.test_function({}).then(function(x) { $.df.call('df.notify', {content: 'Result: ' + x}); });">
-    Test Functions
-  </button>
-    <button class="button"
-          onclick="return $.df.call('demo.print_sig1', {content: 'Client notification [éà]'});">
-    Test Signals
-  </button>
-  <button class="button" onclick="return $.df.call('demo.slow_signal', {content: 'Slow signal [éà]'});">
-    Test slow Signals (specific Celery queue)
-  </button>
-  <button class="button"
-          onclick="return $.df.call('demo.show_modal', {message: '{{ message }}', level: {{ level }} +1});">Show a new
-    modal
-  </button>
-    <button class="button"
-            onclick="return $.df.call('html.download_file', {'url': '{% url  'download_file' %}'});">Download a file
-    </button>
-
-</p>
+    <p>
+      <button class="button"
+              onclick="return $.dfws.test_function({}).then(function(x) { $.df.call('df.notify', {content: 'Result: ' + x}); });">
+        Test Functions
+      </button>
+      <button class="button"
+              onclick="return $.df.call('demo.print_sig1', {content: 'Client notification [éà]'});">
+        Test Signals
+      </button>
+      <button class="button" onclick="return $.df.call('demo.slow_signal', {content: 'Slow signal [éà]'});">
+        Test slow Signals (specific Celery queue)
+      </button>
+      <button class="button"
+              onclick="return $.df.call('demo.show_modal', {message: '{{ message }}', level: {{ level }} +1});">Show a
+        new
+        modal
+      </button>
+      <button class="button"
+              onclick="return $.df.call('html.download_file', {'url': '{% url  'download_file' %}'});">Download a file
+      </button>
+    </p>
   </div>
 </div>
 <div class="module">
+  <h2>{% trans 'File upload in a form' %}</h2>
+  <div>
+    <form id="uploadForm" onchange="$.df.validateForm(this, 'validate_upload_file');" action="?" method="post" enctype="multipart/form-data">
+      {% csrf_token %}<fieldset class="module aligned wide">
+      {% django_form upload_form %}</fieldset>
+      <input type="submit" class="btn btn-success" value="Valider">
+    </form>
+  </div>
+</div>
+
+<div class="module">
+  <h2>{% trans 'File upload through Ajax, with a progress bar' %}</h2>
+  <div>
+    <form id="uploadForm" onchange="$.df.uploadFile('{% url "upload_file" %}', this, 'progress');" action="?" method="post" enctype="multipart/form-data">
+      {% csrf_token %}<fieldset class="module aligned wide">
+      {% django_form simple_upload_form %}
+    <div class="form-row">
+    <progress max="100" value="0" style="display: block; width: 100%; height: 8px;"></progress>
+    </div>
+      </fieldset>
+      <input type="submit" class="btn btn-success" value="Valider">
+    </form>
+  </div>
+</div>
+
+<div class="module">
   <h2>{% trans 'Form demo' %}</h2>
   <div>
-<form id="testForm" onchange="$.df.validateForm(this, 'validate_test');" action="?" method="post">
-  {% csrf_token %}
-  {{ form }}
-  <input type="submit" class="btn btn-success" value="Valider">
-</form>
+    <form id="testForm" onchange="$.df.validateForm(this, 'validate_test');" action="?" method="post">
+      {% csrf_token %}<fieldset class="module aligned wide">
+      {% django_form form %}</fieldset>
+      <input type="submit" class="btn btn-success" value="{% trans 'send' %}">
+    </form>
 
   </div>
 </div>
@@ -57,18 +83,18 @@
   <div>
     {% if debug %}
     <p>{% trans 'The DEBUG mode is active; cache is deactivated.' %}</p>
-  {% endif %}
-<h3>{% trans 'Cached template fragment: ' %}{% cache 60 sidebar %} {% demo_template_tag 1 %}{% endcache %}</h3>
+    {% endif %}
+    <h3>{% trans 'Cached template fragment: ' %}{% cache 60 sidebar %} {% demo_template_tag 1 %}{% endcache %}</h3>
     <p>{% trans 'This value should be cached by the template engine.' %}</p>
-<h3>{% trans 'Non-cached value: ' %}{% cache 60 sidebar %} {% demo_template_tag 1 %}{% endcache %}</h3>
-    <p>{% trans 'This value should not be cached by the template engine (but may be cached if the whole page is cached).' %}</p>
-<ul>
-  <li><a href="{% url 'chat' %}">Simple chat system</a></li>
-  <li><a href="{% url 'cache_60' %}">Cached during 60s</a></li>
-  <li><a href="{% url 'cache_vary_on_headers' %}">Cached vary on headers</a></li>
-  <li><a href="{% url 'cache_private' %}">Cached for authenticated users</a></li>
-  <li><a href="{% url 'cache_nevercache' %}">Never cached</a></li>
-</ul>
+    <h3>{% trans 'Non-cached value: ' %}{% cache 60 sidebar %} {% demo_template_tag 1 %}{% endcache %}</h3>
+    <p>{% trans 'This value should not be cached by the template engine but the whole page may be cached.' %}</p>
+    <ul>
+      <li><a href="{% url 'chat' %}">Simple chat system</a></li>
+      <li><a href="{% url 'cache_60' %}">Cached during 60s</a></li>
+      <li><a href="{% url 'cache_vary_on_headers' %}">Cached vary on headers</a></li>
+      <li><a href="{% url 'cache_private' %}">Cached for authenticated users</a></li>
+      <li><a href="{% url 'cache_nevercache' %}">Never cached</a></li>
+    </ul>
 
   </div>
 </div>

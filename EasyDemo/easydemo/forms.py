@@ -21,3 +21,13 @@ class ChatLoginForm(forms.Form):
 class SearchForm(forms.Form):
     q = forms.CharField(max_length=255, min_length=1, label=_('Search'),
                         help_text=_('Please enter your search pattern.'))
+
+
+@validate_form(path='validate_upload_file', is_allowed_to=everyone)
+class UploadFileForm(forms.Form):
+    name = forms.CharField(label='Name', help_text='Please enter your name', required=False)
+    content = forms.FileField(label='File', help_text='Please select a file')
+
+
+class SimpleUploadFileForm(forms.Form):
+    content = forms.FileField(label='File', help_text='Please select a file')

@@ -47,13 +47,18 @@ The registered Python code can use py3 annotation for specifying data types.
 
 
 """
+import io
 import logging
+import mimetypes
 import random
 import re
 import warnings
 
+import os
 from django import forms
 from django.conf import settings
+from django.core.files.uploadedfile import InMemoryUploadedFile
+from django.forms import FileField
 from django.http import QueryDict
 from django.utils.encoding import force_text
 
@@ -320,7 +325,10 @@ class FunctionConnection(Connection):
 
 
 class FormValidator(FunctionConnection):
-    """Special signal, dedicated to dynamically validate a HTML form."""
+    """Special signal, dedicated to dynamically validate a HTML form.
+
+    However, files cannot be sent in the validation process.
+    """
     def signature_check(self, fn):
         """override the default method for checking the arguments, since they are independent from the Django Form.
         """
@@ -535,10 +543,24 @@ class SerializedForm(object):
         """
         if value is None:
             return self.form_cls(*args, **kwargs)
-        query_dict = QueryDict('', mutable=True)
+
+        post_data = QueryDict('', mutable=True)
+        file_data = QueryDict('', mutable=True)
+
         for obj in value:
-            query_dict.update({obj['name']: obj['value']})
-        return self.form_cls(query_dict, *args, **kwargs)
+            name = obj['name']
+            value = obj['value']
+            if name in self.form_cls.base_fields and isinstance(self.form_cls.base_fields[name], FileField):
+                mimetypes.init()
+                basename = os.path.basename(value)
+                (type_, __) = mimetypes.guess_type(basename)
+                # it's a file => we need to simulate an uploaded one
+                content = InMemoryUploadedFile(io.BytesIO(b'\0'), name, basename,
+                                               type_ or 'application/binary', 1, 'utf-8')
+                file_data.update({name: content})
+            else:
+                post_data.update({name: value})
+        return self.form_cls(post_data, file_data, *args, **kwargs)
 
 
 class LegacySignalConnection(SignalConnection):
