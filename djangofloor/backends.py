@@ -1,8 +1,8 @@
 """Miscelaneous backends
 =====================
 
-The provided authentication backend  for :mod:`django.contrib.auth` only overrides the default Django one for remote users
-(users that are authenticated using a HTTP header like HTTP_REMOTE_USER).
+The provided authentication backend  for :mod:`django.contrib.auth` only overrides the default Django one
+for remote users (users that are authenticated using a HTTP header like HTTP_REMOTE_USER).
 It automatically add several groups to newly-created users.
 Setting `DF_DEFAULT_GROUPS` is expected to be a list of group names.
 
@@ -68,12 +68,11 @@ class DefaultGroupsRemoteUserBackend(RemoteUserBackend):
 
 
 if PipelineCachedStorage:
+
     # noinspection PyClassHasNoInit
     class DjangofloorPipelineCachedStorage(PipelineCachedStorage):
-        def hashed_name(self, name, content=None):
-            parsed_name = urlsplit(unquote(name))
-            clean_name = parsed_name.path.strip()
-            if content is None and not self.exists(clean_name):
-                raise ValueError("The file '%s' could not be found with %r. Did you run the command 'collectstatic'?" %
-                                 (clean_name, self))
-            return super(DjangofloorPipelineCachedStorage, self).hashed_name(name, content=content)
+        def hashed_name(self, name, content=None, filename=None):
+            try:
+                return super(DjangofloorPipelineCachedStorage, self).hashed_name(name, content=content)
+            except ValueError as e:
+                raise ValueError("%s. Did you run the command 'collectstatic'?" % e.args[0])

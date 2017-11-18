@@ -49,7 +49,7 @@ _warned_files = set()
 @register.simple_tag
 def javascript(key):
     """insert all javascript files corresponding to the given key"""
-    if pipe and settings.PIPELINE['PIPELINE_ENABLED']:
+    if pipe and settings.PIPELINE['PIPELINE_ENABLED'] and not settings.DEBUG:
         node = pipe.JavascriptNode(key)
         return node.render({key: key})
     filenames = settings.PIPELINE['JAVASCRIPT'][key]['source_filenames']
@@ -70,9 +70,11 @@ def javascript(key):
 @register.simple_tag
 def stylesheet(key):
     """insert all javascript files corresponding to the given key"""
+    print('youpi', pipe and settings.PIPELINE['PIPELINE_ENABLED'])
     if pipe and settings.PIPELINE['PIPELINE_ENABLED']:
         node = pipe.StylesheetNode(key)
         return node.render({key: key})
+    print('youpi', pipe and settings.PIPELINE['PIPELINE_ENABLED'])
     filenames = settings.PIPELINE['STYLESHEETS'][key]['source_filenames']
     context = {'type': 'text/css', 'rel': 'stylesheet'}
     context.update(settings.PIPELINE['STYLESHEETS'][key].get('extra_context', {}))

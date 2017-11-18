@@ -148,6 +148,7 @@ input.has-error {
        -moz-box-sizing: border-box;
             box-sizing: border-box;
 }
+/* allauth */
 .allauth a.button, .allauth button {
     background: #79aec8;
     padding: 10px 15px;
@@ -220,7 +221,6 @@ body > .modal > .modal-dialog > .modal-close {
     font-weight: bold;
     text-decoration: none;
 }
-
 body > .modal > .modal-dialog > .modal-close:hover,
 body > .modal > .modal-dialog > .modal-close:focus {
     color: black;

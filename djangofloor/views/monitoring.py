@@ -350,8 +350,8 @@ class LogLastLines(MonitoringCheck):
             try:
                 size = os.path.getsize(filename)
                 with codecs.open(filename, 'r', encoding='utf-8') as fd:
-                    fd.seek(max(0, size - 1024))
-                    content = fd.read(1024)
+                    fd.seek(max(0, size - 4096))
+                    content = fd.read(4096)
                 contents.append((filename, 'default', content))
             except Exception as e:
                 contents.append((filename, 'danger', _('Unable to read %(filename)s') % {'filename': filename}))

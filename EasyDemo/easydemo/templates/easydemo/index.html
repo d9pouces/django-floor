@@ -1,5 +1,12 @@
 {% extends 'djangofloor/django/base.html' %}
-{% load i18n demo cache staticfiles djangofloor %}
+{% load i18n demo cache staticfiles djangofloor pipeline %}
+
+{% block extrahead %}
+{% javascript 'django' %}
+{% stylesheet 'django' %}
+{% df_init_websocket %}
+{% endblock %}
+
 {% block content %}
 <pre>
   easydemo-ctl check  # {% trans 'check if everything is correct' %}

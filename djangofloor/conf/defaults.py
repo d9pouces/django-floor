@@ -8,13 +8,15 @@ import os
 
 from django.utils.translation import ugettext_lazy as _
 
+from djangofloor.conf.auth import authentication_backends, ldap_group_class, ldap_group_search, \
+    ldap_boolean_attribute_map, ldap_attribute_map, ldap_user_search
 from djangofloor.conf.callables import url_parse_server_name, \
     url_parse_server_protocol, url_parse_server_port, url_parse_prefix, url_parse_ssl, project_name, \
-    authentication_backends, ldap_user_search, allowed_hosts, cache_setting, template_setting, \
-    generate_secret_key, use_x_forwarded_for, required_packages, installed_apps, ldap_attribute_map, \
-    ldap_boolean_attribute_map, ldap_group_search, ldap_group_class, databases, excluded_django_commands
+    allowed_hosts, cache_setting, template_setting, \
+    generate_secret_key, use_x_forwarded_for, required_packages, installed_apps, databases, excluded_django_commands
 from djangofloor.conf.config_values import Path, Directory, SettingReference, ExpandIterable, \
     CallableSetting, AutocreateFileContent
+from djangofloor.conf.pipeline import static_storage, pipeline_enabled
 from djangofloor.log import log_configuration, pid_filename
 from djangofloor.utils import is_package_present, guess_version
 
@@ -130,10 +132,7 @@ SITE_ID = 1
 # django.contrib.staticfiles
 STATIC_ROOT = Directory('{LOCAL_PATH}/static')
 STATIC_URL = '/static/'
-if USE_PIPELINE:
-    STATICFILES_STORAGE = 'djangofloor.backends.DjangofloorPipelineCachedStorage'
-else:
-    STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
+STATICFILES_STORAGE = CallableSetting(static_storage)
 STATICFILES_FINDERS = ['django.contrib.staticfiles.finders.FileSystemFinder',
                        'django.contrib.staticfiles.finders.AppDirectoriesFinder']
 if USE_PIPELINE:
@@ -237,8 +236,8 @@ PIPELINE_CSS = {
         'output_filename': 'css/ie9.css', 'extra_context': {'media': 'all'},
     },
 }
-PIPELINE_CSS_COMPRESSOR = 'pipeline.compressors.yuglify.YuglifyCompressor'
-PIPELINE_ENABLED = True
+PIPELINE_CSS_COMPRESSOR = 'pipeline.compressors.NoopCompressor'
+PIPELINE_ENABLED = CallableSetting(pipeline_enabled)
 PIPELINE_JS = {
     'default': {
         'source_filenames': [
@@ -279,8 +278,7 @@ PIPELINE_MIMETYPES = ((b'text/coffeescript', '.coffee'),
                       (b'text/javascript', '.js'),
                       (b'text/x-sass', '.sass'),
                       (b'text/x-scss', '.scss'))
-# PIPELINE_JS_COMPRESSOR = 'pipeline.compressors.yuglify.YuglifyCompressor'
-PIPELINE_JS_COMPRESSOR = 'pipeline.compressors.jsmin.JSMinCompressor'
+PIPELINE_JS_COMPRESSOR = 'pipeline.compressors.NoopCompressor'
 
 # Django-All-Auth
 ACCOUNT_EMAIL_SUBJECT_PREFIX = '[{SERVER_NAME}] '

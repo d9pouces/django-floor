@@ -1,20 +1,16 @@
 """Callables settings
 ==================
 
-
+Dynamically build smart settings, taking into account other settings or installed packages.
 """
 
-import grp
 import os
-import pwd
 import re
-# noinspection PyUnresolvedReferences
 from collections import OrderedDict
 from urllib.parse import urlparse
 
 from django.core.checks import Error
 from django.utils.crypto import get_random_string
-from django.utils.module_loading import import_string
 from pkg_resources import get_distribution, DistributionNotFound, VersionConflict
 
 from djangofloor.checks import settings_check_results, missing_package
@@ -56,6 +52,8 @@ database_engine.required_settings = ['DATABASE_ENGINE']
 
 
 def databases(settings_dict):
+    """Build a complete DATABASES setting, taking into account the `DATABASE_URL` environment variable if present
+     (used on the Heroku platform)."""
     engine = database_engine(settings_dict)
     name = settings_dict['DATABASE_NAME']
     user = settings_dict['DATABASE_USER']
@@ -79,6 +77,27 @@ databases.required_settings = ['DATABASE_ENGINE', 'DATABASE_NAME', 'DATABASE_USE
                                'DATABASE_PASSWORD', 'DATABASE_HOST', 'DATABASE_PORT']
 
 
+def template_setting(settings_dict):
+    loaders = ['django.template.loaders.filesystem.Loader', 'django.template.loaders.app_directories.Loader']
+    if settings_dict['DEBUG']:
+        backend = {'BACKEND': 'django.template.backends.django.DjangoTemplates', 'NAME': 'default',
+                   'DIRS': settings_dict['TEMPLATE_DIRS'],
+                   'OPTIONS': {'context_processors': settings_dict['TEMPLATE_CONTEXT_PROCESSORS'],
+                               'loaders': loaders, 'debug': True}}
+    else:
+        backend = {'BACKEND': 'django.template.backends.django.DjangoTemplates', 'NAME': 'default',
+                   'DIRS': settings_dict['TEMPLATE_DIRS'],
+                   'OPTIONS': {
+                       'context_processors': settings_dict['TEMPLATE_CONTEXT_PROCESSORS'],
+                       'debug': False,
+                       'loaders': [('django.template.loaders.cached.Loader', loaders)]
+                   }}
+    return [backend]
+
+
+template_setting.required_settings = ['DEBUG', 'TEMPLATE_DIRS', 'TEMPLATE_CONTEXT_PROCESSORS']
+
+
 def allowed_hosts(settings_dict):
     result = {'127.0.0.1', '::1', 'localhost'}
     listened_ip, sep, port = settings_dict['LISTEN_ADDRESS'].rpartition(':')
@@ -91,6 +110,7 @@ def allowed_hosts(settings_dict):
 allowed_hosts.required_settings = ['SERVER_NAME', 'LISTEN_ADDRESS']
 
 
+# noinspection PyUnresolvedReferences
 def cache_setting(settings_dict):
     """Automatically compute cache settings:
       * if debug mode is set, then caching is disabled
@@ -230,179 +250,6 @@ def project_name(settings_dict):
 
 
 project_name.required_settings = ['DF_MODULE_NAME']
-
-
-# noinspection PyMethodMayBeStatic,PyUnusedLocal
-class AuthenticationBackends:
-    required_settings = ['ALLAUTH_PROVIDERS', 'DF_REMOTE_USER_HEADER', 'AUTH_LDAP_SERVER_URI',
-                         'USE_PAM_AUTHENTICATION', 'DF_ALLOW_LOCAL_USERS', 'USE_ALL_AUTH', 'RADIUS_SERVER']
-
-    def __call__(self, settings_dict):
-        backends = []
-        backends += self.process_remote_user(settings_dict)
-        backends += self.process_radius(settings_dict)
-        backends += self.process_django(settings_dict)
-        backends += self.process_django_ldap(settings_dict)
-        backends += self.process_allauth(settings_dict)
-        backends += self.process_pam(settings_dict)
-        return backends
-
-    def process_django(self, settings_dict):
-        if settings_dict['DF_ALLOW_LOCAL_USERS']:
-            return ['django.contrib.auth.backends.ModelBackend']
-        return []
-
-    def process_remote_user(self, settings_dict):
-        if settings_dict['DF_REMOTE_USER_HEADER']:
-            return ['djangofloor.backends.DefaultGroupsRemoteUserBackend']
-        return []
-
-    def process_allauth(self, settings_dict):
-        if not settings_dict['USE_ALL_AUTH'] and not settings_dict['ALLAUTH_PROVIDERS']:
-            return []
-        try:
-            get_distribution('django-allauth')
-            return ['allauth.account.auth_backends.AuthenticationBackend']
-        except DistributionNotFound:
-            return []
-
-    def process_radius(self, settings_dict):
-        if not settings_dict['RADIUS_SERVER']:
-            return []
-        try:
-            get_distribution('django-radius')
-        except DistributionNotFound:
-            missing_package('django-radius', ' to use RADIUS authentication')
-            return []
-        return ['radiusauth.backends.RADIUSBackend']
-
-    def process_django_ldap(self, settings_dict):
-        if not settings_dict['AUTH_LDAP_SERVER_URI']:
-            return []
-        try:
-            get_distribution('django-auth-ldap')
-        except DistributionNotFound:
-            missing_package('django-auth-ldap', ' to use LDAP authentication')
-            return []
-        return ['django_auth_ldap.backend.LDAPBackend']
-
-    def process_pam(self, settings_dict):
-        if not settings_dict['USE_PAM_AUTHENTICATION']:
-            return []
-        try:
-            get_distribution('django_pam')
-        except DistributionNotFound:
-            missing_package('django-pam', ' to use PAM authentication')
-            return []
-        # check if the current user is in the shadow group
-        username = pwd.getpwuid(os.getuid()).pw_name
-        if not any(x.gr_name == 'shadow' and username in x.gr_mem for x in grp.getgrall()):
-            settings_check_results.append(Error('The user "%s" must belong to the "shadow" group to use PAM '
-                                                'authentication.' % username, obj='configuration'))
-            return []
-        return ['django_pam.auth.backends.PAMBackend']
-
-    def __repr__(self):
-        return '%s.%s' % (self.__module__, 'authentication_backends')
-
-
-authentication_backends = AuthenticationBackends()
-
-
-def template_setting(settings_dict):
-    loaders = ['django.template.loaders.filesystem.Loader', 'django.template.loaders.app_directories.Loader']
-    if settings_dict['DEBUG']:
-        backend = {'BACKEND': 'django.template.backends.django.DjangoTemplates', 'NAME': 'default',
-                   'DIRS': settings_dict['TEMPLATE_DIRS'],
-                   'OPTIONS': {'context_processors': settings_dict['TEMPLATE_CONTEXT_PROCESSORS'],
-                               'loaders': loaders, 'debug': True}}
-    else:
-        backend = {'BACKEND': 'django.template.backends.django.DjangoTemplates', 'NAME': 'default',
-                   'DIRS': settings_dict['TEMPLATE_DIRS'],
-                   'OPTIONS': {
-                       'context_processors': settings_dict['TEMPLATE_CONTEXT_PROCESSORS'],
-                       'debug': False,
-                       'loaders': [('django.template.loaders.cached.Loader', loaders)]
-                   }}
-    return [backend]
-
-
-template_setting.required_settings = ['DEBUG', 'TEMPLATE_DIRS', 'TEMPLATE_CONTEXT_PROCESSORS']
-
-
-def ldap_user_search(settings_dict):
-    if settings_dict['AUTH_LDAP_SERVER_URI'] and settings_dict['AUTH_LDAP_USER_SEARCH_BASE']:
-        try:
-            # noinspection PyPackageRequirements,PyUnresolvedReferences
-            import ldap
-            # noinspection PyUnresolvedReferences
-            from django_auth_ldap.config import LDAPSearch
-        except ImportError:
-            return None
-        return LDAPSearch(settings_dict['AUTH_LDAP_USER_SEARCH_BASE'], ldap.SCOPE_SUBTREE,
-                          settings_dict['AUTH_LDAP_FILTER'])
-    return None
-
-
-ldap_user_search.required_settings = ['AUTH_LDAP_USER_SEARCH_BASE', 'AUTH_LDAP_SERVER_URI', 'AUTH_LDAP_FILTER']
-
-
-def ldap_group_search(settings_dict):
-    if settings_dict['AUTH_LDAP_SERVER_URI'] and settings_dict['AUTH_LDAP_GROUP_SEARCH_BASE']:
-        try:
-            # noinspection PyPackageRequirements,PyUnresolvedReferences
-            import ldap
-            # noinspection PyUnresolvedReferences
-            from django_auth_ldap.config import LDAPSearch
-        except ImportError:
-            return None
-        return LDAPSearch(settings_dict['AUTH_LDAP_GROUP_SEARCH_BASE'], ldap.SCOPE_SUBTREE, '(objectClass=*)')
-    return None
-
-
-ldap_group_search.required_settings = ['AUTH_LDAP_GROUP_SEARCH_BASE', 'AUTH_LDAP_SERVER_URI']
-
-
-def ldap_attribute_map(settings_dict):
-    result = {}
-    if settings_dict['AUTH_LDAP_USER_FIRST_NAME']:
-        result['first_name'] = settings_dict['AUTH_LDAP_USER_FIRST_NAME']
-    if settings_dict['AUTH_LDAP_USER_LAST_NAME']:
-        result['last_name'] = settings_dict['AUTH_LDAP_USER_LAST_NAME']
-    if settings_dict['AUTH_LDAP_USER_EMAIL']:
-        result['email'] = settings_dict['AUTH_LDAP_USER_EMAIL']
-    return result
-
-
-ldap_attribute_map.required_settings = ['AUTH_LDAP_USER_FIRST_NAME', 'AUTH_LDAP_USER_LAST_NAME', 'AUTH_LDAP_USER_EMAIL']
-
-
-def ldap_boolean_attribute_map(settings_dict):
-    result = {}
-    if settings_dict['AUTH_LDAP_USER_IS_ACTIVE']:
-        result['is_active'] = settings_dict['AUTH_LDAP_USER_IS_ACTIVE']
-    if settings_dict['AUTH_LDAP_USER_IS_STAFF']:
-        result['is_staff'] = settings_dict['AUTH_LDAP_USER_IS_STAFF']
-    if settings_dict['AUTH_LDAP_USER_IS_ACTIVE']:
-        result['is_superuser'] = settings_dict['AUTH_LDAP_USER_IS_SUPERUSER']
-    return result
-
-
-ldap_boolean_attribute_map.required_settings = ['AUTH_LDAP_USER_IS_ACTIVE', 'AUTH_LDAP_USER_IS_STAFF',
-                                                'AUTH_LDAP_USER_IS_SUPERUSER']
-
-
-def ldap_group_class(settings_dict):
-    if settings_dict['AUTH_LDAP_SERVER_URI']:
-        try:
-            cls = import_string(settings_dict['AUTH_LDAP_GROUP_NAME'])
-            return cls()
-        except ImportError:
-            return None
-    return None
-
-
-ldap_group_class.required_settings = ['AUTH_LDAP_GROUP_NAME', 'AUTH_LDAP_SERVER_URI']
 
 
 class InstalledApps:
