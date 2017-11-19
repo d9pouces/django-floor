@@ -22,17 +22,78 @@ DjangoFloor also searches for `local_settings.py` and `local_settings.ini` setti
 Defining settings
 -----------------
 
-  * many settings are *de facto* defined in :mod:`djangofloor.conf.defaults`,
-  * default mapping between Python settings and the `.ini` config file is defined in :mod:`djangofloor.conf.mapping`,
-  * you should define your project-wide settings in `<project_root>/yourproject/defaults.py` (only define overriden settings),
-  * you should define the option that can be defined in a configuration file in `<project_root>/yourproject/iniconf.py`, in a list named `INI_MAPPING`,
-  * define development settings (like `DEBUG = True`) should be defined in  `<project_root>/local_settings.py`,
-
-Before defining your own settings, you should take a look to the first two files and the existing variables.
+  * many settings are defined in :mod:`djangofloor.conf.defaults`,
+  * define your project-wide settings in `<project_root>/yourproject/defaults.py` (only define overriden settings),
+  * translation from `.ini` config files to Python settings is defined by a list named `INI_MAPPING` in `<project_root>/yourproject/iniconf.py`,
+  * development settings (like `DEBUG = True`) can be defined in  `<project_root>/local_settings.py`,
 
 Your `defaults.py` has the same structure than a traditionnal Django `settings.py` file (but with less variables ^^ )
 `INI_MAPPING` is a list of :class:`djangofloor.conf.config_values.ConfigValue` (or of its subclasses, some of them defined in the same module).
 Several lists are already defined in :mod:`djangofloor.conf.mapping`.
+
+Smart settings
+--------------
+
+With DjangoFloor, settings can be built at runtime from some other settings.
+For example, imagine that you have the following settings in your Django project:
+
+.. code-block:: python
+
+    LOG_DIRECTORY = '/var/myproject/logs'
+    STATIC_ROOT = '/var/myproject/static'
+    MEDIA_ROOT = '/var/myproject/media'
+    FILE_UPLOAD_TEMP_DIR = '/var/myproject/tmp'
+
+
+Modifying the base directory implies that you have four variables to change, and that you will forget to change at least one.
+With DjangoFloor, things are simpler:
+
+.. code-block:: python
+
+    LOCAL_PATH = '/var/myproject'
+    LOG_DIRECTORY = '{LOCAL_PATH}/logs'
+    STATIC_ROOT = '{LOCAL_PATH}/static'
+    MEDIA_ROOT = '{LOCAL_PATH}/media'
+    FILE_UPLOAD_TEMP_DIR = '{LOCAL_PATH}/tmp'
+
+
+You only have to redefine `LOCAL_PATH`!
+You can even go further:
+
+.. code-block:: python
+
+    from djangofloor.conf.config_values import Directory
+    LOCAL_PATH = Directory('/var/myproject')
+    LOG_DIRECTORY = Directory('{LOCAL_PATH}/logs')
+    STATIC_ROOT = Directory('{LOCAL_PATH}/static')
+    MEDIA_ROOT = Directory('{LOCAL_PATH}/media')
+    FILE_UPLOAD_TEMP_DIR = Directory('{LOCAL_PATH}/tmp')
+
+If you run the `check` command, you will be warned for missing directories, and the `collectstatic` and `migrate` commands
+will attempt to create them. Of course, you still have `settings.MEDIA_ROOT == '/var/myproject/media'`.
+
+You can use more complex things, instead of having:
+
+.. code-block:: python
+
+    SERVER_BASE_URL = 'http://www.example.com'
+    SERVER_NAME = 'www.example.com'
+    USE_SSL = False
+    ALLOWED_HOSTS = ['www.example.com']
+    CSRF_COOKIE_DOMAIN = 'www.example.com'
+    EMAIL_SUBJECT_PREFIX = '[www.example.com]'
+
+You could just have:
+
+.. code-block:: python
+
+    from djangofloor.conf.config_values import CallableSetting
+    SERVER_BASE_URL = 'http://www.example.com'
+    SERVER_NAME = CallableSetting(lambda x: urlparse(x['SERVER_BASE_URL']).hostname, 'SERVER_BASE_URL')
+    USE_SSL = CallableSetting(lambda x: urlparse(x['SERVER_BASE_URL']).scheme == 'https', 'SERVER_BASE_URL')
+    ALLOWED_HOSTS = CallableSetting(lambda x: [urlparse(x['SERVER_BASE_URL']).hostname], 'SERVER_BASE_URL')
+    CSRF_COOKIE_DOMAIN = CallableSetting(lambda x: urlparse(x['SERVER_BASE_URL']).hostname, 'SERVER_BASE_URL')
+    EMAIL_SUBJECT_PREFIX = CallableSetting(lambda x: '[%s]' % urlparse(x['SERVER_BASE_URL']).hostname, 'SERVER_BASE_URL')
 
 
 Displaying settings
@@ -44,7 +105,7 @@ The complete list of used config files can be displayed using the following comm
 
   yourproject-ctl config python | less (or python yourproject-django.py config python -v 2)
   # --------------------------------------------------------------------------------
-  # Djangofloor version 1.0.4
+  # Djangofloor version 1.0.22
   # Configuration providers:
   # --------------------------------------------------------------------------------
   ...
@@ -78,9 +139,9 @@ You can also display the corresponding .ini files:
 .. code-block:: bash
 
   yourproject-ctl config ini -v 2 | less
-  #  - .ini file "/Users/flanker/.virtualenvs/easydjango35/etc/easydemo/settings.ini"
-  #  - .ini file "/Users/flanker/.virtualenvs/easydjango35/etc/easydemo/django.ini"
-  #  - .ini file "/Users/flanker/Developer/Github/EasyDjango/EasyDemo/local_settings.ini"
+  #  - .ini file "/home/usr/.virtualenvs/easydjango35/etc/easydemo/settings.ini"
+  #  - .ini file "/home/usr/.virtualenvs/easydjango35/etc/easydemo/django.ini"
+  #  - .ini file "/home/usr/Developer/Github/EasyDjango/EasyDemo/local_settings.ini"
   [global]
   admin_email = admin@localhost
 	# e-mail address for receiving logged errors
@@ -99,7 +160,5 @@ You can also display the corresponding .ini files:
   log_remote_url =
 	# Send logs to a syslog or systemd log daemon.
 	# Examples: syslog+tcp://localhost:514/user, syslog:///local7, syslog:///dev/log/daemon, logd:///project_name
-  log_slow_queries_duration =
-	# DB queries that take more than this threshold (in seconds) are logged.Deactivated if left empty.
   ...
 

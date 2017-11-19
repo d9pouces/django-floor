@@ -29,8 +29,8 @@ $.ajaxSetup({
     beforeSend: function(xhr, settings) {
         if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
             xhr.setRequestHeader("{{ CSRF_HEADER_NAME }}", $.df.csrfTokenValue);
+            xhr.setRequestHeader("{{ WEBSOCKET_HEADER }}", $.df._wsToken);
         }
     }
 });
-
 $.df.debug = {{ DEBUG|lower }};

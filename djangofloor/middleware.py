@@ -60,15 +60,16 @@ class DjangoFloorMiddleware(BaseRemoteUserMiddleware):
     * set response header for Internet Explorer (to use its most recent render engine)
     """
     header = settings.DF_REMOTE_USER_HEADER
+    ajax_header = 'HTTP_%s' % settings.WEBSOCKET_HEADER
     if header:
         header = header.upper().replace('-', '_')
 
     # noinspection PyMethodMayBeStatic
     def process_request(self, request: HttpRequest):
         request.window_key = get_random_string(32, VALID_KEY_CHARS)
-        if request.is_ajax() and 'HTTP_WINDOW_KEY' in request.META:
+        if request.is_ajax() and self.ajax_header in request.META:
             from djangofloor.wsgi.wsgi_server import signer
-            signed_token = request.META['HTTP_WINDOW_KEY']
+            signed_token = request.META[self.ajax_header]
             request.window_key = signer.unsign(signed_token)
         request.has_websocket_topics = False
         request.remote_username = None

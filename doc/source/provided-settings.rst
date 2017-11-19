@@ -15,4 +15,4 @@ written in .ini files. The mapping between the Python setting and the [section/o
 
 .. literalinclude:: ../../djangofloor/conf/defaults.py
    :language: python
-   :lines: 24-433
+   :lines: 24-471

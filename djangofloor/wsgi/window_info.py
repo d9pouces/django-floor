@@ -85,6 +85,8 @@ class WindowInfo(object):
         """
         if isinstance(request, WindowInfo):
             return request
+        elif request is None:
+            return WindowInfo()
         window_info = cls(init=False)
         for mdw in middlewares:
             mdw.from_request(request, window_info)

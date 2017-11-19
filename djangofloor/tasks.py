@@ -116,8 +116,7 @@ These two successive calls are strictly equivalent:
 
 
 # noinspection PyIncorrectDocstring
-def call(window_info, signal_name, to=None, kwargs=None, countdown=None, expires=None, eta=None, sharing=None,
-         request=None, **other_kwargs):
+def call(window_info, signal_name, to=None, kwargs=None, countdown=None, expires=None, eta=None):
     """Call a DjangoFloor signal.
 
     :param window_info: either a :class:`django.http.request.HttpRequest` or
@@ -131,28 +130,6 @@ def call(window_info, signal_name, to=None, kwargs=None, countdown=None, expires
        it is cancelled)
     :param eta: check the Celery doc (in a nutshell: datetime of running this signal)
     """
-    if sharing or request or other_kwargs:
-        warnings.warn('djangofloor.tasks.call prototype has been changed.', RemovedInDjangoFloor200Warning)
-        # noinspection PyProtectedMember
-        from djangofloor.df_ws4redis import _sharing_to_topics
-        window_info, signal_name = signal_name, window_info
-        if request:
-            window_info = request
-        if to:
-            other_kwargs['to'] = to
-            to = _sharing_to_topics(window_info, sharing) + [SERVER]
-        if kwargs:
-            other_kwargs['kwargs'] = kwargs
-        if countdown:
-            other_kwargs['countdown'] = countdown
-            countdown = None
-        if expires:
-            other_kwargs['expires'] = expires
-            expires = None
-        if eta:
-            other_kwargs['eta'] = eta
-            eta = None
-        kwargs = other_kwargs
     return _call_signal(window_info, signal_name, to=to, kwargs=kwargs, countdown=countdown, expires=expires,
                         eta=eta, from_client=False)
 
@@ -166,7 +143,7 @@ def _call_signal(window_info, signal_name, to=None, kwargs=None, countdown=None,
 
     """
     import_signals_and_functions()
-    window_info = WindowInfo.from_request(window_info)
+    window_info = WindowInfo.from_request(window_info)  # ensure that we always have a true WindowInfo object
     if kwargs is None:
         kwargs = {}
     for k in (SERVER, WINDOW, USER, BROADCAST):
@@ -217,7 +194,6 @@ def _call_signal(window_info, signal_name, to=None, kwargs=None, countdown=None,
 
 def _call_ws_signal(signal_name, signal_id, serialized_topic, kwargs):
     connection = get_websocket_redis_connection()
-    # connection = StrictRedis(**settings.WEBSOCKET_REDIS_CONNECTION)
     serialized_message = json.dumps({'signal': signal_name, 'opts': kwargs, 'signal_id': signal_id},
                                     cls=_signal_encoder)
     topic = settings.WEBSOCKET_REDIS_PREFIX + serialized_topic
@@ -227,7 +203,6 @@ def _call_ws_signal(signal_name, signal_id, serialized_topic, kwargs):
 
 def _return_ws_function_result(window_info, result_id, result, exception=None):
     connection = get_websocket_redis_connection()
-    # connection = StrictRedis(**settings.WEBSOCKET_REDIS_CONNECTION)
     json_msg = {'result_id': result_id, 'result': result, 'exception': str(exception) if exception else None}
     serialized_message = json.dumps(json_msg, cls=_signal_encoder)
     serialized_topic = _topic_serializer(window_info, WINDOW)
@@ -328,19 +303,6 @@ def import_signals():
     warnings.warn('djangofloor.tasks.import_signals() has been replaced by '
                   'djangofloor.tasks.import_signals_and_functions()', RemovedInDjangoFloor200Warning)
     return import_signals_and_functions()
-
-
-def get_signal_encoder():
-    """.. deprecated:: 1.0 do not use it"""
-    warnings.warn('djangofloor.tasks.get_signal_encoder is deprecated', RemovedInDjangoFloor200Warning)
-    return _signal_encoder
-
-
-def get_signal_decoder():
-    """.. deprecated:: 1.0 do not use it"""
-    warnings.warn('djangofloor.tasks.get_signal_decoder is deprecated', RemovedInDjangoFloor200Warning)
-    from djangofloor.wsgi.wsgi_server import signal_decoder
-    return signal_decoder
 
 
 @shared_task(serializer='json')

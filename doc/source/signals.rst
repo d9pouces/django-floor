@@ -1,49 +1,30 @@
-Working with signals
-====================
+Websockets and signals
+======================
 
 DjangoFloor allows you to define signals in both server (Python) and client (JavaScript) sides.
-Signals are just a name (a string) with some code related to it. When a signal is triggered (by its name), each function is called elsewhere (in another process).
-You can attach JavaScript or Python code to your signal name, and you can call this can from the server side as well as from the JS side.
+A signal is just a name (a string) with some code related to it. When a signal is triggered by its name, the code is called somewhere, maybe in another processes.
+You can attach multiple JavaScript or Python functions to the same signal name, and you can call it from the server side as well as from the JS side.
 
-However, Python and JavaScript sides are not symmetrical:
+Called signals can be processed by the Python side ("SERVER") in a Celery worker, or by one or more client browsers.
 
-  * there is a single Python side for executing signals (even if there are multiple processes or threads executing it) that is called “SERVER”,
-  * there are multiple JavaScript clients. Each of them has a unique identifier and some other properties (any Python object, like "property1" or User("username")). Two-way communications are based on websockets.
+All signal-related functions require `window_info` as first argument: this object carries some information to identify the browser window.
+It should be forwarded as-is when a signal calls another signal. You can also use a :class:`django.http.request.HttpRequest`, or just `None` if you do not have to identify a specific browser window.
 
 Architecture
 ------------
 
-In the following graph, the JS side means any JS signal: it can be triggered to `WINDOW`, `BROADCAST`, `USER`, any topic or any list of topics.
-For obvious security reasons, a browser can only trigger signals on itself or on the server, but never on other browser windows.
+In the following graph, the JS side means any JS signal. For obvious security reasons, a browser can only trigger signals on itself or on the server, not on other browser windows.
 
-.. graphviz::
+Here is the complete scenario:
 
-   digraph websockets {
-      bgcolor="transparent";
-      browser [label="Browser window(s)\n(JS side)"];
-      aiohttp_http [label="HTTP server\nDjango view\n(SERVER side)"];
-      aiohttp_ws [label="WS server"];
-      redis_celery [label="Celery \nRedis DB"];
-      redis_ws [label="Websocket \nRedis DB"];
-      celery [label="Celery worker(s)\n(SERVER side)"];
-      browser -> browser [label="signal to JS\nfrom the same window"];
-      browser -> aiohttp_http [label="HTTP request"];
-      aiohttp_http -> browser [label="HTTP response"];
-      browser -> aiohttp_ws [label="signal to SERVER\nfrom JS"];
-      aiohttp_ws -> redis_celery [label="signal to SERVER\nfrom JS"];
-      aiohttp_http -> redis_celery [label="signal to SERVER\nfrom SERVER"];
-      aiohttp_http -> redis_ws [label="signal to JS\nfrom SERVER"];
-      redis_celery -> celery [label="send signals \nto SERVER to \nCelery workers"];
-      celery -> redis_celery [label="new signal\n to SERVER\nfrom SERVER"];
-      celery -> redis_ws [label="signal to JS\nfrom SERVER"];
-      redis_ws -> aiohttp_ws [label="signal to JS\nfrom SERVER\n(pubsub)"];
-      aiohttp_ws -> browser [label="signal to JS\nfrom SERVER"];
-   }
+    - your browser open http://localhost:9000/ ,
+    - a Django view receives a :class:`django.http.request.HttpRequest` (with a unique ID attached to it) and returns a :class:`django.http.request.HttpResponse`,
+    - your browser receives a HTML page as well as some JS and CSS files linked in the HTML page, and this HTML page contains the unique ID,
+    - a websocket is open by the JS code and identifies itself with this unique ID, creating a bidirectionnal communication channel,
 
-As you know, almost all webpages are made of several files (the main HTML page with several annex files like style sheets or javascript files).
-Each file corresponds to one HTTP request (and a Django view), each request having its own `window_key`.
-The websocket connection is made with the `window_key` provided by the main HTML request: other `window_key` are useless.
-Only this view can call JS signals (since other views do not know the right `window_key`), even if all views can call server-side signals.
+Python Signal calls are translated into Celery tasks, whatever they are received by the websocket connexion (thus triggered by the browser), triggered by the Django view processing a :class:`django.http.request.HttpResponse`,
+or triggered by a Celery worker that is processing a previous signal.
+Signals that are sent to the browser are written to a Redis queue corresponding to the targetted property.
 
 
 Defining Python signals
@@ -57,18 +38,21 @@ Of course, you can attach multiple functions to the same signal. All codes will 
     from djangofloor.decorators import signal, everyone
     @signal(is_allowed_to=everyone, path='demo.signal', queue='slow')
     def slow_signal(window_info, content=''):
-       [perform a (clever) thing]
+        pass
+        # [perform a (clever) thing]
 
 In this example:
   * `path` is the name of the signal,
   * `queue` is the (optional) name Celery queue. It allows to dispatch signal calls to specialized queues: one for interactive functions (allowing short response times) and one for slow functions (real background tasks).
-    `queue` can also be a sub-class of :class:`djangofloor.decorators.DynamicQueueName` for dynamically choose the Celery queue.
-    Given `queue(signal, window_info, kwargs)`, it should return a string (corresponding to the Celery queue).
-  * `is_allowed_to` must be a `callable` that determine whether if a signal call is allowed to a JS client. Given `is_allowed_to(signal, window_info, kwargs)`, it must return `True` or `False`. When the list of signals allowed to a client is built, kwargs is `None`.
-
+    `queue` can also be a sub-class of :class:`djangofloor.decorators.DynamicQueueName` to dynamically choose the right Celery queue.
+  * `is_allowed_to` must be a `callable` that determine whether if a signal call is allowed to a JS client. Given `is_allowed_to(signal, window_info, kwargs)`, it must return `True` or `False`.
+    It can be called in two ways:
+    * when the JS client asks for a list of available signals (then kwargs is `None`),
+    * when the JS tries to call a signal (then kwargs is of course a dict).
 
 The last two arguments may be different for each Python code connected to the same signal. If all Python functions does not accept the same keyword arguments, then an exception will be raised, so they should accept \*\*kwargs.
-In the following example, both functions will be executed. The first one will always be executed by the 'celery' queue, the second one will use a Celery queue dedicated to the user. When called from the JavaScript, the second code will only be executed if the client is authenticated.
+In the following example, both functions will be executed. The first one will always be executed by the 'celery' queue, the second one will use a Celery queue dedicated to the user.
+When called from the JavaScript, the second code will only be executed if the client is authenticated.
 
 
 .. code-block:: python
@@ -103,14 +87,15 @@ Calling signals is quite easy: just provide the `window_info` if the call is des
   from djangofloor.tasks import call, SERVER, WINDOW, USER
   from django.contrib.auth.models import User
 
-  u = User.objects.get(id=1)
-  call(window_info, 'demo.signal.name', to=[SERVER, 42, 'test', u], kwargs={'kwarg1': "value", "kwarg2": 10}, countdown=None, expires=None, eta=None)
+  def my_view(request):
+      u = User.objects.get(id=1)
+      call(request, 'demo.signal.name', to=[SERVER, 42, 'test', u], kwargs={'kwarg1': "value", "kwarg2": 10}, countdown=None, expires=None, eta=None)
 
 
 
-The destination can be one of the constants `SERVER` (), `WINDOW`, `USER` (all JS browser windows belonging to the connected user), `BROADCAST` (any JS client), or a list of any value.
-If `SERVER` is present, then the code will be executed on the server side.
-All JS clients featuring the corresponding values will execute the signal (if the corresponding JS signal is defined!).
+The destination can be one of the constants `SERVER` (), `WINDOW`, `USER` (all JS browser windows belonging to the connected user), `BROADCAST` (any JS client), or a list of any values.
+If `SERVER` is present, then the code will be executed on the server side (if such a signal is defined).
+All JS clients featuring the corresponding values will execute the signal, if the corresponding JS signal is defined!.
 
 
 Defining JS signals

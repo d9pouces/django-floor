@@ -93,7 +93,7 @@ SECURE_SSL_REDIRECT = SettingReference('USE_SSL')
 SECURE_FRAME_DENY = SettingReference('USE_SSL')
 SESSION_COOKIE_AGE = 1209600
 TEMPLATES = CallableSetting(template_setting)
-TEMPLATE_DEBUG = False  # SettingReference('DEBUG')
+TEMPLATE_DEBUG = SettingReference('DEBUG')
 TEMPLATE_DIRS = ()
 TEMPLATE_CONTEXT_PROCESSORS = ['django.contrib.auth.context_processors.auth',
                                'django.template.context_processors.debug',
@@ -189,8 +189,6 @@ DF_SERVER_SSL_KEY = None
 DF_SERVER_SSL_CERTIFICATE = None
 DF_ALLOW_USER_CREATION = True
 DF_ALLOW_LOCAL_USERS = True
-# name of the script name that redirects to djangofloor.scripts:aiohttp (in setup.py/console_scripts)
-DF_UNIQUE_COMMAND_NAME = '{DF_MODULE_NAME}-ctl'
 DF_WEBSERVER = 'aiohttp'  # must be "aiohttp" or "gunicorn"
 
 WEBSOCKET_URL = '/ws/'  # set to None if you do not use websockets
@@ -202,6 +200,7 @@ WEBSOCKET_SIGNAL_DECODER = 'json.JSONDecoder'
 WEBSOCKET_SIGNAL_ENCODER = 'django.core.serializers.json.DjangoJSONEncoder'
 WEBSOCKET_REDIS_PREFIX = 'ws'
 WEBSOCKET_REDIS_EXPIRE = 36000
+WEBSOCKET_HEADER = 'WINDOW_KEY'  # header used in AJAX requests (thus they have the same window identifier)
 
 # django-pipeline
 PIPELINE = {

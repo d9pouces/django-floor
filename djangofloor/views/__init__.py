@@ -6,7 +6,6 @@ Also define two functions:
   * :meth:`read_file_in_chunks`: generate an iterator that reads a file object in chunks
   * :meth:`send_file`: return an efficient :class:`django.http.response.HttpResponse` for reading files
 """
-import json
 import mimetypes
 import os
 import warnings
@@ -18,7 +17,6 @@ from django.contrib.syndication.views import add_domain
 from django.http import HttpResponse
 from django.http import HttpResponsePermanentRedirect
 from django.http import HttpResponseRedirect
-from django.http import JsonResponse
 from django.http import StreamingHttpResponse
 from django.template.response import TemplateResponse
 from django.templatetags.static import static
@@ -26,12 +24,12 @@ from django.urls import reverse
 from django.utils.lru_cache import lru_cache
 from django.views.decorators.cache import never_cache
 from django.views.generic import TemplateView
+
 from djangofloor.decorators import REGISTERED_SIGNALS, REGISTERED_FUNCTIONS, everyone
-from djangofloor.wsgi.window_info import WindowInfo
 # noinspection PyProtectedMember
-from djangofloor.tasks import _call_signal
-from djangofloor.tasks import import_signals_and_functions, get_signal_decoder, get_signal_encoder, SERVER
+from djangofloor.tasks import import_signals_and_functions
 from djangofloor.utils import RemovedInDjangoFloor200Warning
+from djangofloor.wsgi.window_info import WindowInfo
 
 __author__ = 'Matthieu Gallet'
 
@@ -111,6 +109,7 @@ def signals(request):
     csrf_header_name = getattr(settings, 'CSRF_HEADER_NAME', 'HTTP_X_CSRFTOKEN')
     template_values = {'SIGNALS': valid_signal_names, 'FUNCTIONS': functions,
                        'WEBSOCKET_HEARTBEAT': settings.WEBSOCKET_HEARTBEAT,
+                       'WEBSOCKET_HEADER': settings.WEBSOCKET_HEADER,
                        'CSRF_COOKIE_NAME': settings.CSRF_COOKIE_NAME,
                        'DEBUG': settings.DEBUG, 'CSRF_HEADER_NAME': csrf_header_name[5:].replace('_', '-')}
     if settings.WEBSOCKET_URL:
@@ -177,44 +176,6 @@ You can only override the default template or populate the context. """
     def get_context(self, request):
         """provide the template context """
         return {}
-
-
-# TODO remove the following functions
-
-@never_cache
-def signal_call(request, signal):
-    """.. deprecated:: 1.0 Called by JS code when websockets are not available. Allow to call Python signals from JS.
-
-Arguments are passed in the request body, serialized as JSON.
-
-    :param request: Django HTTP request
-    :param signal: name of the called signal
-    :type signal: :class:`str`
-"""
-    warnings.warn('djangofloor.views.signal_call is deprecated. Use websockets instead.',
-                  RemovedInDjangoFloor200Warning)
-    request.window_key = request.GET.get('window_key')
-    if request.body:
-        kwargs = json.loads(request.body.decode('utf-8'), cls=get_signal_decoder())
-    else:
-        kwargs = {}
-    _call_signal(WindowInfo.from_request(request), signal_name=signal, to=SERVER,
-                 kwargs=kwargs, from_client=True)
-    return JsonResponse([], safe=False, encoder=get_signal_encoder())
-
-
-# noinspection PyUnusedLocal
-@never_cache
-def get_signal_calls(request):
-    """.. deprecated:: 1.0 Regularly called by JS code when websockets are not available for calling JS signals from Python.
-
-    The polling frequency is set with `WEBSOCKET_REDIS_EMULATION_INTERVAL` (in milliseconds).
-
-    Return all signals called by Python code as a JSON-list
-    """
-    warnings.warn('djangofloor.views.get_signal_calls is deprecated. Use websockets instead.',
-                  RemovedInDjangoFloor200Warning)
-    return JsonResponse([], safe=False)
 
 
 def index(request):

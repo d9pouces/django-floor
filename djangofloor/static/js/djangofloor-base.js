@@ -162,6 +162,12 @@ Here is the complete JavaScript API provided by DjangoFloor.
         $.df._registered_signals[signal].push(fn);
     };
 
+/*"""
+.. function:: $.df.serializeArray(form)
+
+    A customized version of the $.serializeArray that add a value for file input elements.
+
+*/
     $.df.serializeArray = function (form) {
         var value = $(form).serializeArray();
         $(form).find('input[type="file"]').each(function (index, element) {
@@ -171,11 +177,10 @@ Here is the complete JavaScript API provided by DjangoFloor.
         });
         return value;
     };
-
 /*"""
 .. function:: $.df.uploadFile(url, fileSelector, progressSelector)
 
-    Upload a file to the provided URL and update a progress bar element
+    Upload a file to the provided URL and update a progress bar HTML5 element. The called URL can call
 
 .. code-block:: html
 
@@ -186,7 +191,7 @@ Here is the complete JavaScript API provided by DjangoFloor.
 */
     $.df.uploadFile = function (url, fileSelector, progressSelector) {
         $.ajax({url: url, type: 'POST', data: new FormData($(fileSelector)[0]), cache: false,
-                contentType: false, processData: false, headers: {'WINDOW-KEY': $.df._wsToken},
+                contentType: false, processData: false,
                 xhr: function() {
                 var myXhr = $.ajaxSettings.xhr();
                 if (myXhr.upload) {
@@ -596,7 +601,7 @@ Here is the complete JavaScript API provided by DjangoFloor.
 
     .. code-block:: javascript
 
-        $.df.call('df.validate.renew_csrf', {});
+        $.df.call('df.validate.update_csrf', {});
 
     :param string value: New CSRF value
 
@@ -604,5 +609,4 @@ Here is the complete JavaScript API provided by DjangoFloor.
         $('input[name=csrfmiddlewaretoken]').value(opts.value);
         $.df.csrfTokenValue = opts.value;
     })
-
 }(jQuery));
