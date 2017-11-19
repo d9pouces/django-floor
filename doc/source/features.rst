@@ -76,13 +76,9 @@ Scripts
 
 DjangoFloor provides an easy way to run Django, Celery or aiohttp commands.
 There are several main functions in :mod:`djangofloor.scripts` that automatically detect the name of your project from the script name and loads settings from the corresponding Python module (`your_projects.defaults`).
-A classical `setup.py` script should create the following console_scripts as `entry_points`:
-
-  * '{your_project}-celery = djangofloor.scripts:celery',
-  * '{your_project}-django = djangofloor.scripts:django',
-  * '{your_project}-aiohttp = djangofloor.scripts:aiohttp'.
-
-If you want to use custom scripts, you just have to remove these lines from your `setup.py`.
+A classical `setup.py` script should create '{your_project}-ctl = djangofloor.scripts:control' as `entry_points`.
+If you want to use custom scripts, you just have to remove this line from your `setup.py`.
+You can also target 'djangofloor.scripts:django', 'djangofloor.scripts:aiohttp', 'djangofloor.scripts:gunicorn', 'djangofloor.scripts:celery'.
 
 Using Gunicorn
 --------------
@@ -97,7 +93,26 @@ Logs
 DjangoFloor provides a log configuration based on:
 
   * the `DEBUG` mode (if `True`, everything is logged to the console),
+  * the name of your package (`DF_MODULE_NAME`),
+  * the name of the running script (`SCRIPT_NAME`),
   * the `LOG_DIRECTORY` value for storing infos and errors in rotated files,
-  * the `LOG_REMOTE_URL` value for send errors to a syslog (or logd) server.
+  * the `LOG_REMOTE_URL` value for send errors to a syslog (or logd) server,
+  * the `LOG_REMOTE_ACCESS` boolean (that determines if client accesses are also sent to the remote log server),
+  * the `SERVER_NAME` variable (instead of having the component, you have the name of the server in the logs),
+  * the `SERVER_PORT` variable (instead of having the component, you have the name of the server in the logs),
+  * the list `LOG_EXCLUDED_COMMANDS` of commands that do not write logs.
 
 This log configuration is provided by :meth:`djangofloor.log.log_configuration`.
+
+If Django is in `DEBUG` mode, then all logs are only written to `stdout`.
+Otherwise, if `LOG_DIRECTORY` is set, each command has its own file (and each Celery queue has its own file).
+If `LOG_REMOTE_URL` is set, everything is sent to logd or rsyslogd.
+All errors are also reported the admins by e-mail.
+
+Here is a sample of log message:
+
+.. code-block:: bash
+
+    cat ./django_data/log/easydemo-server-error.log
+    2017-11-18 21:51:23 [localhost:9000] [ERROR] error log message
+

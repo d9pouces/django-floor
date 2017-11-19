@@ -21,7 +21,8 @@ This command also shows which settings are defined in each config file.
 
 .. code-block:: bash
 
-    myproject-django config python -v 2
+    myproject-ctl check -v 3
+    myproject-ctl config python -v 2
 
 
 signals are not working

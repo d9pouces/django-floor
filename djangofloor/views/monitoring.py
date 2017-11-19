@@ -336,7 +336,6 @@ class RequestCheck(MonitoringCheck):
 
     def check_commandline(self):
         if settings.DEBUG:
-
             settings_check_results.append(Warning('The DEBUG mode is activated. You should disable it in production',
                                                   obj='configuration'))
 

@@ -172,4 +172,53 @@ Built-in signals
 
 DjangoFloor provides a set of Python and JavaScript signals. Most of them are JavaScript ones, allowing you to dynamically modify your HTML page from your Python code.
 All these JavaScript signals have shortcuts to ease their use: you can use autocompletion and easily check their arguments.
-Default Python signals are provided in :mod:`djangofloor.signals`. The shortcuts of the JavaScript signals are defined in :mod:`djangofloor.signal.html` and :mod:`djangofloor.signals.bootstrap3`.
+Default Python signals are provided in :mod:`djangofloor.signals`.
+Shortcuts for many JavaScript signals are defined in :mod:`djangofloor.signal.html` and :mod:`djangofloor.signals.bootstrap3`.
+They allow you to call JavaScript code by only writing Python code.
+
+Testing signals
+---------------
+
+The signal framework requires a working Redis and a worker process. However, if you only want to check if a signal
+has been called in unitary tests, you can use :class:`djangofloor.tests.SignalQueue`.
+Both server-side and client-side signals are kept into memory:
+
+  * :attr:`djangofloor.tests.SignalQueue.ws_signals`,
+
+    * keys are the serialized topics
+    * values are lists of tuples `(signal name, arguments as dict)`
+
+  * :attr:`djangofloor.tests.SignalQueue.python_signals`
+
+    * keys are the name of the queue
+    * values are lists of `(signal_name, window_info_dict, kwargs=None, from_client=False, serialized_client_topics=None, to_server=False, queue=None)`
+
+      * `signal_name` is … the name of the signal
+      * `window_info_dict` is a WindowInfo serialized as a dict,
+      * `kwargs` is a dict representing the signal arguments,
+      * `from_client` is `True` if this signal has been emitted by a web browser,
+      * `serialized_client_topics` is not `None` if this signal must be re-emitted to some client topics,
+      * `to_server` is `True` if this signal must be processed server-side,
+      * `queue` is the name of the selected Celery queue.
+
+.. code-block:: python
+
+  from djangofloor.tasks import scall, SERVER
+  from djangofloor.wsgi.window_info import WindowInfo
+  from djangofloor.wsgi.topics import serialize_topic
+  from djangofloor.decorators import signal
+  # noinspection PyUnusedLocal
+  @signal(path='test.signal', queue='demo-queue')
+  def test_signal(window_info, value=None):
+      print(value)
+
+  wi = WindowInfo()
+  with SignalQueue() as fd:
+      scall(wi, 'test.signal1', to=[SERVER, 1], value="value1")
+      scall(wi, 'test.signal2', to=[SERVER, 1], value="value2")
+
+  # fd.python_signals looks like {'demo-queue': [ ['test.signal1', {…}, {'value': 'value1'}, False, None, True, None], ['test.signal2', {…}, {'value': 'value2'}, False, None, True, None]]}
+  # fd.ws_signals looks like {'-int.1': [('test.signal1', {'value': 'value1'}), ('test.signal2', {'value': 'value2'})]}
+
+
+If you do not want to use :class:`djangofloor.tests.SignalQueue` as a context manager, you can just call `activate` and `deactivate` methods.

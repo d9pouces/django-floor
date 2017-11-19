@@ -42,7 +42,7 @@ The complete list of used config files can be displayed using the following comm
 
 .. code-block:: bash
 
-  yourproject-django config python | less (or python yourproject-django.py config python -v 2)
+  yourproject-ctl config python | less (or python yourproject-django.py config python -v 2)
   # --------------------------------------------------------------------------------
   # Djangofloor version 1.0.4
   # Configuration providers:
@@ -54,7 +54,7 @@ You can use the `-v 2` flag for a more verbose output:
 
 .. code-block:: bash
 
-  yourproject-django config python -v 2 | less (or python yourproject-django.py config python -v 2)
+  yourproject-ctl config python -v 2 | less (or python yourproject-django.py config python -v 2)
   # --------------------------------------------------------------------------------
   # Djangofloor version 1.0.4
   # Configuration providers:
@@ -77,7 +77,7 @@ You can also display the corresponding .ini files:
 
 .. code-block:: bash
 
-  yourproject-django config ini -v 2 | less
+  yourproject-ctl config ini -v 2 | less
   #  - .ini file "/Users/flanker/.virtualenvs/easydjango35/etc/easydemo/settings.ini"
   #  - .ini file "/Users/flanker/.virtualenvs/easydjango35/etc/easydemo/django.ini"
   #  - .ini file "/Users/flanker/Developer/Github/EasyDjango/EasyDemo/local_settings.ini"

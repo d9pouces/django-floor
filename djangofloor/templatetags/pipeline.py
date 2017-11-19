@@ -15,13 +15,16 @@ from django.utils.safestring import mark_safe
 from djangofloor.utils import RemovedInDjangoFloor200Warning
 
 if settings.USE_PIPELINE:
-    try:
-        # noinspection PyPackageRequirements
-        import pipeline.templatetags.pipeline as pipe
-    except ImportError:
-        pipe = None
+    # noinspection PyPackageRequirements
+    import pipeline.templatetags.pipeline as pipe
+    # noinspection PyPackageRequirements
+    from pipeline.compressors import CompressorBase
+    # noinspection PyPackageRequirements
+    from pipeline.compilers import CompilerBase
 else:
     pipe = None
+    CompressorBase = object
+    CompilerBase = object
 
 __author__ = 'Matthieu Gallet'
 
@@ -71,11 +74,9 @@ def javascript(key):
 @register.simple_tag
 def stylesheet(key):
     """insert all javascript files corresponding to the given key"""
-    print('youpi', pipe and settings.PIPELINE['PIPELINE_ENABLED'])
     if pipe and settings.PIPELINE['PIPELINE_ENABLED']:
         node = pipe.StylesheetNode(key)
         return node.render({key: key})
-    print('youpi', pipe and settings.PIPELINE['PIPELINE_ENABLED'])
     filenames = settings.PIPELINE['STYLESHEETS'][key]['source_filenames']
     context = {'type': 'text/css', 'rel': 'stylesheet'}
     context.update(settings.PIPELINE['STYLESHEETS'][key].get('extra_context', {}))
@@ -86,3 +87,36 @@ def stylesheet(key):
 
     result = '\n'.join([fmt(x) for x in filenames])
     return mark_safe(result)
+
+
+# noinspection PyClassHasNoInit,PyAbstractClass
+class RcssCompressor(CompressorBase):
+    """
+    JS compressor based on the Python library slimit
+    (http://pypi.python.org/pypi/slimit/).
+    """
+
+    # noinspection PyMethodMayBeStatic
+    def compress_css(self, css):
+        # noinspection PyUnresolvedReferences,PyPackageRequirements
+        from rcssmin import cssmin
+        return cssmin(css)
+
+
+# noinspection PyClassHasNoInit
+class PyScssCompiler(CompilerBase):
+    output_extension = 'css'
+
+    def match_file(self, filename):
+        return filename.endswith('.scss')
+
+    def compile_file(self, infile, outfile, outdated=False, force=False):
+        # noinspection PyUnresolvedReferences,PyUnresolvedReferences,PyPackageRequirements
+        from scss import Compiler
+        with open(infile, 'r') as fd:
+            scss_content = fd.read()
+        css_content = Compiler().compile_string(scss_content)
+        with open(outfile, 'w') as fd:
+            fd.write(css_content)
+        if self.verbose:
+            print(css_content)

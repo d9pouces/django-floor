@@ -9,70 +9,49 @@ Its main features are:
 
   * easy to develop: a single command line generates a fully working base project (with complete templates), that you can modify step-by-step,
     with dedicated development settings,
-  * easy to deploy: ready to be packaged, with separated simple config (.ini) files, without requiring to maintain duplicated config files (prod and dev),
-  * allowing offline computation (computation in separated processes or dedicated machines) and two-way communication link between the server side and the JavaScript world via websockets.
+  * easy to deploy: ready to be packaged with separated simple config (.ini) files, without requiring to maintain duplicated config files (prod and dev),
+  * allowing offline computation (computation in separated processes or dedicated machines) and two-way communication between the server and the JavaScript world via websockets.
 
-Of course, everything that is provided by default by DjangoFloor can be overriden (like the default templates that are based on the well-known Bootstrap 3 css).
+Of course, any thing provided by DjangoFloor can be overriden (like the default templates that are based on the well-known Bootstrap 3).
 
 Requirements
 ------------
 
-DjangoFloor assumes that some requirements are available:
+DjangoFloor has a bit more requirements than Django:
 
-  * Python 3.4+,
-  * Django 1.8+,
+  * Python 3.4+ (however Django 2.0 also requires Python 3.4+),
+  * Django 1.11+,
   * Redis for caching, sessions, websocket management and celery broker,
-  * a reverse proxy like nginx.
+  * a reverse proxy like nginx or apache.
 
 DjangoFloor in a nutshell
 -------------------------
 
-
-Assuming a Redis database is working on localhost:
+I assume that you already have a new virtual environment.
 
 .. code-block:: bash
 
-  pip install djangofloor django-debug-toolbar django-redis-sessions django-redis
+  pip install djangofloor
   djangofloor-createproject
   | Your new project name [MyProject]
   | Python package name [myproject]
   | Initial version [0.1]
   | Root project path [.] test
-  | Use background tasks or websockets [y]
+  | Use background tasks or websockets [n]
   cd test
   python setup.py develop
-  echo "DEBUG = True" > local_settings.py
-  myproject-django collectstatic --noinput
-  myproject-django migrate
-  myproject-django runserver
-  # open a new terminal window
-  myproject-celery worker
+  myproject-ctl collectstatic --noinput
+  myproject-ctl migrate
+  myproject-ctl check
+  myproject-ctl runserver
 
 And open your browser on http://localhost:9000/ :)
 
-If you do not want to play with Redis:
+You can easily create an admin user (password: "admin") and a standard user (password: "user"):
 
 .. code-block:: bash
 
-  pip install djangofloor django-debug-toolbar
-  djangofloor-createproject
-  | Your new project name [MyProject]
-  | Python package name [myproject]
-  | Initial version [0.1]
-  | Root project path [.] test
-  | Use background tasks or websockets [y] n
-  cd test
-  python setup.py develop
-  echo "DEBUG = True" > local_settings.py
-  myproject-django collectstatic --noinput
-  myproject-django migrate
-  myproject-django runserver
-
-You can easily create an admin user and a standard user:
-
-.. code-block:: bash
-
-  cat << EOF | myproject-django shell
+  cat << EOF | myproject-ctl shell
   from django.contrib.auth.models import User
   if User.objects.filter(username='admin').count() == 0:
       u = User(username='admin')

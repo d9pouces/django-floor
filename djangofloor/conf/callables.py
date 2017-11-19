@@ -1,7 +1,7 @@
 """Callables settings
 ==================
 
-Dynamically build smart settings, taking into account other settings or installed packages.
+Dynamic
 """
 
 import os
@@ -34,17 +34,17 @@ def database_engine(settings_dict):
         try:
             get_distribution('psycopg2')
         except DistributionNotFound:
-            missing_package('psycopg2', ' to use PostgreSQL database')
+            settings_check_results.append(missing_package('psycopg2', ' to use PostgreSQL database'))
     elif engine == 'django.db.backends.oracle':
         try:
             get_distribution('cx_Oracle')
         except DistributionNotFound:
-            missing_package('cx_Oracle', ' to use Oracle database')
+            settings_check_results.append(missing_package('cx_Oracle', ' to use Oracle database'))
     elif engine == 'django.db.backends.mysql':
         try:
             get_distribution('mysqlclient')
         except DistributionNotFound:
-            missing_package('mysqlclient', ' to use MySQL or MariaDB database')
+            settings_check_results.append(missing_package('mysqlclient', ' to use MySQL or MariaDB database'))
     return engine
 
 
@@ -302,7 +302,8 @@ class InstalledApps:
         try:
             get_distribution('django-allauth')
         except DistributionNotFound:
-            missing_package('django-allauth', ' to use OAuth2 or OpenID authentication')
+            settings_check_results.append(missing_package('django-allauth',
+                                                          ' to use OAuth2 or OpenID authentication'))
             return []
         if 'django.contrib.sites' not in self.default_apps:
             settings_check_results.append(
@@ -338,9 +339,9 @@ def required_packages(settings_dict):
                 for required_package in get_requirements(r, parent=package_name):
                     yield str(required_package)
         except DistributionNotFound:
-            missing_package(str(package_name), ' required by %s' % parent)
+            settings_check_results.append(missing_package(str(package_name), ' required by %s' % parent))
         except VersionConflict:
-            missing_package(str(package_name), ' required by %s' % parent)
+            settings_check_results.append(missing_package(str(package_name), ' required by %s' % parent))
 
     return list(set(get_requirements(settings_dict['DF_MODULE_NAME'], parent=settings_dict['DF_MODULE_NAME'])))
 

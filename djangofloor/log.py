@@ -445,11 +445,11 @@ log_configuration = LogConfiguration()
 
 
 class PidFilename:
-    required_settings = ['PID_DIRECTORY', 'SCRIPT_NAME', 'LOG_EXCLUDED_COMMANDS', 'DF_MODULE_NAME']
+    required_settings = ['PID_DIRECTORY', 'SCRIPT_NAME', 'LOG_EXCLUDED_COMMANDS', 'DF_MODULE_NAME', 'DEBUG']
 
     def __call__(self, settings_dict):
         dirname = settings_dict['PID_DIRECTORY']
-        if not dirname or not os.path.isdir(dirname):
+        if not dirname or not os.path.isdir(dirname) or settings_dict['DEBUG']:
             return None
 
         info = self.get_command_info(settings_dict['DF_MODULE_NAME'], settings_dict['SCRIPT_NAME'],

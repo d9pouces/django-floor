@@ -10,8 +10,11 @@ Just append them to the `settings_check_results` list to delay them and display 
 import sys
 
 import os
+from distutils.spawn import find_executable
+
 from django.core.checks import register, Error
 
+from djangofloor.utils import is_package_present
 
 __author__ = 'Matthieu Gallet'
 
@@ -20,13 +23,12 @@ settings_check_results = []
 
 def missing_package(package_name, desc=''):
     if hasattr(sys, 'real_prefix'):  # inside a virtualenv
-        cmd = 'Try "pip install %s" to install it.' % package_name
+        cmd = 'Try \'pip install %s\' to install it.' % package_name
     elif __file__.startswith(os.environ.get('HOME', '/home')):
-        cmd = 'Try "pip3 install --user %s" to install it.' % package_name
+        cmd = 'Try \'pip3 install --user %s\' to install it.' % package_name
     else:
-        cmd = 'Try "sudo pip3 install %s" to install it.' % package_name
-    settings_check_results.append(Error('Python package "%s" is required%s. %s' % (package_name, desc, cmd),
-                                        obj='configuration'))
+        cmd = 'Try \'sudo pip3 install %s\' to install it.' % package_name
+    return Error('Python package \'%s\' is required%s. %s' % (package_name, desc, cmd), obj='configuration')
 
 
 # noinspection PyUnusedLocal
@@ -40,3 +42,44 @@ def settings_check(app_configs, **kwargs):
         if isinstance(check, MonitoringCheck):
             check.check_commandline()
     return settings_check_results
+
+
+# noinspection PyUnusedLocal
+@register()
+def pipeline_check(app_configs, **kwargs):
+    """Check if dependencies used by `django-pipeline` are installed.
+    """
+    check_results = []
+    from djangofloor.conf.settings import merger
+    engines = [merger.settings.get('PIPELINE_CSS_COMPRESSOR', ''),
+               merger.settings.get('PIPELINE_JS_COMPRESSOR', '')]
+    engines += merger.settings.get('PIPELINE_COMPILERS', [])
+
+    binaries = {'pipeline.compilers.coffee.CoffeeScriptCompiler': 'COFFEE_SCRIPT_BINARY',
+                'pipeline.compilers.livescript.LiveScriptCompiler': 'LIVE_SCRIPT_BINARY',
+                'pipeline.compilers.less.LessCompiler': 'LESS_BINARY',
+                'pipeline.compilers.sass.SASSCompiler': 'SASS_BINARY',
+                'pipeline.compilers.stylus.StylusCompiler': 'STYLUS_BINARY',
+                'pipeline.compilers.es6.ES6Compiler': 'BABEL_BINARY',
+                'pipeline.compressors.yuglify.YuglifyCompressor': 'YUGLIFY_BINARY',
+                'pipeline.compressors.yui.YUICompressor': 'YUI_BINARY',
+                'pipeline.compressors.closure.ClosureCompressor': 'CLOSURE_BINARY',
+                'pipeline.compressors.uglifyjs.UglifyJSCompressor': 'UGLIFYJS_BINARY',
+                'pipeline.compressors.csstidy.CSSTidyCompressor': 'CSSTIDY_BINARY',
+                'pipeline.compressors.cssmin.CSSMinCompressor': 'CSSMIN_BINARY',
+                }
+    packages = {'pipeline.compressors.jsmin.JSMinCompressor': 'jsmin',
+                'pipeline.compressors.slimit.SlimItCompressor': 'slimit',
+                'djangofloor.templatetags.pipeline.RcssCompressor': 'rcssmin',
+                'djangofloor.templatetags.pipeline.PyScssCompiler': 'scss',
+                }
+    for engine in engines:
+        if engine in binaries:
+            name = merger.settings.get(binaries[engine], 'program')
+            if not find_executable(name):
+                check_results.append(Error('\'%s\' is required by \'django-pipeline\' and is not found in PATH.' %
+                                           name, obj='configuration'))
+        elif engine in packages:
+            if not is_package_present(packages[engine]):
+                check_results.append(missing_package(packages[engine], ' by \'django-pipeline\''))
+    return check_results

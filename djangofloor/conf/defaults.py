@@ -36,7 +36,6 @@ except ImportError:
     USE_REDIS_CACHE = False
 USE_CELERY = is_package_present('celery')
 USE_REDIS_SESSIONS = is_package_present('redis_sessions')
-USE_SCSS = is_package_present('scss')
 USE_PIPELINE = is_package_present('pipeline')
 USE_DEBUG_TOOLBAR = is_package_present('debug_toolbar')
 USE_REST_FRAMEWORK = is_package_present('rest_framework')
@@ -212,8 +211,9 @@ PIPELINE = {
     'CSS_COMPRESSOR': SettingReference('PIPELINE_CSS_COMPRESSOR'),
     'JS_COMPRESSOR': SettingReference('PIPELINE_JS_COMPRESSOR'),
 }
-if USE_SCSS:
-    PIPELINE_COMPILERS = ('djangofloor.middleware.PyScssCompiler',)
+PIPELINE_COMPILERS = []
+PIPELINE_CSS_COMPRESSOR = 'pipeline.compressors.NoopCompressor'
+PIPELINE_JS_COMPRESSOR = 'pipeline.compressors.NoopCompressor'
 PIPELINE_CSS = {
     'default': {
         'source_filenames': SettingReference('DF_CSS'),
@@ -236,7 +236,6 @@ PIPELINE_CSS = {
         'output_filename': 'css/ie9.css', 'extra_context': {'media': 'all'},
     },
 }
-PIPELINE_CSS_COMPRESSOR = 'pipeline.compressors.NoopCompressor'
 PIPELINE_ENABLED = CallableSetting(pipeline_enabled)
 PIPELINE_JS = {
     'default': {
@@ -273,13 +272,19 @@ PIPELINE_JS = {
         'output_filename': 'js/ie9.js',
     }
 }
-PIPELINE_MIMETYPES = ((b'text/coffeescript', '.coffee'),
-                      (b'text/less', '.less'),
-                      (b'text/javascript', '.js'),
-                      (b'text/x-sass', '.sass'),
-                      (b'text/x-scss', '.scss'))
-PIPELINE_JS_COMPRESSOR = 'pipeline.compressors.NoopCompressor'
-
+PIPELINE_MIMETYPES = ((b'text/coffeescript', '.coffee'), (b'text/less', '.less'), (b'text/javascript', '.js'),
+                      (b'text/x-sass', '.sass'), (b'text/x-scss', '.scss'))
+LIVE_SCRIPT_BINARY = 'lsc'
+LESS_BINARY = 'lessc'
+SASS_BINARY = 'sass'
+STYLUS_BINARY = 'stylus'
+BABEL_BINARY = 'babel'
+YUGLIFY_BINARY = 'yuglify'
+YUI_BINARY = 'yuicompressor'
+CLOSURE_BINARY = 'closure'
+UGLIFYJS_BINARY = 'uglifyjs'
+CSSTIDY_BINARY = 'csstidy'
+CSSMIN_BINARY = 'cssmin'
 # Django-All-Auth
 ACCOUNT_EMAIL_SUBJECT_PREFIX = '[{SERVER_NAME}] '
 ACCOUNT_EMAIL_VERIFICATION = None

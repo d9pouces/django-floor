@@ -6,14 +6,14 @@ Expected archicture
 
 By default, DjangoFloor assumes several architectural choices:
 
-  * your application server (aiohttp or gunicorn) is behind a reverse proxy (nginx or apache),
-  * offline computation are processed by Celery queues,
+  * your application server (aiohttp by default, but you can also use gunicorn) is behind a reverse proxy (nginx or apache),
+  * offline computation and websockets messages (if present) are processed by Celery queues,
   * Redis is used as Celery broker, session store and cache database.
 
 Preparing the environment
 -------------------------
 
-* install redis
+* install redis (optional if you do not use offline computations nor websockets)
 
 * create a virtualenv dedicated to your project
 
@@ -21,7 +21,7 @@ Preparing the environment
 
   pip install virtualenv
   cd myproject
-  virtualenv venv -p `which python3.5`
+  virtualenv venv -p `which python3.5`  # also works with any Python 3.4+
   source venv/bin/activate
 
 * install DjangoFloor:
@@ -40,32 +40,27 @@ Preparing the environment
   | Initial version [0.1]
   | Root project path [.] .
 
-* install scripts in your path. Several scripts will be installed:
+* install scripts in your path. The default `setup.py` installs a single script (`myproject-ctl`) that allows you to
+access to all Django or Celery commands or launch the aiohttp server.
 
-  * myproject-django: access to all Django admin commands,
-  * myproject-celery: run any Celery command,
-  * myproject-aiohttp: run a webserver with aiohttp.
 
 .. code-block:: bash
 
   python setup.py develop
-  echo "DEBUG = True" > local_settings.py
 
 * prepare the database and collect static files
 
 .. code-block:: bash
 
-  myproject-django collectstatic --noinput
-  myproject-django migrate
+  myproject-ctl collectstatic --noinput
+  myproject-ctl migrate
 
 * Now, you just have to run the following two processes (so you need two terminal windows):
 
 .. code-block:: bash
 
-  myproject-django runserver
-  myproject-celery worker
-
-
+  myproject-ctl runserver  # the dev. server provided by Django, you should use `server` in production
+  myproject-ctl worker
 
 
 Project structure
@@ -93,53 +88,6 @@ If you install `starterpyth` in your dev environment, you can prepare `.po` tran
 
 Of course, you must use the right value instead of `fr_FR`.
 
-Testing signals
----------------
-
-The signal framework requires a working Redis and a worker process. However, if you only want to check if a signal
-has been called in unitary tests, you can use :class:`djangofloor.tests.SignalQueue`.
-Both server-side and client-side signals are kept into memory:
-
-  * :attr:`djangofloor.tests.SignalQueue.ws_signals`,
-
-    * keys are the serialized topics
-    * values are lists of tuples `(signal name, arguments as dict)`
-
-  * :attr:`djangofloor.tests.SignalQueue.python_signals`
-
-    * keys are the name of the queue
-    * values are lists of `(signal_name, window_info_dict, kwargs=None, from_client=False, serialized_client_topics=None, to_server=False, queue=None)`
-
-      * `signal_name` is … the name of the signal
-      * `window_info_dict` is a WindowInfo serialized as a dict,
-      * `kwargs` is a dict representing the signal arguments,
-      * `from_client` is `True` if this signal has been emitted by a web browser,
-      * `serialized_client_topics` is not `None` if this signal must be re-emitted to some client topics,
-      * `to_server` is `True` if this signal must be processed server-side,
-      * `queue` is the name of the selected Celery queue.
-
-.. code-block:: python
-
-  from djangofloor.tasks import scall, SERVER
-  from djangofloor.wsgi.window_info import WindowInfo
-  from djangofloor.wsgi.topics import serialize_topic
-  from djangofloor.decorators import signal
-  # noinspection PyUnusedLocal
-  @signal(path='test.signal', queue='demo-queue')
-  def test_signal(window_info, value=None):
-      print(value)
-
-  wi = WindowInfo()
-  with SignalQueue() as fd:
-      scall(wi, 'test.signal1', to=[SERVER, 1], value="value1")
-      scall(wi, 'test.signal2', to=[SERVER, 1], value="value2")
-
-  # fd.python_signals looks like {'demo-queue': [ ['test.signal1', {…}, {'value': 'value1'}, False, None, True, None], ['test.signal2', {…}, {'value': 'value2'}, False, None, True, None]]}
-  # fd.ws_signals looks like {'-int.1': [('test.signal1', {'value': 'value1'}), ('test.signal2', {'value': 'value2'})]}
-
-
-If you do not want to use :class:`djangofloor.tests.SignalQueue` as a context manager, you can just call `activate` and `deactivate` methods.
-
 Deploying your project
 ----------------------
 
@@ -155,33 +103,39 @@ The configuration of your deployment should be in .ini-like files. The list of c
 
 .. code-block:: bash
 
-  myproject-django config ini -v 2
+  myproject-ctl config ini -v 2
 
 After the configuration, you can migrate the database and deploy the static files (CSS or JS):
 
 .. code-block:: bash
 
-  myproject-django collectstatic --noinput
-  myproject-django migrate
+  myproject-ctl collectstatic --noinput
+  myproject-ctl migrate
 
 Running the servers (in two different processes):
 
 .. code-block:: bash
 
-  myproject-django runserver  # for dev
-  myproject-aiohttp  # for prod
-  myproject-celery worker
+  myproject-ctl runserver  # for dev
+  myproject-ctl server  # for prod
+  myproject-ctl worker  # for the Celery worker that process offline computation and websocket messages
+
+Development commands
+--------------------
+
+Django already uses a `DEBUG` variable; DjangoFloor adds a boolean `DEVELOPMENT` variable that allows to hide commands
+from the command line. The goal is to hide from the final user commands that are not required in production.
 
 Development files
 -----------------
 
-DjangoFloor can create a documentation for your project as well as some extra files:
+DjangoFloor can create a Sphinx documentation for your project:
 
   * configuration file for generating the doc source,
 
 .. code-block:: bash
 
-  myproject-django gen_dev_files . -v 2  --dry
+  myproject-ctl gen_dev_files . -v 2  --dry
 
 (remove the `--dry` argument for actually writing files)
 You can now install sphinx and generate the doc:
@@ -294,6 +248,6 @@ DjangoFloor can luckily generate the required file:
 
 .. code-block:: bash
 
-  myproject-django config python > pycharm_settings.py
+  myproject-ctl config python > pycharm_settings.py
 
 Since this file is easily created, you do not have to commit this file to your version control system.

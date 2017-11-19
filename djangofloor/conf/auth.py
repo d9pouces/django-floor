@@ -58,7 +58,7 @@ class AuthenticationBackends:
         try:
             get_distribution('django-radius')
         except DistributionNotFound:
-            missing_package('django-radius', ' to use RADIUS authentication')
+            settings_check_results.append(missing_package('django-radius', ' to use RADIUS authentication'))
             return []
         return ['radiusauth.backends.RADIUSBackend']
 
@@ -68,7 +68,7 @@ class AuthenticationBackends:
         try:
             get_distribution('django-auth-ldap')
         except DistributionNotFound:
-            missing_package('django-auth-ldap', ' to use LDAP authentication')
+            settings_check_results.append(missing_package('django-auth-ldap', ' to use LDAP authentication'))
             return []
         return ['django_auth_ldap.backend.LDAPBackend']
 
@@ -78,7 +78,7 @@ class AuthenticationBackends:
         try:
             get_distribution('django_pam')
         except DistributionNotFound:
-            missing_package('django-pam', ' to use PAM authentication')
+            settings_check_results.append(missing_package('django-pam', ' to use PAM authentication'))
             return []
         # check if the current user is in the shadow group
         username = pwd.getpwuid(os.getuid()).pw_name

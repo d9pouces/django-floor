@@ -26,7 +26,7 @@ Dependencies
 
 Of course, DjangoFloor is not a standalone library and requires several packages:
 
-  * django >= 1.8,
+  * django >= 1.11,
   * celery,
   * django-bootstrap3,
   * redis,
