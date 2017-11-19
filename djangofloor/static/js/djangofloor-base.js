@@ -165,7 +165,8 @@ Here is the complete JavaScript API provided by DjangoFloor.
 /*"""
 .. function:: $.df.serializeArray(form)
 
-    A customized version of the $.serializeArray that add a value for file input elements.
+    A customized version of the $.serializeArray that add a value for file input elements (the name of the selected file).
+    Can be useful for sending data to SerializedForm and check if a form is valid (without actually sending the file).
 
 */
     $.df.serializeArray = function (form) {
@@ -180,17 +181,23 @@ Here is the complete JavaScript API provided by DjangoFloor.
 /*"""
 .. function:: $.df.uploadFile(url, fileSelector, progressSelector)
 
-    Upload a file to the provided URL and update a progress bar HTML5 element. The called URL can call
+    Upload a file to the provided URL and update a progress bar HTML5 element.
+
+    :param string url: the URL to call (often a Django view)
+    :param Form form: the form object
+    :param string progressSelector: a jQuery selector for the progress element to update (optional)
+    :returns: always `false`
 
 .. code-block:: html
 
-    <form onsubmit="return $.df.uploadFile("/app/upload", this, '#myProgressBar');" method="POST" >
+    <form onsubmit="return $.df.uploadFile('/app/upload', this, '#myProgressBar');" method="POST" >
     <input type="text" name="content">
-    </form>;
+    </form>
+    <progress max="100" value="0" id="myProgressBar"></progress>
 
 */
-    $.df.uploadFile = function (url, fileSelector, progressSelector) {
-        $.ajax({url: url, type: 'POST', data: new FormData($(fileSelector)[0]), cache: false,
+    $.df.uploadFile = function (url, form, progressSelector) {
+        $.ajax({url: url, type: 'POST', data: new FormData($(form)[0]), cache: false,
                 contentType: false, processData: false,
                 xhr: function() {
                 var myXhr = $.ajaxSettings.xhr();
@@ -204,6 +211,7 @@ Here is the complete JavaScript API provided by DjangoFloor.
                 return myXhr;
             },
         });
+        return false;
     };
     /**
 
@@ -214,10 +222,10 @@ Here is the complete JavaScript API provided by DjangoFloor.
 
     Add the CSRF token to a form as a hidden input. Always returns True so you can use it as the `onsubmit` attribute. Useful when the form has been generated without any CSRF input.
 
-    :param Form form: JavaScript form
+    :param Form form: the form object
     :returns: always `true`
 
-    Here is an example on a :
+    Here is an example:
 
 .. code-block:: html
 
