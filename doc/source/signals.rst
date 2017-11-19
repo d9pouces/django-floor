@@ -22,9 +22,8 @@ Here is the complete scenario:
     - your browser receives a HTML page as well as some JS and CSS files linked in the HTML page, and this HTML page contains the unique ID,
     - a websocket is open by the JS code and identifies itself with this unique ID, creating a bidirectionnal communication channel,
 
-Python Signal calls are translated into Celery tasks, whatever they are received by the websocket connexion (thus triggered by the browser), triggered by the Django view processing a :class:`django.http.request.HttpResponse`,
-or triggered by a Celery worker that is processing a previous signal.
-Signals that are sent to the browser are written to a Redis queue corresponding to the targetted property.
+Python Signal calls are translated into Celery tasks, whatever they are received by the websocket connection (thus triggered by the browser), triggered by the Django view processing a :class:`django.http.request.HttpResponse`,
+or triggered by a Celery worker (that is processing a previous signal). Signals that are sent to the browser from Python are written to a Redis queue read by the server that processes the websocket connection.
 
 
 Defining Python signals
@@ -116,7 +115,7 @@ For using signals with JavaScript, you need to
     def my_view(request):
         [...]
         context = {...}
-        set_websocket_topics(request, topic1, topic2)
+        set_websocket_topics(request)
         return TemplateResponse(request, template='template_name', context=context)
 
 
@@ -150,6 +149,30 @@ Calling signals is simpler that creating a new one. Once the steps enumerated be
 .. code-block:: javascript
 
     $.df.call('signal.name', {kwarg1: "value1", kwarg2: "value2"});
+
+
+Calling signals on a set of browsers
+------------------------------------
+
+You can call signals from Python on any set of browsers: all windows open by a given user, all open windows, only the window that initiated the connection…
+If your Django app is a blog, you should have a page per blog post and an index. You can send signals to all users viewing a specific post or the index page.
+
+.. code-block:: python
+
+    # in your Django view
+    from djangofloor.tasks import set_websocket_topics
+    from djangofloor.tasks import call, SERVER, WINDOW, USER
+    def index_view(request):
+        set_websocket_topics(request, 'index')  # <- add the "index" property to this page
+        return TemplateResponse(request, template='index.html', context={})
+    def post_view(request, post_id):
+        post = Post.objects.get(id=post_id)
+        set_websocket_topics(request, post)  # <- add the "post" property to this page
+        return TemplateResponse(request, template='post.html', context={'post': post})
+
+    def display_message(post: Post):
+        call(None, 'demo.signal.name', to=[post], kwargs={'kwarg1': "value"})  # 'demo.signal.name' must be defined in JS!
+        call(None, 'demo.signal.name', to=["index"], kwargs={'kwarg1': "value"})  # 'demo.signal.name' must be defined in JS!
 
 
 Built-in signals
