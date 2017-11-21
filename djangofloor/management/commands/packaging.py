@@ -204,6 +204,7 @@ class Command(TemplatedBaseCommand):
                                'ubuntu/xenial64': 'deb', 'ubuntu/yakkety64': 'deb', 'ubuntu/zesty64': 'deb',
                                'ubuntu/artful64': 'deb',
                                'debian/wheezy64': 'deb', 'debian/jessie64': 'deb', 'debian/stretch64': 'deb',
+                               'centos/7': 'rpm', 'fedora/25-cloud-base': 'rpm'
                                }
     BUILD_PACKAGE = 1
     SHOW_CONFIG = 2
@@ -531,6 +532,7 @@ class Command(TemplatedBaseCommand):
         context = super(Command, self).get_template_context(merger, extra_context)
         context['bind_dirs'] = self.bind_dirs
         context['vagrant_distrib'] = self.vagrant_distrib
+        context['vagrant_distrib_family'] = self.vagrant_distrib.partition('/')[0]
         context['install_dir'] = (self.host_install_dir, self.vagrant_install_dir)
         context['package_dir'] = (self.host_package_dir, self.vagrant_package_dir)
         context['tmp_dir'] = (self.host_tmp_dir, self.vagrant_tmp_dir)

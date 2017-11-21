@@ -83,6 +83,7 @@ Overview
    features
    common_errors
    javascript
+   whatsnext
    api/index
 
 Indices and tables

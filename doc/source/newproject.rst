@@ -211,35 +211,6 @@ If the final file is empty, then it is not written.
 
 Due to the search pattern, you can create your own templates that extends DjangoFloor ones.
 
-
-Creating Debian packages
-------------------------
-
-There are several ways to distribute your application, like:
-
-  * source Python files,
-  * Docker files,
-  * standard packages for your distribution (e.g. .deb files for Ubuntu and Debian).
-    To avoid the packaging of all your dependencies (and conflicts with packages proposed by the distribution), only
-    the Python 3 of your distribution is used: a virtualenv is created in /opt and packaged as-is.
-    All dependencies are installed inside this virtualenv.
-
-Here is the description of the whole process:
-
-  * create a Vagrant box using the selected distribution (like `"ubuntu/xenial64"`),
-  * install a virtual env inside /opt/myproject,
-  * create an archive of your project (with `python3 setup.py sdist` in the current directory),
-  * send this archive to the Vagrant box and install it in the virtual env,
-  * create required directories, collect static files and create some files (like service files for systemd),
-  * finally create the package using the `fpm` command.
-
-You can optionally keep the Vagrant box (it should be destroyed at the end of the command) with `--no-destroy` and install the
-newly created package in this box with `--run-package`.
-If you use this latter option, open your favorite browser to `http://localhost:10080/` to try your project.
-FPM supports many options. You can tweak its behaviour with a config file provided by the `--config` option.
-You can display an example of such config file with the `--show-config` (since this option requires to run almost the whole process,
-it can takes some time).
-
 Using PyCharm
 -------------
 

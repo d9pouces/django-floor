@@ -1,13 +1,16 @@
 {% load djangofloor %}.. {{ DF_PROJECT_NAME }} documentation master file, created by
+
 {% block heading %}
-Welcome to {{ DF_PROJECT_NAME }}'s documentation!
-==========={{ DF_PROJECT_NAME|df_underline }}=================
+{{ DF_PROJECT_NAME }}
+{{ DF_PROJECT_NAME|df_underline }}
+
 {% block description %}{% endblock %}
+
 {% block screenshots %}{% endblock %}
 {% endblock %}
 
-Full table of contents
-======================
+table of contents
+=================
 
 .. toctree::
    :maxdepth: 1
@@ -17,10 +20,5 @@ Full table of contents
    configuration
 {% block extra_table_contents %}{% endblock %}
 
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
 * :ref:`search`
 {% block extra_indices %}{% endblock %}

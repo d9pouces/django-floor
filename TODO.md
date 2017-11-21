@@ -36,3 +36,10 @@ EasyDemo
 
   * check i18n system
   * disable cache for static files
+
+quick installation
+requirements
+configuration
+update
+users
+deploying on Heroku

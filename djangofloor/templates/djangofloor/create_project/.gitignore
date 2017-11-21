@@ -34,6 +34,7 @@ var/
 # Installer logs
 pip-log.txt
 pip-delete-this-directory.txt
+Pipfile.lock
 
 # Unit test / coverage reports
 htmlcov/
@@ -52,4 +53,6 @@ docs/_build/
 # PyBuilder
 target/
 
-Pipfile.lock
+# ignore DjangoFloor local config files
+local_settings.py
+local_settings.ini
