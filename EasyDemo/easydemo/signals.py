@@ -1,11 +1,11 @@
 import logging
-import time
 
 import re
+import time
+
 from djangofloor.decorators import signal, everyone
 from djangofloor.signals.bootstrap3 import render_to_modal
 from djangofloor.tasks import scall, BROADCAST, SERVER, WINDOW
-from djangofloor.wsgi.window_info import render_to_string
 
 __author__ = 'Matthieu Gallet'
 logger = logging.getLogger('django.request')
@@ -48,6 +48,7 @@ def print_sig2(window_info, content=''):
           content="Server notification that causes an error in the Celery queue"
                   "[with some special chars for checking encoding: éà] [%r]" % content,
           level='warning', timeout=2, style='notification')
+    # noinspection PyStatementEffect
     1/0
 
 

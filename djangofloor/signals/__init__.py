@@ -11,8 +11,8 @@ from django.utils.translation import ugettext as _
 
 from djangofloor.decorators import signal, is_staff, is_superuser, SerializedForm
 from djangofloor.forms import LogNameForm
-from djangofloor.signals.bootstrap3 import notify, WARNING, NOTIFICATION, BANNER, SYSTEM, MODAL, INFO, DANGER, SUCCESS, \
-    DEFAULT
+from djangofloor.signals.bootstrap3 import notify, WARNING, NOTIFICATION, BANNER, SYSTEM, MODAL, INFO, DANGER, \
+    SUCCESS, DEFAULT
 from djangofloor.tasks import scall, WINDOW
 
 __author__ = 'Matthieu Gallet'
@@ -31,6 +31,7 @@ def check_websockets(window_info):
     """Check what happens when an exception is raised in a Celery queue"""
     notify(window_info, _('An exception (division by zero) has been raised in a Celery queue'), to=WINDOW,
            level=WARNING, style=BANNER)
+    # noinspection PyStatementEffect
     1 / 0
 
 

@@ -1,4 +1,3 @@
-import codecs
 import datetime
 import hashlib
 import os
@@ -328,7 +327,7 @@ class TemplateWriter(Writer):
                 self.notice('[SKIPPED]: %s (identical)' % self.source_filename)
                 return
             elif verbose_mode:
-                with codecs.open(target_filename, 'r', encoding='utf-8') as fd:
+                with open(target_filename, 'r', encoding='utf-8') as fd:
                     previous_content = fd.read()
                 for line in unified_diff(previous_content.splitlines(), new_content.splitlines(),
                                          fromfile='%s-before' % target_filename, tofile='%s-after' % target_filename):
@@ -338,7 +337,7 @@ class TemplateWriter(Writer):
             return
         self.notice('[OK] %s -> %s' % (self.source_filename, target_filename))
         pkg_resources.ensure_directory(target_filename)
-        with codecs.open(target_filename, 'w', encoding='utf-8') as fd:
+        with open(target_filename, 'w', encoding='utf-8') as fd:
             fd.write(new_content)
 
 

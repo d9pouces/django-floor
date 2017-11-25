@@ -3,7 +3,6 @@
 
 Define "main" functions for your scripts using the Django `manage.py` system or Gunicorn/Celery/uWSGI.
 """
-import codecs
 import datetime
 import logging
 import logging.config
@@ -409,8 +408,8 @@ def create_project():
             dirname = os.path.dirname(dst_path)
             if not os.path.isdir(dirname):
                 os.makedirs(dirname)
-            with codecs.open(dst_path, 'w', encoding='utf-8') as out_fd:
-                with codecs.open(src_path, 'r', encoding='utf-8') as in_fd:
+            with open(dst_path, 'w', encoding='utf-8') as out_fd:
+                with open(src_path, 'r', encoding='utf-8') as in_fd:
                     content = in_fd.read().format(**template_values)
                     out_fd.write(content)
 

@@ -183,18 +183,18 @@ class PythonFileProvider(PythonModuleProvider):
         if version >= (3, 5):
             import importlib.util
             spec = importlib.util.spec_from_file_location(module_name, module_filename)
-            module = importlib.util.module_from_spec(spec)
-            spec.loader.exec_module(module)
+            module_ = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(module_)
         elif version >= (3, 2):
             # noinspection PyCompatibility
             from importlib.machinery import SourceFileLoader
-            module = SourceFileLoader(module_name, module_filename).load_module()
+            module_ = SourceFileLoader(module_name, module_filename).load_module()
         else:
             # noinspection PyDeprecation
             import imp
             # noinspection PyDeprecation
-            module = imp.load_source(module_name, module_filename)
-        self.module = module
+            module_ = imp.load_source(module_name, module_filename)
+        self.module = module_
 
     def __str__(self):
         return self.module_filename

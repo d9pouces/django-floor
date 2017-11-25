@@ -9,12 +9,12 @@ ENV PYTHONUNBUFFERED 1
 RUN apt-get update
 RUN mkdir -p "{{ tmp_dir.1 }}"
 WORKDIR "{{ tmp_dir.1 }}"
-COPY ./{{ dist_filename }} "{{ tmp_dir.1 }}/{{ dist_filename }}"
-COPY ./install_python.sh "{{ tmp_dir.1 }}/install_python.sh"
-COPY ./install_project.sh "{{ tmp_dir.1 }}/install_project.sh"
-COPY ./install_dependencies.sh "{{ tmp_dir.1 }}/install_dependencies.sh"
-COPY ./configure_project.sh "{{ tmp_dir.1 }}/configure_project.sh"
-COPY ./run_project.sh "{{ tmp_dir.1 }}/run_project.sh"
+COPY "./{{ dist_filename }}" "{{ tmp_dir.1 }}/{{ dist_filename }}"
+COPY "./install_python.sh" "{{ tmp_dir.1 }}/install_python.sh"
+COPY "./install_project.sh" "{{ tmp_dir.1 }}/install_project.sh"
+COPY "./install_dependencies.sh" "{{ tmp_dir.1 }}/install_dependencies.sh"
+COPY "./configure_project.sh" "{{ tmp_dir.1 }}/configure_project.sh"
+COPY "./run_project.sh" "{{ tmp_dir.1 }}/run_project.sh"
 
 RUN ["bash", "{{ tmp_dir.1 }}/install_python.sh"]
 RUN ["bash", "{{ tmp_dir.1 }}/install_project.sh"]

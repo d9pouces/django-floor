@@ -2,7 +2,8 @@
 ===============================
 
 This module only defines shortcuts to existing JS signals.
-These signals are intended to be called on the JS side from the Python side and allow you to easily modify the client webpage.
+These signals are intended to be called on the JS side from the Python side and allow you to easily modify the
+client webpage.
 
 """
 from djangofloor.tasks import WINDOW, scall

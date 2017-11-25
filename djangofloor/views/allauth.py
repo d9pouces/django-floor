@@ -1,3 +1,4 @@
+# noinspection PyPackageRequirements
 from allauth.account.adapter import DefaultAccountAdapter
 from django.conf import settings
 

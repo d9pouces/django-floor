@@ -13,7 +13,7 @@ from django.views.generic import TemplateView
 from easydemo.forms import TestForm, ChatLoginForm, UploadFileForm, SimpleUploadFileForm
 
 from djangofloor.signals import notify, SUCCESS, DANGER
-from djangofloor.tasks import set_websocket_topics, BROADCAST, scall, WINDOW
+from djangofloor.tasks import set_websocket_topics
 
 logger = logging.getLogger('django.request')
 __author__ = 'Matthieu Gallet'

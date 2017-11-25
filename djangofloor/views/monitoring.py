@@ -8,7 +8,6 @@ You should install the :mod:`psutil` module to add server info (like the CPU usa
 
 
 """
-import codecs
 import datetime
 import glob
 import logging
@@ -348,7 +347,7 @@ class LogLastLines(MonitoringCheck):
         for filename in self.get_log_filenames():
             try:
                 size = os.path.getsize(filename)
-                with codecs.open(filename, 'r', encoding='utf-8') as fd:
+                with open(filename, 'r', encoding='utf-8') as fd:
                     fd.seek(max(0, size - 4096))
                     content = fd.read(4096)
                 contents.append((filename, 'default', content))
@@ -427,6 +426,7 @@ def raise_exception(request):
     if not request.user.is_superuser:
         raise Http404
     messages.warning(request, _('An exception (division by zero) has been raised in a Django HTTP request'))
+    # noinspection PyStatementEffect
     1 / 0
 
 

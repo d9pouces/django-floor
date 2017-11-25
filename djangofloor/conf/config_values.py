@@ -23,7 +23,6 @@ Since the second file overrides the first one, `TEMPLATE_DEBUG` always has the s
 
 """
 
-import codecs
 import os
 import warnings
 
@@ -261,7 +260,7 @@ class AutocreateFileContent(File):
         """
         filename = merger.analyze_raw_value(self.value)
         if os.path.isfile(filename):
-            with codecs.open(filename, 'r', encoding='utf-8') as fd:
+            with open(filename, 'r', encoding='utf-8') as fd:
                 result = fd.read()
         else:
             settings_check_results.append(

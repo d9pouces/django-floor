@@ -55,6 +55,7 @@ class SignupView(LoginView):
 def login(request):
     """return the django.contrib.auth or the django-allauth login view"""
     if settings.USE_ALL_AUTH:
+        # noinspection PyPackageRequirements
         from allauth.account.views import login
         return login(request)
     return LoginView.as_view()(request)
@@ -64,6 +65,7 @@ def login(request):
 def signup(request):
     """return the django.contrib.auth or the django-allauth login view"""
     if settings.USE_ALL_AUTH:
+        # noinspection PyPackageRequirements
         from allauth.account.views import signup
         return signup(request)
     return SignupView.as_view()(request)
@@ -73,6 +75,7 @@ def signup(request):
 def logout(request):
     """return the django.contrib.auth or the django-allauth logout view"""
     if settings.USE_ALL_AUTH:
+        # noinspection PyPackageRequirements
         from allauth.account.views import logout
         return logout(request)
     return LogoutView.as_view()(request)
@@ -82,6 +85,7 @@ def logout(request):
 def password_reset(request):
     """Display a password reset form"""
     if settings.USE_ALL_AUTH:
+        # noinspection PyPackageRequirements
         from allauth.account.views import password_reset
         return password_reset(request)
     return PasswordResetView.as_view()(request)
@@ -92,6 +96,7 @@ def password_reset(request):
 def set_password(request):
     """Define a new password for the user"""
     if settings.USE_ALL_AUTH:
+        # noinspection PyPackageRequirements
         from allauth.account.views import password_change
         return password_change(request)
     return PasswordChangeView.as_view()(request)
