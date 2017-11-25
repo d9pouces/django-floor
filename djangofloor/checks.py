@@ -44,12 +44,7 @@ def settings_check(app_configs, **kwargs):
     return settings_check_results
 
 
-# noinspection PyUnusedLocal
-@register()
-def pipeline_check(app_configs, **kwargs):
-    """Check if dependencies used by `django-pipeline` are installed.
-    """
-    check_results = []
+def get_pipeline_requirements():
     from djangofloor.conf.settings import merger
     engines = [merger.settings.get('PIPELINE_CSS_COMPRESSOR', ''),
                merger.settings.get('PIPELINE_JS_COMPRESSOR', '')]
@@ -68,18 +63,43 @@ def pipeline_check(app_configs, **kwargs):
                 'pipeline.compressors.csstidy.CSSTidyCompressor': 'CSSTIDY_BINARY',
                 'pipeline.compressors.cssmin.CSSMinCompressor': 'CSSMIN_BINARY',
                 }
-    packages = {'pipeline.compressors.jsmin.JSMinCompressor': 'jsmin',
-                'pipeline.compressors.slimit.SlimItCompressor': 'slimit',
-                'djangofloor.templatetags.pipeline.RcssCompressor': 'rcssmin',
-                'djangofloor.templatetags.pipeline.PyScssCompiler': 'scss',
-                }
+    pip_packages = {'pipeline.compressors.jsmin.JSMinCompressor': 'jsmin',
+                    'pipeline.compressors.slimit.SlimItCompressor': 'slimit',
+                    'djangofloor.templatetags.pipeline.RcssCompressor': 'rcssmin',
+                    'djangofloor.templatetags.pipeline.PyScssCompiler': 'scss',
+                    }
+    npm_packages = {'lsc', }
+    gem_packages = {}
+    result = {'gem': [], 'pip': [], 'npm': [], 'other': [], 'all': []}
     for engine in engines:
         if engine in binaries:
             name = merger.settings.get(binaries[engine], 'program')
-            if not find_executable(name):
-                check_results.append(Error('\'%s\' is required by \'django-pipeline\' and is not found in PATH.' %
-                                           name, obj='configuration'))
-        elif engine in packages:
-            if not is_package_present(packages[engine]):
-                check_results.append(missing_package(packages[engine], ' by \'django-pipeline\''))
+            result['all'].append(name)
+            if name in npm_packages:
+                result['npm'].append(name)
+            elif name in gem_packages:
+                result['gem'].append(name)
+            else:
+                result['other'].append(name)
+        elif engine in pip_packages:
+            result['pip'].append(pip_packages[engine])
+    for v in result.values():
+        v.sort()
+    return result
+
+
+# noinspection PyUnusedLocal
+@register()
+def pipeline_check(app_configs, **kwargs):
+    """Check if dependencies used by `django-pipeline` are installed.
+    """
+    check_results = []
+    requirements = get_pipeline_requirements()
+    for name in requirements['all']:
+        if not find_executable(name):
+            check_results.append(Error('\'%s\' is required by \'django-pipeline\' and is not found in PATH.' %
+                                       name, obj='configuration'))
+    for name in requirements['pip']:
+        if not is_package_present(name):
+            check_results.append(missing_package(name, ' by \'django-pipeline\''))
     return check_results

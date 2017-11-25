@@ -4,6 +4,7 @@
 Define "main" functions for your scripts using the Django `manage.py` system or Gunicorn/Celery/uWSGI.
 """
 import codecs
+import datetime
 import logging
 import logging.config
 import os
@@ -13,6 +14,7 @@ import ssl
 import subprocess
 import sys
 from argparse import ArgumentParser
+from distutils.spawn import find_executable
 
 from django.utils.autoreload import python_reloader
 
@@ -332,30 +334,29 @@ def uwsgi():
     sys.exit(p.returncode)
 
 
-# noinspection PyUnresolvedReferences
 def create_project():
     import djangofloor
-    inp = input
-    if sys.version_info[0] == 2:
-        # noinspection PyUnresolvedReferences
-        inp = raw_input
     base_path = os.path.dirname(djangofloor.__file__)
     template_base_path = os.path.join(base_path, 'templates', 'djangofloor', 'create_project')
-    template_values = {}
-    default_values = [('project_name', 'Your new project name', 'MyProject'),
-                      ('package_name', 'Python package name', ''),
-                      ('version', 'Initial version', '0.1'),
-                      ('dst_dir', 'Root project path', 'project'),
-                      ('use_celery', 'Use background tasks or websockets', 'y'),
+    template_values = {'today': datetime.date.today().strftime('%Y/%m/%d')}
+    pipenv = find_executable('pipenv')
+    default_values = [['project_name', 'Your new project name', 'MyProject'],
+                      ['package_name', 'Python package name', ''],
+                      ['version', 'Initial version', '0.1'],
+                      ['dst_dir', 'Root project path', './project'],
+                      ['use_celery', 'Use background tasks or websockets', 'y'],
                       ]
+    if pipenv:
+        default_values += [('use_pipenv', 'Use pipenv to create a working virtualenv', 'y')]
     for key, text, default_value in default_values:
         if key == 'package_name':
             default_value = re.sub(r'[^a-z0-9_]', '_', template_values['project_name'].lower())
             while default_value[0:1] in '0123456789_':
                 default_value = default_value[1:]
+            default_values[3][2] = './%s' % default_value
         value = None
         while not value:
-            value = inp('%s [%s] ' % (text, default_value))
+            value = input('%s [%s] ' % (text, default_value))
             if not value:
                 value = default_value
         template_values[key] = value
@@ -369,7 +370,7 @@ def create_project():
     if os.path.exists(dst_dir):
         value = ''
         while not value:
-            value = inp('%s already exists. Do you want to remove it? [Y/n]')
+            value = input('\'%(dst_dir)s\' already exists. Do you want to remove it? [y/n] ' % template_values)
             value = value.lower()
             if value == 'n':
                 return
@@ -412,3 +413,13 @@ def create_project():
                 with codecs.open(src_path, 'r', encoding='utf-8') as in_fd:
                     content = in_fd.read().format(**template_values)
                     out_fd.write(content)
+
+    if pipenv and template_values['use_pipenv'] == 'y':
+        ctl = '%s-ctl.py' % template_values['package_name']
+        env = os.environ.copy()
+        if 'VIRTUAL_ENV' in env:
+            del env['VIRTUAL_ENV']
+        subprocess.check_call(['pipenv', 'check', '--venv'], cwd=dst_dir, env=env)
+        subprocess.check_call(['pipenv', 'install'], cwd=dst_dir, env=env)
+        subprocess.check_call(['pipenv', 'run', 'python', 'setup.py', 'develop'], cwd=dst_dir, env=env)
+        subprocess.check_call(['pipenv', 'run', 'python', ctl, 'gen_dev_files', '.'], cwd=dst_dir, env=env)

@@ -1,22 +1,15 @@
 {% load djangofloor %}Installation
 ============
 {% block introduction %}
-Like many Python packages, you can use several methods to install {{ DF_PROJECT_NAME }}.
-{{ DF_PROJECT_NAME }} designed to run with {{ python_version }}.x{% if use_python3 %}+{% endif %}.
-The following packages are also required:
-{% block dependencies %}{% block pre_dependencies %}{% endblock %}
-  * setuptools >= 3.0,
-  * djangofloor >= 1.0.0{% block post_dependencies %}.{% endblock %}
-{% endblock %}
-
-Of course you can install it from the source, but the preferred way is to install it as a standard Python package, via pip.
-{% endblock %}
-
-Installing or Upgrading
------------------------
-
 Here is a simple tutorial to install {{ DF_PROJECT_NAME }} on a basic Debian/Linux installation.
 You should easily adapt it on a different Linux or Unix flavor.
+
+Like many Python packages, you can use several methods to install {{ DF_PROJECT_NAME }}.
+Of course you can install it from source, but the preferred way is to install it as a standard Python package, via pip.
+{% endblock %}
+
+Upgrading
+---------
 
 {% block upgrading %}If you want to upgrade an existing installation, just install the new version (with the `--upgrade` flag for `pip`) and run
 the `collectstatic` and `migrate` commands (for updating both static files and the database).{% endblock %}
@@ -210,9 +203,9 @@ Now, it's time to install {{ DF_PROJECT_NAME }}:
 {% endblock %}    EOF
     chmod 0400 $VIRTUAL_ENV/etc/{{ DF_MODULE_NAME }}/settings.ini
     # protect passwords in the config files from by being readable by everyone
-    {{ processes.django }} collectstatic --noinput
-    {{ processes.django }} migrate
-{% block post_application %}    {{ processes.django }} createsuperuser
+    {{ process.control }} collectstatic --noinput
+    {{ process.control }} migrate
+{% block post_application %}    {{ process.control }} createsuperuser
 {% endblock %}
 {% endblock %}
 
@@ -226,16 +219,13 @@ Supervisor is required to automatically launch {{ DF_MODULE_NAME }}:
 {% block pre_supervisor %}{% endblock %}
     sudo apt-get install supervisor
     cat << EOF | sudo tee /etc/supervisor/conf.d/{{ DF_MODULE_NAME }}.conf
-{% if processes.aiohttp %}    [program:{{ DF_MODULE_NAME }}_aiohttp]
-    command = $VIRTUAL_ENV/bin/{{ processes.aiohttp }}
+    [program:{{ DF_MODULE_NAME }}_aiohttp]
+    command = $VIRTUAL_ENV/bin/{{ control_command }} server
     user = {{ DF_MODULE_NAME }}
-{% elif processes.gunicorn %}    [program:{{ DF_MODULE_NAME }}_gunicorn]
-    command = $VIRTUAL_ENV/bin/{{ processes.gunicorn }}
+{% for queue in required_celery_queues %}    [program:{{ DF_MODULE_NAME }}_celery_{{ queue }}]
+    command = $VIRTUAL_ENV/bin/{{ control_command }} worker -Q {{ queue }}
     user = {{ DF_MODULE_NAME }}
-{% endif %}{% if processes.celery %}{% for queue in required_celery_queues %}    [program:{{ DF_MODULE_NAME }}_celery_{{ queue }}]
-    command = $VIRTUAL_ENV/bin/{{ processes.celery }} worker -Q {{ queue }}
-    user = {{ DF_MODULE_NAME }}
-{% endfor %}{% endif %}{% block post_supervisor %}{% endblock %}    EOF
+{% endfor %}{% block post_supervisor %}{% endblock %}    EOF
     sudo service supervisor stop
     sudo service supervisor start
 
@@ -249,7 +239,7 @@ You can also use systemd to launch {{ DF_MODULE_NAME }}:
 
 .. code-block:: bash
 {% block pre_systemd %}{% endblock %}
-{% if processes.aiohttp %}    cat << EOF | sudo tee /etc/systemd/system/{{ processes.aiohttp }}.service
+    cat << EOF | sudo tee /etc/systemd/system/{{ control_command }}.service
     [Unit]
     Description={{ DF_PROJECT_NAME }} aIOHTTP process
     After=network.target
@@ -257,31 +247,15 @@ You can also use systemd to launch {{ DF_MODULE_NAME }}:
     User={{ DF_MODULE_NAME }}
     Group={{ DF_MODULE_NAME }}
     WorkingDirectory={{ LOCAL_PATH }}/
-    ExecStart=$VIRTUAL_ENV/bin/{{ processes.aiohttp }}
+    ExecStart=$VIRTUAL_ENV/bin/{{ control_command }} server
     ExecReload=/bin/kill -s HUP \$MAINPID
     ExecStop=/bin/kill -s TERM \$MAINPID
     [Install]
     WantedBy=multi-user.target
     EOF
-    systemctl enable {{ processes.aiohttp }}.service
-    sudo service {{ processes.aiohttp }} start
-{% else %}    cat << EOF | sudo tee /etc/systemd/system/{{ processes.gunicorn }}.service
-    [Unit]
-    Description={{ DF_PROJECT_NAME }} Gunicorn process
-    After=network.target
-    [Service]
-    User={{ DF_MODULE_NAME }}
-    Group={{ DF_MODULE_NAME }}
-    WorkingDirectory={{ LOCAL_PATH }}/
-    ExecStart=$VIRTUAL_ENV/bin/{{ processes.gunicorn }}
-    ExecReload=/bin/kill -s HUP \$MAINPID
-    ExecStop=/bin/kill -s TERM \$MAINPID
-    [Install]
-    WantedBy=multi-user.target
-    EOF
-    systemctl enable {{ processes.gunicorn }}.service
-    sudo service {{ processes.gunicorn }} start
-{% endif %}{% if USE_CELERY %}{% for queue in required_celery_queues %}    cat << EOF | sudo tee /etc/systemd/system/{{ processes.celery }}{% if queue != "celery" %}-{{ queue }}{% endif %}.service
+    systemctl enable {{ control_command }}.service
+    sudo service {{ control_command }} start
+{% for queue in required_celery_queues %}    cat << EOF | sudo tee /etc/systemd/system/{{ control_command }}-{{ queue }}.service
     [Unit]
     Description={{ DF_PROJECT_NAME }} Celery process
     After=network.target
@@ -290,15 +264,15 @@ You can also use systemd to launch {{ DF_MODULE_NAME }}:
     Group={{ DF_MODULE_NAME }}
     Type=forking
     WorkingDirectory={{ LOCAL_PATH }}/
-    ExecStart=$VIRTUAL_ENV/bin/{{ processes.celery }} worker -Q {{ queue }}
+    ExecStart=$VIRTUAL_ENV/bin/{{ control_command }} worker -Q {{ queue }}
     ExecReload=/bin/kill -s HUP \$MAINPID
     ExecStop=/bin/kill -s TERM \$MAINPID
     [Install]
     WantedBy=multi-user.target
     EOF
     mkdir -p {{ install_root }}/run
-    sudo systemctl enable {{ processes.celery }}{% if queue != "celery" %}-{{ queue }}{% endif %}.service
-    sudo service {{ processes.celery }}{% if queue != "celery" %}-{{ queue }}{% endif %} start
-{% endfor %}{% endif %}
+    sudo systemctl enable {{ control_command }}{% if queue != "celery" %}-{{ queue }}{% endif %}.service
+    sudo service {{ control_command }}{% if queue != "celery" %}-{{ queue }}{% endif %} start
+{% endfor %}
 {% block post_systemd %}{% endblock %}{% endblock %}
 {% block post_install_step %}{% endblock %}

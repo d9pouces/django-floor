@@ -337,8 +337,10 @@ def df_call(signal_name, request, sharing=None, from_client=False, kwargs=None, 
 
 
 def get_expected_queues():
-    import_signals_and_functions()
     expected_queues = set()
+    if not settings.USE_CELERY:
+        return expected_queues
+    import_signals_and_functions()
     for connection in REGISTERED_FUNCTIONS.values():
         if isinstance(connection.queue, DynamicQueueName):
             for queue_name in connection.queue.get_available_queues():

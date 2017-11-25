@@ -95,23 +95,20 @@ listen_address = 0.0.0.0:{{ LISTEN_PORT }}
 server_url = http://localhost:10080/
 EOF
 sudo chown -R {{ DF_MODULE_NAME }}: /var/{{ DF_MODULE_NAME }} /etc/{{ DF_MODULE_NAME }}
-sudo -H -u {{ DF_MODULE_NAME }} {{ processes.django }} migrate  # create the database (SQLite by default)
-sudo -H -u {{ DF_MODULE_NAME }} {{ processes.django }} collectstatic --noinput  # prepare static files (CSS, JS, …)
+sudo -H -u {{ DF_MODULE_NAME }} {{ control_command }} migrate  # create the database (SQLite by default)
+sudo -H -u {{ DF_MODULE_NAME }} {{ control_command }} collectstatic --noinput  # prepare static files (CSS, JS, …)
 {% endblock %}{% block post_application %}sudo apt-get install -y supervisor
 cat << EOF | sudo tee /etc/supervisor/conf.d/{{ DF_MODULE_NAME }}.conf
-{% if processes.aiohttp %}[program:{{ DF_MODULE_NAME }}_aiohttp]
-command = /usr/local/bin/{{ processes.aiohttp }}
+[program:{{ DF_MODULE_NAME }}_server]
+command = /usr/local/bin/{{ control_command }} server
 user = {{ DF_MODULE_NAME }}
-{% elif processes.gunicorn %}[program:{{ DF_MODULE_NAME }}_gunicorn]
-command = /usr/local/bin/{{ processes.gunicorn }}
+{% for queue in required_celery_queues %}[program:{{ DF_MODULE_NAME }}_celery_{{ queue }}]
+command = /usr/local/bin/{{ control_command }} worker -Q {{ queue }}
 user = {{ DF_MODULE_NAME }}
-{% endif %}{% if processes.celery %}{% for queue in required_celery_queues %}[program:{{ DF_MODULE_NAME }}_celery_{{ queue }}]
-command = /usr/local/bin/{{ processes.celery }} worker -Q {{ queue }}
-user = {{ DF_MODULE_NAME }}
-{% endfor %}{% endif %}EOF
+{% endfor %}EOF
 sudo service supervisor stop
 sudo service supervisor start
-cat << EOF | sudo -H -u {{ DF_MODULE_NAME }} {{ processes.django }} shell
+cat << EOF | sudo -H -u {{ DF_MODULE_NAME }} {{ control_command }} shell
 from django.contrib.auth import get_user_model
 M = get_user_model()
 u = M(username='demo')

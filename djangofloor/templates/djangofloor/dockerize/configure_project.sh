@@ -1,2 +1,2 @@
 #!/usr/bin/env bash
-{{ processes.django.command_line }} collectstatic --noinput
+{{ process.control.command_line }} collectstatic --noinput

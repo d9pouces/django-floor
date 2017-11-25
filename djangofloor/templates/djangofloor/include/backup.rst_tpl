@@ -33,7 +33,7 @@ Many backup strategies exist, and you must choose one that fits your needs. We c
   touch /var/backups/{{ DF_MODULE_NAME }}/backup_db.sql.gz
   crontab -e
   MAILTO={{ ADMIN_EMAIL }}
-  0 1 * * * {{ processes.django }} clearsessions
+  0 1 * * * {{ control_command }} clearsessions
   0 2 * * * logrotate -f /etc/{{ DF_MODULE_NAME }}/backup_db.conf
 
 
@@ -70,7 +70,7 @@ Restoring a backup
 
 .. code-block:: bash
 
-  cat /var/backups/{{ DF_MODULE_NAME }}/backup_db.sql.gz | gunzip | {{ processes.django }} dbshell
+  cat /var/backups/{{ DF_MODULE_NAME }}/backup_db.sql.gz | gunzip | {{ control_command }} dbshell
   tar -C {{ MEDIA_ROOT }} -xf /var/backups/{{ DF_MODULE_NAME }}/backup_media.tar.gz
 
 {% endblock %}

@@ -336,7 +336,7 @@ class Command(TemplatedBaseCommand):
         return ensure_dir(os.path.join(self.build_dir, 'pkg'), parent=False)
 
     @cached_property
-    def host_fpm_project_config_filename(self):
+    def host_fpm_project_config_filename(self):  # written by 'get_project_info.py' from the Vagrant box
         return os.path.join(self.host_tmp_dir, 'fpm-project.ini')
 
     @cached_property
@@ -619,7 +619,8 @@ class Command(TemplatedBaseCommand):
     def update_template_context(self, package_type):
         parser = self.get_config_parser()
         regex = re.compile(r'(?P<module>[\w.]+)\s*(:\s*(?P<attr>[\w.]+))?\s*(?P<extras>\[.*\])?\s*$', flags=re.UNICODE)
-        process_categories = {'django': None, 'gunicorn': None, 'uwsgi': None, 'aiohttp': None, 'celery': None}
+        process_categories = {'django': None, 'gunicorn': None, 'uwsgi': None, 'aiohttp': None, 'celery': None,
+                              'control': None}
         for option_name in parser.options('processes'):
             option_matcher = regex.match(parser.get('processes', option_name))
             if not option_matcher:
@@ -632,6 +633,7 @@ class Command(TemplatedBaseCommand):
             process_categories[values['attr']] = os.path.join(self.vagrant_install_dir, 'bin', option_name)
         processes = {key: Process(key, value) for (key, value) in process_categories.items() if value}
         self.template_context['processes'] = self.processes or processes
+        print(self.template_context['processes'])
         self.template_context['dependencies'] = []
         if parser.has_option(package_type, 'depends'):
             self.template_context['dependencies'] = [x.strip()

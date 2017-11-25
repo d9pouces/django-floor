@@ -1,15 +1,33 @@
 Quick installation
 ==================
 
-You can quickly test {{ DF_PROJECT_NAME }}, storing all data in $HOME/{{ DF_MODULE_NAME }}:
+{{ DF_PROJECT_NAME }} mainly requires Python ({{ available_python_versions|join:', ' }}){% if USE_CELERY %} and a Redis server for background tasks{% endif %}.
+
+You should create a dedicated virtualenvironment on your system to isolate {{ DF_PROJECT_NAME }}.
+You can use `pipenv <http://docs.python-guide.org/en/latest/dev/virtualenvs/>`_ or `virtualenvwrapper <https://virtualenvwrapper.readthedocs.io>`_.
+
+For example, on Debian-based systems like Ubuntu:
 
 .. code-block:: bash
 
-{% block install_deps %}    sudo apt-get install {{ python_version }} {{ python_version }}-dev build-essential
-{% endblock %}{% block application %}    pip install {{ DF_MODULE_NAME }}
-{% endblock %}{% block pre_application %}{% endblock %}    {{ processes.django }} collectstatic --noinput  # prepare static files (CSS, JS, …)
-    {{ processes.django }} migrate  # create the database (SQLite by default)
-{% block post_application %}    {{ processes.django }} createsuperuser  # create an admin user
+{% block install_deps %}    sudo apt-get install {{ python_version }} {{ python_version }}-dev build-essential{% if USE_CELERY %} redis-server{% endif %}
+{% if pipeline.gem %}    sudo gem install {{ pipeline.gem|join:' ' }}
+{% endif %}{% if pipeline.npm %}    sudo npm install -g {{ pipeline.npm|join:' ' }}
+{% endif %}
+{% if pipeline.other %}
+
+{{ pipeline.other|join:', ' }} must also be installed.{% endif %}
+{% endblock %}
+
+If these requirements are fullfilled, then you can gon on and install {{ DF_PROJECT_NAME }}:
+
+.. code-block:: bash
+
+{% block application %}    pip install {{ DF_MODULE_NAME }} --user
+{% endblock %}{% block pre_application %}{% endblock %}    {{ control_command }} collectstatic --noinput  # prepare static files (CSS, JS, …)
+    {{ control_command }} migrate  # create the database (SQLite by default)
+{% block post_application %}    {{ control_command }} createsuperuser  # create an admin user
+    {{ control_command }} check  # everything should be ok
 {% endblock %}
 
 {% block basic_config %}
@@ -18,9 +36,7 @@ editing the configuration file.
 
 .. code-block:: bash
 
-    CONFIG_FILENAME=`{{ processes.django }}  config ini -v 2 | head -n 1 | grep ".ini" | cut -d '"' -f 2`
-    # create required folders
-    mkdir -p `dirname $FILENAME` $HOME/{{ DF_MODULE_NAME }}
+    CONFIG_FILENAME=`{{ control_command }} config ini -v 2 | grep -m 1 ' - .ini file' | cut -d '"' -f 2`
     # prepare a limited configuration file
     cat << EOF > $FILENAME
     [global]
@@ -34,10 +50,11 @@ You can launch the server process{% if USE_CELERY %}es (the second process is re
 
 .. code-block:: bash
 {% block run_application %}
-    {% if processes.aiohttp %}{{ processes.aiohttp }}{% elif processes.gunicorn %}{{ processes.gunicorn }}{% endif %}
-{% if USE_CELERY %}    {{ processes.celery }} worker -Q {{ required_celery_queues|join:',' }}
+    {{ control_command }} server
+{% if USE_CELERY %}    {{ control_command }} worker -Q {{ required_celery_queues|join:',' }}
 {% endif %}{% endblock %}
 
-Then open http://{{ LISTEN_ADDRESS }} in your favorite browser.
+Then open http://{{ LISTEN_ADDRESS }} with your favorite browser.
 
-You should use virtualenv or install {{ DF_PROJECT_NAME }} using the `--user` option.
+You can install {{ DF_PROJECT_NAME }} in your home (with the `--user` option), globally (without this option), or (preferably)
+inside a virtualenv.

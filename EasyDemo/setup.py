@@ -13,6 +13,13 @@ for line in open(os.path.join('easydemo', '__init__.py'), 'r', encoding='utf-8')
 # get README content from README.md file
 with open(os.path.join(os.path.dirname(__file__), 'README.md'), encoding='utf-8') as fd:
     long_description = fd.read()
+try:
+    from djangofloor.scripts import set_env
+    import django
+    set_env('easydemo-django')
+    django.setup()
+except ImportError:
+    set_env, django = None, None
 
 setup(
     name='EasyDemo',
@@ -25,7 +32,7 @@ setup(
     packages=find_packages(),
     include_package_data=True,
     zip_safe=False,
-    install_requires=['djangofloor'],
+    install_requires=['djangofloor>=1.0.20'],
     classifiers=['Development Status :: 3 - Alpha', 'Operating System :: MacOS :: MacOS X',
                  'Operating System :: Microsoft :: Windows', 'Operating System :: POSIX :: BSD',
                  'Operating System :: POSIX :: Linux', 'Operating System :: Unix',

@@ -1,11 +1,7 @@
 {% load djangofloor %}.. {{ DF_PROJECT_NAME }} documentation master file, created by
 
 {% block heading %}
-{{ DF_PROJECT_NAME }}
-{{ DF_PROJECT_NAME|df_underline }}
-
-{% block description %}{% endblock %}
-
+{% block description %}{{ description|safe }}{% endblock %}
 {% block screenshots %}{% endblock %}
 {% endblock %}
 
@@ -16,8 +12,10 @@ table of contents
    :maxdepth: 1
 
    quick-installation
+   requirements
    installation
    configuration
+   changes
 {% block extra_table_contents %}{% endblock %}
 
 * :ref:`search`

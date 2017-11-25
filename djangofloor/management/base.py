@@ -2,16 +2,18 @@ import codecs
 import datetime
 import hashlib
 import os
-import shlex
+import re
 import shutil
 import string
 import sys
 from argparse import ArgumentParser
 from difflib import unified_diff
+from email import message_from_string
 
 import pkg_resources
+from django.conf import settings
 from django.contrib.staticfiles import finders
-from django.core.management import BaseCommand as OriginalBaseCommand, CommandError, CommandParser,\
+from django.core.management import BaseCommand as OriginalBaseCommand, CommandError, CommandParser, \
     handle_default_options
 from django.core.management.base import SystemCheckError
 from django.db import connections
@@ -19,10 +21,10 @@ from django.template import TemplateDoesNotExist
 from django.template import TemplateSyntaxError
 from django.template.loader import render_to_string
 
+from djangofloor.checks import get_pipeline_requirements
 from djangofloor.conf.providers import IniConfigProvider
 from djangofloor.scripts import get_merger_from_env
 from djangofloor.utils import remove_arguments_from_help, walk
-
 
 __author__ = 'Matthieu Gallet'
 
@@ -117,6 +119,74 @@ class TemplatedBaseCommand(OriginalBaseCommand):
         merger.process()
         merger.post_process()
         return merger
+
+    def get_setup_context(self):
+        """extract required informations from the setup.py command (like the description or the installed scripts)"""
+        module_name = settings.DF_MODULE_NAME
+        try:
+            project_distribution = pkg_resources.get_distribution(module_name)
+        except pkg_resources.DistributionNotFound:
+            if hasattr(sys, 'real_prefix'):  # we are inside a virtualenv
+                self.stderr.write('You must run \'python setup.py install\' or \'python setup.py develop\' '
+                                  'before using this command')
+            else:
+                self.stderr.write('You must run \'python3 setup.py install --user\' or '
+                                  '\'python3 setup.py develop --user\' before using this command.')
+            return {}
+        context = {'version': project_distribution.version, 'name': module_name, 'processes': {},
+                   'control_command': None, 'available_python_versions': []}
+        # analyze scripts to detect which processes to launch on startup
+        entry_map = pkg_resources.get_entry_map(module_name)
+        for script_name, entry_point in entry_map.get('console_scripts').items():
+            script_value = entry_point.module_name
+            if entry_point.attrs:
+                script_value += ':%s' % entry_point.attrs[:1]
+            if entry_point.extras:
+                script_value += ' %s' % entry_point.extras[:1]
+            if entry_point.module_name == 'djangofloor.scripts' and entry_point.attrs == ('control', ):
+                context['control_command'] = entry_point.name
+            context['processes'][script_name] = script_value
+        maintainer = [None, None]
+        # noinspection PyBroadException
+        pkg_info = project_distribution.get_metadata('PKG-INFO')
+        msg = message_from_string(pkg_info)
+        for k, v in msg.items():
+            if v == 'UNKNOWN':
+                continue
+            elif k == 'License':
+                context['license'] = v
+            elif k == 'Description':
+                content = []
+                for index, line in enumerate(v.splitlines()):
+                    if index == 0:
+                        content.append(line)
+                    else:
+                        content.append(line[8:])
+                context['description'] = '\n'.join(content)
+            elif k == 'Home-page':
+                context['url'] = v
+            elif k == 'Author':
+                maintainer[0] = v
+            elif k == 'Author-email':
+                maintainer[1] = v
+            elif k == 'Classifier':
+                matcher = re.match(r'Programming Language :: Python :: (3.\d+)', v)
+                if matcher:
+                    context['available_python_versions'].append(matcher.group(1))
+        if maintainer[0] and maintainer[1]:
+            context['maintainer'] = '%s <%s>' % tuple(maintainer)
+            context['vendor'] = '%s <%s>' % tuple(maintainer)
+        context['available_python_versions'].sort()
+        context['requirements'] = [str(x) for x in project_distribution.requires()]
+        return context
+
+    @staticmethod
+    def get_pipeline_context():
+        """
+        Return a dict with programs required by `django-pipeline` (like sass or livescript).
+        Distinguishes between 'npm' and 'gem' packages.
+        """
+        return get_pipeline_requirements()
 
     def get_template_context(self, merger, extra_context):
         """

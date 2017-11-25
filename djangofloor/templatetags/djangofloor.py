@@ -189,12 +189,6 @@ def df_messages(context, style='banner'):
     return mark_safe(result)
 
 
-@register.filter
-def df_underline(value, kind='='):
-    """.. deprecated:: 1.0 do not use it"""
-    return kind * len(value)
-
-
 @register.simple_tag(takes_context=False)
 def df_deprecation(value):
     """.. deprecated:: 1.0 do not use it"""

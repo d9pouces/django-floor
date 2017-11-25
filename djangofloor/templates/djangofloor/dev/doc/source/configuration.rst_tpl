@@ -10,13 +10,13 @@ You can look current settings with the following command:
 
 .. code-block:: bash
 
-    {{ processes.django }} config ini -v 2
+    {{ control_command }} config ini -v 2
 
-You can also display the actual list of Python settings
+You can also display the actual list of Python settings (for more complex tweaks):
 
 .. code-block:: bash
 
-    {{ processes.django }} config python -v 2
+    {{ control_command }} config python -v 2
 
 
 Here is the complete list of settings:
@@ -57,23 +57,12 @@ Settings are automatically changed for using a local Redis server (of course, yo
 
   pip install django-redis-sessions
 
-Optimized media files
-~~~~~~~~~~~~~~~~~~~~~
-
-You can use `Django-Pipeline <https://django-pipeline.readthedocs.io/en/latest/configuration.html>`_ to merge all media files (CSS and JS) for a faster site.
-
-.. code-block:: bash
-
-  pip install django-pipeline
-
-Optimized JavaScript files are currently deactivated due to syntax errors in generated files (not my fault ^^).
-
 {% endblock %}
 {% block debugging %}
 Debugging
 ---------
 
-If something does not work as expected, you can look at logs (in /var/log/supervisor if you use supervisor)
+If something does not work as expected, you can look at logs (check the global configuration for determining their folder)
 or try to run the server interactively:
 
 .. code-block:: bash
@@ -81,27 +70,20 @@ or try to run the server interactively:
   sudo service supervisor stop
   sudo -H -u {{ DF_MODULE_NAME }} -i
   workon {{ DF_MODULE_NAME }}
-  {{ processes.django }} config
-  {{ processes.django }} runserver
-  {% if processes.aiohttp %}{{ processes.aiohttp }}{% else %}{{ processes.gunicorn }}{% endif %}
-{% if USE_CELERY %}  {{ processes.celery }} worker -Q {{ required_celery_queues|join:',' }}
+  {{ control_command }} check
+  {{ control_command }} config ini
+  {{ control_command }} server
+{% if USE_CELERY %}  {{ control_command }} worker -Q {{ required_celery_queues|join:',' }}
 {% endif %}
 
-{% endblock %}
-{% block backup %}
-{% include 'djangofloor/include/backup.rst_tpl' %}
-{% endblock %}
+You can also enable the DEBUG mode which is more verbose (and displays logs to stdout):
 
-{% block ldap_groups %}
-LDAP groups
------------
+.. code-block:: bash
 
-There are two possibilities to use LDAP groups, with their own pros and cons:
+  FILENAME=`easydemo-ctl config ini -v 2 | grep -m 1 ' - .ini file' | cut -d '"' -f 2 | sed  's/.ini$/.py/'`
+  echo "DEBUG = True" >> $FILENAME
+  {{ control_command }} runserver
+{% if USE_CELERY %}  {{ control_command }} worker -Q {{ required_celery_queues|join:',' }}
+{% endif %}
 
-  * on each request, use an extra LDAP connection to retrieve groups instead of looking in the SQL database,
-  * regularly synchronize groups between the LDAP server and the SQL servers.
-
-The second approach can be used without any modification in your code and remove a point of failure
-in the global architecture (if you can afford regular synchronizations instead of instant replication).
-At least one tool exists for such synchronization: `MultiSync <https://github.com/d9pouces/Multisync>`_.
 {% endblock %}

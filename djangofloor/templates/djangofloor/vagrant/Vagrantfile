@@ -15,10 +15,15 @@ sudo apt-get install -y `python3 -c 'import sys; print("python%d.%d-venv" % (sys
 sudo apt-get purge -y {{ DF_MODULE_NAME }} 2> /dev/null || :
 {% elif vagrant_distrib_family == 'fedora' or vagrant_distrib_family == 'centos' %}
 sudo yum -y -q reinstall glibc-common
-
+sudo yum -y -q install mariadb-devel.x86_64 postgresql-devel.x86_64 rng-tools.x86_64
+sudo yum -y -q install ruby.x86_64 ruby-devel.x86_64
+sudo rpm -Uvh http://download.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-10.noarch.rpm
+sudo yum -y -q install python34-devel.x86_64 python34-virtualenv.noarch
+sudo yum -y -q install gcc gcc-c++ make openssl-devel glibc-devel
+sudo yum -y -q remove {{ DF_MODULE_NAME }} 2> /dev/null || :
 {% endif %}
 echo "HRNGDEVICE=/dev/urandom" | sudo tee -a /etc/default/rng-tools
-sudo /etc/init.d/rng-tools restart
+sudo service rngd restart
 SHELL
 
 end

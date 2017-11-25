@@ -1,0 +1,21 @@
+Requirements
+============
+
+As said before, Python is required but this is not the only requirement:
+{% block requirements %}
+  * Python ({{ available_python_versions|join:', ' }}),
+{% for requirement in requirements %}  * {{ requirement|safe }} Python package (automatically installed with {{ DF_PROJECT_NAME }}),
+{% endfor %}{% if USE_CELERY %}  * a Redis server for background tasks (and optionally for sessions and cache),
+{% else %}  * an optional Redis server for sessions and cache,
+{% endif %}{% if pipeline.gem %}   * {{ pipeline.gem|join:', ' }} (required gem packages if you install {{ DF_PROJECT_NAME }} from Pypi or from the source),
+{% endif %}{% if pipeline.npm %}   * {{ pipeline.npm|join:', ' }} (required npm packages if you install {{ DF_PROJECT_NAME }} from Pypi or from the source),
+{% endif %}{% if pipeline.other %}   * {{ pipeline.other|join:', ' }} (required packages if you install {{ DF_PROJECT_NAME }} from Pypi or from the source),
+{% endif %}  * mysqlclient (Python package) libmysqlclient and libmysqlclient-dev (system packages) if you want to use MySQL,
+  * psycopg2 (Python package), libpq and libpq-dev (system packages) if you want to use PostgreSQL,
+  * cx_Oracle (Python package) and the associated system packages if you want to use Oracle,
+  * django_redis (Python package) is you want to cache pages in Redis,
+  * django-allauth (Python package) for OAuth2 authentication,
+  * django-radius (Python package) for Radius authentication,
+  * django-auth-ldap (Python package) and libldap-dev (system package) for LDAP authentication,
+  * django_pam (Python package) for PAM authentication.
+{% endblock %}

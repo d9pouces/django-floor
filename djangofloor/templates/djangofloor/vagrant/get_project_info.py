@@ -6,6 +6,7 @@ import pkg_resources
 project_name = '{{ DF_MODULE_NAME }}'
 vagrant_tmp_dir = '{{ tmp_dir.1 }}'
 vagrant_install_dir = '{{ install_dir.1 }}'
+vagrant_config_filename = '{{ fpm_project_config_filename.1 }}'
 
 
 def main():
@@ -47,7 +48,7 @@ def main():
     parser['deb'] = defaults
     parser['rpm'] = defaults
     parser['tar'] = defaults
-    with open('{{ fpm_project_config_filename.1 }}', 'w', encoding='utf-8') as fd:
+    with open(vagrant_config_filename, 'w', encoding='utf-8') as fd:
         parser.write(fd)
 
 

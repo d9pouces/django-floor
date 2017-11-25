@@ -19,13 +19,10 @@ A few extra variables are currently added to the context:
 """
 from argparse import ArgumentParser
 
-import pkg_resources
 from django.conf import settings
 
-from djangofloor.decorators import REGISTERED_FUNCTIONS
-from djangofloor.decorators import REGISTERED_SIGNALS
 from djangofloor.management.base import TemplatedBaseCommand
-from djangofloor.tasks import import_signals_and_functions
+from djangofloor.tasks import get_expected_queues
 
 __author__ = 'Matthieu Gallet'
 
@@ -49,6 +46,7 @@ class Command(TemplatedBaseCommand):
                                                                '(--extra-context=NAME:VALUE)', default=[])
 
     def handle(self, *args, **options):
+
         verbose_mode = options['verbosity'] > 1
         dry_mode = options['dry']
         target_directory = options['target']
@@ -68,6 +66,8 @@ class Command(TemplatedBaseCommand):
         config_files = options['config_file']
         merger = self.get_merger(config_files)
         context = self.get_template_context(merger, extra_variables)
+        if context is None:
+            return
         writers = self.get_file_writers(searched_locations)
         for target_filename in sorted(writers):  # fix the writing order
             writer = writers[target_filename]
@@ -75,24 +75,13 @@ class Command(TemplatedBaseCommand):
 
     def get_template_context(self, merger, extra_context):
         context = super(Command, self).get_template_context(merger, extra_context)
-        process_categories = {'django': None, 'gunicorn': None, 'uwsgi': None, 'aiohttp': None, 'celery': None}
-        import_signals_and_functions()
-        required_celery_queues = {y.queue for y in REGISTERED_FUNCTIONS.values()}
-        for connections in REGISTERED_SIGNALS.values():
-            required_celery_queues |= {y.queue for y in connections if not callable(y.queue)}
-        required_celery_queues = list(required_celery_queues)
-        required_celery_queues.sort()
-        # analyze scripts to detect which processes to launch on startup
-        app_name = merger.settings['DF_MODULE_NAME']
-        for script_name, entry_point in pkg_resources.get_entry_map(app_name).get('console_scripts').items():
-            if entry_point.module_name != 'djangofloor.scripts' or not entry_point.attrs:
-                continue
-            daemon_type = entry_point.attrs[0]
-            if process_categories.get(daemon_type):
-                continue
-            process_categories[daemon_type] = entry_point.name
+        required_celery_queues = list(sorted(get_expected_queues()))
+        setup_context = self.get_setup_context()
+        if not setup_context:
+            return None
+        context.update(setup_context)
         context['LISTEN_PORT'] = settings.LISTEN_ADDRESS.partition(':')[2] or '8000'
         context['required_celery_queues'] = required_celery_queues
+        context['pipeline'] = self.get_pipeline_context()
         context['INSTALL_ROOT'] = '/home/%s/.virtualenvs/%s' % (settings.DF_MODULE_NAME, settings.DF_MODULE_NAME)
-        context['processes'] = {key: value for (key, value) in process_categories.items() if value}
         return context

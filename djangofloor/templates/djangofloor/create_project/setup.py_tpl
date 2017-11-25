@@ -16,13 +16,15 @@ python_version = (sys.version_info[0], sys.version_info[1])
 with open(os.path.join(os.path.dirname(__file__), 'README.md'), encoding='utf-8') as fd:
     long_description = fd.read()
 
-entry_points = {{'console_scripts': ['{package_name}-ctl = djangofloor.scripts:control']}}
 try:
     from djangofloor.scripts import set_env
-    set_env('{package_name}-setup')
+    import django
+    set_env('{package_name}-django')
 except ImportError:
-    set_env = None
+    django.setup()
+    django, set_env = None, None
 
+entry_points = {{'console_scripts': ['{package_name}-ctl = djangofloor.scripts:control']}}
 setup(
     name='{project_name}',
     version=version,
