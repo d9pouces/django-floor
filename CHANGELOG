@@ -6,4 +6,4 @@ Changelog history
 
   * more complete developer documentation
   * new automatic documentation
-
+  * ConfigValue methods takes more arguments to have a complete context

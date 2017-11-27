@@ -313,6 +313,7 @@ class RequestCheck(MonitoringCheck):
         context['request_host'] = host
         context['request_site'] = None
         context['cache_redis'] = settings.USE_REDIS_CACHE
+        context['use_ssl'] = settings.USE_SSL
         context['session_redis'] = settings.USE_REDIS_SESSIONS
         context['websockets_required'] = settings.WEBSOCKET_URL is not None
         context['celery_required'] = settings.USE_CELERY

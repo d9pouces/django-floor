@@ -23,7 +23,7 @@
                     {% endif %}
                 </li>
                 {% endif %}
-                    {% if secure_proxy_ssl_header %}
+                    {% if use_ssl and secure_proxy_ssl_header %}
                 <li><strong>{% trans 'Secure proxy SSL HTTP header: ' %}</strong>{{ secure_proxy_ssl_header.0|upper }} =
                     {% if secure_proxy_ssl_header.2 %}{% django_icon 'check' %}{{ secure_proxy_ssl_header.1 }}
                     {% elif secure_proxy_ssl_header.1 %}{% django_icon 'warning' %}{{ secure_proxy_ssl_header.1 }}
