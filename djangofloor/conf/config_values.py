@@ -42,35 +42,37 @@ class ConfigValue(object):
     def __init__(self, value):
         self.value = value
 
-    def get_value(self, merger):
+    def get_value(self, merger, provider_name: str, setting_name: str):
         """ Return the intepreted value
 
         :param merger: merger object, with all interpreted settings
         :type merger: :class:`djangofloor.utils.SettingMerger`
+        :param provider_name: name of the provider containing this value
+        :param setting_name: name of the setting containing this value
         """
         raise NotImplementedError
 
     # noinspection PyMethodMayBeStatic
-    def pre_collectstatic(self, merger, setting_name, value):
+    def pre_collectstatic(self, merger, provider_name, setting_name, value):
         """Called before the "collectstatic" command (at least the one provided by Djangofloor).
         Could be used for creating public files or directories (static files, required directories...).
         """
         pass
 
     # noinspection PyMethodMayBeStatic
-    def pre_migrate(self, merger, setting_name, value):
+    def pre_migrate(self, merger, provider_name, setting_name, value):
         """Called before the "migrate" command.
         Could be used for creating private files (like the SECRET_KEY file)
         """
         pass
 
     # noinspection PyMethodMayBeStatic
-    def post_collectstatic(self, merger, setting_name, value):
+    def post_collectstatic(self, merger, provider_name, setting_name, value):
         """Called after the "collectstatic" command"""
         pass
 
     # noinspection PyMethodMayBeStatic
-    def post_migrate(self, merger, setting_name, value):
+    def post_migrate(self, merger, provider_name, setting_name, value):
         """Called after the "migrate" command"""
         pass
 
@@ -89,11 +91,13 @@ you need to use :class:`RawValue` for using values that should be formatted.
     SETTING_2 = Raw('{DEBUG}')  # will be kept as  '{DEBUG}'
     """
 
-    def get_value(self, merger):
+    def get_value(self, merger, provider_name: str, setting_name: str):
         """ Return the non-intepreted value
 
         :param merger: merger object, with all interpreted settings
         :type merger: :class:`djangofloor.utils.SettingMerger`
+        :param provider_name: name of the provider containing this value
+        :param setting_name: name of the setting containing this value
         """
         return self.value
 
@@ -105,13 +109,15 @@ class Path(ConfigValue):
         super().__init__(value)
         self.mode = mode
 
-    def get_value(self, merger):
+    def get_value(self, merger, provider_name, setting_name):
         """ Return the value
 
         :param merger: merger object, with all interpreted settings
         :type merger: :class:`djangofloor.utils.SettingMerger`
+        :param provider_name: name of the provider containing this value
+        :param setting_name: name of the setting containing this value
         """
-        value = merger.analyze_raw_value(self.value)
+        value = merger.analyze_raw_value(self.value, provider_name, setting_name)
         value = os.path.normpath(value)
         return value
 
@@ -152,13 +158,15 @@ class Directory(Path):
     """Represent a directory on the filesystem, that is automatically created by the "migrate" and "collectstatic"
     commands"""
 
-    def get_value(self, merger):
+    def get_value(self, merger, provider_name: str, setting_name: str):
         """ Return the value
 
         :param merger: merger object, with all interpreted settings
         :type merger: :class:`djangofloor.utils.SettingMerger`
+        :param provider_name: name of the provider containing this value
+        :param setting_name: name of the setting containing this value
         """
-        value = merger.analyze_raw_value(self.value)
+        value = merger.analyze_raw_value(self.value, provider_name, setting_name)
         value = os.path.normpath(value)
         if not value.endswith('/'):
             value += '/'
@@ -168,11 +176,11 @@ class Directory(Path):
                         obj='configuration'))
         return value
 
-    def pre_collectstatic(self, merger, setting_name, value):
+    def pre_collectstatic(self, merger, provider_name, setting_name, value):
         self.makedirs(merger, value)
         self.chmod(merger, value)
 
-    def pre_migrate(self, merger, setting_name, value):
+    def pre_migrate(self, merger, provider_name, setting_name, value):
         self.makedirs(merger, value)
         self.chmod(merger, value)
 
@@ -183,26 +191,28 @@ class File(Path):
 
     """
 
-    def get_value(self, merger):
+    def get_value(self, merger, provider_name: str, setting_name: str):
         """ Return the value
 
         :param merger: merger object, with all interpreted settings
         :type merger: :class:`djangofloor.utils.SettingMerger`
+        :param provider_name: name of the provider containing this value
+        :param setting_name: name of the setting containing this value
         """
-        value = merger.analyze_raw_value(self.value)
+        value = merger.analyze_raw_value(self.value, provider_name, setting_name)
         value = os.path.normpath(value)
         if not os.path.isfile(value):
             settings_check_results.append(
                 Warning('\'%s\' does not exist.' % value, obj='configuration'))
         return value
 
-    def pre_collectstatic(self, merger, setting_name, value):
+    def pre_collectstatic(self, merger, provider_name, setting_name, value):
         if value is None:
             return
         self.makedirs(merger, os.path.dirname(value))
         self.chmod(merger, value)
 
-    def pre_migrate(self, merger, setting_name, value):
+    def pre_migrate(self, merger, provider_name, setting_name, value):
         self.pre_collectstatic(merger, setting_name, value)
 
 
@@ -234,8 +244,8 @@ class AutocreateFileContent(File):
         self.args = args
         self.kwargs = kwargs
 
-    def pre_migrate(self, merger, setting_name, value):
-        filename = merger.analyze_raw_value(self.value)
+    def pre_migrate(self, merger, provider_name, setting_name, value):
+        filename = merger.analyze_raw_value(self.value, provider_name, setting_name)
         if filename is None or os.path.isfile(filename):  # empty filename, or it already exists => nothing to do
             return
         result = self.create_function(True, *self.args, **self.kwargs)
@@ -252,13 +262,15 @@ class AutocreateFileContent(File):
         else:
             merger.stderr.write('Invalid empty content for \'%s\'' % filename)
 
-    def get_value(self, merger):
+    def get_value(self, merger, provider_name: str, setting_name: str):
         """ Return the value
 
         :param merger: merger object, with all interpreted settings
         :type merger: :class:`djangofloor.utils.SettingMerger`
+        :param provider_name: name of the provider containing this value
+        :param setting_name: name of the setting containing this value
         """
-        filename = merger.analyze_raw_value(self.value)
+        filename = merger.analyze_raw_value(self.value, provider_name, setting_name)
         if os.path.isfile(filename):
             with open(filename, 'r', encoding='utf-8') as fd:
                 result = fd.read()
@@ -302,11 +314,13 @@ class SettingReference(ConfigValue):
         super(SettingReference, self).__init__(value)
         self.func = func
 
-    def get_value(self, merger):
+    def get_value(self, merger, provider_name: str, setting_name: str):
         """ Return the value
 
         :param merger: merger object, with all interpreted settings
         :type merger: :class:`djangofloor.utils.SettingMerger`
+        :param provider_name: name of the provider containing this value
+        :param setting_name: name of the setting containing this value
         """
         result = merger.get_setting_value(self.value)
         if self.func:
@@ -320,18 +334,20 @@ class DeprecatedSetting(ConfigValue):
         self.default = default
         self.msg = msg
 
-    def get_value(self, merger):
+    def get_value(self, merger, provider_name: str, setting_name: str):
         """ Return the value
 
         :param merger: merger object, with all interpreted settings
         :type merger: :class:`djangofloor.utils.SettingMerger`
+        :param provider_name: name of the provider containing this value
+        :param setting_name: name of the setting containing this value
         """
         if merger.has_setting_value(self.value) and merger.get_setting_value(self.value):
             from djangofloor.utils import RemovedInDjangoFloor200Warning
             warnings.warn('"%s" setting should not be used anymore. %s' % (self.value, self.msg),
                           RemovedInDjangoFloor200Warning)
             return merger.get_setting_value(self.value)
-        return merger.analyze_raw_value(self.default)
+        return merger.analyze_raw_value(self.default, provider_name, setting_name)
 
     def __repr__(self):
         return repr(self.value)
@@ -377,11 +393,13 @@ class CallableSetting(ConfigValue):
         else:
             self.required = required
 
-    def get_value(self, merger):
+    def get_value(self, merger, provider_name: str, setting_name: str):
         """ Return the value
 
         :param merger: merger object, with all interpreted settings
         :type merger: :class:`djangofloor.utils.SettingMerger`
+        :param provider_name: name of the provider containing this value
+        :param setting_name: name of the setting containing this value
         """
         for required in self.required:
             merger.get_setting_value(required)

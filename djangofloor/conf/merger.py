@@ -103,6 +103,7 @@ class SettingMerger(object):
         self.providers = providers or []
         self.__formatter = string.Formatter()
         self.settings = {}
+        self.config_values = []  # list of (ConfigValue, provider_name, setting_name, final_value)
         self.raw_settings = OrderedDict()
         for key, value in extra_values.items():
             self.raw_settings[key] = OrderedDict()
@@ -166,10 +167,10 @@ class SettingMerger(object):
         elif setting_name not in self.raw_settings:
             raise ValueError('Invalid setting reference: %s' % setting_name)
         self.__working_stack.add(setting_name)
-        raw_value = None
-        for raw_value in self.raw_settings[setting_name].values():
+        provider_name, raw_value = None, None
+        for provider_name, raw_value in self.raw_settings[setting_name].items():
             pass
-        value = self.analyze_raw_value(raw_value)
+        value = self.analyze_raw_value(raw_value, provider_name, setting_name)
         self.settings[setting_name] = value
         self.__working_stack.remove(setting_name)
         return value
@@ -184,24 +185,14 @@ class SettingMerger(object):
 
         :param method_name: 'pre_collectstatic', 'pre_migrate', 'post_collectstatic', or 'post_migrate'.
         """
-        for setting_name, config_values in self.raw_settings.items():
-            raw_value = None
-            for raw_value in config_values.values():
-                pass
-            if not isinstance(raw_value, ConfigValue) or setting_name not in self.settings:
-                continue
-            final_value = self.settings[setting_name]
+        for raw_value, provider_name, setting_name, final_value in self.config_values:
             try:
-                getattr(raw_value, method_name)(self, setting_name, final_value)
+                getattr(raw_value, method_name)(self, provider_name, setting_name, final_value)
             except Exception as e:
-                provider_name = None
-                for provider_name, raw_value in self.raw_settings[setting_name].items():
-                    pass
-                if provider_name:
-                    self.stdout.write(self.style.ERROR('Invalid value "%s" in %s for %s (%s)' %
-                                                       (raw_value, provider_name or 'built-in', setting_name, e)))
+                self.stdout.write(self.style.ERROR('Invalid value "%s" in %s for %s (%s)' %
+                                                   (raw_value, provider_name or 'built-in', setting_name, e)))
 
-    def analyze_raw_value(self, obj):
+    def analyze_raw_value(self, obj, provider_name, setting_name):
         """Parse the object for replacing variables by their values.
 
         If `obj` is a string like "THIS_IS_{TEXT}", search for a setting named "TEXT" and replace {TEXT} by its value
@@ -211,6 +202,9 @@ class SettingMerger(object):
         Otherwise, `obj` is returned as-is.
 
         :param obj: object to analyze
+        :param provider_name: the name of the config file
+        :param setting_name: the name of the setting containing this value
+            but this value can be inside a dict or a list (like `SETTING = [Directory("/tmp"), ]`)
         :return: the parsed setting
         """
         if isinstance(obj, str):
@@ -221,14 +215,16 @@ class SettingMerger(object):
             if values:
                 return self.__formatter.format(obj, **values)
         elif isinstance(obj, ConfigValue):
-            return self.analyze_raw_value(obj.get_value(self))
+            final_value = obj.get_value(self, provider_name, setting_name)
+            self.config_values.append((obj, provider_name, setting_name, final_value))
+            return self.analyze_raw_value(final_value, provider_name, setting_name)
         elif isinstance(obj, list) or isinstance(obj, tuple):
             result = []
             for sub_obj in obj:
                 if isinstance(sub_obj, ExpandIterable):
                     result += self.get_setting_value(sub_obj.value)
                 else:
-                    result.append(self.analyze_raw_value(sub_obj))
+                    result.append(self.analyze_raw_value(sub_obj, provider_name, setting_name))
             if isinstance(obj, tuple):
                 return tuple(result)
             return result
@@ -238,7 +234,7 @@ class SettingMerger(object):
                 if isinstance(sub_obj, ExpandIterable):
                     result |= self.get_setting_value(sub_obj.value)
                 else:
-                    result.add(self.analyze_raw_value(sub_obj))
+                    result.add(self.analyze_raw_value(sub_obj, provider_name, setting_name))
             return result
         elif isinstance(obj, dict):
             result = {}
@@ -246,7 +242,9 @@ class SettingMerger(object):
                 if isinstance(sub_obj, ExpandIterable):
                     result.update(self.get_setting_value(sub_obj.value))
                 else:
-                    result[self.analyze_raw_value(sub_key)] = (self.analyze_raw_value(sub_obj))
+                    value = self.analyze_raw_value(sub_obj, provider_name, setting_name)
+                    key = self.analyze_raw_value(sub_key, provider_name, setting_name)
+                    result[key] = value
             return result
         return obj
 
