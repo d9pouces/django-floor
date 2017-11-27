@@ -188,7 +188,7 @@ class SettingMerger(object):
             raw_value = None
             for raw_value in config_values.values():
                 pass
-            if not isinstance(raw_value, ConfigValue):
+            if not isinstance(raw_value, ConfigValue) or setting_name not in self.settings:
                 continue
             final_value = self.settings[setting_name]
             try:
@@ -261,7 +261,7 @@ class SettingMerger(object):
         # remove deprecated settings
         if LooseVersion(django_version) >= LooseVersion('1.8'):
             if 'TEMPLATES' in self.settings:
-                for key in 'TEMPLATE_DIRS', 'TEMPLATE_CONTEXT_PROCESSORS', 'TEMPLATE_LOADERS':
+                for key in 'TEMPLATE_DIRS', 'TEMPLATE_CONTEXT_PROCESSORS', 'TEMPLATE_LOADERS', 'TEMPLATE_DEBUG':
                     if key in self.settings:
                         del self.settings[key]
 
