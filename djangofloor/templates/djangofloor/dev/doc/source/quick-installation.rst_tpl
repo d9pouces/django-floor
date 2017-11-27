@@ -1,7 +1,7 @@
 Quick installation
 ==================
 
-{{ DF_PROJECT_NAME }} mainly requires Python ({{ available_python_versions|join:', ' }}){% if USE_CELERY %} and a Redis server for background tasks{% endif %}.
+{{ DF_PROJECT_NAME }} mainly requires Python{% if available_python_versions %} ({{ available_python_versions|join:', ' }}){% endif %}{% if USE_CELERY %} and a Redis server for background tasks{% endif %}.
 
 You should create a dedicated virtualenvironment on your system to isolate {{ DF_PROJECT_NAME }}.
 You can use `pipenv <http://docs.python-guide.org/en/latest/dev/virtualenvs/>`_ or `virtualenvwrapper <https://virtualenvwrapper.readthedocs.io>`_.
@@ -11,13 +11,15 @@ For example, on Debian-based systems like Ubuntu:
 .. code-block:: bash
 
 {% block install_deps %}    sudo apt-get install {{ python_version }} {{ python_version }}-dev build-essential{% if USE_CELERY %} redis-server{% endif %}
-{% if pipeline.gem %}    sudo gem install {{ pipeline.gem|join:' ' }}
+{% block install_extra_deps %}{% endblock %}{% if pipeline.gem %}    sudo gem install {{ pipeline.gem|join:' ' }}
 {% endif %}{% if pipeline.npm %}    sudo npm install -g {{ pipeline.npm|join:' ' }}
 {% endif %}
 {% if pipeline.other %}
 
 {{ pipeline.other|join:', ' }} must also be installed.{% endif %}
 {% endblock %}
+
+{% block before_install %}{% endblock %}
 
 If these requirements are fullfilled, then you can gon on and install {{ DF_PROJECT_NAME }}:
 
@@ -29,7 +31,8 @@ If these requirements are fullfilled, then you can gon on and install {{ DF_PROJ
 {% block post_application %}    {{ control_command }} createsuperuser  # create an admin user
     {{ control_command }} check  # everything should be ok
 {% endblock %}
-
+{% block after_install %}{% endblock %}
+{% block before_basic_config %}{% endblock %}
 {% block basic_config %}
 You can easily change the root location for all data (SQLite database, uploaded or temp files, static files, …) by
 editing the configuration file.
@@ -45,7 +48,9 @@ editing the configuration file.
 
 Of course, you must run again the `migrate` and `collectstatic` commands (or moving data to this new folder).
 {% endblock %}
-
+{% block after_basic_config %}{% endblock %}
+{% block before_run_server %}{% endblock %}
+{% block run_server %}
 You can launch the server process{% if USE_CELERY %}es (the second process is required for background tasks){% endif %}:
 
 .. code-block:: bash
@@ -55,6 +60,8 @@ You can launch the server process{% if USE_CELERY %}es (the second process is re
 {% endif %}{% endblock %}
 
 Then open http://{{ LISTEN_ADDRESS }} with your favorite browser.
+{% endblock %}
+{% block after_run_server %}{% endblock %}
 
 You can install {{ DF_PROJECT_NAME }} in your home (with the `--user` option), globally (without this option), or (preferably)
 inside a virtualenv.

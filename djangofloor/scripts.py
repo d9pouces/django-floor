@@ -169,11 +169,10 @@ def django():
     """
     set_env()
     from django.conf import settings
-
-    parser = ArgumentParser(usage="%(prog)s subcommand [options] [args]", add_help=False)
-    options, extra_args = parser.parse_known_args()
     env_set = bool(os.environ.get('DF_CONF_SET', ''))
     if not env_set:
+        parser = ArgumentParser(usage="%(prog)s subcommand [options] [args]", add_help=False)
+        options, extra_args = parser.parse_known_args()
         if len(extra_args) >= 1 and extra_args[0] == 'runserver':
             sys.argv += [settings.LISTEN_ADDRESS]
         os.environ['DF_CONF_SET'] = '1'
