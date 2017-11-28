@@ -338,6 +338,7 @@ AUTH_LDAP_GROUP_CACHE_TIMEOUT = 3600
 # Use LDAP group membership to calculate group permissions.
 AUTH_LDAP_FIND_GROUP_PERMS = False
 AUTH_LDAP_GROUP_SEARCH = CallableSetting(ldap_group_search)
+AUTH_LDAP_GROUP_SEARCH_BASE = 'ou=groups,dc=example,dc=com'
 AUTH_LDAP_AUTHORIZE_ALL_USERS = True
 # https://bitbucket.org/illocution/django-auth-ldap/pull-requests/29/kerberos-bind-method-to-provide-multi/diff
 # KRB5_CCACHE = None
@@ -438,8 +439,8 @@ LOG_EXCLUDED_COMMANDS = {'clearsessions', 'check', 'compilemessages', 'collectst
                          'sendtestemail', 'shell', 'showmigrations', 'sqlflush', 'sqlmigrate',
                          'sqlsequencereset', 'squashmigrations', 'startapp', 'test', 'testserver', }
 # these Django commands do not write log (only on stdout)
-PID_DIRECTORY = Directory('{LOCAL_PATH}/run')
-PID_FILENAME = CallableSetting(pid_filename)
+# PID_DIRECTORY = Directory('{LOCAL_PATH}/run')
+# PID_FILENAME = CallableSetting(pid_filename)
 
 # django_redis (cache)
 CACHE_REDIS_PROTOCOL = 'redis'  # aliased in settings.ini as "[cache]protocol"

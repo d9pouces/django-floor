@@ -9,7 +9,7 @@ from django.conf import settings
 from django.conf.urls import url, include
 from django.contrib import admin
 from django.utils.module_loading import import_string
-from django.views.i18n import javascript_catalog
+from django.views.i18n import JavaScriptCatalog
 from django.views.static import serve
 
 from djangofloor import urls
@@ -28,8 +28,8 @@ if settings.DF_URL_CONF:
 else:
     extra_urls = []
 prefix = '^' + settings.URL_PREFIX[1:]
-urlpatterns = [url(prefix + r'jsi18n/$', javascript_catalog, {'packages': ('djangofloor', 'django.contrib.admin'), },
-                   name='jsi18n'),
+catalog_view = JavaScriptCatalog.as_view(packages=['djangofloor', 'django.contrib.admin'])
+urlpatterns = [url(prefix + r'jsi18n/$', catalog_view, name='jsi18n'),
                url(prefix + r'%s(?P<path>.*)$' % settings.MEDIA_URL[1:], serve, {'document_root': settings.MEDIA_ROOT}),
                url(prefix + r'%s(?P<path>.*)$' % settings.STATIC_URL[1:], serve,
                    {'document_root': settings.STATIC_ROOT}),

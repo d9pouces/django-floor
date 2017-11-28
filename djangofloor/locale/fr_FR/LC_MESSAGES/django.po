@@ -1,0 +1,756 @@
+# Add configuration management and websockets to Django.
+# Copyright (C) Matthieu Gallet
+# This file is distributed under the same license as the {package} package.
+# Matthieu Gallet <github@19pouces.net>, 2017.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: djangofloor 1.0.7\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2017-11-28 08:20+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: Matthieu Gallet <github@19pouces.net>\n"
+"Language-Team: Matthieu Gallet <github@19pouces.net>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: djangofloor/templates/400.html:9 djangofloor/templates/400.html:11
+msgid "Bad request"
+msgstr ""
+
+#: djangofloor/templates/400.html:14
+msgid "Error 400: bad request"
+msgstr ""
+
+#: djangofloor/templates/400.html:16
+msgid "Maybe you the form you sent is too old and you should refresh the page."
+msgstr ""
+
+#: djangofloor/templates/400.html:21 djangofloor/templates/403.html:21
+#: djangofloor/templates/403_csrf.html:18 djangofloor/templates/404.html:21
+#: djangofloor/templates/500.html:22 djangofloor/templates/account/base.html:16
+#: djangofloor/templates/account/base.html:18
+#: djangofloor/templates/openid/base.html:16
+#: djangofloor/templates/openid/base.html:18
+#: djangofloor/templates/registration/logged_out.html:24
+#: djangofloor/templates/registration/logged_out.html:26
+#: djangofloor/templates/registration/password_change_done.html:19
+#: djangofloor/templates/registration/password_change_done.html:21
+#: djangofloor/templates/registration/password_change_form.html:67
+#: djangofloor/templates/registration/password_change_form.html:69
+#: djangofloor/templates/registration/password_reset_confirm.html:43
+#: djangofloor/templates/registration/password_reset_confirm.html:45
+#: djangofloor/templates/registration/password_reset_done.html:21
+#: djangofloor/templates/registration/password_reset_done.html:23
+#: djangofloor/templates/registration/password_reset_form.html:29
+#: djangofloor/templates/registration/password_reset_form.html:31
+#: djangofloor/templates/registration/signup.html:68
+#: djangofloor/templates/registration/signup.html:70
+#: djangofloor/templates/socialaccount/base.html:15
+#: djangofloor/templates/socialaccount/base.html:17
+msgid "Return to the homepage"
+msgstr ""
+
+#: djangofloor/templates/403.html:9 djangofloor/templates/403.html:11
+msgid "Permission denied"
+msgstr ""
+
+#: djangofloor/templates/403.html:14
+msgid "Error 403: forbidden"
+msgstr ""
+
+#: djangofloor/templates/403.html:16
+msgid "Maybe you try something you are not allowed to do?"
+msgstr ""
+
+#: djangofloor/templates/403_csrf.html:9
+msgid "CSRF problem"
+msgstr ""
+
+#: djangofloor/templates/403_csrf.html:11
+msgid "Cross Site Request Forgery protection"
+msgstr ""
+
+#: djangofloor/templates/404.html:9 djangofloor/templates/404.html:11
+msgid "Page not found"
+msgstr ""
+
+#: djangofloor/templates/404.html:14
+msgid "Error 404: page not found"
+msgstr ""
+
+#: djangofloor/templates/404.html:16
+msgid ""
+"Oops, the page your requested cannot be found. Maybe you followed a bad link?"
+msgstr ""
+
+#: djangofloor/templates/500.html:9 djangofloor/templates/500.html:11
+msgid "Internal server error"
+msgstr ""
+
+#: djangofloor/templates/500.html:12
+msgid "Server error"
+msgstr ""
+
+#: djangofloor/templates/500.html:15
+msgid "Error 500: internal server error"
+msgstr ""
+
+#: djangofloor/templates/500.html:17
+msgid ""
+"Oops, something terrible just happened, but don't panic, administrators have "
+"been warned and will fix this problem."
+msgstr ""
+
+#: djangofloor/templates/account/password_change.html:5
+#: djangofloor/templates/account/password_change.html:9
+#: djangofloor/templates/account/password_change.html:14
+msgid "Change Password"
+msgstr ""
+
+#: djangofloor/templates/account/password_change.html:18
+msgid "E-mail preferences"
+msgstr ""
+
+#: djangofloor/templates/account/password_change.html:22
+#: djangofloor/templates/registration/password_change_form.html:60
+msgid "You cannot change your password on this site."
+msgstr ""
+
+#: djangofloor/templates/admin/base_site.html:3
+#: djangofloor/templates/admin/base_site.html:6
+msgid "Administration"
+msgstr ""
+
+#: djangofloor/templates/admin/base_site.html:13
+msgid "View site"
+msgstr ""
+
+#: djangofloor/templates/admin/base_site.html:18
+msgid "Documentation"
+msgstr ""
+
+#: djangofloor/templates/admin/base_site.html:21
+#: djangofloor/templates/djangofloor/django/system_state.html:8
+#: djangofloor/templates/djangofloor/django/system_state.html:21
+msgid "System state"
+msgstr "État système"
+
+#: djangofloor/templates/admin/base_site.html:25
+#: djangofloor/templates/djangofloor/django/base.html:31
+#: djangofloor/templates/registration/password_change_form.html:9
+msgid "Change password"
+msgstr ""
+
+#: djangofloor/templates/admin/base_site.html:27
+#: djangofloor/templates/djangofloor/bootstrap3/base.html:57
+#: djangofloor/templates/djangofloor/django/base.html:33
+msgid "Log out"
+msgstr ""
+
+#: djangofloor/templates/djangofloor/base.html:28
+msgid "Toggle navigation"
+msgstr ""
+
+#: djangofloor/templates/djangofloor/bootstrap3/base.html:44
+#, fuzzy
+#| msgid "Search"
+msgid "search…"
+msgstr "Chercher"
+
+#: djangofloor/templates/djangofloor/bootstrap3/base.html:45
+#: djangofloor/templates/djangofloor/bootstrap3/search.html:12
+msgid "Search"
+msgstr "Chercher"
+
+#: djangofloor/templates/djangofloor/bootstrap3/base.html:51
+msgid "DEBUG mode is activated"
+msgstr ""
+
+#: djangofloor/templates/djangofloor/bootstrap3/base.html:53
+msgid "Log-in"
+msgstr ""
+
+#: djangofloor/templates/djangofloor/bootstrap3/base.html:59
+msgid "Change your password"
+msgstr ""
+
+#: djangofloor/templates/djangofloor/bootstrap3/base.html:63
+msgid "Admin"
+msgstr ""
+
+#: djangofloor/templates/djangofloor/bootstrap3/search.html:8
+#, fuzzy
+#| msgid "Search"
+msgid "Search results"
+msgstr "Chercher"
+
+#: djangofloor/templates/djangofloor/django/base.html:36
+#: djangofloor/templates/registration/login.html:54
+#: djangofloor/templates/registration/password_reset_complete.html:16
+msgid "Log in"
+msgstr ""
+
+#: djangofloor/templates/djangofloor/django/monitoring/authentication.html:3
+#, fuzzy
+#| msgid "System notification"
+msgid "Authentication"
+msgstr "Notification système"
+
+#: djangofloor/templates/djangofloor/django/monitoring/authentication.html:6
+msgid "Local passwords: "
+msgstr ""
+
+#: djangofloor/templates/djangofloor/django/monitoring/authentication.html:9
+msgid "Allow visitors to create an account: "
+msgstr ""
+
+#: djangofloor/templates/djangofloor/django/monitoring/authentication.html:11
+msgid "Social external authentications: "
+msgstr ""
+
+#: djangofloor/templates/djangofloor/django/monitoring/authentication.html:15
+#, fuzzy
+#| msgid "Any authenticated users"
+msgid "PAM authentication: "
+msgstr "Tous les visiteurs authentifiés"
+
+#: djangofloor/templates/djangofloor/django/monitoring/authentication.html:19
+msgid "Basic HTTP authentication: "
+msgstr ""
+
+#: djangofloor/templates/djangofloor/django/monitoring/authentication.html:23
+msgid "HTTP authentication by header: "
+msgstr ""
+
+#: djangofloor/templates/djangofloor/django/monitoring/authentication.html:26
+msgid "Automatically create new users: "
+msgstr ""
+
+#: djangofloor/templates/djangofloor/django/monitoring/authentication.html:27
+msgid "Groups of new users: "
+msgstr ""
+
+#: djangofloor/templates/djangofloor/django/monitoring/authentication.html:29
+#, fuzzy
+#| msgid "Any authenticated users"
+msgid "LDAP authentication: "
+msgstr "Tous les visiteurs authentifiés"
+
+#: djangofloor/templates/djangofloor/django/monitoring/authentication.html:33
+msgid "Maximum time between successive authentications: "
+msgstr ""
+
+#: djangofloor/templates/djangofloor/django/monitoring/celery_stats.html:4
+msgid "Celery state"
+msgstr ""
+
+#: djangofloor/templates/djangofloor/django/monitoring/celery_stats.html:6
+msgid "Required Celery queues"
+msgstr ""
+
+#: djangofloor/templates/djangofloor/django/monitoring/celery_stats.html:12
+msgid "Celery workers and active queues"
+msgstr ""
+
+#: djangofloor/templates/djangofloor/django/monitoring/celery_stats.html:16
+msgid "worker"
+msgstr ""
+
+#: djangofloor/templates/djangofloor/django/monitoring/celery_stats.html:18
+msgid "broker: "
+msgstr ""
+
+#: djangofloor/templates/djangofloor/django/monitoring/celery_stats.html:19
+msgid "PID: "
+msgstr ""
+
+#: djangofloor/templates/djangofloor/django/monitoring/celery_stats.html:20
+msgid "thread number: "
+msgstr ""
+
+#: djangofloor/templates/djangofloor/django/monitoring/celery_stats.html:21
+#, fuzzy
+#| msgid "Timeout"
+msgid "timeouts: "
+msgstr "Délai"
+
+#: djangofloor/templates/djangofloor/django/monitoring/celery_stats.html:22
+msgid "active queues: "
+msgstr ""
+
+#: djangofloor/templates/djangofloor/django/monitoring/celery_stats.html:26
+msgid "No Celery worker detected"
+msgstr ""
+
+#: djangofloor/templates/djangofloor/django/monitoring/errors.html:3
+msgid "Check exception handling"
+msgstr ""
+
+#: djangofloor/templates/djangofloor/django/monitoring/errors.html:5
+msgid ""
+"A DivisionByZero exception will be raised in the selected process (webserver "
+"or Celery worker). You can check if the raised exception is gracefully "
+"handled by your supervision."
+msgstr ""
+
+#: djangofloor/templates/djangofloor/django/monitoring/errors.html:7
+msgid ""
+"A DivisionByZero exception will be raised. You can check if the raised "
+"exception is gracefully handled by your supervision."
+msgstr ""
+
+#: djangofloor/templates/djangofloor/django/monitoring/errors.html:11
+msgid "Select the process where the exception will be raised:"
+msgstr ""
+
+#: djangofloor/templates/djangofloor/django/monitoring/errors.html:12
+msgid "raise an exception in a HTTP request"
+msgstr ""
+
+#: djangofloor/templates/djangofloor/django/monitoring/errors.html:14
+msgid "raise an exception in a Celery queue."
+msgstr ""
+
+#: djangofloor/templates/djangofloor/django/monitoring/errors.html:18
+msgid "Generate a log message"
+msgstr ""
+
+#: djangofloor/templates/djangofloor/django/monitoring/errors.html:57
+#, fuzzy
+#| msgid "Users that should read this message"
+msgid "Select the process that should write the message:"
+msgstr "Utilisateurs qui devraient lire ce message"
+
+#: djangofloor/templates/djangofloor/django/monitoring/errors.html:58
+msgid "write log in a HTTP request"
+msgstr ""
+
+#: djangofloor/templates/djangofloor/django/monitoring/errors.html:61
+msgid "write log in a Celery queue"
+msgstr ""
+
+#: djangofloor/templates/djangofloor/django/monitoring/log_last_lines.html:3
+msgid "Last lines of logs"
+msgstr ""
+
+#: djangofloor/templates/djangofloor/django/monitoring/packages.html:3
+msgid "Required Python packages"
+msgstr ""
+
+#: djangofloor/templates/djangofloor/django/monitoring/request_check.html:3
+msgid "Request and settings info"
+msgstr ""
+
+#: djangofloor/templates/djangofloor/django/monitoring/request_check.html:6
+msgid "Websockets: "
+msgstr ""
+
+#: djangofloor/templates/djangofloor/django/monitoring/request_check.html:8
+msgid ""
+"At least one Celery worker is required, as well as a websocket-compatible "
+"server."
+msgstr ""
+
+#: djangofloor/templates/djangofloor/django/monitoring/request_check.html:10
+msgid "Connected user: "
+msgstr ""
+
+#: djangofloor/templates/djangofloor/django/monitoring/request_check.html:11
+msgid "no user"
+msgstr ""
+
+#: djangofloor/templates/djangofloor/django/monitoring/request_check.html:12
+msgid "anonymous user"
+msgstr ""
+
+#: djangofloor/templates/djangofloor/django/monitoring/request_check.html:17
+msgid "User IP address: "
+msgstr ""
+
+#: djangofloor/templates/djangofloor/django/monitoring/request_check.html:20
+msgid "User HTTP header: "
+msgstr ""
+
+#: djangofloor/templates/djangofloor/django/monitoring/request_check.html:22
+#: djangofloor/templates/djangofloor/django/monitoring/request_check.html:30
+msgid "empty header"
+msgstr ""
+
+#: djangofloor/templates/djangofloor/django/monitoring/request_check.html:27
+msgid "Secure proxy SSL HTTP header: "
+msgstr ""
+
+#: djangofloor/templates/djangofloor/django/monitoring/request_check.html:31
+msgid ""
+"Please ensure that a HTTPS access is available and that the webserver "
+"provides the right header (without the HTTP prefix)."
+msgstr ""
+
+#: djangofloor/templates/djangofloor/django/monitoring/request_check.html:37
+msgid "Forwarded-for HTTP header: "
+msgstr ""
+
+#: djangofloor/templates/djangofloor/django/monitoring/request_check.html:40
+msgid "empty"
+msgstr ""
+
+#: djangofloor/templates/djangofloor/django/monitoring/request_check.html:44
+msgid "Server names allowed to POST requests: "
+msgstr ""
+
+#: djangofloor/templates/djangofloor/django/monitoring/request_check.html:45
+msgid "Requested server name:"
+msgstr ""
+
+#: djangofloor/templates/djangofloor/django/monitoring/request_check.html:49
+msgid "Configuration server name:"
+msgstr ""
+
+#: djangofloor/templates/djangofloor/django/monitoring/request_check.html:53
+msgid "Request site (from the CurrentSiteMiddleware middleware):"
+msgstr ""
+
+#: djangofloor/templates/djangofloor/django/monitoring/request_check.html:56
+msgid "Redis-based cache:"
+msgstr ""
+
+#: djangofloor/templates/djangofloor/django/monitoring/request_check.html:58
+msgid "you should install \"django-redis\" to cache your pages in Redis."
+msgstr ""
+
+#: djangofloor/templates/djangofloor/django/monitoring/request_check.html:59
+msgid "you must deactivate the DEBUG mode to activate the cache."
+msgstr ""
+
+#: djangofloor/templates/djangofloor/django/monitoring/request_check.html:61
+msgid "Redis-based sessions:"
+msgstr ""
+
+#: djangofloor/templates/djangofloor/django/monitoring/request_check.html:63
+msgid "you should install \"django-redis-sessions\" to store your sessions."
+msgstr ""
+
+#: djangofloor/templates/djangofloor/django/monitoring/request_check.html:65
+msgid "Config files: "
+msgstr ""
+
+#: djangofloor/templates/djangofloor/django/monitoring/request_check.html:67
+msgid ": not found"
+msgstr ""
+
+#: djangofloor/templates/djangofloor/django/monitoring/request_check.html:67
+msgid ": loaded"
+msgstr ""
+
+#: djangofloor/templates/djangofloor/django/monitoring/system.html:3
+#, fuzzy
+#| msgid "System notification"
+msgid "System info"
+msgstr "Notification système"
+
+#: djangofloor/templates/djangofloor/django/monitoring/system.html:8
+msgid "The \"psutil\" package is required to display system info"
+msgstr ""
+
+#: djangofloor/templates/djangofloor/django/monitoring/system.html:10
+msgid "CPU(s):"
+msgstr ""
+
+#: djangofloor/templates/djangofloor/django/monitoring/system.html:11
+msgid "cores"
+msgstr ""
+
+#: djangofloor/templates/djangofloor/django/monitoring/system.html:11
+msgid "threads"
+msgstr ""
+
+#: djangofloor/templates/djangofloor/django/monitoring/system.html:13
+msgid "CPU average usage:"
+msgstr ""
+
+#: djangofloor/templates/djangofloor/django/monitoring/system.html:16
+msgid "CPU current usage:"
+msgstr ""
+
+#: djangofloor/templates/djangofloor/django/monitoring/system.html:19
+msgid "Memory current usage:"
+msgstr ""
+
+#: djangofloor/templates/djangofloor/django/monitoring/system.html:22
+msgid "Swap current usage:"
+msgstr ""
+
+#: djangofloor/templates/djangofloor/django/monitoring/system.html:26
+msgid "Disk:"
+msgstr ""
+
+#: djangofloor/templates/djangofloor/django/system_state.html:20
+msgid "Home"
+msgstr ""
+
+#: djangofloor/templates/registration/logged_out.html:11
+msgid "Logged out"
+msgstr ""
+
+#: djangofloor/templates/registration/logged_out.html:17
+msgid "Logout successful."
+msgstr ""
+
+#: djangofloor/templates/registration/logged_out.html:21
+msgid "Thanks for spending some quality time with the Web site today."
+msgstr ""
+
+#: djangofloor/templates/registration/login.html:7
+msgid "Login"
+msgstr ""
+
+#: djangofloor/templates/registration/login.html:16
+#: djangofloor/templates/registration/password_change_form.html:20
+#: djangofloor/templates/registration/signup.html:21
+msgid "Please correct the error below."
+msgstr ""
+
+#: djangofloor/templates/registration/login.html:16
+#: djangofloor/templates/registration/password_change_form.html:20
+#: djangofloor/templates/registration/signup.html:21
+msgid "Please correct the errors below."
+msgstr ""
+
+#: djangofloor/templates/registration/login.html:32
+#, python-format
+msgid ""
+"You are authenticated as %(username)s, but are not authorized to access this "
+"page. Would you like to login to a different account?"
+msgstr ""
+
+#: djangofloor/templates/registration/login.html:50
+msgid "Forgotten your password or username?"
+msgstr ""
+
+#: djangofloor/templates/registration/login.html:58
+msgid "Do not have an account?"
+msgstr ""
+
+#: djangofloor/templates/registration/password_change_done.html:8
+msgid "Password changed"
+msgstr ""
+
+#: djangofloor/templates/registration/password_change_done.html:16
+msgid "Your password was changed."
+msgstr ""
+
+#: djangofloor/templates/registration/password_change_form.html:25
+msgid ""
+"Please enter your old password, for security's sake, and then enter your new "
+"password twice so we can verify you typed it in correctly."
+msgstr ""
+
+#: djangofloor/templates/registration/password_change_form.html:53
+#: djangofloor/templates/registration/password_reset_confirm.html:31
+msgid "Change my password"
+msgstr ""
+
+#: djangofloor/templates/registration/password_reset_complete.html:5
+msgid "Password set"
+msgstr ""
+
+#: djangofloor/templates/registration/password_reset_complete.html:14
+msgid "Your password has been set.  You may go ahead and log in now."
+msgstr ""
+
+#: djangofloor/templates/registration/password_reset_confirm.html:10
+msgid "Set new password"
+msgstr ""
+
+#: djangofloor/templates/registration/password_reset_confirm.html:17
+msgid ""
+"Please enter your new password twice so we can verify you typed it in "
+"correctly."
+msgstr ""
+
+#: djangofloor/templates/registration/password_reset_confirm.html:22
+msgid "New password:"
+msgstr ""
+
+#: djangofloor/templates/registration/password_reset_confirm.html:27
+msgid "Confirm password:"
+msgstr ""
+
+#: djangofloor/templates/registration/password_reset_confirm.html:38
+msgid ""
+"The password reset link was invalid, possibly because it has already been "
+"used.  Please request a new password reset."
+msgstr ""
+
+#: djangofloor/templates/registration/password_reset_done.html:10
+msgid "E-mail sent"
+msgstr ""
+
+#: djangofloor/templates/registration/password_reset_done.html:15
+msgid ""
+"We've emailed you instructions for setting your password, if an account "
+"exists with the e-mail you entered. You should receive them shortly."
+msgstr ""
+
+#: djangofloor/templates/registration/password_reset_done.html:17
+msgid ""
+"If you don't receive an e-mail, please make sure you've entered the address "
+"you registered with, and check your spam folder."
+msgstr ""
+
+#: djangofloor/templates/registration/password_reset_form.html:10
+msgid "Forgotten password"
+msgstr ""
+
+#: djangofloor/templates/registration/password_reset_form.html:15
+msgid ""
+"Forgotten your password? Enter your e-mail address below, and we'll email "
+"instructions for setting a new one."
+msgstr ""
+
+#: djangofloor/templates/registration/password_reset_form.html:20
+msgid "E-mail address:"
+msgstr ""
+
+#: djangofloor/templates/registration/password_reset_form.html:24
+msgid "Reset my password"
+msgstr ""
+
+#: djangofloor/templates/registration/signup.html:11
+#, fuzzy
+#| msgid "Repeat count"
+msgid "Create account"
+msgstr "Nombre de répétitions"
+
+#: djangofloor/templates/registration/signup.html:54
+#, fuzzy
+#| msgid "Repeat count"
+msgid "Create my account"
+msgstr "Nombre de répétitions"
+
+#: djangofloor/templates/registration/signup.html:61
+msgid "Only administrators can create new user accounts."
+msgstr ""
+
+#~ msgid "Content"
+#~ msgstr "Contenu"
+
+#~ msgid "Title"
+#~ msgstr "Titre"
+
+#~ msgid "Icon"
+#~ msgstr "Icône"
+
+#~ msgid "Not used yet"
+#~ msgstr "inutilisé pour l'instant"
+
+#~ msgid "Is active?"
+#~ msgstr "Actif ?"
+
+#~ msgid "Only active notifications will be displayed."
+#~ msgstr "Seules les notifications actives seront affichées."
+
+#~ msgid "Do not display before"
+#~ msgstr "Masquer jusqu'au"
+
+#~ msgid "Do not display after"
+#~ msgstr "Masquer après le"
+
+#~ msgid "Level"
+#~ msgstr "Niveau"
+
+#~ msgid "Success"
+#~ msgstr "Succès"
+
+#~ msgid "Info"
+#~ msgstr "Note"
+
+#~ msgid "Warning"
+#~ msgstr "Attention"
+
+#~ msgid "Danger"
+#~ msgstr "Danger"
+
+#~ msgid ""
+#~ "Automatically hide after this number of seconds, 0 meaning no auto-hide"
+#~ msgstr "Cacher après ce nombre de secondes (0 pour ne jamais cacher)"
+
+#~ msgid "Display mode"
+#~ msgstr "Mode d'affichage"
+
+#~ msgid "HTML notification"
+#~ msgstr "Notification, en HTML"
+
+#~ msgid "Blocking (modal) window"
+#~ msgstr "Fenêtre bloquante (modale)"
+
+#~ msgid "Screen-wide banner"
+#~ msgstr "Bannière sur toute la largeur"
+
+#~ msgid "System notifications can be hidden by users."
+#~ msgstr "Les notifications système peuvent être cachées par les utilisateurs"
+
+#~ msgid "Broadcast mode"
+#~ msgstr "Afficher chez tout le monde"
+
+#~ msgid "Any visitor (using cookies)"
+#~ msgstr "tous les visiteurs (via les cookies)"
+
+#~ msgid "Selected groups and users"
+#~ msgstr "Sélection de groupes et d'utilisateurs"
+
+#~ msgid ""
+#~ "Display count (0 meaning that the notification will always be displayed)"
+#~ msgstr "Nombre d'affichages (0 pour toujours afficher)"
+
+#~ msgid "Groups of users that should read this message"
+#~ msgstr "Groupes d'utilisateurs qui devraient lire ce message"
+
+#~ msgid "User that read this notification"
+#~ msgstr "Utilisateur qui a lu cette notification"
+
+#~ msgid "first read time"
+#~ msgstr "date de première lecture"
+
+#~ msgid "last read time"
+#~ msgstr "dernière date de lecture"
+
+#~ msgid "Read count"
+#~ msgstr "nombre de lecture"
+
+#~ msgid "Please enter your search pattern."
+#~ msgstr "Merci d'entrer votre recherche"
+
+#~ msgid "configured logger"
+#~ msgstr "logger configuré"
+
+#~ msgid "other logger name"
+#~ msgstr "autre logger configuré"
+
+#~ msgid "Please enter the name of another logger to check."
+#~ msgstr "Merci d'entrer le nom d'un logger à tester"
+
+#~ msgid "message"
+#~ msgstr "message"
+
+#~ msgid "log test"
+#~ msgstr "test de log"
+
+#~ msgid "level"
+#~ msgstr "niveau"
+
+#~ msgid "No notification has been activated."
+#~ msgstr "aucune notification n'a été activée."
+
+#~ msgid "A notification has been activated."
+#~ msgstr "une notification a été activée."
+
+#~ msgid "%(n)s notifications have been activated."
+#~ msgstr "%(n)s notifications ont été activées."
+
+#~ msgid "Activate the selected notifications"
+#~ msgstr "Activer les notifications sélectionnées"

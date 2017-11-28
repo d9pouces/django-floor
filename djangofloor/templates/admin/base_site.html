@@ -18,7 +18,7 @@
             <a href="{{ docsroot }}">{% trans 'Documentation' %}</a> /
         {% endif %}
         {% if df_has_monitoring_view %}
-            <a href="{% url 'df:system_state' %}">{% trans 'System' %}</a> /
+            <a href="{% url 'df:system_state' %}">{% trans 'System state' %}</a> /
         {% endif %}
     {% endif %}
     {% if user.has_usable_password %}

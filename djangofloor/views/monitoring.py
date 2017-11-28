@@ -187,20 +187,20 @@ class System(MonitoringCheck):
                     settings_check_results.append(Info(msg, obj='system'))
             except Exception:
                 pass
-        if settings.PID_DIRECTORY:
-            processes = self.get_expected_processes()
-            for filename in glob.glob('%s/*.pid' % settings.PID_DIRECTORY):
-                # list all PID files and read them
-                data = self.read_pid_file(filename)
-                self.analyse_pid_file(processes, data)
-            for process, pids in processes.items():
-                if not pids:
-                    settings_check_results.append(Warning('%s: no such process' % process, obj='system'))
-                valid_pids = {pid for pid in pids if self.check_pid(pid)}
-                invalid_pids = {pid for pid in pids if pid not in valid_pids}
-                for pid in invalid_pids:
-                    msg = '%s: stale PID %s (in \'%s%s.pid\')' % (process, pid, settings.PID_DIRECTORY, pid)
-                    settings_check_results.append(Warning(msg, obj='system'))
+        # if settings.PID_DIRECTORY:
+        #     processes = self.get_expected_processes()
+        #     for filename in glob.glob('%s/*.pid' % settings.PID_DIRECTORY):
+        #         # list all PID files and read them
+        #         data = self.read_pid_file(filename)
+        #         self.analyse_pid_file(processes, data)
+        #     for process, pids in processes.items():
+        #         if not pids:
+        #             settings_check_results.append(Warning('%s: no such process' % process, obj='system'))
+        #         valid_pids = {pid for pid in pids if self.check_pid(pid)}
+        #         invalid_pids = {pid for pid in pids if pid not in valid_pids}
+        #         for pid in invalid_pids:
+        #             msg = '%s: stale PID %s (in \'%s%s.pid\')' % (process, pid, settings.PID_DIRECTORY, pid)
+        #             settings_check_results.append(Warning(msg, obj='system'))
 
     @staticmethod
     def analyse_pid_file(processes, data):
@@ -208,9 +208,9 @@ class System(MonitoringCheck):
         if command == 'worker' and data.get('QUEUES'):
             for queue in data['QUEUES'].split('|'):
                 command = 'worker (queue \'%s\')' % queue
-                if command and pid and re.match('^\d+$', pid):
+                if command and pid and re.match(r'^\d+$', pid):
                     processes.setdefault(command, []).append(pid)
-        elif command and pid and re.match('^\d+$', pid):
+        elif command and pid and re.match(r'^\d+$', pid):
             processes.setdefault(command, []).append(pid)
 
     @staticmethod
