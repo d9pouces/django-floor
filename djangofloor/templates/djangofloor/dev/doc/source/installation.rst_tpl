@@ -58,6 +58,8 @@ Apache
 
 Only the Apache installation is presented, but an installation behind nginx should be similar.
 Only the chosen server name (like `{{ DF_MODULE_NAME }}.example.org`) can be used for accessing your site. For example, you cannot use its IP address.
+{% block pre_webserver_no_ssl %}
+{% endblock %}
 
 .. code-block:: bash
 
@@ -97,7 +99,11 @@ Only the chosen server name (like `{{ DF_MODULE_NAME }}.example.org`) can be use
     sudo a2ensite {{ DF_MODULE_NAME }}.conf
     sudo apachectl -t
     sudo apachectl restart
+{% block post_webserver_no_ssl %}
+{% endblock %}
 
+{% block pre_webserver_ssl %}
+{% endblock %}
 {% block webserver_ssl %}
 If you want to use SSL:
 
@@ -188,7 +194,7 @@ Now, it's time to install {{ DF_PROJECT_NAME }}:
 
 {% block pre_application %}{% endblock %}    pip install setuptools --upgrade
     pip install pip --upgrade
-    pip install {{ DF_MODULE_NAME }} psycopg2 gevent
+    pip install {{ DF_MODULE_NAME }} psycopg2
     mkdir -p $VIRTUAL_ENV/etc/{{ DF_MODULE_NAME }}
     cat << EOF > $VIRTUAL_ENV/etc/{{ DF_MODULE_NAME }}/settings.ini
 {% block ini_configuration %}    [global]
@@ -203,16 +209,18 @@ Now, it's time to install {{ DF_PROJECT_NAME }}:
 {% endblock %}    EOF
     chmod 0400 $VIRTUAL_ENV/etc/{{ DF_MODULE_NAME }}/settings.ini
     # protect passwords in the config files from by being readable by everyone
-    {{ process.control }} collectstatic --noinput
-    {{ process.control }} migrate
-{% block post_application %}    {{ process.control }} createsuperuser
+    {{ control_command }} collectstatic --noinput
+    {{ control_command }} migrate
+{% block post_application %}    {{ control_command }} createsuperuser
+{% endblock %}
+{% block post_webserver_ssl %}
 {% endblock %}
 {% endblock %}
 
 {% block supervisor %}supervisor
 ----------
 
-Supervisor is required to automatically launch {{ DF_MODULE_NAME }}:
+Supervisor can be used to automatically launch {{ DF_MODULE_NAME }}:
 
 .. code-block:: bash
 
@@ -235,13 +243,13 @@ Now, Supervisor should start {{ DF_MODULE_NAME }} after a reboot.
 {% block systemd %}systemd
 -------
 
-You can also use systemd to launch {{ DF_MODULE_NAME }}:
+You can also use systemd (present in many modern Linux distributions) to launch {{ DF_MODULE_NAME }}:
 
 .. code-block:: bash
 {% block pre_systemd %}{% endblock %}
     cat << EOF | sudo tee /etc/systemd/system/{{ control_command }}.service
     [Unit]
-    Description={{ DF_PROJECT_NAME }} aIOHTTP process
+    Description={{ DF_PROJECT_NAME }} HTTP process
     After=network.target
     [Service]
     User={{ DF_MODULE_NAME }}

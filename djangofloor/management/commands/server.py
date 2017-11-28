@@ -16,6 +16,4 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         while len(sys.argv) > 1:
             del sys.argv[1]
-        if settings.DF_WEBSERVER == 'aiohttp':
-            return aiohttp()
         return gunicorn()

@@ -11,10 +11,10 @@
 {% df_init_websocket %}
 {% endblock %}
 
-{% block title %}{{ title }} | {{ site_title|default:df_project_name }}{% endblock %}
+{% block title %}{{ title }} {% if df_project_name %}| {{ site_title|default:df_project_name }}{% endif %}{% endblock %}
 
 {% block branding %}
-<h1 id="site-name"><a href="{% url df_index_view %}">{{ site_header|default:df_project_name }}</a></h1>
+<h1 id="site-name"><a href="{% if df_has_index_view %}{% url 'index' %}{% else %}/{% endif %}">{% if df_project_name %}{{ site_header|default:df_project_name }}{% endif %}</a></h1>
 {% endblock %}
 
 {% block usertools %}

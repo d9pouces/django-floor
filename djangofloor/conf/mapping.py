@@ -68,12 +68,12 @@ BASE_MAPPING = [
                              'Default to "http://{listen_address}/" but should '
                              'be different if you use a reverse proxy like '
                              'Apache or Nginx. Example: http://www.example.org/.'),
-    IntegerConfigField('server.timeout', 'DF_SERVER_TIMEOUT', help_str='Workers silent for more than this many '
-                                                                       'seconds are killed and restarted.'),
+    IntegerConfigField('server.timeout', 'DF_SERVER_TIMEOUT',
+                       help_str='Web workers silent for more than this many seconds are killed and restarted.'),
     IntegerConfigField('server.threads', 'DF_SERVER_THREADS',
-                       help_str='The number of Gunicorn threads for handling requests.'),
+                       help_str='The number of web server threads for handling requests.'),
     IntegerConfigField('server.processes', 'DF_SERVER_PROCESSES',
-                       help_str='The number of Gunicorn processes for handling requests.'),
+                       help_str='The number of web server processes for handling requests.'),
 
     CharConfigField('global.time_zone', 'TIME_ZONE', help_str='default to Europe/Paris'),
     CharConfigField('global.log_remote_url', 'LOG_REMOTE_URL',

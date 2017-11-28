@@ -19,16 +19,8 @@ python_version = (sys.version_info[0], sys.version_info[1])
 with open(os.path.join(os.path.dirname(__file__), 'README.md'), encoding='utf-8') as fd:
     long_description = fd.read()
 
-
 extras_requirements = {}
-install_requirements = ['django>=1.11', 'celery', 'django-bootstrap3>=9.0.0', 'redis', 'pip']
-if python_version < (3, 3):
-    install_requirements.append('funcsigs')
-if python_version >= (3, 4):
-    install_requirements += ['aiohttp-wsgi', 'aiohttp>=2,<3', 'asyncio_redis']
-
 entry_points = {'console_scripts': ['djangofloor-createproject = djangofloor.scripts:create_project']}
-extras_requirements['gunicorn'] = ['gunicorn', 'eventlet']
 extras_requirements['extra'] = ['django-pipeline', 'django-debug-toolbar', 'django-redis-sessions',
                                 'django-redis', 'psutil']
 extras_requirements['doc'] = ['sphinx', 'sphinx_rtd_theme', 'sphinxcontrib-autoanysrc']
@@ -36,6 +28,7 @@ extras_requirements['doc'] = ['sphinx', 'sphinx_rtd_theme', 'sphinxcontrib-autoa
 try:
     from djangofloor.scripts import set_env
     import django
+
     set_env('djangofloor-setup')
     django.setup()
 except ImportError:
@@ -55,7 +48,8 @@ setup(
     include_package_data=True,
     zip_safe=False,
     test_suite='djangofloor.tests',
-    install_requires=install_requirements,
+    install_requires=['django>=1.11', 'celery', 'django-bootstrap3>=9.0.0', 'redis', 'pip',
+                      'aiohttp-wsgi', 'aiohttp>=2,<3', 'asyncio_redis', 'gunicorn'],
     extras_require=extras_requirements,
     setup_requires=[],
     classifiers=['Development Status :: 5 - Production/Stable',

@@ -38,11 +38,6 @@ def context_base(request):
     :return: a dict to update the global template context
     :rtype: :class:`dict`
     """
-    # noinspection PyTypeChecker
-    def df_index_view():
-        warnings.warn('"df_index_view" template value will be removed, use "df_has_index_view" instead.',
-                      RemovedInDjangoFloor200Warning)
-        return 'index'
 
     def df_language_code():
         warnings.warn('"df_language_code" template value will be removed, use "LANGUAGE_CODE" (provided by '
@@ -70,6 +65,5 @@ def context_base(request):
         'df_has_ws_topics': getattr(request, 'has_websocket_topics', False),
         'df_http_request': request,
         'df_user': df_user,
-        'df_index_view': df_index_view,
         'df_language_code': df_language_code,
     }

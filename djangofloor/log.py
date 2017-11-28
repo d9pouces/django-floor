@@ -462,7 +462,8 @@ class PidFilename:
                     fd.write('%s=%s\n' % (k, v))
 
             def remove_pid():
-                os.unlink(filename)
+                if os.path.isfile(filename):
+                    os.unlink(filename)
 
             atexit.register(remove_pid)
             return filename

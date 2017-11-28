@@ -1,0 +1,21 @@
+{% extends "djangofloor/django/base.html" %}
+{% load i18n static %}
+
+{% block extrastyle %}{{ block.super }}<link rel="stylesheet" type="text/css" href="{% static 'admin/css/login.css' %}" />
+{{ form.media }}
+{% endblock %}
+
+{% block bodyclass %}{{ block.super }} login{% endblock %}
+{% block head_title %}{% trans 'CSRF problem' %}{% endblock %}
+{% block breadcrumbs %}{% endblock %}
+{% block title %}{% trans 'Cross Site Request Forgery protection' %}{% endblock %}
+{% block content %}
+<div id="content-main">
+<p class="errornote">{{ main }}</p>
+<p>{{ no_referer1 }}</p>
+<p>{{ no_referer2 }}</p>
+<p class="login-footer">
+  {% if df_has_index_view %}<a href="{% url 'index' %}">{% trans 'Return to the homepage' %}</a>{% else %}<a href="/">{% trans 'Return to the homepage' %}</a>{% endif %}
+</p>
+</div>
+{% endblock %}

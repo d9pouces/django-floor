@@ -30,7 +30,7 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                <a class="navbar-brand" href="{% url df_index_view %}">{{ df_project_name }}</a>
+                <a class="navbar-brand" href="{% if df_has_index_view %}{% url 'index' %}{% else %}/{% endif %}">{{ df_project_name }}</a>
             </div>
             <div class="navbar-collapse collapse">
                 {% if user.is_authenticated and not df_remote_authenticated %}

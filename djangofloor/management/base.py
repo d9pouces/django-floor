@@ -145,6 +145,7 @@ class TemplatedBaseCommand(OriginalBaseCommand):
             if entry_point.module_name == 'djangofloor.scripts' and entry_point.attrs == ('control', ):
                 context['control_command'] = entry_point.name
             context['processes'][script_name] = script_value
+        # print(context['processes'])
         maintainer = [None, None]
         # noinspection PyBroadException
         pkg_info = project_distribution.get_metadata('PKG-INFO')

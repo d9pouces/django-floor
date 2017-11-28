@@ -156,8 +156,6 @@ def control():
         set_env(script_name='server')
         del sys.argv[1]
         from django.conf import settings
-        if settings.DF_WEBSERVER == 'aiohttp':
-            return aiohttp()
         return gunicorn()
     set_env(script_name='django')
     return django()
@@ -203,19 +201,13 @@ def gunicorn():
     set_env()
     import django
     django.setup()
-    # noinspection PyUnresolvedReferences,PyPackageRequirements
     from gunicorn.app.wsgiapp import run
     from django.conf import settings
-    use_gevent = False
-    try:
-        # noinspection PyPackageRequirements
-        from gevent import monkey
-        monkey.patch_all()
-        use_gevent = True
-    except ImportError:
-        # noinspection PyUnusedLocal
-        monkey = None
     logging.config.dictConfig(settings.LOGGING)
+    if settings.WEBSOCKET_URL:
+        worker_cls = 'aiohttp.worker.GunicornWebWorker'
+    else:
+        worker_cls = 'gunicorn.workers.gthread.ThreadWorker'
     parser = ArgumentParser(usage="%(prog)s subcommand [options] [args]", add_help=False)
     parser.add_argument('-b', '--bind', default=settings.LISTEN_ADDRESS)
     parser.add_argument('--threads', default=settings.DF_SERVER_THREADS, type=int)
@@ -224,10 +216,7 @@ def gunicorn():
     parser.add_argument('--keyfile', default=settings.DF_SERVER_SSL_KEY)
     parser.add_argument('--certfile', default=settings.DF_SERVER_SSL_CERTIFICATE)
     parser.add_argument('--reload', default=False, action='store_true')
-    if use_gevent:
-        parser.add_argument('-k', '--worker-class', default='geventwebsocket.gunicorn.workers.GeventWebSocketWorker')
-    else:
-        parser.add_argument('-k', '--worker-class', default='gunicorn.workers.gthread.ThreadWorker')
+    parser.add_argument('-k', '--worker-class', default=worker_cls)
     options, extra_args = parser.parse_known_args()
     sys.argv[1:] = extra_args
     env_set = bool(os.environ.get('DF_CONF_SET', ''))
@@ -242,32 +231,14 @@ def gunicorn():
         __set_default_option(options, 'certfile')
         if settings.DEBUG and not options.reload:
             sys.argv += ['--reload']
-    application = 'djangofloor.wsgi.gunicorn_runserver:application'
+    application = 'djangofloor.wsgi.aiohttp_runserver:application'
     if application not in sys.argv:
         sys.argv.append(application)
     return run()
 
 
 def aiohttp():
-    set_env()
-    from django.conf import settings
-    import django as base_django
-    if base_django.VERSION[:2] >= (1, 7):
-        base_django.setup()
-    logging.config.dictConfig(settings.LOGGING)
-    from djangofloor.wsgi.aiohttp_runserver import run_server
-    if settings.DF_SERVER_SSL_KEY and settings.DF_SERVER_SSL_CERTIFICATE:
-        sslcontext = ssl.create_default_context()
-        sslcontext.load_cert_chain(settings.DF_SERVER_SSL_CERTIFICATE, settings.DF_SERVER_SSL_KEY)
-    else:
-        sslcontext = None
-    parser = ArgumentParser(usage="%(prog)s subcommand [options] [args]", add_help=False)
-    parser.add_argument('-b', '--bind', default=settings.LISTEN_ADDRESS)
-    options, args = parser.parse_known_args()
-    host, sep, port = options.bind.partition(':')
-    host = host or settings.SERVER_NAME
-    port = int(port) or settings.SERVER_PORT
-    return run_server(host, port, sslcontext=sslcontext)
+    return gunicorn()
 
 
 def celery():

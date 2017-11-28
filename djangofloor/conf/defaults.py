@@ -189,7 +189,6 @@ DF_SERVER_SSL_KEY = None
 DF_SERVER_SSL_CERTIFICATE = None
 DF_ALLOW_USER_CREATION = True
 DF_ALLOW_LOCAL_USERS = True
-DF_WEBSERVER = 'aiohttp'  # must be "aiohttp" or "gunicorn"
 
 WEBSOCKET_URL = '/ws/'  # set to None if you do not use websockets
 WEBSOCKET_REDIS_CONNECTION = {'host': '{WEBSOCKET_REDIS_HOST}', 'port': SettingReference('WEBSOCKET_REDIS_PORT'),

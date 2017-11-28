@@ -135,37 +135,18 @@ class WebsocketHandler:
         return django_request
 
 
-def run_server(host, port, sslcontext=None):
-    """run the aiohttp server on the specified network interface.
-
-    :param host: network adress to bind to
-    :type host: :class:`str`
-    :param port: port to listen to
-    :type port: :class:`int`
-    :param sslcontext: SSL context
-    """
+def get_application():
     # noinspection PyUnresolvedReferences
     import djangofloor.celery
-    app = aiohttp.web.Application()
     http_application = get_wsgi_application()
-    wsgi_handler = WSGIHandler(http_application)
     if settings.WEBSOCKET_URL:
+        app = aiohttp.web.Application()
+        wsgi_handler = WSGIHandler(http_application)
         app.router.add_route('GET', settings.WEBSOCKET_URL, websocket_handler)
-    app.router.add_route("*", "/{path_info:.*}", wsgi_handler)
+        app.router.add_route("*", "/{path_info:.*}", wsgi_handler)
+    else:
+        app = http_application
+    return app
 
-    loop = asyncio.get_event_loop()
-    handler = app.make_handler()
 
-    f = loop.create_server(handler, host=host, port=port, ssl=sslcontext)
-    srv = loop.run_until_complete(f)
-    logger.info("Server started at {sock[0]}:{sock[1]}".format(sock=srv.sockets[0].getsockname()))
-    try:
-        loop.run_forever()
-    except KeyboardInterrupt:
-        pass
-    finally:
-        loop.run_until_complete(handler.finish_connections(settings.DF_SERVER_TIMEOUT))
-        srv.close()
-        loop.run_until_complete(srv.wait_closed())
-        loop.run_until_complete(app.cleanup())
-    loop.close()
+application = get_application()

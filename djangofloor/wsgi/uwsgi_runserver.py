@@ -3,7 +3,7 @@ import logging
 import redis.connection
 # noinspection PyUnresolvedReferences,PyPackageRequirements
 import uwsgi
-# noinspection PyPackageRequirements
+# noinspection PyPackageRequirements,PyUnresolvedReferences
 import gevent.select
 from django.conf import settings
 from django.core.wsgi import get_wsgi_application
