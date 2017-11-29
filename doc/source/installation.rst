@@ -26,12 +26,13 @@ Dependencies
 
 Of course, DjangoFloor is not a standalone library and requires several packages:
 
+  * aiohttp-wsgi,
   * django >= 1.11,
   * celery,
   * django-bootstrap3,
   * redis,
+  * gunicorn,
   * pip,
-  * aiohttp-wsgi,
   * aiohttp,
   * asyncio_redis.
 

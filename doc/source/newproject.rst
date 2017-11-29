@@ -6,7 +6,7 @@ Expected archicture
 
 By default, DjangoFloor assumes several architectural choices:
 
-  * your application server (aiohttp by default, but you can also use gunicorn) is behind a reverse proxy (nginx or apache),
+  * your gunicorn server is behind a reverse proxy (nginx or apache),
   * offline computation and websockets messages (if present) are processed by Celery queues,
   * Redis is used as Celery broker, session store and cache database.
 
@@ -59,7 +59,7 @@ access to all Django or Celery commands or launch the aiohttp server.
 
 .. code-block:: bash
 
-  myproject-ctl runserver  # the dev. server provided by Django, you should use `server` in production
+  myproject-ctl runserver  # the dev. server provided by Django, you should use only `server` in production
   myproject-ctl worker
 
 
@@ -74,19 +74,6 @@ DjangoFloor only provides default code or values for some parts, so you do not h
   * a default template and a default index view, based on Bootstrap 3,
   * a minimal mapping for some settings in a configuration file,
   * multiple WSGI apps (for Gunicorn and aiohttp) are also provided.
-
-Translating strings
--------------------
-
-If you install `starterpyth` in your dev environment, you can prepare `.po` translation files and compile them in two commands:
-
-.. code-block:: bash
-
-  python setup.py makemessages -l fr_FR -D django
-  python setup.py compilemessages -l fr_FR -D django
-
-
-Of course, you must use the right value instead of `fr_FR`.
 
 Deploying your project
 ----------------------
@@ -142,7 +129,7 @@ You can now install sphinx and generate the doc:
 
 .. code-block:: bash
 
-  pip install sphinx  # some extra style packages may be required
+  pip install sphinx  # some extra packages may be required
   cd doc
   make html
   cd ..
@@ -162,7 +149,9 @@ It means that it looks for files in:
 
 When files have the same relative path, the last one override the previous ones.
 
-If an original filename ends with `"_tpl"`, then this suffix is silently stripped for building the destination filename. This allows to avoid template files with the `".py"` suffix (that can lead to some problems with scripts that import all Python files in a folder).
+If an original filename ends with `"_inc"`, then this file will be ignored.
+If an original filename ends with `"_tpl"`, then this suffix is silently stripped for building the destination filename.
+This allows to avoid template files with the `".py"` suffix (that can lead to some problems with scripts that import all Python files in a folder).
 
 For example, if we have:
 
@@ -196,7 +185,8 @@ Then the `gen_dev_files destination/folder` command will write the following fil
   destination/folder/demo.txt
 
 
-If the original file is found in a `static` folder, then it is copied as-is. If it is found in a `templates` folder, then it is templated before being written.
+If the original file is found in a `static` folder, then it is copied as-is.
+If it is found in a `templates` folder, then it is templated before being written.
 
 Template values are:
 

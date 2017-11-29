@@ -7,10 +7,10 @@ Introduction
 DjangoFloor is an thin overlay of the Django Python web framework for quickly building websites that are ready to deploy.
 Its main features are:
 
-  * easy to develop: a single command line generates a fully working base project (with complete templates), that you can modify step-by-step,
-    with dedicated development settings,
+  * easy to develop: a single command line generates a fully-working base project (with complete templates), that you can modify step-by-step, with dedicated development settings,
   * easy to deploy: ready to be packaged with separated simple config (.ini) files, without requiring to maintain duplicated config files (prod and dev),
   * allowing offline computation (computation in separated processes or dedicated machines) and two-way communication between the server and the JavaScript world via websockets.
+  * with a complete deployment documentation.
 
 Of course, any thing provided by DjangoFloor can be overriden (like the default templates that are based on the well-known Bootstrap 3).
 
@@ -21,6 +21,7 @@ DjangoFloor has a bit more requirements than Django:
 
   * Python 3.4+ (however Django 2.0 also requires Python 3.4+),
   * Django 1.11+,
+  * Gunicorn as application server,
   * Redis for caching, sessions, websocket management and celery broker,
   * a reverse proxy like nginx or apache.
 

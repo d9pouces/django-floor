@@ -69,11 +69,11 @@ FPM supports many options. You can tweak its behaviour with a config file provid
 You can display an example of such config file with the `--show-config` (since this option requires to run almost the whole process,
 it can takes some time).
 
-  * Readthedocs
-  * Travis-CI / CircleCI / bitrise.io
-  * Libraries.io
-  * CodeClimate / CodeCov / Coveralls
-  * PackageCloud
-  * poeditor.com
-  * Heroku
-  * sentry
+You can use sites like `PackageCloud <https://packagecloud.io>`_ to host your public packages.
+
+
+documentation
+--------------
+
+A complete documentation can be generated and customized to perfectly fit your needs.
+You should consider using `ReadTheDocs <https://readthedocs.org>`_, like most of modern Python packages, for hosting your doc.
