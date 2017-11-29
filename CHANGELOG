@@ -1,6 +1,13 @@
 Changelog history
 =================
 
+1.1.0 (2017/11/29)
+------------------
+
+  * small bug fixes
+  * Gunicorn compatibility with websockets
+  * deprecates separate commands for Celery and web server: only use "myproject-ctl" for everything
+
 1.0.31 (2017/11/24)
 -------------------
 

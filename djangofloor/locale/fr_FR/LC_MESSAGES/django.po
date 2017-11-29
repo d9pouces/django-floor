@@ -52,86 +52,86 @@ msgstr ""
 #: djangofloor/templates/socialaccount/base.html:15
 #: djangofloor/templates/socialaccount/base.html:17
 msgid "Return to the homepage"
-msgstr ""
+msgstr "Retour à l'accueil"
 
 #: djangofloor/templates/403.html:9 djangofloor/templates/403.html:11
 msgid "Permission denied"
-msgstr ""
+msgstr "Permission refusée"
 
 #: djangofloor/templates/403.html:14
 msgid "Error 403: forbidden"
-msgstr ""
+msgstr "Erreur 403 : interdit"
 
 #: djangofloor/templates/403.html:16
 msgid "Maybe you try something you are not allowed to do?"
-msgstr ""
+msgstr "Peut-être tentez-vous quelque chose d'interdit ?"
 
 #: djangofloor/templates/403_csrf.html:9
 msgid "CSRF problem"
-msgstr ""
+msgstr "Problème CSRF"
 
 #: djangofloor/templates/403_csrf.html:11
 msgid "Cross Site Request Forgery protection"
-msgstr ""
+msgstr "protection « Cross Site Request Forgery »"
 
 #: djangofloor/templates/404.html:9 djangofloor/templates/404.html:11
 msgid "Page not found"
-msgstr ""
+msgstr "Page non trouvée"
 
 #: djangofloor/templates/404.html:14
 msgid "Error 404: page not found"
-msgstr ""
+msgstr "Erreur 404 : page absente"
 
 #: djangofloor/templates/404.html:16
 msgid ""
 "Oops, the page your requested cannot be found. Maybe you followed a bad link?"
-msgstr ""
+msgstr "Oups ! La page demandée n'a pas été trouvée. Peut-être avez-vous suivi un lien erroné ?"
 
 #: djangofloor/templates/500.html:9 djangofloor/templates/500.html:11
 msgid "Internal server error"
-msgstr ""
+msgstr "Erreur interne au serveur"
 
 #: djangofloor/templates/500.html:12
 msgid "Server error"
-msgstr ""
+msgstr "Erreur du serveur"
 
 #: djangofloor/templates/500.html:15
 msgid "Error 500: internal server error"
-msgstr ""
+msgstr "Erreur 500 : erreur interne au serveur"
 
 #: djangofloor/templates/500.html:17
 msgid ""
 "Oops, something terrible just happened, but don't panic, administrators have "
 "been warned and will fix this problem."
-msgstr ""
+msgstr "Ooups ! Ce qui est arrivé est dramatique, mais pas de panique, les administrateurs sont prévenus."
 
 #: djangofloor/templates/account/password_change.html:5
 #: djangofloor/templates/account/password_change.html:9
 #: djangofloor/templates/account/password_change.html:14
 msgid "Change Password"
-msgstr ""
+msgstr "Changer le mot de passe"
 
 #: djangofloor/templates/account/password_change.html:18
 msgid "E-mail preferences"
-msgstr ""
+msgstr "Préférences e-mail"
 
 #: djangofloor/templates/account/password_change.html:22
 #: djangofloor/templates/registration/password_change_form.html:60
 msgid "You cannot change your password on this site."
-msgstr ""
+msgstr "Vous ne pouvez pas changer votre mot de passe"
 
 #: djangofloor/templates/admin/base_site.html:3
 #: djangofloor/templates/admin/base_site.html:6
 msgid "Administration"
-msgstr ""
+msgstr "Administration"
 
 #: djangofloor/templates/admin/base_site.html:13
 msgid "View site"
-msgstr ""
+msgstr "Voir le site"
 
 #: djangofloor/templates/admin/base_site.html:18
 msgid "Documentation"
-msgstr ""
+msgstr "Documentation"
 
 #: djangofloor/templates/admin/base_site.html:21
 #: djangofloor/templates/djangofloor/django/system_state.html:8
@@ -143,17 +143,17 @@ msgstr "État système"
 #: djangofloor/templates/djangofloor/django/base.html:31
 #: djangofloor/templates/registration/password_change_form.html:9
 msgid "Change password"
-msgstr ""
+msgstr "Changer le mot de passe"
 
 #: djangofloor/templates/admin/base_site.html:27
 #: djangofloor/templates/djangofloor/bootstrap3/base.html:57
 #: djangofloor/templates/djangofloor/django/base.html:33
 msgid "Log out"
-msgstr ""
+msgstr "Déconnexion"
 
 #: djangofloor/templates/djangofloor/base.html:28
 msgid "Toggle navigation"
-msgstr ""
+msgstr "Basculer la navigation"
 
 #: djangofloor/templates/djangofloor/bootstrap3/base.html:44
 #, fuzzy
@@ -168,19 +168,19 @@ msgstr "Chercher"
 
 #: djangofloor/templates/djangofloor/bootstrap3/base.html:51
 msgid "DEBUG mode is activated"
-msgstr ""
+msgstr "Le mode « DEBUG » est activé"
 
 #: djangofloor/templates/djangofloor/bootstrap3/base.html:53
 msgid "Log-in"
-msgstr ""
+msgstr "Connexion"
 
 #: djangofloor/templates/djangofloor/bootstrap3/base.html:59
 msgid "Change your password"
-msgstr ""
+msgstr "Changement de mot de passe"
 
 #: djangofloor/templates/djangofloor/bootstrap3/base.html:63
 msgid "Admin"
-msgstr ""
+msgstr "Admin"
 
 #: djangofloor/templates/djangofloor/bootstrap3/search.html:8
 #, fuzzy
@@ -192,7 +192,7 @@ msgstr "Chercher"
 #: djangofloor/templates/registration/login.html:54
 #: djangofloor/templates/registration/password_reset_complete.html:16
 msgid "Log in"
-msgstr ""
+msgstr "Connexion"
 
 #: djangofloor/templates/djangofloor/django/monitoring/authentication.html:3
 #, fuzzy
@@ -202,15 +202,15 @@ msgstr "Notification système"
 
 #: djangofloor/templates/djangofloor/django/monitoring/authentication.html:6
 msgid "Local passwords: "
-msgstr ""
+msgstr "Mots de passe locaux : "
 
 #: djangofloor/templates/djangofloor/django/monitoring/authentication.html:9
 msgid "Allow visitors to create an account: "
-msgstr ""
+msgstr "Permettre aux visiteurs de créer un compte : "
 
 #: djangofloor/templates/djangofloor/django/monitoring/authentication.html:11
 msgid "Social external authentications: "
-msgstr ""
+msgstr "Authentification par les réseaux sociaux : "
 
 #: djangofloor/templates/djangofloor/django/monitoring/authentication.html:15
 #, fuzzy
@@ -220,19 +220,19 @@ msgstr "Tous les visiteurs authentifiés"
 
 #: djangofloor/templates/djangofloor/django/monitoring/authentication.html:19
 msgid "Basic HTTP authentication: "
-msgstr ""
+msgstr "Authentification HTTP basique : "
 
 #: djangofloor/templates/djangofloor/django/monitoring/authentication.html:23
 msgid "HTTP authentication by header: "
-msgstr ""
+msgstr "authentification par en-tête HTTP : "
 
 #: djangofloor/templates/djangofloor/django/monitoring/authentication.html:26
 msgid "Automatically create new users: "
-msgstr ""
+msgstr "Création automatique des utilisateurs : "
 
 #: djangofloor/templates/djangofloor/django/monitoring/authentication.html:27
 msgid "Groups of new users: "
-msgstr ""
+msgstr "Groupes par défaut des nouveaux utilisateurs : "
 
 #: djangofloor/templates/djangofloor/django/monitoring/authentication.html:29
 #, fuzzy
@@ -242,35 +242,35 @@ msgstr "Tous les visiteurs authentifiés"
 
 #: djangofloor/templates/djangofloor/django/monitoring/authentication.html:33
 msgid "Maximum time between successive authentications: "
-msgstr ""
+msgstr "Validité d'une authentification : "
 
 #: djangofloor/templates/djangofloor/django/monitoring/celery_stats.html:4
 msgid "Celery state"
-msgstr ""
+msgstr "État Celery"
 
 #: djangofloor/templates/djangofloor/django/monitoring/celery_stats.html:6
 msgid "Required Celery queues"
-msgstr ""
+msgstr "Files d'attente Celery requises"
 
 #: djangofloor/templates/djangofloor/django/monitoring/celery_stats.html:12
 msgid "Celery workers and active queues"
-msgstr ""
+msgstr "Worker Celery et files d'attente actives"
 
 #: djangofloor/templates/djangofloor/django/monitoring/celery_stats.html:16
 msgid "worker"
-msgstr ""
+msgstr "Worker"
 
 #: djangofloor/templates/djangofloor/django/monitoring/celery_stats.html:18
 msgid "broker: "
-msgstr ""
+msgstr "Broker : "
 
 #: djangofloor/templates/djangofloor/django/monitoring/celery_stats.html:19
 msgid "PID: "
-msgstr ""
+msgstr "PID : "
 
 #: djangofloor/templates/djangofloor/django/monitoring/celery_stats.html:20
 msgid "thread number: "
-msgstr ""
+msgstr "Nombre de threads : "
 
 #: djangofloor/templates/djangofloor/django/monitoring/celery_stats.html:21
 #, fuzzy
@@ -280,15 +280,15 @@ msgstr "Délai"
 
 #: djangofloor/templates/djangofloor/django/monitoring/celery_stats.html:22
 msgid "active queues: "
-msgstr ""
+msgstr "files d'attente actives : "
 
 #: djangofloor/templates/djangofloor/django/monitoring/celery_stats.html:26
 msgid "No Celery worker detected"
-msgstr ""
+msgstr "Aucun worker Celery détecté"
 
 #: djangofloor/templates/djangofloor/django/monitoring/errors.html:3
 msgid "Check exception handling"
-msgstr ""
+msgstr "Vérifier la prise en compte des exceptions"
 
 #: djangofloor/templates/djangofloor/django/monitoring/errors.html:5
 msgid ""
