@@ -78,7 +78,9 @@ Only the chosen server name (like `{{ DF_MODULE_NAME }}.example.org`) can be use
             Allow from all
             Satisfy any
         </Location>
-{% endblock %}{% block webserver_media %}        Alias {{ MEDIA_URL }} {{ MEDIA_ROOT }}
+{% endblock %}{% block webserver_media %}        # CAUTION: THE FOLLOWING LINES ALLOW PUBLIC ACCESS TO ANY UPLOADED CONTENT
+        Alias {{ MEDIA_URL }} {{ MEDIA_ROOT }}
+        # the right value is provided by "{{ control_command }} config python | grep MEDIA_ROOT"
         ProxyPass {{ MEDIA_URL }} !
         <Location {{ MEDIA_URL }}>
             Order deny,allow
@@ -88,9 +90,13 @@ Only the chosen server name (like `{{ DF_MODULE_NAME }}.example.org`) can be use
 {% endblock %}        ProxyPass / http://{{ LISTEN_ADDRESS }}/
         ProxyPassReverse / http://{{ LISTEN_ADDRESS }}/
         DocumentRoot {{ STATIC_ROOT }}
+        # the right value is provided by "{{ control_command }} config python | grep STATIC_ROOT"
         ServerSignature off
-{% block webserver_xsendfilepath %}        XSendFile on
+{% block webserver_xsendfilepath %}        # the optional two following lines are useful
+        # for keeping uploaded content  private with good performance
+        XSendFile on
         XSendFilePath {{ MEDIA_ROOT }}
+        # the right value is provided by "{{ control_command }} config python | grep MEDIA_ROOT"
         # in older versions of XSendFile (<= 0.9), use XSendFileAllowAbove On
 {% endblock %}{% block webserver_extra %}{% endblock %}    </VirtualHost>
     EOF
@@ -146,7 +152,9 @@ If you want to use SSL:
             Allow from all
             Satisfy any
         </Location>
-{% endblock %}{% block webserver_ssl_media %}        Alias {{ MEDIA_URL }} {{ MEDIA_ROOT }}
+{% endblock %}{% block webserver_ssl_media %}        # CAUTION: THE FOLLOWING LINES ALLOW PUBLIC ACCESS TO ANY UPLOADED CONTENT
+        Alias {{ MEDIA_URL }} {{ MEDIA_ROOT }}
+        # the right value is provided by "{{ control_command }} config python | grep MEDIA_ROOT"
         ProxyPass {{ MEDIA_URL }} !
         <Location {{ MEDIA_URL }}>
             Order deny,allow
@@ -156,6 +164,7 @@ If you want to use SSL:
 {% endblock %}        ProxyPass / http://{{ LISTEN_ADDRESS }}/
         ProxyPassReverse / http://{{ LISTEN_ADDRESS }}/
         DocumentRoot {{ STATIC_ROOT }}
+        # the right value is provided by "{{ control_command }} config python | grep STATIC_ROOT"
         ServerSignature off
         RequestHeader set X_FORWARDED_PROTO https
 {% block webserver_ssl_auth %}        <Location />
@@ -171,8 +180,11 @@ If you want to use SSL:
             Require valid-user
             RequestHeader set REMOTE_USER %{REMOTE_USER}s
         </Location>
-{% endblock %}{% block webserver_ssl_xsendfilepath %}        XSendFile on
+{% endblock %}{% block webserver_ssl_xsendfilepath %}        # the optional two following lines are useful
+        # for private uploaded content and good performance
+        XSendFile on
         XSendFilePath {{ MEDIA_ROOT }}
+        # the right value is provided by "{{ control_command }} config python | grep MEDIA_ROOT"
         # in older versions of XSendFile (<= 0.9), use XSendFileAllowAbove On
 {% endblock %}{% block webserver_ssl_extra %}{% endblock %}    </VirtualHost>
     EOF

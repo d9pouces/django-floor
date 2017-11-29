@@ -28,7 +28,7 @@ __author__ = 'Matthieu Gallet'
 
 
 class Command(TemplatedBaseCommand):
-    default_config_files = ['dev/config-doc.ini']
+    packaging_config_files = ['dev/config-doc.ini']
     default_searched_locations = [('djangofloor', 'djangofloor/dev'),
                                   (settings.DF_MODULE_NAME, '%s/dev' % settings.DF_MODULE_NAME)]
     include_folder = 'djangofloor/include'
