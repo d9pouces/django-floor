@@ -361,7 +361,7 @@ class ExcludedDjangoCommands:
                        'remove_stale_contenttypes', 'squashmigrations'}
         if not settings_dict['USE_CELERY']:
             result |= {'celery', 'worker'}
-        if not settings_dict['DEBUG']:
+        if not settings_dict['DEBUG'] and not settings_dict['DEVELOPMENT']:
             result |= {'testserver', 'test', 'runserver'}
         return result
 
