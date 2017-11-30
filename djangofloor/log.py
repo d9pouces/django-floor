@@ -346,7 +346,8 @@ class LogConfiguration:
                        'formatter': formatter}
         elif filename == 'syslog':
             handler_name = '%s.%s' % (filename, level.lower())
-            handler = {'class': 'logging.handlers.SysLogHandler', 'level': level, **kwargs}
+            handler = {'class': 'logging.handlers.SysLogHandler', 'level': level}
+            handler.update(kwargs)
         elif filename == 'logd':
             try:
                 # noinspection PyUnresolvedReferences,PyPackageRequirements
@@ -359,7 +360,8 @@ class LogConfiguration:
                 self.add_handler(logger, level.lower(), level=level)
                 return
             handler_name = '%s.%s' % (filename, level.lower())
-            handler = {'class': 'systemd.journal.JournalHandler', 'level': level, **kwargs}
+            handler = {'class': 'systemd.journal.JournalHandler', 'level': level}
+            handler.update(kwargs)
         else:  # basename of a plain-text log
             log_directory = os.path.normpath(self.log_directory)
             if not os.path.isdir(log_directory):
