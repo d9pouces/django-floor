@@ -1,13 +1,12 @@
 Documentation
 -------------
 
-  * packaging
-  * vagrant
-  * docker
-
 TODO
 ----
 
+  * docker
+  * ansible files
+  * heroku
   * monitoring:
     * Celery : add the number of waiting tasks by queue
   * command-line check
