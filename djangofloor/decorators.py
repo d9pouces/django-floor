@@ -50,17 +50,16 @@ The registered Python code can use py3 annotation for specifying data types.
 import io
 import logging
 import mimetypes
+import os
 import random
 import re
 import warnings
 
-import os
 from django import forms
 from django.conf import settings
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.forms import FileField
 from django.http import QueryDict
-from django.utils.encoding import force_text
 
 from djangofloor.utils import RemovedInDjangoFloor200Warning
 
@@ -220,7 +219,7 @@ class Connection(object):
                 path = '%s.%s' % (fn.__module__, fn.__name__)
             elif getattr(fn, '__name__', None):
                 path = fn.__name__
-        self.path = force_text(path)
+        self.path = str(path)
         if not re.match(r'^([_a-zA-Z]\w*)(\.[_a-zA-Z]\w*)*$', self.path):
             raise ValueError('Invalid identifier: %s' % self.path)
         self.is_allowed_to = is_allowed_to
@@ -455,7 +454,7 @@ class RE(object):
         self.regexp = re.compile(value, flags=flags)
 
     def __call__(self, value):
-        matcher = self.regexp.match(force_text(value))
+        matcher = self.regexp.match(str(value))
         if not matcher:
             raise ValueError
         value = matcher.group(1) if matcher.groups() else value

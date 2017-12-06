@@ -17,7 +17,6 @@ from django.contrib.auth import get_user
 from django.core import signing
 from django.core.exceptions import PermissionDenied
 from django.core.handlers.wsgi import WSGIRequest
-from django.utils.encoding import force_str
 from django.utils.module_loading import import_string
 
 from djangofloor.decorators import REGISTERED_FUNCTIONS
@@ -188,7 +187,7 @@ class WebsocketWSGIServer(object):
                 # noinspection PyProtectedMember
                 headers = response._headers.values()
                 headers = list(headers)
-                start_response(force_str(status), headers)
+                start_response(str(status), headers)
                 logger.info('Finish non-websocket response with status code: {}'.format(response.status_code))
         return response
 

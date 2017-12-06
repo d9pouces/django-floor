@@ -2,7 +2,6 @@
 import warnings
 
 from django.contrib.auth import get_user_model
-from django.utils.encoding import force_text
 from django.utils.lru_cache import lru_cache
 
 from djangofloor.tasks import SESSION, WINDOW, BROADCAST, USER, call
@@ -23,7 +22,7 @@ warnings.warn('djangofloor.df_ws4redis module and its functions will be removed'
 
 def ws_call(signal_name, request, sharing, kwargs):
     if isinstance(sharing, bytes):
-        sharing = force_text(sharing)
+        sharing = str(sharing)
     to = _sharing_to_topics(request, sharing)
     window_info = WindowInfo.from_request(request)
     call(window_info, signal_name, to=to, kwargs=kwargs)

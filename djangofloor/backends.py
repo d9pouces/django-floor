@@ -10,12 +10,10 @@ Setting `DF_DEFAULT_GROUPS` is expected to be a list of group names.
 """
 
 import logging
-from urllib.parse import urlsplit, unquote
 
 from django.conf import settings
 from django.contrib.auth.backends import RemoteUserBackend
 from django.contrib.auth.models import Group
-from django.utils.encoding import force_text
 from django.utils.functional import cached_property
 
 try:
@@ -61,7 +59,7 @@ class DefaultGroupsRemoteUserBackend(RemoteUserBackend):
         """
         for group_name in settings.DF_DEFAULT_GROUPS:
             if group_name not in _CACHED_GROUPS:
-                _CACHED_GROUPS[group_name] = Group.objects.get_or_create(name=force_text(group_name))[0]
+                _CACHED_GROUPS[group_name] = Group.objects.get_or_create(name=str(group_name))[0]
             user.groups.add(_CACHED_GROUPS[group_name])
 
         return user

@@ -13,7 +13,6 @@ from django.conf import settings
 from django.template import Context
 from django.templatetags.static import PrefixNode, StaticNode
 from django.urls import reverse
-from django.utils.encoding import force_text
 # noinspection PyProtectedMember
 from django.utils.html import _js_escapes, escape
 from django.utils.safestring import mark_safe
@@ -175,7 +174,7 @@ def df_messages(context, style='banner'):
     result = '<script type="text/javascript">\n'
     for message in context.get('messages', []):
         result += '$.df.call("df.notify", {style: "%s", level: "%s", content: "%s"});\n' \
-                  % (style, message_level(message), force_text(message).translate(_js_escapes))
+                  % (style, message_level(message), str(message).translate(_js_escapes))
     get_notifications = context.get('df_get_notifications', lambda: [])
     values = get_notifications()
     for notification in values:
