@@ -17,7 +17,7 @@ from djangofloor.conf.callables import url_parse_server_name, \
 from djangofloor.conf.config_values import Path, Directory, SettingReference, ExpandIterable, \
     CallableSetting, AutocreateFileContent
 from djangofloor.conf.pipeline import static_storage, pipeline_enabled
-from djangofloor.log import log_configuration, pid_filename
+from djangofloor.log import log_configuration
 from djangofloor.utils import is_package_present, guess_version
 
 __author__ = 'Matthieu Gallet'

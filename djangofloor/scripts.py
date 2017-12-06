@@ -9,7 +9,6 @@ import logging.config
 import os
 import re
 import shutil
-import ssl
 import subprocess
 import sys
 from argparse import ArgumentParser

@@ -213,7 +213,7 @@ class File(Path):
         self.chmod(merger, value)
 
     def pre_migrate(self, merger, provider_name, setting_name, value):
-        self.pre_collectstatic(merger, setting_name, value)
+        self.pre_collectstatic(merger, provider_name, setting_name, value)
 
 
 class AutocreateFileContent(File):

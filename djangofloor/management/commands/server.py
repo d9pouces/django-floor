@@ -1,9 +1,7 @@
 import sys
 
-from django.conf import settings
-
 from djangofloor.management.base import BaseCommand
-from djangofloor.scripts import gunicorn, aiohttp
+from djangofloor.scripts import gunicorn
 
 
 class Command(BaseCommand):

@@ -358,6 +358,7 @@ def signal(fn=None, path=None, is_allowed_to=server_side, queue=None, cls=Signal
     return wrapped
 
 
+# noinspection PyShadowingBuiltins
 def function(fn=None, path=None, is_allowed_to=server_side, queue=None):
     """Allow the following Python code to be called from the JavaScript code.
 The result of this function is serialized (with JSON and `settings.WEBSOCKET_SIGNAL_ENCODER`) before being

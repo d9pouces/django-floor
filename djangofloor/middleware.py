@@ -42,7 +42,7 @@ from django.db.models import Q
 from django.http import HttpRequest
 from django.utils import translation
 from django.utils.crypto import get_random_string
-from django.utils.deprecation import MiddlewareMixin, CallableBool
+from django.utils.deprecation import MiddlewareMixin
 from django.utils.translation import get_language_from_request
 
 from djangofloor.utils import RemovedInDjangoFloor200Warning
@@ -235,8 +235,8 @@ class DjangoAuthMiddleware(WindowInfoMiddleware):
         window_info.is_superuser = values.get('is_superuser')
         window_info.is_staff = values.get('is_staff')
         window_info.is_active = values.get('is_active')
-        window_info.is_authenticated = CallableBool(bool(window_info.user_pk))
-        window_info.is_anonymous = CallableBool(not bool(window_info.user_pk))
+        window_info.is_authenticated = bool(window_info.user_pk)
+        window_info.is_anonymous = not bool(window_info.user_pk)
         window_info._perms = set(values['perms']) if values.get('perms') is not None else None
         window_info._template_perms = None
         window_info.user_agent = values.get('user_agent')
