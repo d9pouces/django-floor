@@ -37,7 +37,7 @@ The registered Python code can use py3 annotation for specifying data types.
       test = forms.CharField()
 
   @signal(path='demo.signal')
-  def my_signal(window_info, kwarg1: Choice([1, 2], int)=1, kwarg2: Re('^\d+$', int)=2,
+  def my_signal(window_info, kwarg1: Choice([1, 2], int)=1, kwarg2: Re('^\\d+$', int)=2,
           kwarg3: SerializedForm(MyForm)):
      assert isinstance(kwarg1, int)
      assert isinstance(kwarg2, int)
@@ -437,7 +437,7 @@ class RE(object):
     .. code-block:: python
 
         @signal(path='myproject.signals.test')
-        def test(window_info, value: RE("\d{3}a\d{3}")):
+        def test(window_info, value: RE('\\d{3}a\\d{3}')):
             pass
 
     Your code won't be called for values like "abc".

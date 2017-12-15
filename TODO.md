@@ -15,10 +15,15 @@ TODO
     * is the DB valid?
     * is all Redis valid?
 
+  * http://alesnosek.com/blog/2016/12/04/controlling-a-multi-service-application-with-systemd/
   * check pipeline
   * documentation generated for new projects
   * documentation for developpers
   * documentation for new projects
+
+  * expose some metrics
+    * Promotheus
+    * Nagios
 
 Authentication sources
 ----------------------
@@ -42,3 +47,4 @@ configuration
 update
 users
 deploying on Heroku
+
