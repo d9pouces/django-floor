@@ -70,6 +70,16 @@ BASE_MAPPING = [
                              'Apache or Nginx. Example: http://www.example.org/.'),
     IntegerConfigField('server.timeout', 'DF_SERVER_TIMEOUT',
                        help_str='Web workers silent for more than this many seconds are killed and restarted.'),
+    IntegerConfigField('server.graceful_timeout', 'DF_SERVER_GRACEFUL_TIMEOUT',
+                       help_str='After receiving a restart signal, workers have this much time to finish serving '
+                                'requests. Workers still alive after the timeout (starting from the receipt of '
+                                'the restart signal) are force killed.'),
+    IntegerConfigField('server.keepalive', 'DF_SERVER_KEEPALIVE',
+                       help_str='After receiving a restart signal, workers have this much time to finish serving '
+                                'requests. Workers still alive after the timeout (starting from the receipt of '
+                                'the restart signal) are force killed.'),
+    IntegerConfigField('server.max_requests', 'DF_SERVER_MAX_REQUESTS',
+                       help_str='The maximum number of requests a worker will process before restarting.'),
     IntegerConfigField('server.threads', 'DF_SERVER_THREADS',
                        help_str='The number of web server threads for handling requests.'),
     IntegerConfigField('server.processes', 'DF_SERVER_PROCESSES',

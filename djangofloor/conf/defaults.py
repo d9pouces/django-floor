@@ -182,9 +182,12 @@ WINDOW_INFO_MIDDLEWARES = ['djangofloor.middleware.WindowKeyMiddleware',
                            'djangofloor.middleware.DjangoAuthMiddleware',
                            'djangofloor.middleware.Djangoi18nMiddleware',
                            'djangofloor.middleware.BrowserMiddleware', ]
-DF_SERVER_TIMEOUT = 30
+DF_SERVER_TIMEOUT = 35
+DF_SERVER_GRACEFUL_TIMEOUT = 25
 DF_SERVER_THREADS = 2
 DF_SERVER_PROCESSES = 2
+DF_SERVER_KEEPALIVE = 5
+DF_SERVER_MAX_REQUESTS = 10000
 DF_SERVER_SSL_KEY = None
 DF_SERVER_SSL_CERTIFICATE = None
 DF_ALLOW_USER_CREATION = True

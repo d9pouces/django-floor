@@ -211,6 +211,9 @@ def gunicorn():
     parser.add_argument('-b', '--bind', default=settings.LISTEN_ADDRESS)
     parser.add_argument('--threads', default=settings.DF_SERVER_THREADS, type=int)
     parser.add_argument('-w', '--workers', default=settings.DF_SERVER_PROCESSES, type=int)
+    parser.add_argument('--graceful-timeout', default=settings.DF_SERVER_GRACEFUL_TIMEOUT, type=int)
+    parser.add_argument('--max-requests', default=settings.DF_SERVER_MAX_REQUESTS, type=int)
+    parser.add_argument('--keep-alive', default=settings.DF_SERVER_KEEPALIVE, type=int)
     parser.add_argument('-t', '--timeout', default=settings.DF_SERVER_TIMEOUT, type=int)
     parser.add_argument('--keyfile', default=settings.DF_SERVER_SSL_KEY)
     parser.add_argument('--certfile', default=settings.DF_SERVER_SSL_CERTIFICATE)
@@ -224,13 +227,17 @@ def gunicorn():
         __set_default_option(options, 'bind')
         __set_default_option(options, 'worker_class')
         __set_default_option(options, 'threads')
+        __set_default_option(options, 'graceful_timeout')
+        __set_default_option(options, 'keep_alive')
         __set_default_option(options, 'workers')
+        __set_default_option(options, 'max_requests')
         __set_default_option(options, 'timeout')
         __set_default_option(options, 'keyfile')
         __set_default_option(options, 'certfile')
         if settings.DEBUG and not options.reload:
             sys.argv += ['--reload']
     application = 'djangofloor.wsgi.aiohttp_runserver:application'
+    print(sys.argv)
     if application not in sys.argv:
         sys.argv.append(application)
     return run()
