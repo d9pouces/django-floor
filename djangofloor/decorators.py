@@ -546,7 +546,6 @@ class SerializedForm(object):
 
         post_data = QueryDict('', mutable=True)
         file_data = QueryDict('', mutable=True)
-
         for obj in value:
             name = obj['name']
             value = obj['value']
