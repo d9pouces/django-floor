@@ -237,7 +237,6 @@ def gunicorn():
         if settings.DEBUG and not options.reload:
             sys.argv += ['--reload']
     application = 'djangofloor.wsgi.aiohttp_runserver:application'
-    print(sys.argv)
     if application not in sys.argv:
         sys.argv.append(application)
     return run()

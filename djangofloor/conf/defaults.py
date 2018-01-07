@@ -211,6 +211,7 @@ PIPELINE = {
     'STYLESHEETS': SettingReference('PIPELINE_CSS'),
     'CSS_COMPRESSOR': SettingReference('PIPELINE_CSS_COMPRESSOR'),
     'JS_COMPRESSOR': SettingReference('PIPELINE_JS_COMPRESSOR'),
+    'COMPILERS': SettingReference('PIPELINE_COMPILERS'),
 }
 PIPELINE_COMPILERS = []
 PIPELINE_CSS_COMPRESSOR = 'pipeline.compressors.NoopCompressor'

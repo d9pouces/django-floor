@@ -1,0 +1,17 @@
+$background-color: #00ff10;
+$primary-color: #3bbfce;
+$margin: 16px;
+
+.content-navigation {
+border-color: $primary-color;
+color: darken($primary-color, 10%);
+}
+
+.border {
+border-color: $primary-color;
+margin: $margin / 2;
+padding: $margin / 2;
+}
+button.button {
+    background-color: $background-color;
+}

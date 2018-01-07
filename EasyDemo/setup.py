@@ -32,7 +32,7 @@ setup(
     packages=find_packages(),
     include_package_data=True,
     zip_safe=False,
-    install_requires=['djangofloor>=1.0.20'],
+    install_requires=['djangofloor>=1.0.20', 'pyScss', 'jsmin', 'rcssmin', 'slimit', 'django-pipeline'],
     classifiers=['Development Status :: 5 - Production/Stable',
                  'Framework :: Django :: 1.11',
                  'Framework :: Django :: 2.0',

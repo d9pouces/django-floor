@@ -63,10 +63,10 @@ def get_pipeline_requirements():
                 'pipeline.compressors.csstidy.CSSTidyCompressor': 'CSSTIDY_BINARY',
                 'pipeline.compressors.cssmin.CSSMinCompressor': 'CSSMIN_BINARY',
                 }
-    pip_packages = {'pipeline.compressors.jsmin.JSMinCompressor': 'jsmin',
-                    'pipeline.compressors.slimit.SlimItCompressor': 'slimit',
-                    'djangofloor.templatetags.pipeline.RcssCompressor': 'rcssmin',
-                    'djangofloor.templatetags.pipeline.PyScssCompiler': 'scss',
+    pip_packages = {'pipeline.compressors.jsmin.JSMinCompressor': ('jsmin', 'jsmin'),
+                    'pipeline.compressors.slimit.SlimItCompressor': ('slimit', 'slimit'),
+                    'djangofloor.templatetags.pipeline.RcssCompressor': ('rcssmin', 'rcssmin'),
+                    'djangofloor.templatetags.pipeline.PyScssCompiler': ('scss', 'pyScss'),
                     }
     npm_packages = {'lsc', }
     gem_packages = {}
@@ -99,7 +99,7 @@ def pipeline_check(app_configs, **kwargs):
         if not find_executable(name):
             check_results.append(Error('\'%s\' is required by \'django-pipeline\' and is not found in PATH.' %
                                        name, obj='configuration'))
-    for name in requirements['pip']:
+    for name, package in requirements['pip']:
         if not is_package_present(name):
-            check_results.append(missing_package(name, ' by \'django-pipeline\''))
+            check_results.append(missing_package(package, ' by \'django-pipeline\''))
     return check_results
