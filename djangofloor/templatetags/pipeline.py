@@ -116,7 +116,7 @@ class PyScssCompiler(CompilerBase):
     output_extension = 'css'
 
     def match_file(self, filename):
-        return filename.endswith('.scss')
+        return filename.endswith('.scss') or filename.endswith('.sass')
 
     def compile_file(self, infile, outfile, outdated=False, force=False):
         # noinspection PyUnresolvedReferences,PyUnresolvedReferences,PyPackageRequirements

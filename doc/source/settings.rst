@@ -4,11 +4,11 @@ Settings system
 By default, Django uses a single Python file for all settings.
 However, these settings could be organized into three categories:
 
-  * settings that are very common and that can be kept as-is for any project (`USE_TZ = True` or `MEDIA_URL = '/media/'`),
+  * settings that are very common and that can be kept as-is for most projects (`USE_TZ = True` or `MEDIA_URL = '/media/'`),
   * settings that are specific to your project but common to all instances of your project (like `INSTALLED_APPS`),
   * settings that are installation-dependent (`DATABASE_PASSWORD`, …)
 
-You usually have to maintain at least two versions of the same file (dev and prod, or one that is versionned and the other one for prod), with the risk of desynchronized files.
+You usually have to maintain at least two versions of the same settings file (dev and prod, or one that is versionned and the other one for prod), with the risk of desynchronized files.
 
 On the contrary, DjangoFloor allows to dynamically merge several files to define your settings:
 
@@ -31,8 +31,8 @@ Your `defaults.py` has the same structure than a traditionnal Django `settings.p
 `INI_MAPPING` is a list of :class:`djangofloor.conf.config_values.ConfigValue` (or of its subclasses, some of them defined in the same module).
 Several lists are already defined in :mod:`djangofloor.conf.mapping`.
 
-Smart settings
---------------
+Smarter settings
+----------------
 
 With DjangoFloor, settings can be built at runtime from some other settings.
 For example, imagine that you have the following settings in your Django project:
@@ -45,7 +45,7 @@ For example, imagine that you have the following settings in your Django project
     FILE_UPLOAD_TEMP_DIR = '/var/myproject/tmp'
 
 
-Modifying the base directory implies that you have four variables to change, and that you will forget to change at least one.
+Modifying the base directory `/var/myproject` implies that you have four variables to change (and you will forget to change at least one).
 With DjangoFloor, things are simpler:
 
 .. code-block:: python
@@ -70,7 +70,9 @@ You can even go further:
     FILE_UPLOAD_TEMP_DIR = Directory('{LOCAL_PATH}/tmp')
 
 If you run the `check` command, you will be warned for missing directories, and the `collectstatic` and `migrate` commands
-will attempt to create them. Of course, you still have `settings.MEDIA_ROOT == '/var/myproject/media'`.
+will attempt to create them.
+Of course, you still have `settings.MEDIA_ROOT == '/var/myproject/media'` in your code, when settings are loaded.
+
 
 You can use more complex things, instead of having:
 
@@ -95,6 +97,11 @@ You could just have:
     CSRF_COOKIE_DOMAIN = CallableSetting(lambda x: urlparse(x['SERVER_BASE_URL']).hostname, 'SERVER_BASE_URL')
     EMAIL_SUBJECT_PREFIX = CallableSetting(lambda x: '[%s]' % urlparse(x['SERVER_BASE_URL']).hostname, 'SERVER_BASE_URL')
 
+
+Default settings
+----------------
+
+Please take a look at :mod:`djangoFloor.conf.defaults` for all default settings.
 
 Displaying settings
 -------------------

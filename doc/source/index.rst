@@ -75,7 +75,6 @@ Overview
    installation
    newproject
    settings
-   provided-settings
    signals
    remote-functions
    monitoring
