@@ -12,7 +12,7 @@ You usually have to maintain at least two versions of the same settings file (de
 
 On the contrary, DjangoFloor allows to dynamically merge several files to define your settings:
 
-  * :mod:`djangoFloor.conf.defaults` that aims at providing good default values,
+  * :mod:`djangofloor.conf.defaults` that aims at providing good default values,
   * `yourproject.defaults` for your project-specific settings,
   * `/etc/yourproject/settings.py` for installation-dependent settings.
 
