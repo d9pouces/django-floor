@@ -7,7 +7,9 @@ If you keep the default settings, `django-pipeline` is automatically detected an
 
 """
 import warnings
+from pathlib import Path
 
+import os
 from django import template
 from django.conf import settings
 from django.utils.safestring import mark_safe
@@ -93,7 +95,7 @@ def stylesheet(key):
 class RcssCompressor(CompressorBase):
     """
     JS compressor based on the Python library slimit
-    (http://pypi.python.org/pypi/slimit/).
+    (http://pypi.python.org/pypi/slimit/ ).
     """
 
     # noinspection PyMethodMayBeStatic
@@ -105,6 +107,12 @@ class RcssCompressor(CompressorBase):
 
 # noinspection PyClassHasNoInit
 class PyScssCompiler(CompilerBase):
+    """ SASS (.scss) compiler based on the Python library pyScss.
+    (http://pyscss.readthedocs.io/en/latest/ ).
+    However, this compiler is limited to SASS 3.2 and cannot compile modern projets like Bootstrap 4.
+    Please use :class:`pipeline.compilers.sass.SASSCompiler` if you use modern SCSS files.
+
+    """
     output_extension = 'css'
 
     def match_file(self, filename):
@@ -113,9 +121,9 @@ class PyScssCompiler(CompilerBase):
     def compile_file(self, infile, outfile, outdated=False, force=False):
         # noinspection PyUnresolvedReferences,PyUnresolvedReferences,PyPackageRequirements
         from scss import Compiler
-        with open(infile, 'r') as fd:
-            scss_content = fd.read()
-        css_content = Compiler().compile_string(scss_content)
+        root = Path(os.path.abspath(settings.STATIC_ROOT))
+        compiler = Compiler(root=root, search_path=('./', ))
+        css_content = compiler.compile(infile)
         with open(outfile, 'w') as fd:
             fd.write(css_content)
         if self.verbose:
