@@ -101,7 +101,7 @@ You could just have:
 Default settings
 ----------------
 
-Please take a look at :mod:`djangoFloor.conf.defaults` for all default settings.
+Please take a look at :mod:`djangofloor.conf.defaults` for all default settings.
 
 Displaying settings
 -------------------
