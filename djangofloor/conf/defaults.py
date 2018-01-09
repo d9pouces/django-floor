@@ -218,6 +218,8 @@ WEBSOCKET_SIGNAL_DECODER = 'json.JSONDecoder'
 WEBSOCKET_SIGNAL_ENCODER = 'django.core.serializers.json.DjangoJSONEncoder'
 WEBSOCKET_REDIS_PREFIX = 'ws'
 WEBSOCKET_REDIS_EXPIRE = 36000
+WEBSOCKET_CONNECTION_EXPIRE = 3600  # by default, close a connection after one hour
+# (but the client transparently reopen it
 WEBSOCKET_HEADER = 'WINDOW_KEY'  # header used in AJAX requests (thus they have the same window identifier)
 
 # django-pipeline

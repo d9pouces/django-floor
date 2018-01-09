@@ -13,6 +13,7 @@ import logging
 import aiohttp
 # noinspection PyPackageRequirements
 import aiohttp.web
+import time
 
 try:
     # noinspection PyPackageRequirements
@@ -52,7 +53,7 @@ def handle_ws(window_info, ws):
     :type ws: :class:`aiohttp.web.WebSocketResponse`
     """
     while True:
-        msg_ws = yield from ws.receive()
+        msg_ws = yield from ws.receive(timeout=settings.WEBSOCKET_CONNECTION_EXPIRE)
         if msg_ws:
             # noinspection PyTypeChecker
             WebsocketHandler.on_msg_from_ws(window_info, ws, msg_ws)
