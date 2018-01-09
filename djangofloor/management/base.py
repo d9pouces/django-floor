@@ -276,7 +276,7 @@ class TemplatedBaseCommand(OriginalBaseCommand):
         return writers
 
 
-class Writer(object):
+class Writer:
     def __init__(self, target_filename, source_filename, stdout=sys.stdout, style=None):
         self.target_filename = target_filename
         self.source_filename = source_filename

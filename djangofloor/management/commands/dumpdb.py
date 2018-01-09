@@ -13,7 +13,7 @@ from django.utils.translation import ugettext as _
 __author__ = 'Matthieu Gallet'
 
 
-class BaseDumper(object):
+class BaseDumper:
     """ base class for a given database engine. An instance is returned by :py:func:`Command.get_dumper` """
 
     def __init__(self, name, db_options):

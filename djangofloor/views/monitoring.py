@@ -60,7 +60,7 @@ def get_installed_distributions():
     return [d for d in pkg_resources.working_set if d.key not in ('python', 'wsgiref', 'argparse')]
 
 
-class MonitoringCheck(object):
+class MonitoringCheck:
     """Base widget of the monitoring view."""
     template = None
     """name of the template used by this widget"""

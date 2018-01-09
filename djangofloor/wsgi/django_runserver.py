@@ -78,7 +78,7 @@ class DjangoWebSocket(WebSocket):
         super().__init__(Stream(wsgi_input))
 
 
-class Stream(object):
+class Stream:
     """
     Wraps the handler's socket/rfile attributes and makes it in to a file like
     object that can be read from/written to by the lower level websocket api.

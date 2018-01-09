@@ -92,7 +92,7 @@ def __getattr__(self, name):
 LazySettings.__getattr__ = __getattr__
 
 
-class SettingMerger(object):
+class SettingMerger:
     """Load different settings modules and config files and merge them.
     """
 

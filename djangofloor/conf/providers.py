@@ -24,7 +24,7 @@ except ImportError:
 __author__ = 'Matthieu Gallet'
 
 
-class ConfigProvider(object):
+class ConfigProvider:
     """Base class of config provider."""
     name = None
 
@@ -237,7 +237,7 @@ class DictProvider(ConfigProvider):
         return '%r' % self.values
 
 
-class ConfigFieldsProvider(object):
+class ConfigFieldsProvider:
     """Provides a list of :class:`djangofloor.conf.fields.ConfigField`.
 Used for retrieving settings from a config file.
     """

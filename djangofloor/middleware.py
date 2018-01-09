@@ -139,7 +139,7 @@ class DjangoFloorMiddleware(BaseRemoteUserMiddleware):
         return remote_username.partition('@')[0]
 
 
-class WindowInfoMiddleware(object):
+class WindowInfoMiddleware:
     """Base class for the WindowInfo middlewares."""
     def from_request(self, request, window_info):
         pass

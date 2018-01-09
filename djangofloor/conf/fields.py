@@ -63,7 +63,7 @@ def strip_split(value):
     return []
 
 
-class ConfigField(object):
+class ConfigField:
     """Class that maps an option in a .ini file to a setting.
 
     :param name: the section and the option in a .ini file (like "database.engine")

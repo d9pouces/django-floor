@@ -14,7 +14,7 @@ __author__ = 'Matthieu Gallet'
 logger = logging.getLogger('django.request')
 
 
-class UWSGIWebsocket(object):
+class UWSGIWebsocket:
     def __init__(self):
         self._closed = False
 

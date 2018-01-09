@@ -12,7 +12,7 @@ from djangofloor.wsgi.exceptions import WebSocketError, FrameTooLargeException
 logger = logging.getLogger('django.request')
 
 
-class WebSocket(object):
+class WebSocket:
     __slots__ = ('_closed', 'stream', 'utf8validator', 'utf8validate_last')
 
     OPCODE_CONTINUATION = 0x00
@@ -273,7 +273,7 @@ class WebSocket(object):
             self.stream = None
 
 
-class Header(object):
+class Header:
     __slots__ = ('fin', 'mask', 'opcode', 'flags', 'length')
 
     FIN_MASK = 0x80

@@ -55,7 +55,7 @@ def get_websocket_topics(request):
     return [x.decode('utf-8') for x in topics]
 
 
-class WebsocketWSGIServer(object):
+class WebsocketWSGIServer:
     def __init__(self, redis_connection=None):
         """
         redis_connection can be overriden by a mock object.

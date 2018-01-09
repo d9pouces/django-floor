@@ -29,12 +29,12 @@ logger = logging.getLogger('djangofloor.signals')
 middlewares = [import_string(x)() for x in settings.WINDOW_INFO_MIDDLEWARES]
 
 
-class Session(object):
+class Session:
     def __init__(self, key=None):
         self.key = key
 
 
-class WindowInfo(object):
+class WindowInfo:
     """ Built to store the username and the window key and must be supplied to any Python signal call.
     All attributes are set by "WindowInfoMiddleware"'s.
 

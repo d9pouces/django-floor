@@ -192,7 +192,7 @@ def is_superuser(connection, window_info, kwargs):
 
 
 # noinspection PyPep8Naming
-class has_perm(object):
+class has_perm:
     """restrict a WS signal or a WS function to users with permission "perm"
 
     >>> @signal(is_allowed_to=has_perm('app_label.codename'))
@@ -207,7 +207,7 @@ class has_perm(object):
         return window_info and window_info.has_perm(self.perm)
 
 
-class Connection(object):
+class Connection:
     """Parent class of a registered signal or remote function.
      Do not use it directly."""
     required_function_arg = 'window_info'
@@ -429,7 +429,7 @@ def validate_form(form_cls=None, path=None, is_allowed_to=server_side, queue=Non
     return wrapped
 
 
-class RE(object):
+class RE:
     """ used to check if a string value matches a given regexp.
 
     Example (requires Python 3.2+), for a function that can only handle a string of the form 123a456:
@@ -462,7 +462,7 @@ class RE(object):
         return self.caster(value) if self.caster else value
 
 
-class Choice(object):
+class Choice:
     """ used to check if a value is among some valid choices.
 
     Example (requires Python 3.2+), for a function that can only two values:
@@ -488,7 +488,7 @@ class Choice(object):
         return value
 
 
-class SerializedForm(object):
+class SerializedForm:
     """Transform values sent by JS to a Django form.
 
     Given a form and a :class:`list` of :class:`dict`, transforms the :class:`list` into a

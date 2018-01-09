@@ -34,7 +34,7 @@ from djangofloor.checks import settings_check_results
 __author__ = 'Matthieu Gallet'
 
 
-class ConfigValue(object):
+class ConfigValue:
     """Base class for special setting values. When a setting is a :class:`djangofloor.settings.ConfigValue`,
       then the method `get_value(merger)` is called for getting the definitive value.
     """
