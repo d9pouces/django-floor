@@ -255,14 +255,17 @@ Now, Supervisor should start {{ DF_MODULE_NAME }} after a reboot.
 {% block systemd %}systemd
 -------
 
-You can also use systemd (present in many modern Linux distributions) to launch {{ DF_MODULE_NAME }}:
+You can also use systemd in most modern Linux distributions to launch {{ DF_MODULE_NAME }}:
 
 .. code-block:: bash
 {% block pre_systemd %}{% endblock %}
-    cat << EOF | sudo tee /etc/systemd/system/{{ control_command }}.service
+    cat << EOF | sudo tee /etc/systemd/system/{{ DF_MODULE_NAME }}-web.service
     [Unit]
-    Description={{ DF_PROJECT_NAME }} HTTP process
+    Description={{ DF_PROJECT_NAME }} web process
     After=network.target
+{% if required_celery_queus %}    After={{ DF_MODULE_NAME }}.service
+    PartOf={{ DF_MODULE_NAME }}.service
+{% endif %}
     [Service]
     User={{ DF_MODULE_NAME }}
     Group={{ DF_MODULE_NAME }}
@@ -270,29 +273,48 @@ You can also use systemd (present in many modern Linux distributions) to launch 
     ExecStart=$VIRTUAL_ENV/bin/{{ control_command }} server
     ExecReload=/bin/kill -s HUP \$MAINPID
     ExecStop=/bin/kill -s TERM \$MAINPID
+    Restart=on-failure
+
     [Install]
-    WantedBy=multi-user.target
+    WantedBy={% if required_celery_queus %}{{ DF_MODULE_NAME }}.service{% else %}multi-user.target{% endif %}
     EOF
-    systemctl enable {{ control_command }}.service
-    sudo service {{ control_command }} start
-{% for queue in required_celery_queues %}    cat << EOF | sudo tee /etc/systemd/system/{{ control_command }}-{{ queue }}.service
+    systemctl enable {{ DF_MODULE_NAME }}-web.service
+    sudo service {{ DF_MODULE_NAME }}-web
+{% for queue in required_celery_queues %}    cat << EOF | sudo tee /etc/systemd/system/{{ DF_MODULE_NAME }}-worker-{{ queue }}.service
     [Unit]
-    Description={{ DF_PROJECT_NAME }} Celery process
+    Description={{ DF_PROJECT_NAME }} worker process
     After=network.target
+    After={{ DF_MODULE_NAME }}.service
+    PartOf={{ DF_MODULE_NAME }}.service
+
     [Service]
     User={{ DF_MODULE_NAME }}
     Group={{ DF_MODULE_NAME }}
-    Type=forking
     WorkingDirectory={{ LOCAL_PATH }}/
     ExecStart=$VIRTUAL_ENV/bin/{{ control_command }} worker -Q {{ queue }}
     ExecReload=/bin/kill -s HUP \$MAINPID
     ExecStop=/bin/kill -s TERM \$MAINPID
+    Restart=on-failure
+
+    [Install]
+    WantedBy={{ DF_MODULE_NAME }}.service
+    EOF
+    sudo systemctl enable {{ DF_MODULE_NAME }}-worker-{{ queue }}.service
+    sudo service {{ DF_MODULE_NAME }}-worker-{{ queue }} start
+{% endfor %}{% if required_celery_queues %}    cat << EOF | sudo tee /etc/systemd/system/{{ DF_MODULE_NAME }}.service
+    [Unit]
+    Description={{ DF_PROJECT_NAME }}
+
+    [Service]
+    Type=oneshot
+    ExecStart=/bin/true
+    RemainAfterExit=yes
+
     [Install]
     WantedBy=multi-user.target
     EOF
-    mkdir -p {{ install_root }}/run
-    sudo systemctl enable {{ control_command }}{% if queue != "celery" %}-{{ queue }}{% endif %}.service
-    sudo service {{ control_command }}{% if queue != "celery" %}-{{ queue }}{% endif %} start
-{% endfor %}
+    systemctl enable {{ DF_MODULE_NAME }}.service
+    sudo service {{ DF_MODULE_NAME }} start
+{% endif %}
 {% block post_systemd %}{% endblock %}{% endblock %}
 {% block post_install_step %}{% endblock %}

@@ -1,0 +1,2 @@
+recursive-include easydemo *
+include LICENSE README.md CHANGELOG

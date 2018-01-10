@@ -1,1 +1,4 @@
+Changes
+=======
+
 .. include:: ../../CHANGELOG
