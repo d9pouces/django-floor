@@ -77,6 +77,46 @@ databases.required_settings = ['DATABASE_ENGINE', 'DATABASE_NAME', 'DATABASE_USE
                                'DATABASE_PASSWORD', 'DATABASE_HOST', 'DATABASE_PORT']
 
 
+class RedisSmartSetting:
+    """Handle values required for Redis configuration, as well as Heroku's standard environment variables.
+    Can be used as :class:`djangofloor.conf.config_values.CallableSetting`.
+    """
+    config_values = ['PROTOCOL', 'HOST', 'PORT', 'DB', 'PASSWORD']
+
+    def __init__(self, prefix='', env_variable='REDIS_URL', fmt='url', extra_values=None):
+        self.fmt = fmt
+        self.prefix = prefix
+        self.env_variable = env_variable
+        self.required_settings = [prefix + x for x in self.config_values]
+        self.extra_values = extra_values
+
+    def __call__(self, settings_dict):
+        values = {x: settings_dict[self.prefix + x] for x in self.config_values}
+        values['AUTH'] = ''
+        if values['PROTOCOL'] == 'redis' and self.env_variable and self.env_variable in os.environ:
+            redis_url = urlparse(os.environ[self.env_variable])
+            values['HOST'] = redis_url.hostname
+            values['PORT'] = redis_url.port
+            values['PASSWORD'] = redis_url.password
+        if values['PASSWORD']:
+            values['AUTH'] = ':%s@' % values['PASSWORD']
+        if self.fmt == 'url':
+            return '%(PROTOCOL)s://%(AUTH)s%(HOST)s:%(PORT)s/%(DB)s' % values
+        elif self.fmt == 'dict':
+            result = {'host': values['HOST'] or 'localhost', 'port': int(values['PORT'] or 6379),
+                      'db': int(values['DB'] or 0), 'password': values['PASSWORD'] or ''}
+            if self.extra_values:
+                result.update(self.extra_values)
+            return result
+        raise ValueError('Unknown RedisSmartSetting format \'%s\'' % self.fmt)
+
+
+cache_redis_url = RedisSmartSetting(prefix='CACHE_', fmt='url')
+celery_broker_url = RedisSmartSetting(prefix='CELERY_', fmt='url')
+session_redis_dict = RedisSmartSetting(prefix='SESSION_REDIS_', fmt='dict', extra_values={'prefix': 'session'})
+websocket_redis_dict = RedisSmartSetting(prefix='WEBSOCKET_REDIS_', fmt='dict')
+
+
 def template_setting(settings_dict):
     loaders = ['django.template.loaders.filesystem.Loader', 'django.template.loaders.app_directories.Loader']
     if settings_dict['DEBUG']:
@@ -120,20 +160,20 @@ def cache_setting(settings_dict):
     :param settings_dict:
     :return:
     """
+    parsed_url = urlparse(settings_dict['CACHE_URL'])
     if settings_dict['DEBUG']:
         return {'default': {'BACKEND': 'django.core.cache.backends.dummy.DummyCache'}}
-    elif settings_dict['USE_REDIS_CACHE']:
-        return {'default': {
-            'BACKEND': 'django_redis.cache.RedisCache',
-            'LOCATION': '{CACHE_REDIS_PROTOCOL}://:{CACHE_REDIS_PASSWORD}@{CACHE_REDIS_HOST}:{CACHE_REDIS_PORT}/'
-                        '{CACHE_REDIS_DB}',
-            'OPTIONS': {'CLIENT_CLASS': 'django_redis.client.DefaultClient'}
-        }
-        }
+    elif settings_dict['USE_REDIS_CACHE'] and parsed_url.scheme == 'redis':
+        return {'default': {'BACKEND': 'django_redis.cache.RedisCache', 'LOCATION': '{CACHE_URL}',
+                            'OPTIONS': {'CLIENT_CLASS': 'django_redis.client.DefaultClient'}}}
+    elif parsed_url.scheme == 'memcache':
+        location = '%s:%s' % (parsed_url.hostname or 'localhost', parsed_url.port or 11211)
+        return {'default': {'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
+                            'LOCATION': location}}
     return {'default': {'BACKEND': 'django.core.cache.backends.locmem.LocMemCache', 'LOCATION': 'unique-snowflake'}}
 
 
-cache_setting.required_settings = ['USE_REDIS_CACHE', 'DEBUG']
+cache_setting.required_settings = ['USE_REDIS_CACHE', 'DEBUG', 'CACHE_URL']
 
 
 def url_parse_server_name(settings_dict):
@@ -331,6 +371,14 @@ def generate_secret_key(django_ready, length=60):
 
 
 def required_packages(settings_dict):
+    """
+    Return a sorted list of the Python packages required by the current project (with their dependencies).
+    A warning is added for each missing package.
+
+    :param settings_dict:
+    :return:
+    """
+
     def get_requirements(package_name, parent=None):
         try:
             yield str(package_name)
@@ -343,7 +391,7 @@ def required_packages(settings_dict):
         except VersionConflict:
             settings_check_results.append(missing_package(str(package_name), ' required by %s' % parent))
 
-    return list(set(get_requirements(settings_dict['DF_MODULE_NAME'], parent=settings_dict['DF_MODULE_NAME'])))
+    return list(sorted(set(get_requirements(settings_dict['DF_MODULE_NAME'], parent=settings_dict['DF_MODULE_NAME']))))
 
 
 required_packages.required_settings = ['DF_MODULE_NAME']
@@ -356,7 +404,7 @@ class ExcludedDjangoCommands:
         result = {'startproject', 'diffsettings', }
         if not settings_dict['DEVELOPMENT']:
             result |= {'startapp', 'findstatic', 'npm', 'packaging',
-                       'gen_dev_files', 'gen_install', 'dockerize',  'bdist_deb_django',
+                       'gen_dev_files', 'gen_install', 'dockerize', 'bdist_deb_django',
                        'makemigrations', 'makemessages', 'inspectdb', 'compilemessages',
                        'remove_stale_contenttypes', 'squashmigrations'}
         if not settings_dict['USE_CELERY']:

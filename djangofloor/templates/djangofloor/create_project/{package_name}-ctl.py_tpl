@@ -1,2 +1,0 @@
-from djangofloor.scripts import django
-django()

@@ -1,0 +1,44 @@
+Hosting on Heroku
+=================
+
+.. code-block:: bash
+
+   pip install pipenv
+   heroku login
+
+
+.. code-block:: bash
+
+    cat << EOF > Pipfile
+    [[source]]
+    url = "https://pypi.python.org/simple"
+    verify_ssl = true
+
+    [packages]
+    {{ DF_PIP_NAME }} = ">={{ DF_PROJECT_VERSION }}"
+    django-redis-sessions = "*"
+    django-redis = "*"
+    psycopg2 = "*"
+
+    [requires]
+    python_version = "3.6"
+    EOF
+
+    cat << EOF > Procfile
+    web: {{ control_command }} server
+{% for queue in required_celery_queues %}    celery_{{ queue }}={{ control_command }} worker -Q {{ queue }}
+{% endfor %}
+    EOF
+
+    cat << EOF > local_settings.ini
+{% block ini_configuration %}{% for line in settings_ini.splitlines %}    {{ line|safe }}
+{% endfor %}
+{% endblock %}
+    EOF
+
+
+.. code-block:: bash
+
+    heroku addons:create heroku-redis:hobby-dev
+    heroku run {{ control_command }} migrate
+    heroku run {{ control_command }} shell

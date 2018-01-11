@@ -1,0 +1,4 @@
+from djangofloor.scripts import django, set_env
+
+set_env(command_name='{package_name}-ctl')
+django()

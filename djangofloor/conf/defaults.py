@@ -29,7 +29,8 @@ from djangofloor.conf.auth import authentication_backends, ldap_group_class, lda
 from djangofloor.conf.callables import url_parse_server_name, \
     url_parse_server_protocol, url_parse_server_port, url_parse_prefix, url_parse_ssl, project_name, \
     allowed_hosts, cache_setting, template_setting, \
-    generate_secret_key, use_x_forwarded_for, required_packages, installed_apps, databases, excluded_django_commands
+    generate_secret_key, use_x_forwarded_for, required_packages, installed_apps, databases, excluded_django_commands, \
+    celery_broker_url, websocket_redis_dict, cache_redis_url, session_redis_dict
 from djangofloor.conf.config_values import Path, Directory, SettingReference, ExpandIterable, \
     CallableSetting, AutocreateFileContent
 from djangofloor.conf.pipeline import static_storage, pipeline_enabled
@@ -59,20 +60,24 @@ USE_ALL_AUTH = is_package_present('allauth')
 
 # ######################################################################################################################
 #
-# settings that can be kept as-is
+# settings that could be kept as-is for most projects
 # of course, you can override them in your default settings
 #
 # ######################################################################################################################
 ADMINS = (('admin', '{ADMIN_EMAIL}'),)
 ALLOWED_HOSTS = CallableSetting(allowed_hosts)
+CACHE_URL = CallableSetting(cache_redis_url)
 CACHES = CallableSetting(cache_setting)
 CSRF_COOKIE_DOMAIN = '{SERVER_NAME}'
 CSRF_TRUSTED_ORIGINS = ['{SERVER_NAME}', '{SERVER_NAME}:{SERVER_PORT}']
 DATABASES = CallableSetting(databases)
 
 DEBUG = False
-DEVELOPMENT = True
 # you should create a "local_settings.py" with "DEBUG = True" at the root of your project
+DEVELOPMENT = True
+# display all commands (like "migrate" or "runserver") in manage.py
+# if False, development-specific commands are hidden
+
 DEFAULT_FROM_EMAIL = 'webmaster@{SERVER_NAME}'
 FILE_UPLOAD_TEMP_DIR = Directory('{LOCAL_PATH}/tmp-uploads')
 INSTALLED_APPS = CallableSetting(installed_apps)
@@ -154,7 +159,7 @@ if USE_PIPELINE:
     STATICFILES_FINDERS.append('pipeline.finders.PipelineFinder')
 
 # celery
-BROKER_URL = '{CELERY_PROTOCOL}://{CELERY_HOST}:{CELERY_PORT}/{CELERY_DB}'
+BROKER_URL = CallableSetting(celery_broker_url)
 CELERY_DEFAULT_QUEUE = 'celery'
 CELERY_TIMEZONE = '{TIME_ZONE}'
 CELERY_RESULT_EXCHANGE = '{DF_MODULE_NAME}_results'
@@ -184,6 +189,7 @@ X_ACCEL_REDIRECT = []  # paths used by nginx
 DF_FAKE_AUTHENTICATION_USERNAME = None
 DF_PROJECT_VERSION = CallableSetting(guess_version)
 DF_REMOVED_DJANGO_COMMANDS = CallableSetting(excluded_django_commands)
+DF_CHECKED_REQUIREMENTS = CallableSetting(required_packages)
 DF_PUBLIC_SIGNAL_LIST = True
 # do not check for each WS signal/function before sending its name to the client
 DF_SYSTEM_CHECKS = ['djangofloor.views.monitoring.RequestCheck',
@@ -210,8 +216,7 @@ DF_ALLOW_USER_CREATION = True
 DF_ALLOW_LOCAL_USERS = True
 
 WEBSOCKET_URL = '/ws/'  # set to None if you do not use websockets
-WEBSOCKET_REDIS_CONNECTION = {'host': '{WEBSOCKET_REDIS_HOST}', 'port': SettingReference('WEBSOCKET_REDIS_PORT'),
-                              'db': SettingReference('WEBSOCKET_REDIS_DB'), 'password': '{WEBSOCKET_REDIS_PASSWORD}'}
+WEBSOCKET_REDIS_CONNECTION = CallableSetting(websocket_redis_dict)
 WEBSOCKET_TOPIC_SERIALIZER = 'djangofloor.wsgi.topics.serialize_topic'
 WEBSOCKET_HEARTBEAT = '--HEARTBEAT--'
 WEBSOCKET_SIGNAL_DECODER = 'json.JSONDecoder'
@@ -383,6 +388,9 @@ RADIUS_SERVER = None
 RADIUS_PORT = None
 RADIUS_SECRET = None
 
+# django-redis-sessions
+SESSION_REDIS = CallableSetting(session_redis_dict)
+
 # ######################################################################################################################
 #
 # settings that should be customized for each project
@@ -398,11 +406,12 @@ DF_PROJECT_NAME = CallableSetting(project_name)
 DF_URL_CONF = '{DF_MODULE_NAME}.urls.urlpatterns'
 # noinspection PyUnresolvedReferences
 DF_INSTALLED_APPS = ['{DF_MODULE_NAME}']  # your django app!
+DF_PIP_NAME = '{DF_MODULE_NAME}'  # anything such that "pip install {DF_PIP_NAME}" installs your project
+# only used in docs
 DF_MIDDLEWARE = []
 DF_REMOTE_USER_HEADER = None  # HTTP_REMOTE_USER
 DF_DEFAULT_GROUPS = [_('Users')]
 DF_TEMPLATE_CONTEXT_PROCESSORS = []
-DF_CHECKED_REQUIREMENTS = CallableSetting(required_packages)
 NPM_FILE_PATTERNS = {
     'bootstrap-notify': ['*.js'],
     'bootstrap3': ['dist/*'],
@@ -413,6 +422,7 @@ NPM_FILE_PATTERNS = {
     # 'metro-ui': ['build/*'],
     'respond.js': ['dest/*'],
 }
+# used by the "npm" command: downloads these packages and copies the files matching any pattern in the list
 
 # ######################################################################################################################
 #
@@ -464,20 +474,22 @@ LOG_EXCLUDED_COMMANDS = {'clearsessions', 'check', 'compilemessages', 'collectst
 # PID_DIRECTORY = Directory('{LOCAL_PATH}/run')
 # PID_FILENAME = CallableSetting(pid_filename)
 
-# django_redis (cache)
-CACHE_REDIS_PROTOCOL = 'redis'  # aliased in settings.ini as "[cache]protocol"
-CACHE_REDIS_HOST = 'localhost'  # aliased in settings.ini as "[cache]host"
-CACHE_REDIS_PORT = 6379  # aliased in settings.ini as "[cache]port"
-CACHE_REDIS_DB = 2  # aliased in settings.ini as "[cache]db"
-CACHE_REDIS_PASSWORD = ''  # aliased in settings.ini as "[cache]password"
-
 # django-redis-sessions
+SESSION_REDIS_PROTOCOL = 'redis'
 SESSION_REDIS_HOST = 'localhost'  # aliased in settings.ini as "[session]host"
 SESSION_REDIS_PORT = 6379  # aliased in settings.ini as "[session]port"
-SESSION_REDIS_DB = 3  # aliased in settings.ini as "[session]db"
+SESSION_REDIS_DB = 1  # aliased in settings.ini as "[session]db"
 SESSION_REDIS_PASSWORD = ''  # aliased in settings.ini as "[session]password"
 
-# ws4redis
+# django_redis (cache)
+CACHE_PROTOCOL = 'redis'
+CACHE_HOST = 'localhost'  # aliased in settings.ini as "[cache]host"
+CACHE_PORT = 6379  # aliased in settings.ini as "[cache]port"
+CACHE_DB = 2  # aliased in settings.ini as "[cache]db"
+CACHE_PASSWORD = ''  # aliased in settings.ini as "[cache]password"
+
+# websockets
+WEBSOCKET_REDIS_PROTOCOL = 'redis'
 WEBSOCKET_REDIS_HOST = 'localhost'  # aliased in settings.ini as "[websocket]host"
 WEBSOCKET_REDIS_PORT = 6379  # aliased in settings.ini as "[websocket]port"
 WEBSOCKET_REDIS_DB = 3  # aliased in settings.ini as "[websocket]db"

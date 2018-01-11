@@ -20,12 +20,16 @@ def x_accel_converter(value):
 
 
 REDIS_MAPPING = [
-    IntegerConfigField('cache.db', 'CACHE_REDIS_DB',
-                       help_str='Database number of the Redis Cache DB.\n'
-                                'Python package "django-redis" is required.'),
-    CharConfigField('cache.host', 'CACHE_REDIS_HOST', help_str='Redis Cache DB host'),
-    CharConfigField('cache.password', 'CACHE_REDIS_PASSWORD', help_str='Redis Cache DB password (if required)'),
-    IntegerConfigField('cache.port', 'CACHE_REDIS_PORT', help_str='Redis Cache DB port'),
+    IntegerConfigField('cache.db', 'CACHE_DB',
+                       help_str='Database number (redis only). \n'
+                                'Python package "django-redis" is also required to use Redis.'),
+    CharConfigField('cache.host', 'CACHE_HOST', help_str='cache server host (redis or memcache)'),
+    CharConfigField('cache.password', 'CACHE_PASSWORD', help_str='cache server password (if required by redis)'),
+    IntegerConfigField('cache.port', 'CACHE_PORT', help_str='cache server port (redis or memcache)'),
+    ChoiceConfigFile('cache.engine', 'CACHE_PROTOCOL', choices={'redis': 'redis', 'memcache': 'memcache',
+                                                                'locmem': 'locmem', 'file': 'file'},
+                     help_str='cache storage engine ("locmem", "redis" or "memcache")'),
+
     IntegerConfigField('sessions.db', 'SESSION_REDIS_DB',
                        help_str='Database number of the Redis sessions DB\n'
                                 'Python package "django-redis-sessions" is required.'),
