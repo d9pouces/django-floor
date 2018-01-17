@@ -246,6 +246,16 @@ def aiohttp():
     return gunicorn()
 
 
+def get_application(command_name=None, script_name=None):
+    set_env(command_name=command_name, script_name=script_name)
+    import django
+    django.setup()
+    from django.conf import settings
+    logging.config.dictConfig(settings.LOGGING)
+    from djangofloor.wsgi.aiohttp_runserver import get_application
+    return get_application()
+
+
 def celery():
     set_env()
     from django.conf import settings
@@ -263,9 +273,9 @@ def celery():
     __set_default_option(options, 'app')
     if is_worker:
         __set_default_option(options, 'concurrency')
+    import django
+    django.setup()
     if settings.DEBUG and 'worker' in extra_args and '-h' not in extra_args:
-        import django
-        django.setup()
         python_reloader(celery_main, (sys.argv, ), {})
     else:
         celery_main(sys.argv)

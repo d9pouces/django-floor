@@ -7,13 +7,6 @@ TODO
   * docker
   * ansible files
   * heroku
-  * monitoring:
-    * Celery : add the number of waiting tasks by queue
-  * command-line check
-    * celery queue running
-    * number of waiting tasks
-    * is the DB valid?
-    * is all Redis valid?
 
   * http://alesnosek.com/blog/2016/12/04/controlling-a-multi-service-application-with-systemd/
   * check pipeline

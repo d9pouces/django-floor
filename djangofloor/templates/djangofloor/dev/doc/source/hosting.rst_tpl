@@ -1,44 +1,95 @@
-Hosting on Heroku
-=================
+{% load djangofloor_dev %}Python hosting
+==============
+
+Heroku
+------
+
+First, you need to prepare your Heroku deployment, with a Redis database for efficient caching:
 
 .. code-block:: bash
 
-   pip install pipenv
-   heroku login
+    mkdir heroku-hosting
+    cd heroku-hosting
+    APP_NAME=hobby-dev  # use the name of your Heroku app
+    pip install pipenv
+    heroku login
+    heroku addons:create heroku-redis -a $APP_NAME
 
+Now, a few files are required:
 
 .. code-block:: bash
 
+    # create the Pipfile for downloading and installing {{ DF_PROJECT_NAME }}
     cat << EOF > Pipfile
     [[source]]
     url = "https://pypi.python.org/simple"
     verify_ssl = true
-
     [packages]
-    {{ DF_PIP_NAME }} = ">={{ DF_PROJECT_VERSION }}"
+    {{ DF_PIP_NAME|pipfile_url|safe }}
     django-redis-sessions = "*"
     django-redis = "*"
     psycopg2 = "*"
-
     [requires]
     python_version = "3.6"
     EOF
 
+    # create a simple manage.py for the automatic collectstatic command
+    cat << EOF > manage.py
+    #!/usr/bin/env python
+    from djangofloor.scripts import django, set_env
+
+    set_env(command_name='{{ DF_MODULE_NAME }}-ctl')
+    django()
+    EOF
+
+    # create the Procfile with required processes
     cat << EOF > Procfile
     web: {{ control_command }} server
-{% for queue in required_celery_queues %}    celery_{{ queue }}={{ control_command }} worker -Q {{ queue }}
-{% endfor %}
-    EOF
+{% for queue in required_celery_queues %}    celery_{{ queue }}:{{ control_command }} worker -Q {{ queue }}
+{% endfor %}    EOF
 
-    cat << EOF > local_settings.ini
-{% block ini_configuration %}{% for line in settings_ini.splitlines %}    {{ line|safe }}
-{% endfor %}
-{% endblock %}
-    EOF
-
+If you need to tweak {{ DF_PROJECT_NAME }}, you can also create a configuration file.
+Please check :ref:`configuration` for available options.
 
 .. code-block:: bash
 
-    heroku addons:create heroku-redis:hobby-dev
+    cat << EOF > local_settings.ini
+    EOF
+
+Once deployed, you can prepare the database or open Python shell:
+
+.. code-block:: bash
+
     heroku run {{ control_command }} migrate
     heroku run {{ control_command }} shell
+
+
+Gandi
+-----
+
+{{ DF_PROJECT_NAME }} must be locally installed (in a virtualenv) to prepare the deployment on a Gandi host.
+
+.. code-block:: bash
+
+    mkdir gandi-hosting
+    cd gandi-hosting
+    cat << EOF > gandi.yml
+    python:
+      version: 3.6
+    EOF
+    cat << EOF > wsgi.py
+    import os
+    from djangofloor.scripts import get_application
+
+    os.environ['LC_ALL']="en_US.UTF-8"
+    os.environ['LC_LANG']="en_US.UTF-8"
+    application = get_application(command_name='{{ DF_MODULE_NAME }}-ctl')
+    EOF
+    cat << EOF > requirements.txt
+    {{ DF_PIP_NAME }}
+    EOF
+    cat << EOF > local_settings.ini
+    EOF
+    {{ control_command }} collectstatic --noinput
+    git add .
+    git commit -am 'initial commit'

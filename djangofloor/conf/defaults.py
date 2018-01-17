@@ -30,7 +30,7 @@ from djangofloor.conf.callables import url_parse_server_name, \
     url_parse_server_protocol, url_parse_server_port, url_parse_prefix, url_parse_ssl, project_name, \
     allowed_hosts, cache_setting, template_setting, \
     generate_secret_key, use_x_forwarded_for, required_packages, installed_apps, databases, excluded_django_commands, \
-    celery_broker_url, websocket_redis_dict, cache_redis_url, session_redis_dict
+    celery_broker_url, websocket_redis_dict, cache_redis_url, session_redis_dict, smart_hostname, DefaultListenAddress
 from djangofloor.conf.config_values import Path, Directory, SettingReference, ExpandIterable, \
     CallableSetting, AutocreateFileContent
 from djangofloor.conf.pipeline import static_storage, pipeline_enabled
@@ -455,13 +455,13 @@ LOG_REMOTE_URL = None  # aliased in settings.ini as "[global]log_remote_url"
 LOG_REMOTE_ACCESS = True
 
 # djangofloor
-LISTEN_ADDRESS = 'localhost:9000'  # aliased in settings.ini as "[global]listen_address"
+LISTEN_ADDRESS = DefaultListenAddress(9000)  # aliased in settings.ini as "[global]listen_address"
 LOCAL_PATH = './django_data'  # aliased in settings.ini as "[global]data"
 __split_path = __file__.split(os.path.sep)
 if 'lib' in __split_path:
     prefix = os.path.join(*__split_path[:__split_path.index('lib')])
     LOCAL_PATH = Directory('/%s/var/{DF_MODULE_NAME}' % prefix)
-SERVER_BASE_URL = 'http://{LISTEN_ADDRESS}/'  # aliased in settings.ini as "[global]server_url"
+SERVER_BASE_URL = CallableSetting(smart_hostname)  # aliased in settings.ini as "[global]server_url"
 LOG_DIRECTORY = Directory('{LOCAL_PATH}/log')
 LOG_EXCLUDED_COMMANDS = {'clearsessions', 'check', 'compilemessages', 'collectstatic', 'config',
                          'createcachetable', 'changepassword', 'createsuperuser',

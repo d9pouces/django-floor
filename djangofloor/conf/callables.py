@@ -14,22 +14,22 @@ from django.utils.crypto import get_random_string
 from pkg_resources import get_distribution, DistributionNotFound, VersionConflict
 
 from djangofloor.checks import settings_check_results, missing_package
-from djangofloor.conf.config_values import ExpandIterable
+from djangofloor.conf.config_values import ExpandIterable, CallableSetting, ConfigValue
 
 __author__ = 'Matthieu Gallet'
 
-_default_engines = {'mysql': 'django.db.backends.mysql',
-                    'mariadb': 'django.db.backends.mysql',
-                    'oracle': 'django.db.backends.oracle',
-                    'postgres': 'django.db.backends.postgresql',
-                    'postgresql': 'django.db.backends.postgresql',
-                    'sqlite': 'django.db.backends.sqlite3',
-                    'sqlite3': 'django.db.backends.sqlite3', }
+_default_database_engines = {'mysql': 'django.db.backends.mysql',
+                             'mariadb': 'django.db.backends.mysql',
+                             'oracle': 'django.db.backends.oracle',
+                             'postgres': 'django.db.backends.postgresql',
+                             'postgresql': 'django.db.backends.postgresql',
+                             'sqlite': 'django.db.backends.sqlite3',
+                             'sqlite3': 'django.db.backends.sqlite3', }
 
 
 def database_engine(settings_dict):
     """Allow to use aliases for database engines, as well as the default dotted name"""
-    engine = _default_engines.get(settings_dict['DATABASE_ENGINE'].lower(), settings_dict['DATABASE_ENGINE'])
+    engine = _default_database_engines.get(settings_dict['DATABASE_ENGINE'].lower(), settings_dict['DATABASE_ENGINE'])
     if engine == 'django.db.backends.postgresql':
         try:
             get_distribution('psycopg2')
@@ -115,6 +115,31 @@ cache_redis_url = RedisSmartSetting(prefix='CACHE_', fmt='url')
 celery_broker_url = RedisSmartSetting(prefix='CELERY_', fmt='url')
 session_redis_dict = RedisSmartSetting(prefix='SESSION_REDIS_', fmt='dict', extra_values={'prefix': 'session'})
 websocket_redis_dict = RedisSmartSetting(prefix='WEBSOCKET_REDIS_', fmt='dict')
+
+
+def smart_hostname(settings_dict):
+    """
+    By default, use the listen address and port as server name.
+    Use the "HEROKU_APP_NAME" environment variable if present.
+
+    :param settings_dict:
+    :return:
+    """
+    if 'HEROKU_APP_NAME' in os.environ:
+        return 'http://%s.herokuapp.com/' % os.environ['HEROKU_APP_NAME']
+    return 'http://%s/' % settings_dict['LISTEN_ADDRESS']
+
+
+smart_hostname.required_settings = ['LISTEN_ADDRESS']
+
+
+class DefaultListenAddress(ConfigValue):
+
+    def get_value(self, merger, provider_name: str, setting_name: str):
+        port = os.environ.get('PORT', '')
+        if re.match(r'^\d+$', port) and 1 <= int(port) <= 65535:
+            return 'localhost:%s' % port
+        return 'localhost:%d' % self.value
 
 
 def template_setting(settings_dict):

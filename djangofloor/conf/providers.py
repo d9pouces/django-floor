@@ -71,12 +71,11 @@ class IniConfigProvider(ConfigProvider):
         return self.config_file
 
     @staticmethod
-    def __get_info(config_field):
-        assert isinstance(config_field, ConfigField)
+    def __get_info(config_field: ConfigField):
         section, sep, option = config_field.name.partition('.')
         return section, option
 
-    def set_value(self, config_field, include_doc=False):
+    def set_value(self, config_field: ConfigField, include_doc: bool=False):
         """update the internal config file """
         section, option = self.__get_info(config_field)
         if not self.parser.has_section(section):
@@ -87,7 +86,7 @@ class IniConfigProvider(ConfigProvider):
                 to_str += ' \n# %s' % line
         self.parser.set(section, option, to_str)
 
-    def get_value(self, config_field):
+    def get_value(self, config_field: ConfigField):
         """get option from the config file"""
         section, option = self.__get_info(config_field)
         if self.parser.has_option(section=section, option=option):
@@ -95,7 +94,7 @@ class IniConfigProvider(ConfigProvider):
             return config_field.from_str(str_value)
         return config_field.value
 
-    def has_value(self, config_field):
+    def has_value(self, config_field: ConfigField):
         """return `True` if the option is defined in the config file """
         section, option = self.__get_info(config_field)
         return self.parser.has_option(section=section, option=option)
