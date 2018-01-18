@@ -42,19 +42,15 @@ Now, a few files are required:
     django()
     EOF
 
+    cat << EOF > local_settings.ini
+{% local_settings LOCAL_PATH="./" as settings_str %}{{ settings_str|line_prefix:'    ' }}EOF
+
     # create the Procfile with required processes
     cat << EOF > Procfile
     web: {{ control_command }} server
 {% for queue in required_celery_queues %}    celery_{{ queue }}:{{ control_command }} worker -Q {{ queue }}
 {% endfor %}    EOF
 
-If you need to tweak {{ DF_PROJECT_NAME }}, you can also create a configuration file.
-Please check :ref:`configuration` for available options.
-
-.. code-block:: bash
-
-    cat << EOF > local_settings.ini
-    EOF
 
 Once deployed, you can prepare the database or open Python shell:
 
@@ -89,7 +85,7 @@ Gandi
     {{ DF_PIP_NAME }}
     EOF
     cat << EOF > local_settings.ini
-    EOF
+{% local_settings SERVER_BASE_URL="https://www.example.com/" LOCAL_PATH="./" as settings_str %}{{ settings_str|line_prefix:'    ' }}EOF
     {{ control_command }} collectstatic --noinput
     git add .
     git commit -am 'initial commit'

@@ -33,3 +33,8 @@ def local_settings(**kwargs):
         provider.set_value(config_field, include_doc=False)
         config_field.value = old_value
     return mark_safe(provider.to_str())
+
+
+@register.filter
+def line_prefix(value, prefix='  '):
+    return '\n'.join([prefix + x for x in value.splitlines()])
