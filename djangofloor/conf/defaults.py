@@ -423,6 +423,15 @@ NPM_FILE_PATTERNS = {
     'respond.js': ['dest/*'],
 }
 # used by the "npm" command: downloads these packages and copies the files matching any pattern in the list
+LOG_REMOTE_ACCESS = True
+LOG_DIRECTORY = Directory('{LOCAL_PATH}/log')
+LOG_EXCLUDED_COMMANDS = {'clearsessions', 'check', 'compilemessages', 'collectstatic', 'config',
+                         'createcachetable', 'changepassword', 'createsuperuser',
+                         'dumpdb', 'dbshell', 'dumpdata', 'flush', 'loaddata',
+                         'gen_dev_files', 'inspectdb', 'makemessages', 'makemigrations',
+                         'migrate', 'npm', 'packaging', 'ping_google', 'remove_stale_contenttypes',
+                         'sendtestemail', 'shell', 'showmigrations', 'sqlflush', 'sqlmigrate',
+                         'sqlsequencereset', 'squashmigrations', 'startapp', 'test', 'testserver', }
 
 # ######################################################################################################################
 #
@@ -452,7 +461,7 @@ LANGUAGE_CODE = 'fr-fr'  # aliased in settings.ini as "[global]language_code"
 SECRET_KEY = AutocreateFileContent('{LOCAL_PATH}/secret_key.txt', generate_secret_key, mode=0o600, length=60)
 TIME_ZONE = 'Europe/Paris'  # aliased in settings.ini as "[global]time_zone"
 LOG_REMOTE_URL = None  # aliased in settings.ini as "[global]log_remote_url"
-LOG_REMOTE_ACCESS = True
+SERVER_BASE_URL = CallableSetting(smart_hostname)  # aliased in settings.ini as "[global]server_url"
 
 # djangofloor
 LISTEN_ADDRESS = DefaultListenAddress(9000)  # aliased in settings.ini as "[global]listen_address"
@@ -461,15 +470,6 @@ __split_path = __file__.split(os.path.sep)
 if 'lib' in __split_path:
     prefix = os.path.join(*__split_path[:__split_path.index('lib')])
     LOCAL_PATH = Directory('/%s/var/{DF_MODULE_NAME}' % prefix)
-SERVER_BASE_URL = CallableSetting(smart_hostname)  # aliased in settings.ini as "[global]server_url"
-LOG_DIRECTORY = Directory('{LOCAL_PATH}/log')
-LOG_EXCLUDED_COMMANDS = {'clearsessions', 'check', 'compilemessages', 'collectstatic', 'config',
-                         'createcachetable', 'changepassword', 'createsuperuser',
-                         'dumpdb', 'dbshell', 'dumpdata', 'flush', 'loaddata',
-                         'gen_dev_files', 'inspectdb', 'makemessages', 'makemigrations',
-                         'migrate', 'npm', 'packaging', 'ping_google', 'remove_stale_contenttypes',
-                         'sendtestemail', 'shell', 'showmigrations', 'sqlflush', 'sqlmigrate',
-                         'sqlsequencereset', 'squashmigrations', 'startapp', 'test', 'testserver', }
 # these Django commands do not write log (only on stdout)
 # PID_DIRECTORY = Directory('{LOCAL_PATH}/run')
 # PID_FILENAME = CallableSetting(pid_filename)

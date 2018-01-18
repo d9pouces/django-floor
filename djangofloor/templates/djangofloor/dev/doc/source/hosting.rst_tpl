@@ -68,6 +68,7 @@ Gandi
 .. code-block:: bash
 
     mkdir gandi-hosting
+    pip install {{ DF_PIP_NAME }}
     cd gandi-hosting
     cat << EOF > gandi.yml
     python:
