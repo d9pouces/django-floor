@@ -60,6 +60,7 @@ Once deployed, you can prepare the database or open Python shell:
     heroku run {{ control_command }} shell
 
 
+{% if not required_celery_queues %}
 Gandi
 -----
 
@@ -90,3 +91,4 @@ Gandi
     {{ control_command }} collectstatic --noinput
     git add .
     git commit -am 'initial commit'
+{% endif %}
