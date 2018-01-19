@@ -122,7 +122,7 @@ EOF
 {% endblock %}
 # sudo apt-get install -y rng-tools git
 # echo "HRNGDEVICE=/dev/urandom" | sudo tee -a /etc/default/rng-tools
-# sudo /etc/init.d/rng-tools restart
+# sudo service rng-tools restart
 # git clone https://github.com/d9pouces/{{ DF_MODULE_NAME }}.git
 # chown -R vagrant:vagrant {{ DF_MODULE_NAME }}
 SHELL

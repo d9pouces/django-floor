@@ -23,7 +23,7 @@ sudo yum -y -q install gcc gcc-c++ make openssl-devel glibc-devel
 sudo yum -y -q remove {{ DF_MODULE_NAME }} 2> /dev/null || :
 {% endif %}
 echo "HRNGDEVICE=/dev/urandom" | sudo tee -a /etc/default/rng-tools
-sudo service rngd restart
+sudo service rng-tools restart
 SHELL
 
 end

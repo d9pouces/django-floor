@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-{{ process.control.command_line }} collectstatic --noinput
+{{ processes.control.command_line }} collectstatic --noinput
 {% include 'djangofloor/vagrant/after_install.sh' %}
 mkdir -p "{{ package_dir.1 }}{{ install_dir.1 }}"
 rm -rf "{{ package_dir.1 }}/usr/local/bin"

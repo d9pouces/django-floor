@@ -1,2 +1,2 @@
 #!/usr/bin/env bash
-{{ process.control.command_line }} collectstatic --noinput
+{{ processes.control.command_line }} collectstatic --noinput
