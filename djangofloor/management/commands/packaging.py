@@ -633,7 +633,6 @@ class Command(TemplatedBaseCommand):
             process_categories[values['attr']] = os.path.join(self.vagrant_install_dir, 'bin', option_name)
         processes = {key: Process(key, value) for (key, value) in process_categories.items() if value}
         self.template_context['processes'] = self.processes or processes
-        print(self.template_context['processes'])
         self.template_context['dependencies'] = []
         if parser.has_option(package_type, 'depends'):
             self.template_context['dependencies'] = [x.strip()

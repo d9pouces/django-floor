@@ -108,8 +108,7 @@ class Notification(models.Model):
         if request.user.is_authenticated:
             user = request.user
             query = query.filter(Q(broadcast_mode=cls.ANY) | Q(broadcast_mode=cls.AUTHENTICATED)
-                                 | Q(destination_users=user))
-            # TODO | Q(destination_groups=user.groups.all())
+                                 | Q(destination_users=user) | Q(destination_groups__in=user.groups.all()))
         else:
             query = query.filter(broadcast_mode=cls.ANY)
         notifications = list(query)
