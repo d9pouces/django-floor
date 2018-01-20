@@ -274,7 +274,7 @@ class CeleryStats(MonitoringCheck):
             worker['pid'] = ', '.join(pids)
             worker['threads'] = infos['pool']['max-concurrency']
             worker['timeouts'] = sum(infos['pool']['timeouts'])
-            worker['state'] = ('success', 'ok')
+            worker['state'] = ('success', 'check')
             if worker['timeouts'] > 0:
                 worker['state'] = ('danger', 'remove')
             # noinspection PyTypeChecker

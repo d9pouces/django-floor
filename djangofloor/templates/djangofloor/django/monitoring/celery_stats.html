@@ -1,19 +1,17 @@
-{% load i18n bootstrap3 djangofloor %}
+{% load i18n djangofloor %}
 {% if celery_required %}
 <div class="module" id="celery_stats">
         <h2>{% trans 'Celery state' %}</h2>
         <div class="panel-body">
-            <h3>{% trans 'Required Celery queues' %}</h3>
+            <div><strong>{% trans 'Required Celery queues' %}</strong></div>
             <ul class="list-unstyled">
             {% for queue in expected_queues.items %}
                 <li>{% if queue.1.0 == 'danger' %}{% django_icon  'remove' %}{% else %}{% django_icon  'check' %}{% endif %} {{ queue.0 }}</li>
             {% endfor %}
             </ul>
-            <h3>{% trans 'Celery workers and active queues' %}</h3>
+            <div><strong>{% trans 'Celery workers and active queues' %}</strong></div>
             {% for worker in workers %}
-            <h5>
-                <span class="label label-{{ worker.state.0 }}">{% bootstrap_icon worker.state.1 %}</span>&nbsp;
-                {% trans 'worker' %} {{ worker.name }}</h5>
+            <div><span class="label label-{{ worker.state.0 }}">{% django_icon worker.state.1 %}</span>&nbsp; {% trans 'worker' %} {{ worker.name }}</div>
             <ul class="list-unstyled">
                 <li><strong>{% trans 'broker: ' %}</strong> {{ worker.broker }}</li>
                 <li><strong>{% trans 'PID: ' %}</strong> {{ worker.pid }}</li>
