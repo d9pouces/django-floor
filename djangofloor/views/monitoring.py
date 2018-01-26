@@ -9,7 +9,6 @@ You should install the :mod:`psutil` module to add server info (like the CPU usa
 
 """
 import datetime
-import glob
 import logging
 import os
 import re

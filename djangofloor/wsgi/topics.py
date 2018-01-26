@@ -39,10 +39,12 @@ def serialize_topic(window_info, obj):
         if window_info is None:
             return None
         return '-window.%s' % window_info.window_key
+    elif isinstance(obj, type):
+        return '-<%s>' % obj.__name__
     elif isinstance(obj, Model):
         # noinspection PyProtectedMember
         meta = obj._meta
-        return '-%s.%s.%s' % (meta.app_label, meta.model_name, obj.pk)
+        return '-%s.%s.%s' % (meta.app_label, meta.model_name, obj.pk or 0)
     elif obj is USER:
         if window_info is None:
             return None
