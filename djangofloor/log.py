@@ -3,6 +3,7 @@
 
 Define useful handlers, formatters and filters and generate an complete log configuration.
 """
+import atexit
 import logging
 import logging.handlers
 import os
@@ -13,12 +14,12 @@ import warnings
 from traceback import extract_stack
 from urllib.parse import urlparse
 
-import atexit
 from django.core.checks.messages import Warning
 from django.core.management import color_style
 from django.utils.log import AdminEmailHandler as BaseAdminEmailHandler
 
 from djangofloor.checks import settings_check_results
+from djangofloor.utils import is_package_present
 
 __author__ = 'Matthieu Gallet'
 
@@ -166,7 +167,7 @@ class LogConfiguration:
     *  `SERVER_PORT`: the public port (probably 80 or 443)
     """
     required_settings = ['DEBUG', 'DF_MODULE_NAME', 'SCRIPT_NAME', 'LOG_DIRECTORY', 'LOG_REMOTE_URL',
-                         'LOG_REMOTE_ACCESS', 'SERVER_NAME', 'SERVER_PORT', 'LOG_EXCLUDED_COMMANDS']
+                         'LOG_REMOTE_ACCESS', 'SERVER_NAME', 'SERVER_PORT', 'LOG_EXCLUDED_COMMANDS', 'RAVEN_DSN']
     request_loggers = ['aiohttp.access', 'gunicorn.access', 'django.server', 'geventwebsocket.handler']
 
     def __init__(self):
@@ -209,6 +210,13 @@ class LogConfiguration:
             for logger in self.request_loggers:
                 self.add_handler(logger, 'stderr', level='INFO', formatter='django.server')
             return config
+        if settings_dict['RAVEN_DSN'] and is_package_present('raven'):
+            self.handlers['sentry'] = {
+                'level': 'ERROR',
+                'class': 'raven.contrib.django.raven_compat.handlers.SentryHandler',
+                'tags': {'application': self.log_suffix},
+            }
+            self.root['handlers'].append('sentry')
         has_handler = False
         if self.log_directory and self.log_suffix:
             self.add_handler('ROOT', 'warning', level='WARN')
@@ -492,7 +500,7 @@ class PidFilename:
         result = {'MODULE': module_name, 'COMMAND': first_arg, 'PID': os.getpid(),
                   'SCRIPT_NAME': sys.argv[0]}
         if script_name == 'django' and excluded_commands and first_arg in excluded_commands:
-                return None
+            return None
         elif script_name == 'celery':
             if 'worker' in argv:
                 result['COMMAND'] = 'worker'

@@ -15,6 +15,7 @@ from pkg_resources import get_distribution, DistributionNotFound, VersionConflic
 
 from djangofloor.checks import settings_check_results, missing_package
 from djangofloor.conf.config_values import ExpandIterable, ConfigValue
+from djangofloor.utils import is_package_present
 
 __author__ = 'Matthieu Gallet'
 
@@ -341,6 +342,7 @@ class InstalledApps:
         ('USE_PIPELINE', 'pipeline',),
         ('USE_REST_FRAMEWORK', 'rest_framework',),
         ('USE_PAM_AUTHENTICATION', 'django_pam'),
+        ('RAVEN_DSN', 'raven.contrib.django.raven_compat'),
     ])
     required_settings = ['ALLAUTH_PROVIDERS', 'USE_ALL_AUTH'] + list(common_third_parties)
     allauth_providers = {'amazon', 'angellist', 'asana', 'auth0', 'baidu', 'basecamp', 'bitbucket', 'bitbucket_oauth2',
@@ -359,7 +361,16 @@ class InstalledApps:
         return apps
 
     def process_third_parties(self, settings_dict):
-        return [v for (k, v) in self.common_third_parties.items() if settings_dict[k]]
+        result = []
+        for k, v in self.common_third_parties.items():
+            package_name = v.partition('.')[0]
+            if not settings_dict[k]:
+                continue
+            elif not is_package_present(package_name):
+                settings_check_results.append(missing_package(package_name, ''))
+                continue
+            result.append(v)
+        return result
 
     def process_django_allauth(self, settings_dict):
         if not settings_dict['USE_ALL_AUTH'] and not settings_dict['ALLAUTH_PROVIDERS']:

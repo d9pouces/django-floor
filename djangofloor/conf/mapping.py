@@ -96,6 +96,9 @@ BASE_MAPPING = [
                              'syslog:///dev/log/daemon, logd:///project_name'),
     CharConfigField('global.log_directory', 'LOG_DIRECTORY',
                     help_str='Write all local logs to this directory.'),
+    CharConfigField('global.log_raven_dsn', 'RAVEN_DSN',
+                    help_str='Use the Raven service to capture logs. Require the "raven" package. \n'
+                             'Should look like "https://xxx...xxx:yyy...yyy@sentry.io/zzzzz"'),
     BooleanConfigField('global.log_remote_access', 'LOG_REMOTE_ACCESS',
                        help_str='If true, log of HTTP connections are also sent to syslog/logd'),
     CharConfigField('database.db', 'DATABASE_NAME', help_str='Main database name (or path of the sqlite3 database)'),
