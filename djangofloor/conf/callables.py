@@ -14,7 +14,7 @@ from django.utils.crypto import get_random_string
 from pkg_resources import get_distribution, DistributionNotFound, VersionConflict
 
 from djangofloor.checks import settings_check_results, missing_package
-from djangofloor.conf.config_values import ExpandIterable, CallableSetting, ConfigValue
+from djangofloor.conf.config_values import ExpandIterable, ConfigValue
 
 __author__ = 'Matthieu Gallet'
 
@@ -126,7 +126,7 @@ def smart_hostname(settings_dict):
     :return:
     """
     if 'HEROKU_APP_NAME' in os.environ:
-        return 'http://%s.herokuapp.com/' % os.environ['HEROKU_APP_NAME']
+        return 'https://%s.herokuapp.com/' % os.environ['HEROKU_APP_NAME']
     return 'http://%s/' % settings_dict['LISTEN_ADDRESS']
 
 
@@ -138,7 +138,7 @@ class DefaultListenAddress(ConfigValue):
     def get_value(self, merger, provider_name: str, setting_name: str):
         port = os.environ.get('PORT', '')
         if re.match(r'^\d+$', port) and 1 <= int(port) <= 65535:
-            return 'localhost:%s' % port
+            return '0.0.0.0:%s' % port
         return 'localhost:%d' % self.value
 
 

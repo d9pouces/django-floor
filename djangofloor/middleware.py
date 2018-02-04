@@ -97,6 +97,7 @@ class DjangoFloorMiddleware(BaseRemoteUserMiddleware):
             if not remote_username or remote_username == '(null)':  # special case due to apache2+auth_mod_kerb :-(
                 return
             remote_username = self.format_remote_username(remote_username)
+            # noinspection PyTypeChecker
             self.remote_user_authentication(request, remote_username)
 
     # noinspection PyUnusedLocal,PyMethodMayBeStatic

@@ -4,7 +4,7 @@
 Heroku
 ------
 
-First, you need to prepare your Heroku deployment, with a Redis database for efficient caching:
+First, you need to prepare your Heroku deployment:
 
 .. code-block:: bash
 
@@ -60,6 +60,8 @@ You can now deploy using git:
     heroku create
     # if you prefer SSH, you should use the following line
     heroku create --ssh-git
+    # the metadata feature is required to provide the Heroku app name in the env
+    heroku labs:enable runtime-dyno-metadata
     git push heroku master
 
 {% if required_celery_queues %}A Redis app is also required to run {{ DF_PROJECT_NAME }} and to use efficient
@@ -71,11 +73,12 @@ You can now deploy using git:
 
 If you do not use Redis for sessions and cache, you must remove `django-redis-sessions` and `django-redis` from your Pipfile.
 
-Once deployed, you can prepare the database or open Python shell:
+Once deployed, you can prepare the database, create an administrator or open Python shell:
 
 .. code-block:: bash
 
     heroku run {{ control_command }} migrate
+    heroku run {{ control_command }} createsuperuser
     heroku run {{ control_command }} shell
 
 Finally, you need to create at least one worker{% if required_celery_queues %} by kind of process{% endif %}:
