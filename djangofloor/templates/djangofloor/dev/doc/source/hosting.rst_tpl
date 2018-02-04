@@ -10,10 +10,8 @@ First, you need to prepare your Heroku deployment, with a Redis database for eff
 
     mkdir heroku-hosting
     cd heroku-hosting
-    APP_NAME=hobby-dev  # use the name of your Heroku app
     pip install pipenv
     heroku login
-    heroku addons:create heroku-redis -a $APP_NAME
 
 Now, a few files are required:
 
@@ -52,12 +50,42 @@ Now, a few files are required:
 {% endfor %}    EOF
 
 
+You can now deploy using git:
+
+.. code-block:: bash
+
+    git init
+    git add .
+    git commit -m 'initial commit'
+    heroku create
+    # if you prefer SSH, you should use the following line
+    heroku create --ssh-git
+    git push heroku master
+
+{% if required_celery_queues %}A Redis app is also required to run {{ DF_PROJECT_NAME }} and to use efficient
+ session and cache storages.{% else %}You can add a Redis app to use efficient session and cache storages.{% endif %}.
+
+.. code-block:: bash
+
+    heroku addons:create heroku-redis -a heroku_app_name
+
+If you do not use Redis for sessions and cache, you must remove `django-redis-sessions` and `django-redis` from your Pipfile.
+
 Once deployed, you can prepare the database or open Python shell:
 
 .. code-block:: bash
 
     heroku run {{ control_command }} migrate
     heroku run {{ control_command }} shell
+
+Finally, you need to create at least one worker{% if required_celery_queues %} by kind of process{% endif %}:
+
+.. code-block:: bash
+
+    heroku ps:scale web=1
+{% for queue in required_celery_queues %}    heroku ps:scale celery_{{ queue }}=1
+{% endfor %}
+
 
 
 {% if not required_celery_queues %}
