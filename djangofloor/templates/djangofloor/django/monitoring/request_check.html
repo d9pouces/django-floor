@@ -82,3 +82,14 @@
     </script>
 {% endif %}
 </div>
+
+<fieldset class="module aligned collapse">
+  <h2>{% trans 'Request headers' %}</h2>
+  <div>
+    {% trans 'Here is the list of all request headers. Those prefixed by "HTTP_" are provided by the client or the reverse proxy.' %}
+  <ul>
+    {% for data in request_headers %}
+    <li><strong>{{ data.0 }}</strong>: <code>{{ data.1 }}</code> {% if data.2 %}<small>({{ data.2 }})</small> {% endif %}</li>
+    {% endfor %}
+  </ul></div>
+</fieldset>

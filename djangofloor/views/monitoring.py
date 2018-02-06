@@ -285,6 +285,51 @@ class CeleryStats(MonitoringCheck):
 
 class RequestCheck(MonitoringCheck):
     template = 'djangofloor/django/monitoring/request_check.html'
+    common_headers = {
+        'HTTP_ACCEPT': 'Media type(s) that is(/are) acceptable for the response.',
+        'HTTP_ACCEPT_CHARSET': 'Character sets that are acceptable.',
+        'HTTP_ACCEPT_ENCODING': 'List of acceptable encodings. See HTTP compression.',
+        'HTTP_ACCEPT_LANGUAGE': 'List of acceptable human languages for response.',
+        'HTTP_ACCEPT_DATETIME': 'Acceptable version in time.',
+        'HTTP_AUTHORIZATION': 'Authentication credentials for HTTP authentication.',
+        'HTTP_CACHE_CONTROL': 'Used to specify directives that must be obeyed by caching mechanisms.',
+        'HTTP_CONNECTION': 'Control options for the current connection and list of hop-by-hop request fields.',
+        'HTTP_COOKIE': 'An HTTP cookie previously sent by the server with Set-Cookie (below).',
+        'HTTP_CONTENT_LENGTH': 'The length of the request body in octets (8-bit bytes).',
+        'HTTP_CONTENT_MD5': 'A Base64-encoded binary MD5 sum of the content of the request body.',
+        'HTTP_CONTENT_TYPE': 'The Media type of the body of the request (used with POST and PUT requests).',
+        'HTTP_DATE': 'The date and time that the message was originated',
+        'HTTP_EXPECT': 'Indicates that particular server behaviors are required by the client.',
+        'HTTP_FORWARDED': 'Disclose original information of a client connecting to a web server through an HTTP proxy.',
+        'HTTP_FROM': 'The email address of the user making the request.',
+        'HTTP_HOST': 'The domain name of the server (for virtual hosting), and the TCP port number.',
+        'HTTP_IF_MATCH': 'Only perform the action if the client supplied entity matches the same entity on the server.',
+        'HTTP_IF_MODIFIED_SINCE': 'Allows a 304 Not Modified to be returned if content is unchanged.',
+        'HTTP_IF_NONE_MATCH': 'Allows a 304 Not Modified to be returned if content is unchanged, see HTTP ETag.',
+        'HTTP_IF_RANGE': 'If the entity is unchanged, send me the part(s) that I am missing or send me the entity.',
+        'HTTP_IF_UNMODIFIED_SINCE': 'Only send the response if the entity has not been modified since a specific time.',
+        'HTTP_MAX_FORWARDS': 'Limit the number of times the message can be forwarded through proxies or gateways.',
+        'HTTP_ORIGIN': 'Initiates a request for cross-origin resource sharing.',
+        'HTTP_PRAGMA': 'Implementation-specific fields that may have various effects.',
+        'HTTP_PROXY_AUTHORIZATION': 'Authorization credentials for connecting to a proxy.',
+        'HTTP_RANGE': 'Request only part of an entity.',
+        'HTTP_REFERER': 'This is the address of the previous web page.',
+        'HTTP_TE': 'The transfer encodings the user agent is willing to accept.',
+        'HTTP_USER_AGENT': 'The user agent string of the user agent.',
+        'HTTP_UPGRADE': 'Ask the server to upgrade to another protocol.',
+        'HTTP_VIA': 'Informs the server of proxies through which the request was sent.',
+        'HTTP_WARNING': 'A general warning about possible problems with the entity body.',
+        'HTTP_X_REQUESTED_WITH': 'Mainly used to identify Ajax requests.',
+        'HTTP_DNT': 'Requests a web application to disable their tracking of a user.',
+        'HTTP_X_FORWARDED_FOR': 'A de facto standard for identifying the originating IP address.',
+        'HTTP_X_FORWARDED_HOST': 'A de facto standard for identifying the original host.',
+        'HTTP_X_FORWARDED_PROTO': 'A de facto standard for identifying the originating protocol',
+        'HTTP_FRONT_END_HTTPS': 'Non-standard header field used by Microsoft applications',
+        'HTTP_PROXY_CONNECTION': 'Implemented as a misunderstanding of the HTTP specifications.',
+        'HTTP_X_CSRF_TOKEN': 'Used to prevent cross-site request forgery.',
+        'HTTP_X_REQUEST_ID': 'Correlates HTTP requests between a client and server.',
+        'HTTP_X_CORRELATION_ID': 'Correlates HTTP requests between a client and server.',
+    }
 
     def get_context(self, request):
         def django_fmt(y):
@@ -325,6 +370,7 @@ class RequestCheck(MonitoringCheck):
         context['server_name'] = settings.SERVER_NAME
         context['server_name_valid'] = settings.SERVER_NAME == host
         context['debug'] = settings.DEBUG
+        context['request_headers'] = [(x, y, self.common_headers.get(x)) for (x, y) in sorted(request.META.items())]
         if settings.DEBUG:
             messages.warning(request, _('The DEBUG mode is activated. You should disable it for a production website.'))
         if context['fake_username']:
@@ -417,6 +463,7 @@ def system_state(request):
                                      'site_title': site.site_title, 'title': _('System state'),
                                      'has_permission': request.user.is_active and request.user.is_staff})
     set_websocket_topics(request)
+    # noinspection PyUnresolvedReferences
     return TemplateResponse(request, template='djangofloor/django/system_state.html', context=template_values)
 
 

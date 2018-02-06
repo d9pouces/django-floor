@@ -1,8 +1,9 @@
 {% extends "admin/base_site.html" %}
-{% load i18n pipeline djangofloor %}
+{% load i18n pipeline djangofloor staticfiles %}
 {% block extrahead %}
 {% stylesheet 'django' %}
 {% javascript 'django' %}
+<script type="text/javascript" src="/admin/jsi18n/"></script>
 {% df_init_websocket %}
 {% endblock %}
 {% block title %}{% trans 'System state' %}{% endblock %}
@@ -26,4 +27,6 @@
 <div id="content-main">
     {% for component in components %}{{ component }}{% endfor %}
 </div>
+<script type="text/javascript">django = {}; django.jQuery = $;</script>
+<script type="text/javascript" src="{% static 'admin/js/collapse.js' %}"></script>
 {% endblock %}

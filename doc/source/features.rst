@@ -80,13 +80,6 @@ A classical `setup.py` script should create '{your_project}-ctl = djangofloor.sc
 If you want to use custom scripts, you just have to remove this line from your `setup.py`.
 You can also target 'djangofloor.scripts:django', 'djangofloor.scripts:aiohttp', 'djangofloor.scripts:gunicorn', 'djangofloor.scripts:celery'.
 
-Using Gunicorn
---------------
-
-By default, DjangoFloor uses `aiohttp <http://aiohttp.readthedocs.io>`_ as application server. If you do not use websockets (or if you want different application servers for WS and HTTP requests), you can use `Gunicorn <https://gunicorn-docs.readthedocs.io>`_.
-Just add to your `setup.py` file, in the `console_scripts` section of the `entry_points`, '{your_project}-gunicorn = djangofloor.scripts:gunicorn'
-
-
 Logs
 ----
 
@@ -100,9 +93,10 @@ DjangoFloor provides a log configuration based on:
   * the `LOG_REMOTE_ACCESS` boolean (that determines if client accesses are also sent to the remote log server),
   * the `SERVER_NAME` variable (instead of having the component, you have the name of the server in the logs),
   * the `SERVER_PORT` variable (instead of having the component, you have the name of the server in the logs),
-  * the list `LOG_EXCLUDED_COMMANDS` of commands that do not write logs.
+  * the list `LOG_EXCLUDED_COMMANDS` of commands that do not write logs,
+  * the `RAVEN_DSN`, which is the `Sentry <https://sentry.io>`_ DSN (a URL embedding login and password),
 
-This log configuration is provided by :meth:`djangofloor.log.log_configuration`.
+This log configuration is provided by :class:`djangofloor.log.LogConfiguration`.
 
 If Django is in `DEBUG` mode, then all logs are only written to `stdout`.
 Otherwise, if `LOG_DIRECTORY` is set, each command has its own file (and each Celery queue has its own file).

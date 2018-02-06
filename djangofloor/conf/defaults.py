@@ -246,7 +246,7 @@ PIPELINE_CSS = {
     },
     'django': {
         'source_filenames': ['vendor/font-awesome/css/font-awesome.min.css', 'admin/css/forms.css',
-                             'css/djangofloor-django.css', ExpandIterable('DF_CSS')],
+                             'css/djangofloor-django.css'],
         'output_filename': 'css/django-all.css', 'extra_context': {'media': 'all'},
     },
     'bootstrap3': {

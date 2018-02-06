@@ -165,6 +165,8 @@ class LogConfiguration:
     *  `LOG_REMOTE_ACCESS`: also send HTTP requests to syslog/journald
     *  `SERVER_NAME`: the public name of the server (like "www.example.com")
     *  `SERVER_PORT`: the public port (probably 80 or 443)
+    * `LOG_EXCLUDED_COMMANDS`: Django commands that do not write logs
+    * `RAVEN_DSN`: `Sentry <https://sentry.io>`_ DSN (URL embedding login and password)
     """
     required_settings = ['DEBUG', 'DF_MODULE_NAME', 'SCRIPT_NAME', 'LOG_DIRECTORY', 'LOG_REMOTE_URL',
                          'LOG_REMOTE_ACCESS', 'SERVER_NAME', 'SERVER_PORT', 'LOG_EXCLUDED_COMMANDS', 'RAVEN_DSN']
