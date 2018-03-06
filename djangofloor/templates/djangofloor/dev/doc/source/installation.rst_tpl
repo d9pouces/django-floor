@@ -56,7 +56,8 @@ PostgreSQL is often a good choice for Django sites:
 Apache
 ------
 
-Only the Apache installation is presented, but an installation behind nginx should be similar.
+Only the Apache installation is presented, but an installation behind nginx should be similar,
+you can look at the `Gunicorn doc <http://docs.gunicorn.org/en/stable/deploy.html>`_.
 Only the chosen server name (like `{{ DF_MODULE_NAME }}.example.org`) can be used for accessing your site. For example, you cannot use its IP address.
 {% block pre_webserver_no_ssl %}
 {% endblock %}
@@ -65,7 +66,7 @@ Only the chosen server name (like `{{ DF_MODULE_NAME }}.example.org`) can be use
 
     SERVICE_NAME={{ DF_MODULE_NAME }}.example.org
     sudo apt-get install apache2 libapache2-mod-xsendfile
-    sudo a2enmod headers proxy proxy_http xsendfile
+    sudo a2enmod headers proxy proxy_http xsendfile{% if WEBSOCKET_URL %} proxy_wstunnel{% endif %}
     sudo a2dissite 000-default.conf
     # sudo a2dissite 000-default on Debian7
     cat << EOF | sudo tee /etc/apache2/sites-available/{{ DF_MODULE_NAME }}.conf
@@ -87,7 +88,10 @@ Only the chosen server name (like `{{ DF_MODULE_NAME }}.example.org`) can be use
             Allow from all
             Satisfy any
         </Location>
-{% endblock %}        ProxyPass / http://{{ LISTEN_ADDRESS }}/
+{% endblock %}{% if WEBSOCKET_URL %}        ProxyPass {{ WEBSOCKET_URL }} ws://{{ LISTEN_ADDRESS }}{{ WEBSOCKET_URL }}  DisableReuse=on
+        ProxyPassReverse {{ WEBSOCKET_URL }} ws://{{ LISTEN_ADDRESS }}{{ WEBSOCKET_URL }}
+{% endif %}        ProxyPass / http://{{ LISTEN_ADDRESS }}/ DisableReuse=on
+        # https://github.com/aio-libs/aiohttp/issues/2687
         ProxyPassReverse / http://{{ LISTEN_ADDRESS }}/
         DocumentRoot {{ STATIC_ROOT }}
         # the right value is provided by "{{ control_command }} config python | grep STATIC_ROOT"
@@ -118,7 +122,7 @@ If you want to use SSL:
     sudo apt-get install apache2 libapache2-mod-xsendfile
     PEM=/etc/apache2/`hostname -f`.pem
     # ok, I assume that you already have your certificate
-    sudo a2enmod headers proxy proxy_http ssl
+    sudo a2enmod headers proxy proxy_http ssl{% if WEBSOCKET_URL %} proxy_wstunnel{% endif %}
     openssl x509 -text -noout < $PEM
     sudo chown www-data $PEM
     sudo chmod 0400 $PEM
@@ -161,7 +165,9 @@ If you want to use SSL:
             Allow from all
             Satisfy any
         </Location>
-{% endblock %}        ProxyPass / http://{{ LISTEN_ADDRESS }}/
+{% endblock %}{% if WEBSOCKET_URL %}        ProxyPass {{ WEBSOCKET_URL }} ws://{{ LISTEN_ADDRESS }}{{ WEBSOCKET_URL }}  DisableReuse=on
+        ProxyPassReverse {{ WEBSOCKET_URL }} ws://{{ LISTEN_ADDRESS }}{{ WEBSOCKET_URL }}
+{% endif %}        ProxyPass / http://{{ LISTEN_ADDRESS }}/ DisableReuse=on
         ProxyPassReverse / http://{{ LISTEN_ADDRESS }}/
         DocumentRoot {{ STATIC_ROOT }}
         # the right value is provided by "{{ control_command }} config python | grep STATIC_ROOT"

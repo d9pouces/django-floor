@@ -44,12 +44,13 @@ class DefaultGroupsRemoteUserBackend(RemoteUserBackend):
         from django_auth_ldap.backend import LDAPBackend
         return LDAPBackend()
 
-    def authenticate(self, request, remote_user):
-        if settings.AUTH_LDAP_SERVER_URI and settings.AUTH_LDAP_ALWAYS_UPDATE_USER:
+    def authenticate(self, *args, **kwargs):
+        remote_user = kwargs.get('remote_user')
+        if remote_user and settings.AUTH_LDAP_SERVER_URI and settings.AUTH_LDAP_ALWAYS_UPDATE_USER:
             user = self.ldap_backend.populate_user(remote_user)
             if user:
                 return user
-        return super().authenticate(request, remote_user)
+        return super().authenticate(*args, remote_user)
 
     def configure_user(self, user):
         """
@@ -61,7 +62,6 @@ class DefaultGroupsRemoteUserBackend(RemoteUserBackend):
             if group_name not in _CACHED_GROUPS:
                 _CACHED_GROUPS[group_name] = Group.objects.get_or_create(name=str(group_name))[0]
             user.groups.add(_CACHED_GROUPS[group_name])
-
         return user
 
 
