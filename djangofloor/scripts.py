@@ -4,6 +4,7 @@
 Define "main" functions for your scripts using the Django `manage.py` system or Gunicorn/Celery/uWSGI.
 """
 import datetime
+import ipaddress
 import logging
 import logging.config
 import os
@@ -13,6 +14,7 @@ import subprocess
 import sys
 from argparse import ArgumentParser
 from distutils.spawn import find_executable
+from typing import Union
 
 from django.utils.autoreload import python_reloader
 
@@ -23,17 +25,143 @@ from djangofloor.conf.providers import PythonModuleProvider, PythonFileProvider,
 __author__ = 'Matthieu Gallet'
 
 
-def __get_extra_option(name, default, *argnames):
-    parser = ArgumentParser(usage="%(prog)s subcommand [options] [args]", add_help=False)
-    parser.add_argument(*argnames, action='store', default=default)
-    options, extra_args = parser.parse_known_args()
-    sys.argv[1:] = extra_args
-    return getattr(options, name)
+class ScriptCommand:
+
+    def __init__(self):
+        self.options_set = []
+
+    def add_arguments(self, parser: ArgumentParser):
+        pass
+
+    def add_argument(self, parser, *args, **kwargs):
+        self.options_set.append(args[-1])
+        parser.add_argument(*args, **kwargs)
+
+    def set_options(self, options):
+        for option_name in self.options_set:
+            option_name = option_name.replace('-', '_')
+            while option_name[0:1] == '_':
+                option_name = option_name[1:]
+            set_default_option(options, option_name)
+
+    def __call__(self):
+        set_env()
+        import django
+        django.setup()
+        from django.conf import settings
+        logging.config.dictConfig(settings.LOGGING)
+        parser = ArgumentParser(usage="%(prog)s subcommand [options] [args]", add_help=False)
+        self.add_arguments(parser)
+        options, extra_args = parser.parse_known_args()
+        sys.argv[1:] = extra_args
+        if not os.environ.get('DF_CONF_SET', ''):
+            os.environ['DF_CONF_SET'] = '1'
+            self.set_options(options)
+        self.run_script()
+
+    def run_script(self):
+        raise NotImplementedError
 
 
-def __set_default_option(options, name):
+class DjangoCommand(ScriptCommand):
+    """
+    Main function, calling Django code for management commands. Retrieve some default values from Django settings.
+    """
+
+    def run_script(self):
+        from django.conf import settings
+        from django.core import management
+        commands = {x: y for (x, y) in management.get_commands().items()
+                    if x not in settings.DF_REMOVED_DJANGO_COMMANDS}
+
+        def get_commands():
+            return commands
+
+        management.get_commands = get_commands
+        if len(sys.argv) >= 2 and sys.argv[1] == 'runserver':
+            from django.core.management.commands.runserver import Command as RunserverCommand
+            ip_address, sep, port = settings.LISTEN_ADDRESS.rpartition(':')
+            try:
+                ipaddress.IPv6Address(ip_address)
+                RunserverCommand.default_addr_ipv6 = ip_address
+            except ipaddress.AddressValueError:
+                RunserverCommand.default_addr = ip_address
+            RunserverCommand.default_port = port
+
+        try:
+            from djangofloor.management import execute_from_command_line
+            return execute_from_command_line(sys.argv)
+        except BrokenPipeError:
+            pass
+
+    def __call__(self):
+        if len(sys.argv) >= 2:
+            if sys.argv[1] == 'worker':
+                sys.argv += ['worker']
+                return celery()
+            elif sys.argv[1] == 'server':
+                return gunicorn()
+            elif sys.argv[1] == 'celery':
+                return celery()
+        return super().__call__()
+
+
+class GunicornCommand(ScriptCommand):
+    """ wrapper around gunicorn. Retrieve some default values from Django settings.
+
+    :return:
+    """
+
+    def add_arguments(self, parser: ArgumentParser):
+        from django.conf import settings
+        if settings.WEBSOCKET_URL:
+            worker_cls = 'aiohttp.worker.GunicornWebWorker'
+        else:
+            worker_cls = 'gunicorn.workers.gthread.ThreadWorker'
+        self.add_argument(parser, '-b', '--bind', default=settings.LISTEN_ADDRESS)
+        self.add_argument(parser, '--threads', default=settings.DF_SERVER_THREADS, type=int)
+        self.add_argument(parser, '-w', '--workers', default=settings.DF_SERVER_PROCESSES, type=int)
+        self.add_argument(parser, '--graceful-timeout', default=settings.DF_SERVER_GRACEFUL_TIMEOUT, type=int)
+        self.add_argument(parser, '--max-requests', default=settings.DF_SERVER_MAX_REQUESTS, type=int)
+        self.add_argument(parser, '--keep-alive', default=settings.DF_SERVER_KEEPALIVE, type=int)
+        self.add_argument(parser, '-t', '--timeout', default=settings.DF_SERVER_TIMEOUT, type=int)
+        self.add_argument(parser, '--keyfile', default=settings.DF_SERVER_SSL_KEY)
+        self.add_argument(parser, '--certfile', default=settings.DF_SERVER_SSL_CERTIFICATE)
+        self.add_argument(parser, '--reload', default=False, action='store_true')
+        self.add_argument(parser, '-k', '--worker-class', default=worker_cls)
+
+    def run_script(self):
+        application = 'djangofloor.wsgi.aiohttp_runserver:application'
+        if application not in sys.argv:
+            sys.argv.append(application)
+        from gunicorn.app.wsgiapp import run
+        return run()
+
+
+class CeleryCommand(ScriptCommand):
+
+    def add_arguments(self, parser: ArgumentParser):
+        from django.conf import settings
+        parser.add_argument('-A', '--app', action='store', default='djangofloor')
+        is_worker = len(sys.argv) > 1 and sys.argv[1] == 'worker'
+        if is_worker:
+            parser.add_argument('-c', '--concurrency', action='store', default=settings.CELERY_PROCESSES,
+                                help='Number of child processes processing the queue. The'
+                                'default is the number of CPUs available on your'
+                                'system.')
+
+    def run_script(self):
+        from django.conf import settings
+        from celery.bin.celery import main as celery_main
+        if settings.DEBUG and 'worker' in sys.argv and '-h' not in sys.argv:
+            python_reloader(celery_main, (sys.argv, ), {})
+        else:
+            celery_main(sys.argv)
+
+
+def set_default_option(options, name: str):
     option_name = name.replace('_', '-')
-    if getattr(options, name):
+    if hasattr(options, name) and getattr(options, name):
         sys.argv += ['--%s' % option_name, str(getattr(options, name))]
 
 
@@ -95,7 +223,7 @@ def get_merger_from_env() -> SettingMerger:
     return SettingMerger(fields_provider, config_providers, extra_values=extra_values)
 
 
-def set_env(command_name=None, script_name=None):
+def set_env(command_name: Union[str, None]=None, script_name: Union[str, None]=None):
     """Set the environment variable `DF_CONF_NAME` with the project name and the script name
     The value looks like "project_name:celery" or "project_name:django"
 
@@ -115,7 +243,7 @@ def set_env(command_name=None, script_name=None):
     if script_re:
         conf_name = '%s:%s' % (script_re.group(1), script_name or script_re.group(2))
     else:
-        conf_name = __get_extra_option('dfproject', 'djangofloor', '--dfproject')
+        conf_name = 'djangofloor:django'
     os.environ.setdefault('DF_CONF_NAME', conf_name)
     return conf_name
 
@@ -160,93 +288,13 @@ def control():
     return django()
 
 
-def django():
-    """
-    Main function, calling Django code for management commands. Retrieve some default values from Django settings.
-    """
-    set_env()
-    from django.conf import settings
-    env_set = bool(os.environ.get('DF_CONF_SET', ''))
-    if not env_set:
-        parser = ArgumentParser(usage="%(prog)s subcommand [options] [args]", add_help=False)
-        options, extra_args = parser.parse_known_args()
-        if len(extra_args) >= 1 and extra_args[0] == 'runserver':
-            sys.argv += [settings.LISTEN_ADDRESS]
-        os.environ['DF_CONF_SET'] = '1'
-
-    import django
-    django.setup()
-    from django.core import management
-    commands = {x: y for (x, y) in management.get_commands().items()
-                if x not in settings.DF_REMOVED_DJANGO_COMMANDS}
-
-    def get_commands():
-        return commands
-
-    management.get_commands = get_commands
-    try:
-        from djangofloor.management import execute_from_command_line
-        return execute_from_command_line(sys.argv)
-    except BrokenPipeError:
-        pass
+django = DjangoCommand()
+gunicorn = GunicornCommand()
+aiohttp = GunicornCommand()
+celery = CeleryCommand()
 
 
-def gunicorn():
-    """ wrapper around gunicorn. Retrieve some default values from Django settings.
-
-    :return:
-    """
-    # noinspection PyPackageRequirements,PyUnresolvedReferences
-    set_env()
-    import django
-    django.setup()
-    from gunicorn.app.wsgiapp import run
-    from django.conf import settings
-    logging.config.dictConfig(settings.LOGGING)
-    if settings.WEBSOCKET_URL:
-        worker_cls = 'aiohttp.worker.GunicornWebWorker'
-    else:
-        worker_cls = 'gunicorn.workers.gthread.ThreadWorker'
-    parser = ArgumentParser(usage="%(prog)s subcommand [options] [args]", add_help=False)
-    parser.add_argument('-b', '--bind', default=settings.LISTEN_ADDRESS)
-    parser.add_argument('--threads', default=settings.DF_SERVER_THREADS, type=int)
-    parser.add_argument('-w', '--workers', default=settings.DF_SERVER_PROCESSES, type=int)
-    parser.add_argument('--graceful-timeout', default=settings.DF_SERVER_GRACEFUL_TIMEOUT, type=int)
-    parser.add_argument('--max-requests', default=settings.DF_SERVER_MAX_REQUESTS, type=int)
-    parser.add_argument('--keep-alive', default=settings.DF_SERVER_KEEPALIVE, type=int)
-    parser.add_argument('-t', '--timeout', default=settings.DF_SERVER_TIMEOUT, type=int)
-    parser.add_argument('--keyfile', default=settings.DF_SERVER_SSL_KEY)
-    parser.add_argument('--certfile', default=settings.DF_SERVER_SSL_CERTIFICATE)
-    parser.add_argument('--reload', default=False, action='store_true')
-    parser.add_argument('-k', '--worker-class', default=worker_cls)
-    options, extra_args = parser.parse_known_args()
-    sys.argv[1:] = extra_args
-    env_set = bool(os.environ.get('DF_CONF_SET', ''))
-    if not env_set:
-        os.environ['DF_CONF_SET'] = '1'
-        __set_default_option(options, 'bind')
-        __set_default_option(options, 'worker_class')
-        __set_default_option(options, 'threads')
-        __set_default_option(options, 'graceful_timeout')
-        __set_default_option(options, 'keep_alive')
-        __set_default_option(options, 'workers')
-        __set_default_option(options, 'max_requests')
-        __set_default_option(options, 'timeout')
-        __set_default_option(options, 'keyfile')
-        __set_default_option(options, 'certfile')
-        if settings.DEBUG and not options.reload:
-            sys.argv += ['--reload']
-    application = 'djangofloor.wsgi.aiohttp_runserver:application'
-    if application not in sys.argv:
-        sys.argv.append(application)
-    return run()
-
-
-def aiohttp():
-    return gunicorn()
-
-
-def get_application(command_name=None, script_name=None):
+def get_application(command_name: Union[str, None]=None, script_name: Union[str, None]=None):
     set_env(command_name=command_name, script_name=script_name)
     import django
     django.setup()
@@ -254,31 +302,6 @@ def get_application(command_name=None, script_name=None):
     logging.config.dictConfig(settings.LOGGING)
     from djangofloor.wsgi.aiohttp_runserver import get_application
     return get_application()
-
-
-def celery():
-    set_env()
-    from django.conf import settings
-    from celery.bin.celery import main as celery_main
-    parser = ArgumentParser(usage="%(prog)s subcommand [options] [args]", add_help=False)
-    parser.add_argument('-A', '--app', action='store', default='djangofloor')
-    is_worker = len(sys.argv) > 1 and sys.argv[1] == 'worker'
-    if is_worker:
-        parser.add_argument('-c', '--concurrency', action='store', default=settings.CELERY_PROCESSES,
-                            help='Number of child processes processing the queue. The'
-                            'default is the number of CPUs available on your'
-                            'system.')
-    options, extra_args = parser.parse_known_args()
-    sys.argv[1:] = extra_args
-    __set_default_option(options, 'app')
-    if is_worker:
-        __set_default_option(options, 'concurrency')
-    import django
-    django.setup()
-    if settings.DEBUG and 'worker' in extra_args and '-h' not in extra_args:
-        python_reloader(celery_main, (sys.argv, ), {})
-    else:
-        celery_main(sys.argv)
 
 
 def uwsgi():
