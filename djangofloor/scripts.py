@@ -53,8 +53,8 @@ class ScriptCommand:
         parser = ArgumentParser(usage="%(prog)s subcommand [options] [args]", add_help=False)
         self.add_arguments(parser)
         options, extra_args = parser.parse_known_args()
-        sys.argv[1:] = extra_args
         if not os.environ.get('DF_CONF_SET', ''):
+            sys.argv[1:] = extra_args
             os.environ['DF_CONF_SET'] = '1'
             self.set_options(options)
         self.run_script()
@@ -142,19 +142,19 @@ class CeleryCommand(ScriptCommand):
 
     def add_arguments(self, parser: ArgumentParser):
         from django.conf import settings
-        parser.add_argument('-A', '--app', action='store', default='djangofloor')
+        self.add_argument(parser, '-A', '--app', action='store', default='djangofloor')
         is_worker = len(sys.argv) > 1 and sys.argv[1] == 'worker'
         if is_worker:
-            parser.add_argument('-c', '--concurrency', action='store', default=settings.CELERY_PROCESSES,
-                                help='Number of child processes processing the queue. The'
-                                'default is the number of CPUs available on your'
-                                'system.')
+            self.add_argument(parser, '-c', '--concurrency', action='store', default=settings.CELERY_PROCESSES,
+                              help='Number of child processes processing the queue. The'
+                                   'default is the number of CPUs available on your'
+                                   'system.')
 
     def run_script(self):
         from django.conf import settings
         from celery.bin.celery import main as celery_main
         if settings.DEBUG and 'worker' in sys.argv and '-h' not in sys.argv:
-            python_reloader(celery_main, (sys.argv, ), {})
+            python_reloader(celery_main, (sys.argv,), {})
         else:
             celery_main(sys.argv)
 
@@ -198,6 +198,7 @@ def get_merger_from_env() -> SettingMerger:
         ini_filenames = [default_ini_filename]
         ini_filenames.sort()
         return [cls(x) for x in ini_filenames]
+
     local_conf_filename = os.path.abspath('local_settings.ini')
     # global_conf_filename = '%s/etc/%s/settings.ini' % (prefix, module_name)
 
@@ -223,7 +224,7 @@ def get_merger_from_env() -> SettingMerger:
     return SettingMerger(fields_provider, config_providers, extra_values=extra_values)
 
 
-def set_env(command_name: Union[str, None]=None, script_name: Union[str, None]=None):
+def set_env(command_name: Union[str, None] = None, script_name: Union[str, None] = None):
     """Set the environment variable `DF_CONF_NAME` with the project name and the script name
     The value looks like "project_name:celery" or "project_name:django"
 
@@ -294,7 +295,7 @@ aiohttp = GunicornCommand()
 celery = CeleryCommand()
 
 
-def get_application(command_name: Union[str, None]=None, script_name: Union[str, None]=None):
+def get_application(command_name: Union[str, None] = None, script_name: Union[str, None] = None):
     set_env(command_name=command_name, script_name=script_name)
     import django
     django.setup()
@@ -391,7 +392,7 @@ def create_project():
     for root, dirnames, filenames in os.walk(template_base_path):
         index = 0
         while index < len(dirnames):
-            if dirnames[index] in ('__pycache__', ):
+            if dirnames[index] in ('__pycache__',):
                 del dirnames[index]
             else:
                 index += 1
