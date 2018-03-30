@@ -78,6 +78,8 @@ def websocket_handler(request):
         yield from asyncio.gather(handle_ws(window_info, ws), handle_redis(window_info, ws, subscriber))
     except aiohttp.ClientConnectionError:
         pass
+    except asyncio.TimeoutError as e:
+        pass
     except base.CancelledError:
         pass
     except RuntimeError:  # avoid raise RuntimeError('WebSocket connection is closed.')

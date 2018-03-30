@@ -45,10 +45,10 @@ class ScriptCommand:
             set_default_option(options, option_name)
 
     def __call__(self):
-        set_env()
         import django
         django.setup()
         from django.conf import settings
+
         logging.config.dictConfig(settings.LOGGING)
         parser = ArgumentParser(usage="%(prog)s subcommand [options] [args]", add_help=False)
         self.add_arguments(parser)
@@ -71,13 +71,10 @@ class DjangoCommand(ScriptCommand):
     def run_script(self):
         from django.conf import settings
         from django.core import management
-        commands = {x: y for (x, y) in management.get_commands().items()
-                    if x not in settings.DF_REMOVED_DJANGO_COMMANDS}
 
-        def get_commands():
-            return commands
+        management.get_commands = lambda: {x: y for (x, y) in management.get_commands().items()
+                                           if x not in settings.DF_REMOVED_DJANGO_COMMANDS}
 
-        management.get_commands = get_commands
         if len(sys.argv) >= 2 and sys.argv[1] == 'runserver':
             from django.core.management.commands.runserver import Command as RunserverCommand
             ip_address, sep, port = settings.LISTEN_ADDRESS.rpartition(':')
@@ -93,17 +90,6 @@ class DjangoCommand(ScriptCommand):
             return execute_from_command_line(sys.argv)
         except BrokenPipeError:
             pass
-
-    def __call__(self):
-        if len(sys.argv) >= 2:
-            if sys.argv[1] == 'worker':
-                sys.argv += ['worker']
-                return celery()
-            elif sys.argv[1] == 'server':
-                return gunicorn()
-            elif sys.argv[1] == 'celery':
-                return celery()
-        return super().__call__()
 
 
 class GunicornCommand(ScriptCommand):

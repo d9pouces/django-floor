@@ -1,4 +1,4 @@
-from djangofloor.scripts import django, set_env
-
+from djangofloor.scripts import control, set_env
 set_env(command_name='{package_name}-ctl')
-django()
+if __name__ == "__main__":
+    control()
