@@ -33,9 +33,9 @@ def database_engine(settings_dict):
     engine = _default_database_engines.get(settings_dict['DATABASE_ENGINE'].lower(), settings_dict['DATABASE_ENGINE'])
     if engine == 'django.db.backends.postgresql':
         try:
-            get_distribution('psycopg2')
+            get_distribution('psycopg2-binary')
         except DistributionNotFound:
-            settings_check_results.append(missing_package('psycopg2', ' to use PostgreSQL database'))
+            settings_check_results.append(missing_package('psycopg2-binary', ' to use PostgreSQL database'))
     elif engine == 'django.db.backends.oracle':
         try:
             get_distribution('cx_Oracle')

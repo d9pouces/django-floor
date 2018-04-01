@@ -212,7 +212,7 @@ Now, it's time to install {{ DF_PROJECT_NAME }}:
 
 {% block pre_application %}{% endblock %}    pip install setuptools --upgrade
     pip install pip --upgrade
-    pip install {{ DF_PIP_NAME }} psycopg2
+    pip install {{ DF_PIP_NAME }} psycopg2-binary
     mkdir -p $VIRTUAL_ENV/etc/{{ DF_MODULE_NAME }}
     cat << EOF > $VIRTUAL_ENV/etc/{{ DF_MODULE_NAME }}/settings.ini
 {% block ini_configuration %}    [global]
