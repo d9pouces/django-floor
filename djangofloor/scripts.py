@@ -14,6 +14,7 @@ import subprocess
 import sys
 from argparse import ArgumentParser
 from distutils.spawn import find_executable
+from functools import lru_cache
 from typing import Union
 
 from django.utils.autoreload import python_reloader
@@ -63,17 +64,23 @@ class ScriptCommand:
         raise NotImplementedError
 
 
+@lru_cache()
+def set_management_get_commands():
+    from django.core import management
+    from django.conf import settings
+    commands = list(management.get_commands().items())
+    management.get_commands = lambda: {x: y for (x, y) in commands if x not in settings.DF_REMOVED_DJANGO_COMMANDS}
+
+
 class DjangoCommand(ScriptCommand):
     """
     Main function, calling Django code for management commands. Retrieve some default values from Django settings.
     """
+    commands = None
 
     def run_script(self):
         from django.conf import settings
-        from django.core import management
-
-        management.get_commands = lambda: {x: y for (x, y) in management.get_commands().items()
-                                           if x not in settings.DF_REMOVED_DJANGO_COMMANDS}
+        set_management_get_commands()
 
         if len(sys.argv) >= 2 and sys.argv[1] == 'runserver':
             from django.core.management.commands.runserver import Command as RunserverCommand
