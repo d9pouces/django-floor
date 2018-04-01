@@ -49,7 +49,7 @@ setup(
     zip_safe=False,
     test_suite='djangofloor.tests',
     install_requires=['django>=1.11', 'celery', 'django-bootstrap3>=9.0.0', 'redis', 'pip',
-                      'aiohttp-wsgi', 'aiohttp>=2,<3', 'asyncio_redis', 'gunicorn'],
+                      'aiohttp-wsgi', 'aiohttp', 'asyncio_redis', 'gunicorn'],
     extras_require=extras_requirements,
     setup_requires=[],
     classifiers=['Development Status :: 5 - Production/Stable',
