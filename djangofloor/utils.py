@@ -6,17 +6,15 @@ Define some utility functions like warning or walking through modules.
 """
 
 import argparse
-import json
 import os
 import re
+import zlib
 from argparse import ArgumentParser
 from importlib import import_module
 
 import pkg_resources
-import zlib
 from django.core.exceptions import ImproperlyConfigured
 from django.utils.module_loading import import_string
-from pip.req import InstallRequirement
 
 __author__ = 'Matthieu Gallet'
 
