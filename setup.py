@@ -34,6 +34,27 @@ try:
 except ImportError:
     set_env, django = None, None
 
+install_requires = ['django>=1.11', 'celery', 'django-bootstrap3>=9.0.0', 'redis', 'pip',
+                    'asyncio_redis', 'gunicorn']
+if sys.version_info >= (3, 5, 3):
+    install_requires += [
+        'aiohttp>=3.1.3,<4.0',
+        'attrs>=17.3.0',
+        'chardet>=2.0,<4.0',
+        'multidict>=4.0,<5.0',
+        'async_timeout>=1.2,<3.0',
+        'yarl>=1.0,<2.0',
+        'aiohttp-wsgi>=0.8.0,<0.9.0',
+    ]
+else:
+    install_requires += [
+        'aiohttp>=2.3.0,<3.0',
+        'multidict>=4.0,<5.0',
+        'async_timeout>=1.2,<3.0',
+        'yarl>=1.0,<2.0',
+        'aiohttp-wsgi>=0.7.0,<0.8.0',
+    ]
+
 setup(
     name='djangofloor',
     version=version,
@@ -48,8 +69,7 @@ setup(
     include_package_data=True,
     zip_safe=False,
     test_suite='djangofloor.tests',
-    install_requires=['django>=1.11', 'celery', 'django-bootstrap3>=9.0.0', 'redis', 'pip',
-                      'aiohttp-wsgi', 'aiohttp', 'asyncio_redis', 'gunicorn'],
+    install_requires=install_requires,
     extras_require=extras_requirements,
     setup_requires=[],
     classifiers=['Development Status :: 5 - Production/Stable',
