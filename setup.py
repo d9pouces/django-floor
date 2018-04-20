@@ -36,7 +36,7 @@ except ImportError:
 
 install_requires = ['django>=1.11', 'celery', 'django-bootstrap3>=9.0.0', 'redis', 'pip',
                     'asyncio_redis', 'gunicorn']
-if sys.version_info >= (3, 5, 3):
+if sys.version_info >= (3, 5, 3) and False:
     install_requires += [
         'aiohttp>=3.1.3,<4.0',
         'attrs>=17.3.0',
