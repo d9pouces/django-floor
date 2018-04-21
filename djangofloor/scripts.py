@@ -124,7 +124,7 @@ class GunicornCommand(ScriptCommand):
         self.add_argument(parser, '-k', '--worker-class', default=worker_cls)
 
     def run_script(self):
-        application = 'djangofloor.wsgi.aiohttp_test:application'
+        application = 'djangofloor.wsgi.aiohttp_runserver:application'
         if application not in sys.argv:
             sys.argv.append(application)
         from gunicorn.app.wsgiapp import run
