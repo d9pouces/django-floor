@@ -1,8 +1,11 @@
 import asyncio
-# noinspection PyPackageRequirements
+# noinspection PyProtectedMember
+import concurrent.futures._base as base
 import logging
 
+# noinspection PyPackageRequirements
 import aiohttp
+# noinspection PyPackageRequirements
 import asyncio_redis
 # noinspection PyPackageRequirements
 from aiohttp import web
@@ -10,8 +13,6 @@ from aiohttp_wsgi import WSGIHandler
 from django.conf import settings
 from django.core.wsgi import get_wsgi_application
 from django.http import HttpRequest
-# noinspection PyProtectedMember
-import concurrent.futures._base as base
 
 try:
     # noinspection PyPackageRequirements
