@@ -111,9 +111,15 @@ class RedisSmartSetting:
             return result
         raise ValueError('Unknown RedisSmartSetting format \'%s\'' % self.fmt)
 
+    def __repr__(self):
+        p = self.prefix
+        if self.prefix.endswith('REDIS_'):
+            p = self.prefix[:-6]
+        return '%s.%sredis_%s' % (self.__module__, p.lower(), self.fmt)
+
 
 cache_redis_url = RedisSmartSetting(prefix='CACHE_', fmt='url')
-celery_broker_url = RedisSmartSetting(prefix='CELERY_', fmt='url')
+celery_redis_url = RedisSmartSetting(prefix='CELERY_', fmt='url')
 session_redis_dict = RedisSmartSetting(prefix='SESSION_REDIS_', fmt='dict', extra_values={'prefix': 'session'})
 websocket_redis_dict = RedisSmartSetting(prefix='WEBSOCKET_REDIS_', fmt='dict')
 

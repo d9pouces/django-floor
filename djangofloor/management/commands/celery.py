@@ -1,3 +1,4 @@
+import os
 import sys
 
 from djangofloor.management.base import BaseCommand
@@ -21,9 +22,8 @@ class Command(BaseCommand):
         """
         if len(sys.argv) > 1:
             del sys.argv[1]
+        os.environ['DF_CONF_SET'] = ''
         return celery()
 
     def handle(self, *args, **options):
-        while len(sys.argv) > 1:
-            del sys.argv[1]
-        return celery()
+        pass

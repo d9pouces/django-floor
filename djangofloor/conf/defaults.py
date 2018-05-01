@@ -30,7 +30,7 @@ from djangofloor.conf.callables import url_parse_server_name, \
     url_parse_server_protocol, url_parse_server_port, url_parse_prefix, url_parse_ssl, project_name, \
     allowed_hosts, cache_setting, template_setting, \
     generate_secret_key, use_x_forwarded_for, required_packages, installed_apps, databases, excluded_django_commands, \
-    celery_broker_url, websocket_redis_dict, cache_redis_url, session_redis_dict, smart_hostname, DefaultListenAddress
+    celery_redis_url, websocket_redis_dict, cache_redis_url, session_redis_dict, smart_hostname, DefaultListenAddress
 from djangofloor.conf.config_values import Path, Directory, SettingReference, ExpandIterable, \
     CallableSetting, AutocreateFileContent
 from djangofloor.conf.pipeline import static_storage, pipeline_enabled
@@ -159,7 +159,7 @@ if USE_PIPELINE:
     STATICFILES_FINDERS.append('pipeline.finders.PipelineFinder')
 
 # celery
-BROKER_URL = CallableSetting(celery_broker_url)
+BROKER_URL = CallableSetting(celery_redis_url)
 CELERY_DEFAULT_QUEUE = 'celery'
 CELERY_TIMEZONE = '{TIME_ZONE}'
 CELERY_RESULT_EXCHANGE = '{DF_MODULE_NAME}_results'

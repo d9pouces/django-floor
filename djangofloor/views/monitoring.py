@@ -343,7 +343,7 @@ class RequestCheck(MonitoringCheck):
         header = settings.DF_REMOTE_USER_HEADER
         if header:
             context['remote_user'] = (http_fmt(header), request.META.get(django_fmt(header)))
-        header = settings.USE_X_FORWARDED_FOR and 'X_FORWARDED_FOR'
+        header = settings.USE_X_FORWARDED_FOR and 'HTTP_X_FORWARDED_FOR'
         if header:
             context['use_x_forwarded_for'] = (http_fmt(header), request.META.get(django_fmt(header)))
         context['secure_proxy_ssl_header'] = None

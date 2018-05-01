@@ -1,3 +1,6 @@
+import os
+import sys
+
 from djangofloor.management.base import BaseCommand
 from djangofloor.scripts import celery
 
@@ -17,7 +20,9 @@ class Command(BaseCommand):
         to stderr. If the ``--traceback`` option is present or the raised
         ``Exception`` is not ``CommandError``, raise it.
         """
+        sys.argv = sys.argv[:2]
+        os.environ['DF_CONF_SET'] = ''
         return celery()
 
     def handle(self, *args, **options):
-        return celery()
+        pass
