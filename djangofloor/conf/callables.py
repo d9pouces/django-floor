@@ -7,6 +7,7 @@ Dynamic
 import os
 import re
 from collections import OrderedDict
+from configparser import RawConfigParser
 from urllib.parse import urlparse
 
 from django.core.checks import Error
@@ -15,6 +16,7 @@ from pkg_resources import get_distribution, DistributionNotFound, VersionConflic
 
 from djangofloor.checks import settings_check_results, missing_package
 from djangofloor.conf.config_values import ExpandIterable, ConfigValue
+from djangofloor.conf.social_providers import SOCIAL_PROVIDER_APPS
 from djangofloor.utils import is_package_present
 
 __author__ = 'Matthieu Gallet'
@@ -324,6 +326,24 @@ def project_name(settings_dict):
 project_name.required_settings = ['DF_MODULE_NAME']
 
 
+def allauth_provider_apps(settings_dict):
+    parser = RawConfigParser()
+    config = settings_dict['ALLAUTH_APPLICATIONS_CONFIG']
+    if not os.path.isfile(config):
+        return []
+    # noinspection PyBroadException
+    try:
+        parser.read([config])
+    except Exception:
+        settings_check_results.append(Error('Invalid config file. %s' % config, obj='configuration'))
+        return []
+    return [parser.get(section, 'django_app') for section in parser.sections()
+            if parser.has_option(section, 'django_app')]
+
+
+allauth_provider_apps.required_settings = ['ALLAUTH_APPLICATIONS_CONFIG']
+
+
 class InstalledApps:
     """Provide a complete `INSTALLED_APPS` list, transparently adding common third-party packages.
      Specifically handle apps required by django-allauth (one by allowed method).
@@ -350,15 +370,8 @@ class InstalledApps:
         ('USE_PAM_AUTHENTICATION', 'django_pam'),
         ('RAVEN_DSN', 'raven.contrib.django.raven_compat'),
     ])
-    required_settings = ['ALLAUTH_PROVIDERS', 'USE_ALL_AUTH'] + list(common_third_parties)
-    allauth_providers = {'amazon', 'angellist', 'asana', 'auth0', 'baidu', 'basecamp', 'bitbucket', 'bitbucket_oauth2',
-                         'bitly', 'coinbase', 'daum', 'digitalocean', 'discord', 'douban', 'draugiem', 'dropbox',
-                         'dropbox_oauth2', 'edmodo', 'eveonline', 'evernote', 'facebook', 'feedly', 'fivehundredpx',
-                         'flickr', 'foursquare', 'fxa', 'github', 'gitlab', 'google', 'hubic', 'instagram', 'kakao',
-                         'line', 'linkedin', 'linkedin_oauth2', 'mailru', 'mailchimp', 'naver', 'odnoklassniki',
-                         'openid', 'orcid', 'paypal', 'persona', 'pinterest', 'reddit', 'robinhood', 'shopify',
-                         'slack', 'soundcloud', 'spotify', 'stackexchange', 'stripe', 'tumblr', 'twentythreeandme',
-                         'twitch', 'twitter', 'untappd', 'vimeo', 'vk', 'weibo', 'weixin', 'windowslive', 'xing'}
+    required_settings = ['ALLAUTH_PROVIDER_APPS', 'USE_ALL_AUTH'] + list(common_third_parties)
+    social_apps = SOCIAL_PROVIDER_APPS
 
     def __call__(self, settings_dict):
         apps = self.default_apps
@@ -379,7 +392,7 @@ class InstalledApps:
         return result
 
     def process_django_allauth(self, settings_dict):
-        if not settings_dict['USE_ALL_AUTH'] and not settings_dict['ALLAUTH_PROVIDERS']:
+        if not settings_dict['USE_ALL_AUTH'] and not settings_dict['ALLAUTH_PROVIDER_APPS']:
             return []
         try:
             get_distribution('django-allauth')
@@ -393,9 +406,8 @@ class InstalledApps:
                       id='djangofloor.E001'))
             return []
         result = ['allauth', 'allauth.account', 'allauth.socialaccount']
-        if settings_dict['ALLAUTH_PROVIDERS']:
-            result += ['allauth.socialaccount.providers.%s' % k for k in settings_dict['ALLAUTH_PROVIDERS']
-                       if k in self.allauth_providers]
+        if settings_dict['ALLAUTH_PROVIDER_APPS']:
+            result += [k for k in settings_dict['ALLAUTH_PROVIDER_APPS'] if k in self.social_apps]
         return result
 
     def __repr__(self):

@@ -78,7 +78,7 @@ OAuth2 authentication
 
 The package `django-allauth <http://django-allauth.readthedocs.io/en/latest/>`_ perfectly handles OAuth2 authentication from many providers.
 Please check its own documentation.
-Of course, it must be installed separately (it is not a dependency of Djangofloor) and at least one provider must be given in `ALLAUTH_PROVIDERS`.
+Of course, it must be installed separately (it is not a dependency of Djangofloor) and at least one provider must be given in `ALLAUTH_PROVIDER_APPS`.
 
 
   * `INSTALLED_APPS` will contain the list of all required Django apps ,

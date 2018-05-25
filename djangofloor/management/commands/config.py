@@ -27,6 +27,7 @@ class Command(BaseCommand):
         'nginx': 'display an example of Nginx config',
         'systemd': 'display an example of systemd config',
         'supervisor': 'display an example of Supervisor config',
+        'social_authentications': 'display configured social authentications',
     }
     if settings.USE_CELERY:
         options['signals'] = 'show the defined signals and remote functions'
@@ -62,6 +63,8 @@ class Command(BaseCommand):
             self.show_external_config('djangofloor/config/systemd.conf')
         elif action == 'supervisor':
             self.show_external_config('djangofloor/config/supervisor.conf')
+        elif action == 'social_authentications':
+            self.show_social_auth_config()
 
     def show_external_config(self, config):
         content = render_to_string(config, merger.settings)
@@ -140,3 +143,8 @@ class Command(BaseCommand):
         self.stdout.write('web: %s-aiohttp' % settings.DF_MODULE_NAME)
         for queue in queues:
             self.stdout.write('%s: %s-%s worker -Q %s' % (queue, settings.DF_MODULE_NAME, 'celery', queue))
+
+    def show_social_auth_config(self):
+        from djangofloor.management.commands.social_authentications import Command as SACommand
+        # noinspection PyCallByClass
+        SACommand.show_config(self)

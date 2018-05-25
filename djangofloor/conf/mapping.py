@@ -6,9 +6,9 @@ The `INI_MAPPING` must be a list of :class:`djangofloor.conf.fields.ConfigField`
 the corresponding Django setting value and how to convert from one format to the another.
 """
 
-from djangofloor.conf.callables import InstalledApps
 from djangofloor.conf.fields import CharConfigField, IntegerConfigField, BooleanConfigField, ConfigField, \
     bool_setting, ListConfigField, ChoiceConfigFile
+from djangofloor.conf.social_providers import SOCIAL_PROVIDER_APPS
 
 __author__ = 'Matthieu Gallet'
 
@@ -223,9 +223,10 @@ AUTH_MAPPING = [
     #                 help_str='Principal to use for Kerberos authentication on the LDAP server.'),
 ]
 ALLAUTH_MAPPING = [
-    ListConfigField('auth.social_providers', 'ALLAUTH_PROVIDERS',
-                    help_str='Comma-separated OAuth2 providers, among "%s". "django-allauth" package must be installed.'
-                             % '","'.join(InstalledApps.allauth_providers)),
+    ListConfigField('auth.social_providers', 'ALLAUTH_PROVIDER_APPS',
+                    help_str='Comma-separated OAuth2 providers. "django-allauth" package must be installed.'
+                             'Please use the `social_authentications` command to add an account provider instead '
+                             'of this setting.'),
 ]
 
 INI_MAPPING = BASE_MAPPING + REDIS_MAPPING + CELERY_MAPPING + AUTH_MAPPING + ALLAUTH_MAPPING

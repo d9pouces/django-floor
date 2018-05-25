@@ -442,7 +442,7 @@ class AuthenticationCheck(MonitoringCheck):
             'basic_auth': settings.USE_HTTP_BASIC_AUTH,
             'remote_user': settings.DF_REMOTE_USER_HEADER,
             'remote_user_groups': settings.DF_DEFAULT_GROUPS,
-            'allauth': settings.ALLAUTH_PROVIDERS,
+            'allauth': settings.ALLAUTH_PROVIDER_APPS,
             'pam': settings.USE_PAM_AUTHENTICATION,
             'local_users': settings.DF_ALLOW_LOCAL_USERS,
         }

@@ -289,6 +289,21 @@ class AutocreateFile(AutocreateFileContent):
     def __init__(self, value, mode=None, *args, **kwargs):
         super().__init__(value, lambda x: '', mode=mode, *args, **kwargs)
 
+    def get_value(self, merger, provider_name: str, setting_name: str):
+        """ Return the value
+
+        :param merger: merger object, with all interpreted settings
+        :type merger: :class:`djangofloor.utils.SettingMerger`
+        :param provider_name: name of the provider containing this value
+        :param setting_name: name of the setting containing this value
+        """
+        filename = merger.analyze_raw_value(self.value, provider_name, setting_name)
+        if not os.path.isfile(filename):
+            settings_check_results.append(
+                Warning('\'%s\' does not exist. Run the \'migrate\' command to fix this problem.' % filename,
+                        obj='configuration'))
+        return filename
+
 
 class SettingReference(ConfigValue):
     """Reference any setting object by its name.

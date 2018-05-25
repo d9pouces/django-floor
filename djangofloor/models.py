@@ -24,6 +24,7 @@ from django.utils.timezone import utc
 from django.utils.translation import ugettext_lazy as _
 
 from djangofloor.conf.settings import merger
+from djangofloor.conf.social_providers import migrate as social_migrate
 
 __author__ = 'Matthieu Gallet'
 
@@ -175,15 +176,26 @@ def apply_pre_migrate_settings(sender, **kwargs):
 
 # noinspection PyUnusedLocal
 @receiver(post_migrate)
+def apply_social_auth_configurations(*args, **kwargs):
+    """create social apps in database"""
+    if not hasattr(apply_social_auth_configurations, 'applied'):  # must be called once
+        apply_social_auth_configurations.applied = True
+    if settings.ALLAUTH_PROVIDER_APPS:
+        social_migrate(read_only=False)
+
+
+# noinspection PyUnusedLocal
+@receiver(post_migrate)
 def apply_post_migrate_settings(sender, **kwargs):
     """Defined for calling "post_migrate" method on each ConfigValue setting through the "post_migrate" Django signal"""
     if not hasattr(apply_post_migrate_settings, 'applied'):  # must be called once, but the signal is called for all app
         merger.call_method_on_config_values('post_migrate')
         apply_post_migrate_settings.applied = True
-    domain = settings.SERVER_NAME
-    if (settings.SERVER_PORT != 80 and not settings.USE_SSL) or (settings.SERVER_PORT != 443 and settings.USE_SSL):
-        domain = '%s:%s' % (settings.SERVER_NAME, settings.SERVER_PORT)
-    Site.objects.filter(pk=1).update(name=settings.SERVER_NAME, domain=domain)
-    username = getattr(settings, 'DF_FAKE_AUTHENTICATION_USERNAME', None)
-    if username and settings.DEBUG and get_user_model().objects.filter(username=username).count() == 0:
-        get_user_model()(username=username, is_staff=True, is_superuser=True).save()
+
+        domain = settings.SERVER_NAME
+        if (settings.SERVER_PORT != 80 and not settings.USE_SSL) or (settings.SERVER_PORT != 443 and settings.USE_SSL):
+            domain = '%s:%s' % (settings.SERVER_NAME, settings.SERVER_PORT)
+        Site.objects.filter(pk=1).update(name=settings.SERVER_NAME, domain=domain)
+        username = getattr(settings, 'DF_FAKE_AUTHENTICATION_USERNAME', None)
+        if username and settings.DEBUG and get_user_model().objects.filter(username=username).count() == 0:
+            get_user_model()(username=username, is_staff=True, is_superuser=True).save()

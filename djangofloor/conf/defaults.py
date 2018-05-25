@@ -30,9 +30,10 @@ from djangofloor.conf.callables import url_parse_server_name, \
     url_parse_server_protocol, url_parse_server_port, url_parse_prefix, url_parse_ssl, project_name, \
     allowed_hosts, cache_setting, template_setting, \
     generate_secret_key, use_x_forwarded_for, required_packages, installed_apps, databases, excluded_django_commands, \
-    celery_redis_url, websocket_redis_dict, cache_redis_url, session_redis_dict, smart_hostname, DefaultListenAddress
+    celery_redis_url, websocket_redis_dict, cache_redis_url, session_redis_dict, smart_hostname, DefaultListenAddress, \
+    allauth_provider_apps
 from djangofloor.conf.config_values import Path, Directory, SettingReference, ExpandIterable, \
-    CallableSetting, AutocreateFileContent
+    CallableSetting, AutocreateFileContent, AutocreateFile
 from djangofloor.conf.pipeline import static_storage, pipeline_enabled
 from djangofloor.log import log_configuration
 from djangofloor.utils import is_package_present, guess_version
@@ -103,7 +104,7 @@ if USE_DEBUG_TOOLBAR:
     MIDDLEWARE.insert(-3, 'debug_toolbar.middleware.DebugToolbarMiddleware')
 
 ROOT_URLCONF = 'djangofloor.root_urls'
-SERVER_EMAIL = '{ADMIN_EMAIL}'
+SECRET_KEY = AutocreateFileContent('{LOCAL_PATH}/secret_key.txt', generate_secret_key, mode=0o600, length=60)
 SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
 SECURE_HSTS_INCLUDE_SUBDOMAINS = SettingReference('USE_SSL')
@@ -112,6 +113,7 @@ SECURE_HSTS_SECONDS = 0
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')  # X-Forwarded-Proto or None
 SECURE_SSL_REDIRECT = SettingReference('USE_SSL')
 SECURE_FRAME_DENY = SettingReference('USE_SSL')
+SERVER_EMAIL = '{ADMIN_EMAIL}'
 SESSION_COOKIE_AGE = 1209600
 TEMPLATES = CallableSetting(template_setting)
 TEMPLATE_DEBUG = SettingReference('DEBUG')
@@ -313,7 +315,8 @@ CSSMIN_BINARY = 'cssmin'
 # Django-All-Auth
 ACCOUNT_EMAIL_SUBJECT_PREFIX = '[{SERVER_NAME}] '
 ACCOUNT_EMAIL_VERIFICATION = None
-ALLAUTH_PROVIDERS = []
+ALLAUTH_PROVIDER_APPS = CallableSetting(allauth_provider_apps)
+ALLAUTH_APPLICATIONS_CONFIG = AutocreateFile('{LOCAL_PATH}/social_auth.ini', mode=0o600)
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_AUTHENTICATION_METHOD = 'username_email'
 ACCOUNT_DEFAULT_HTTP_PROTOCOL = '{SERVER_PROTOCOL}'
@@ -478,7 +481,6 @@ EMAIL_USE_SSL = False  # aliased in settings.ini as "[email]use_ssl"
 EMAIL_SSL_CERTFILE = None
 EMAIL_SSL_KEYFILE = None
 LANGUAGE_CODE = 'fr-fr'  # aliased in settings.ini as "[global]language_code"
-SECRET_KEY = AutocreateFileContent('{LOCAL_PATH}/secret_key.txt', generate_secret_key, mode=0o600, length=60)
 TIME_ZONE = 'Europe/Paris'  # aliased in settings.ini as "[global]time_zone"
 LOG_REMOTE_URL = None  # aliased in settings.ini as "[global]log_remote_url"
 SERVER_BASE_URL = CallableSetting(smart_hostname)  # aliased in settings.ini as "[global]server_url"

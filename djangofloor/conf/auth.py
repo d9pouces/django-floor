@@ -20,7 +20,7 @@ from djangofloor.checks import missing_package, settings_check_results
 
 # noinspection PyMethodMayBeStatic
 class AuthenticationBackends:
-    required_settings = ['ALLAUTH_PROVIDERS', 'DF_REMOTE_USER_HEADER', 'AUTH_LDAP_SERVER_URI',
+    required_settings = ['ALLAUTH_PROVIDER_APPS', 'DF_REMOTE_USER_HEADER', 'AUTH_LDAP_SERVER_URI',
                          'USE_PAM_AUTHENTICATION', 'DF_ALLOW_LOCAL_USERS', 'USE_ALL_AUTH', 'RADIUS_SERVER']
 
     def __call__(self, settings_dict):
@@ -44,7 +44,7 @@ class AuthenticationBackends:
         return []
 
     def process_allauth(self, settings_dict):
-        if not settings_dict['USE_ALL_AUTH'] and not settings_dict['ALLAUTH_PROVIDERS']:
+        if not settings_dict['USE_ALL_AUTH'] and not settings_dict['ALLAUTH_PROVIDER_APPS']:
             return []
         try:
             get_distribution('django-allauth')
