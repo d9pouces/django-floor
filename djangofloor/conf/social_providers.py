@@ -16,9 +16,11 @@ SOCIAL_PROVIDER_APPS = {'allauth.socialaccount.providers.%s' % x for x in
 
 
 class SocialProviderConfiguration:
-    help = 'Please contact %(module)s to obtain the following values:'
+    help = 'Please read https://django-allauth.readthedocs.io/en/latest/providers.html#{{ provider_id }}\n' \
+           'Contact {{ provider_name }} to get authentication secrets. ' \
+           'Callback URL should be {{ SERVER_BASE_URL }}accounts/{{ provider_id }}/login/callback/'
     attributes = {'client_id': 'App ID, or consumer key', 'secret': 'API secret, client secret, or consumer secret',
-                  'key': 'Key'}
+                  'key': 'Key (often optional)'}
     name_prefix = 'df-'
 
     def __init__(self, provider_id: str, provider_name: str, provider_app: str, values: Union[dict, None] = None):
@@ -37,18 +39,14 @@ class SocialProviderConfiguration:
     def query_kwargs(self):
         return {'name': self.name, 'provider': self.provider_id}
 
-
-class GithubConfiguration(SocialProviderConfiguration):
-    id = 'github'
-    help = """open https://github.com/settings/applications/new and enter:
-    Application name: {{ DF_PROJECT_NAME }} ({{ SERVER_NAME }})
-    Homepage URL: {{ SERVER_BASE_URL }}
-    Application description: {{ DF_PROJECT_NAME }} (or anything else useful)
-    Authorization callback URL: {{ SERVER_BASE_URL }}accounts/github/login/callback/
-    
-    After validation, you can copy the following values:
-    """
-    attributes = {'client_id': 'Client ID', 'secret': 'Client Secret'}
+    @property
+    def help_text(self):
+        from djangofloor.conf.settings import merger
+        from django.template import Template, Context
+        context = {}
+        context.update(merger.settings)
+        context.update(self.__dict__)
+        return Template(self.help).render(Context(dict_=context))
 
 
 def get_available_configurations() -> dict:
@@ -151,6 +149,33 @@ def migrate(read_only: bool=False) -> bool:
             if not read_only:
                 q.objects.bulk_create(to_create_db_through_app)
     return action_required
+
+
+class GithubConfiguration(SocialProviderConfiguration):
+    id = 'github'
+    help = """open https://github.com/settings/applications/new and enter:
+    Application name: {{ DF_PROJECT_NAME }} ({{ SERVER_NAME }})
+    Homepage URL: {{ SERVER_BASE_URL }}
+    Application description: {{ DF_PROJECT_NAME }} (or anything else useful)
+    Authorization callback URL: {{ SERVER_BASE_URL }}accounts/github/login/callback/
+    
+    After validation, you can copy the following values:
+    """
+    attributes = {'client_id': 'Client ID', 'secret': 'Client Secret'}
+
+
+class FacebookConfiguration(SocialProviderConfiguration):
+    id = 'facebook'
+    help = """open https://developers.facebook.com/apps and create an app to obtain a key and secret key.
+    After registration you will need to make it available to the public. 
+    In order to do that your app first has to be reviewed by Facebook.
+
+    Leave your App Domains empty and put {{ SERVER_BASE_URL }} in the section labeled Website with Facebook Login. 
+    Note that you’ll need to add your site’s actual domain to this section once it goes live.
+
+    After validation, you can copy the following values:
+    """
+    attributes = {'client_id': 'Client ID', 'secret': 'Client Secret'}
 
 
 SOCIAL_PROVIDER_CONFIGURATIONS = [GithubConfiguration, ]

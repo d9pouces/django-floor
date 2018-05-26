@@ -4,9 +4,7 @@ from collections import OrderedDict
 from configparser import RawConfigParser
 
 from django.conf import settings
-from django.template import Template, Context
 
-from djangofloor.conf.settings import merger
 from djangofloor.conf.social_providers import get_loaded_configurations, get_available_configurations, migrate
 from djangofloor.management.base import BaseCommand
 
@@ -21,10 +19,13 @@ class Command(BaseCommand):
     def handle(self, **options):
 
         action = options['action']
-        if action == 'show':
-            self.show_config()
-        elif action == 'add':
-            self.add_provider()
+        try:
+            if action == 'show':
+                self.show_config()
+            elif action == 'add':
+                self.add_provider()
+        except KeyboardInterrupt:
+            self.stderr.write('\nCancelled.')
 
     def add_provider(self):
         providers = get_available_configurations()
@@ -54,7 +55,7 @@ class Command(BaseCommand):
             if input().lower() != 'y':
                 return
         # get configuration for the selected provider
-        content = Template(provider.help).render(Context(dict_=merger.settings))
+        content = provider.help_text
         self.stdout.write(content)
         new_values = {}
         for option, text in sorted(provider.attributes.items()):
