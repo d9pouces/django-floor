@@ -39,7 +39,7 @@ def check_websockets(window_info):
 def generate_log(window_info, form: SerializedForm(LogNameForm)):
     """Used for checking if websockets are functional or not for your installation. Called from the monitoring view."""
     if form.is_valid():
-        logname = form.cleaned_data['log_name'] or form.cleaned_data['other_log_name'] or 'django.requests'
+        logname = form.cleaned_data['log_name'] or form.cleaned_data['other_log_name'] or 'django.request'
         level = form.cleaned_data['level']
         message = form.cleaned_data['message']
         logger_ = logging.getLogger(logname)

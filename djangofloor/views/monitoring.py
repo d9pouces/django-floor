@@ -46,7 +46,7 @@ except ImportError:
     psutil = None
 
 __author__ = 'Matthieu Gallet'
-logger = logging.getLogger('django.requests')
+logger = logging.getLogger('django.request')
 
 stdlib_pkgs = ('python', 'wsgiref', 'argparse')
 
@@ -484,7 +484,7 @@ def generate_log(request):
         raise Http404
     form = LogNameForm(request.POST)
     if form.is_valid():
-        logname = form.cleaned_data['other_log_name'] or form.cleaned_data['log_name'] or 'django.requests'
+        logname = form.cleaned_data['other_log_name'] or form.cleaned_data['log_name'] or 'django.request'
         level = form.cleaned_data['level']
         message = form.cleaned_data['message']
         logger_ = logging.getLogger(logname)

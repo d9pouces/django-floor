@@ -20,7 +20,7 @@ from djangofloor.tasks import set_websocket_topics
 from djangofloor.forms import SearchForm
 
 __author__ = 'Matthieu Gallet'
-logger = logging.getLogger('django.requests')
+logger = logging.getLogger('django.request')
 
 
 class SiteSearchView(TemplateView):

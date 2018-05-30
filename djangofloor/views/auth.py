@@ -15,7 +15,7 @@ from django.views.decorators.cache import never_cache
 from djangofloor.decorators import validate_form, everyone
 
 __author__ = 'Matthieu Gallet'
-logger = logging.getLogger('django.requests')
+logger = logging.getLogger('django.request')
 
 validate_form(form_cls=UserCreationForm, path='djangofloor.validate.user_creation', is_allowed_to=everyone)
 validate_form(form_cls=PasswordResetForm,

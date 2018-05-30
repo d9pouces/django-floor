@@ -27,6 +27,7 @@ The class :class:`WindowInfoMiddleware` allows to:
 
 """
 import base64
+import logging
 import warnings
 
 from django.conf import settings
@@ -48,6 +49,7 @@ from django.utils.translation import get_language_from_request
 from djangofloor.utils import RemovedInDjangoFloor200Warning
 
 __author__ = 'Matthieu Gallet'
+logger = logging.getLogger('django.request')
 
 
 # noinspection PyClassHasNoInit
@@ -89,8 +91,13 @@ class DjangoFloorMiddleware(BaseRemoteUserMiddleware):
                     auth.login(request, user)
         # noinspection PyTypeChecker
         username = getattr(settings, 'DF_FAKE_AUTHENTICATION_USERNAME', None)
-        if username and settings.DEBUG and request.META.get('REMOTE_ADDR') in settings.INTERNAL_IPS:
-            request.META[self.header] = username
+        if username and settings.DEBUG:
+            remote_addr = request.META.get('REMOTE_ADDR')
+            if remote_addr in settings.INTERNAL_IPS:
+                request.META[self.header] = username
+            elif remote_addr:
+                logger.warning('Unable to use `settings.DF_FAKE_AUTHENTICATION_USERNAME`. '
+                               'You should add %s to the list `settings.INTERNAL_IPS`.' % remote_addr)
 
         if self.header and self.header in request.META:
             remote_username = request.META.get(self.header)

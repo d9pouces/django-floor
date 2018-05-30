@@ -23,7 +23,7 @@ from djangofloor.wsgi.wsgi_server import signer
 
 __author__ = 'Matthieu Gallet'
 register = template.Library()
-logger = logging.getLogger('django.requests')
+logger = logging.getLogger('django.request')
 
 
 @register.simple_tag(takes_context=True)

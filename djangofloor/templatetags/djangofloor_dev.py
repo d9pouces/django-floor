@@ -16,7 +16,7 @@ from djangofloor.conf.settings import merger
 from djangofloor.utils import smart_pipfile_url
 
 register = template.Library()
-logger = logging.getLogger('django.requests')
+logger = logging.getLogger('django.request')
 
 
 register.filter(name='pipfile_url', filter_func=smart_pipfile_url)

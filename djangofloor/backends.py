@@ -22,7 +22,7 @@ try:
 except ImportError:
     PipelineCachedStorage = None
 __author__ = 'Matthieu Gallet'
-logger = logging.getLogger('django.requests')
+logger = logging.getLogger('django.request')
 
 _CACHED_GROUPS = {}
 

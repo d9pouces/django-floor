@@ -6,7 +6,7 @@ from django.template.loader import render_to_string
 
 register = template.Library()
 __author__ = 'Matthieu Gallet'
-logger = logging.getLogger('django.requests')
+logger = logging.getLogger('django.request')
 
 
 @register.filter
