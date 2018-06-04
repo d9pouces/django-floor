@@ -25,3 +25,8 @@ Creating a working new project only requires a couple lines:
     python setup.py install
     newproject-ctl migrate
     newproject-ctl runserver
+
+Online documentation
+--------------------
+
+[Read The doc](http://django-floor.readthedocs.io/en/latest/)
