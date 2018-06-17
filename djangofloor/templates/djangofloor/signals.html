@@ -24,11 +24,12 @@ $.df._heartbeatMessage = "{{ WEBSOCKET_HEARTBEAT }}";
 {% for f in FUNCTIONS.items %}$.dfws.{{ f.0 }} = {{ f.1|safe }};
 {% endfor %}
 
-$.df.csrfTokenValue = getCookie("{{ CSRF_COOKIE_NAME }}")
+$.df.csrfTokenValue = getCookie("{{ CSRF_COOKIE_NAME }}");
 $.ajaxSetup({
     beforeSend: function(xhr, settings) {
         if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
             xhr.setRequestHeader("{{ CSRF_HEADER_NAME }}", $.df.csrfTokenValue);
+            xhr.setRequestHeader("X-CSRFTOKEN", $.df.csrfTokenValue);
             xhr.setRequestHeader("{{ WEBSOCKET_HEADER }}", $.df._wsToken);
         }
     }
