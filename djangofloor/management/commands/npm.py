@@ -51,3 +51,7 @@ class Command(BaseCommand):
                         shutil.copy(src_path, dst_path)
                     else:
                         shutil.copytree(src_path, dst_path)
+        if verbosity > 0:
+            npm_path = os.path.join(settings.STATIC_ROOT, settings.NPM_STATIC_FILES_PREFIX)
+            self.stdout.write(self.style.SUCCESS('Selection moved to %s. You can copy it to your '
+                                                 'static source dir.' % npm_path))
