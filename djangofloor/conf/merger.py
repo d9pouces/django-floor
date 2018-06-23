@@ -237,7 +237,7 @@ class SettingMerger:
                     result.add(self.analyze_raw_value(sub_obj, provider_name, setting_name))
             return result
         elif isinstance(obj, dict):
-            result = {}
+            result = OrderedDict()
             for sub_key, sub_obj in obj.items():
                 if isinstance(sub_obj, ExpandIterable):
                     result.update(self.get_setting_value(sub_obj.value))
