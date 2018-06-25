@@ -254,13 +254,17 @@ class AutocreateFileContent(File):
             self.makedirs(merger, os.path.dirname(filename))
             merger.stdout.write('Writing new value to \'%s\'' % filename)
             try:
+                result_text = self.serialize_value(result)
                 with open(filename, 'w', encoding='utf-8') as fd:
-                    fd.write(result)
+                    fd.write(result_text)
             except Exception as e:
                 merger.stderr.write('Unable to write content of \'%s\' (%s)' % (filename, e))
             self.chmod(merger, filename)
         else:
             merger.stderr.write('Invalid empty content for \'%s\'' % filename)
+
+    def pre_collectstatic(self, merger, provider_name, setting_name, value):
+        pass
 
     def get_value(self, merger, provider_name: str, setting_name: str):
         """ Return the value
@@ -273,13 +277,32 @@ class AutocreateFileContent(File):
         filename = merger.analyze_raw_value(self.value, provider_name, setting_name)
         if os.path.isfile(filename):
             with open(filename, 'r', encoding='utf-8') as fd:
-                result = fd.read()
+                result_text = fd.read()
+            result = self.unserialize_value(result_text)
         else:
             settings_check_results.append(
                 Warning('\'%s\' does not exist. Run the \'migrate\' command to fix this problem.' % filename,
                         obj='configuration'))
             result = self.create_function(False, *self.args, **self.kwargs)
         return result
+
+    # noinspection PyMethodMayBeStatic
+    def serialize_value(self, value) -> str:
+        """Serialize the result value to write it to the target file.
+
+        :param value: the value returned by the `create_function`
+        :return:
+        """
+        return value
+
+    # noinspection PyMethodMayBeStatic
+    def unserialize_value(self, value: str):
+        """
+        Format the text read in the target file.
+        :param value: the content of the file
+        :return:
+        """
+        return value
 
 
 class AutocreateFile(AutocreateFileContent):
