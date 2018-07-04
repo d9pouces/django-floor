@@ -2,6 +2,7 @@ import glob
 import os
 import shutil
 import subprocess
+from argparse import ArgumentParser
 
 from django.conf import settings
 from django.core.management import BaseCommand
@@ -14,15 +15,14 @@ __author__ = 'Matthieu Gallet'
 class Command(BaseCommand):
     help = 'Use npm to download all packages that are keys of "settings.NPM_FILE_PATTERNS"'
 
-    # def add_arguments(self, parser):
-    #     assert isinstance(parser, ArgumentParser)
-    #     parser.add_argument('--favicon', default=None,
-    #                         help=('path or URL of to master favicon. '
-    #                               'Otherwise use "icons/favicon.ico" from the static files'))
+    def add_arguments(self, parser: ArgumentParser):
+        path = os.path.join(settings.STATIC_ROOT, settings.NPM_STATIC_FILES_PREFIX)
+        parser.add_argument('--to', default=path, help='Where to store final files (default to "%s")' % path)
 
     def handle(self, *args, **options):
         verbosity = options['verbosity']
         ensure_dir(settings.NPM_ROOT_PATH, False)
+        dst_path_dirname = options['to']
         for npm_package, patterns in settings.NPM_FILE_PATTERNS.items():
             if verbosity > 0:
                 self.stdout.write(self.style.SUCCESS('downloading %s') % npm_package)
@@ -33,7 +33,7 @@ class Command(BaseCommand):
                 print("Unable to execute command %s" % " ".join(command))
                 continue
             src_package_root = os.path.join(settings.NPM_ROOT_PATH, 'node_modules', npm_package)
-            dst_package_root = os.path.join(settings.STATIC_ROOT, settings.NPM_STATIC_FILES_PREFIX, npm_package)
+            dst_package_root = os.path.join(dst_path_dirname, npm_package)
             ensure_dir(dst_package_root)
             for pattern in patterns:
                 if verbosity > 0:
@@ -52,6 +52,5 @@ class Command(BaseCommand):
                     else:
                         shutil.copytree(src_path, dst_path)
         if verbosity > 0:
-            npm_path = os.path.join(settings.STATIC_ROOT, settings.NPM_STATIC_FILES_PREFIX)
             self.stdout.write(self.style.SUCCESS('Selection moved to %s. You can copy it to your '
-                                                 'static source dir.' % npm_path))
+                                                 'static source dir.' % dst_path_dirname))
