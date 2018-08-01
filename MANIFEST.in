@@ -1,2 +1,3 @@
 recursive-include djangofloor *
 include LICENSE README.md
+global-exclude __pycache__ *.pyc
