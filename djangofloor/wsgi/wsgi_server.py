@@ -38,14 +38,16 @@ except ImportError:
 
 __author__ = 'Matthieu Gallet'
 logger = logging.getLogger('django.request')
-signer = signing.Signer()
 topic_serializer = import_string(settings.WEBSOCKET_TOPIC_SERIALIZER)
 signal_decoder = import_string(settings.WEBSOCKET_SIGNAL_DECODER)
 
 
 def get_websocket_topics(request):
     signed_token = request.GET.get('token', '')
+    session_key = request.COOKIES.get(settings.SESSION_COOKIE_NAME)
+    signer = signing.Signer(session_key)
     try:
+
         token = signer.unsign(signed_token)
     except signing.BadSignature:
         return []
@@ -86,13 +88,14 @@ class WebsocketWSGIServer:
     def process_request(request):
         request.session = None
         request.user = None
-        session_key = request.GET.get(settings.SESSION_COOKIE_NAME)
+        session_key = request.COOKIES.get(settings.SESSION_COOKIE_NAME)
         if session_key is not None:
             engine = import_module(settings.SESSION_ENGINE)
             request.session = engine.SessionStore(session_key)
             request.user = get_user(request)
         window_info = WindowInfo.from_request(request)
         signed_token = request.GET.get('token', '')
+        signer = signing.Signer(session_key)
         try:
             window_info.window_key = signer.unsign(signed_token)
         except signing.BadSignature:

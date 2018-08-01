@@ -10,6 +10,7 @@ from urllib.parse import urljoin
 
 from django import template
 from django.conf import settings
+from django.core import signing
 from django.template import Context
 from django.templatetags.static import PrefixNode, StaticNode
 from django.urls import reverse
@@ -19,7 +20,6 @@ from django.utils.safestring import mark_safe
 
 from djangofloor.tasks import set_websocket_topics
 from djangofloor.utils import RemovedInDjangoFloor200Warning
-from djangofloor.wsgi.wsgi_server import signer
 
 __author__ = 'Matthieu Gallet'
 register = template.Library()
@@ -37,11 +37,11 @@ def df_init_websocket(context, *topics):
         set_websocket_topics(context['df_http_request'], *topics)
     ws_token = context['df_window_key']
     session_id = context['df_session_id']
+    signer = signing.Signer(session_id)
     signed_token = signer.sign(ws_token)
     protocol = 'wss' if settings.USE_SSL else 'ws'
     site_name = '%s:%s' % (settings.SERVER_NAME, settings.SERVER_PORT)
-    script = '$.df._wsConnect("%s://%s%s?token=%s&%s=%s");' % \
-             (protocol, site_name, settings.WEBSOCKET_URL, signed_token, settings.SESSION_COOKIE_NAME, session_id)
+    script = '$.df._wsConnect("%s://%s%s?token=%s");' % (protocol, site_name, settings.WEBSOCKET_URL, signed_token)
     script += '$.df._wsToken="%s";' % signed_token
     script = '$(document).ready(function(){%s});' % script
     init_value = '<script type="application/javascript">%s</script>' % script
