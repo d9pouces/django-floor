@@ -4,9 +4,12 @@ import warnings
 from djangofloor.tasks import SESSION
 from djangofloor.utils import RemovedInDjangoFloor200Warning
 
-__author__ = 'Matthieu Gallet'
+__author__ = "Matthieu Gallet"
 
-warnings.warn('djangofloor.df_redis module and its functions will be removed', RemovedInDjangoFloor200Warning)
+warnings.warn(
+    "djangofloor.df_redis module and its functions will be removed",
+    RemovedInDjangoFloor200Warning,
+)
 
 
 # noinspection PyUnusedLocal

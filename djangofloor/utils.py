@@ -16,16 +16,18 @@ import pkg_resources
 from django.core.exceptions import ImproperlyConfigured
 from django.utils.module_loading import import_string
 
-__author__ = 'Matthieu Gallet'
+__author__ = "Matthieu Gallet"
 
 
 class RemovedInDjangoFloor110Warning(DeprecationWarning):
     """Used for displaying functions or modules that will be removed in a near future."""
+
     pass
 
 
 class RemovedInDjangoFloor200Warning(DeprecationWarning):
     """Used for displaying functions or modules that will be removed in a near future."""
+
     pass
 
 
@@ -73,7 +75,7 @@ def walk(module_name, dirname, topdown=True):
         filenames = []
         for name in pkg_resources.resource_listdir(module_name, root):
             # noinspection PyUnresolvedReferences
-            fullname = root + '/' + name
+            fullname = root + "/" + name
             isdir = pkg_resources.resource_isdir(module_name, fullname)
             if isdir:
                 dirnames.append(name)
@@ -85,7 +87,7 @@ def walk(module_name, dirname, topdown=True):
         if topdown:
             for name in dirnames:
                 # noinspection PyUnresolvedReferences
-                for values in rec_walk(root + '/' + name):
+                for values in rec_walk(root + "/" + name):
                     yield values
 
     return rec_walk(dirname)
@@ -94,12 +96,12 @@ def walk(module_name, dirname, topdown=True):
 def _resolve_name(name, package, level):
     """Return the absolute name of the module to be imported."""
     # noinspection PyTypeChecker
-    if not hasattr(package, 'rindex'):
+    if not hasattr(package, "rindex"):
         raise ValueError("'package' not set to a string")
     dot = len(package)
     for x in range(level, 1, -1):
         try:
-            dot = package.rindex('.', 0, dot)
+            dot = package.rindex(".", 0, dot)
         except ValueError:
             raise ValueError("attempted relative import beyond top-level package")
     return "%s.%s" % (package[:dot], name)
@@ -116,26 +118,30 @@ def guess_version(defined_settings):
     :rtype: :class:`str`
     """
     try:
-        project_distribution = pkg_resources.get_distribution(defined_settings['DF_MODULE_NAME'])
+        project_distribution = pkg_resources.get_distribution(
+            defined_settings["DF_MODULE_NAME"]
+        )
         return project_distribution.version
     except pkg_resources.DistributionNotFound:
         pass
     try:
-        return import_string('%s.__version__' % defined_settings['DF_MODULE_NAME'])
+        return import_string("%s.__version__" % defined_settings["DF_MODULE_NAME"])
     except ImportError:
-        return '1.0.0'
+        return "1.0.0"
 
 
 def get_view_from_string(view_as_str):
     try:
         view = import_string(view_as_str)
     except ImportError:
-        raise ImproperlyConfigured('Unable to import %s' % view_as_str)
-    if hasattr(view, 'as_view') and callable(view.as_view):
+        raise ImproperlyConfigured("Unable to import %s" % view_as_str)
+    if hasattr(view, "as_view") and callable(view.as_view):
         return view.as_view()
     elif callable(view):
         return view
-    raise ImproperlyConfigured('%s is not callabled and does not have an "as_view" attribute')
+    raise ImproperlyConfigured(
+        '%s is not callabled and does not have an "as_view" attribute'
+    )
 
 
 def remove_arguments_from_help(parser, arguments):
@@ -227,52 +233,58 @@ def smart_pipfile_url(url: str) -> str:
     "pywinusb = '*'"
 
     """
+
     def pip_repr(value: dict):
-        return '{ %s }' % ', '.join(['%s = %r' % (k, v) for (k, v) in value.items()])
+        return "{ %s }" % ", ".join(["%s = %r" % (k, v) for (k, v) in value.items()])
 
     class TRUE:
         def __repr__(self):
-            return 'true'
+            return "true"
 
-    url_matcher = re.match(r'^(svn\+|git\+|hg\+|bzr\+)?(([^:]+)://[^/]+/[^@#]+)(@[^#]+)?(#.+)?$', url)
-    git_matcher = re.match(r'^git\+([^@]+)@([^:]+):([^#]+)#egg=(.*)$', url)
-    pkg_matcher = re.match(r'^([^\[;=<>~]+)(\[[^\]]+\])?((===|!=|<=|>=|<|>|==|~=)[^;]+)?(;.*)?$', url.replace(' ', ''))
+    url_matcher = re.match(
+        r"^(svn\+|git\+|hg\+|bzr\+)?(([^:]+)://[^/]+/[^@#]+)(@[^#]+)?(#.+)?$", url
+    )
+    git_matcher = re.match(r"^git\+([^@]+)@([^:]+):([^#]+)#egg=(.*)$", url)
+    pkg_matcher = re.match(
+        r"^([^\[;=<>~]+)(\[[^\]]+\])?((===|!=|<=|>=|<|>|==|~=)[^;]+)?(;.*)?$",
+        url.replace(" ", ""),
+    )
     egg_name = None
     values = {}
     if url_matcher:
         versionning_protocol, url, scheme, tag, anchor = url_matcher.groups()
         if versionning_protocol is None:
-            if scheme == 'git':
+            if scheme == "git":
                 versionning_protocol = scheme
             else:
-                versionning_protocol = 'file'
+                versionning_protocol = "file"
         else:
             versionning_protocol = versionning_protocol[:-1]
-        if url.endswith('.git'):
-            egg_name = url.rpartition('/')[2].rpartition('.')[0]
-        elif versionning_protocol == 'git':
-            egg_name = url.rpartition('/')[2]
-        if anchor and anchor.startswith('#egg='):
+        if url.endswith(".git"):
+            egg_name = url.rpartition("/")[2].rpartition(".")[0]
+        elif versionning_protocol == "git":
+            egg_name = url.rpartition("/")[2]
+        if anchor and anchor.startswith("#egg="):
             egg_name = anchor[5:]
         values[versionning_protocol] = url
         if tag:
-            values['ref'] = tag[1:]
-        if versionning_protocol != 'file':
-            values['editable'] = TRUE()
+            values["ref"] = tag[1:]
+        if versionning_protocol != "file":
+            values["editable"] = TRUE()
         if not egg_name:
             egg_name = ('"%X"' % zlib.crc32(url.encode())).lower()
     elif git_matcher:
         login, host, project, egg_name = git_matcher.groups()
-        values['git'] = 'git://%s@%s/%s' % (login, host, project)
-        values['editable'] = TRUE()
+        values["git"] = "git://%s@%s/%s" % (login, host, project)
+        values["editable"] = TRUE()
     elif pkg_matcher:
         egg_name, extra, spec, __, markers = pkg_matcher.groups()
         if extra:
-            values['extras'] = extra[1:-1].split(',')
+            values["extras"] = extra[1:-1].split(",")
         if spec:
-            values['version'] = spec
+            values["version"] = spec
         elif not values:
-            values['version'] = '*'
-    if len(values) == 1 and 'version' in values:
-        return '%s = %r' % (egg_name, values['version'])
-    return '%s = %s' % (egg_name, pip_repr(values))
+            values["version"] = "*"
+    if len(values) == 1 and "version" in values:
+        return "%s = %r" % (egg_name, values["version"])
+    return "%s = %s" % (egg_name, pip_repr(values))

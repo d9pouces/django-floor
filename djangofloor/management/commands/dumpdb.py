@@ -10,7 +10,7 @@ from django.conf import settings
 from django.core.management import BaseCommand
 from django.utils.translation import ugettext as _
 
-__author__ = 'Matthieu Gallet'
+__author__ = "Matthieu Gallet"
 
 
 class BaseDumper:
@@ -41,7 +41,7 @@ class MySQL(BaseDumper):
         env = os.environ.copy()
         env.update(self.get_env())
         if filename is not None:
-            with open(filename, 'wb') as fd:
+            with open(filename, "wb") as fd:
                 p = subprocess.Popen(cmd, env=env, stdout=fd)
         else:
             p = subprocess.Popen(cmd, env=env)
@@ -51,12 +51,12 @@ class MySQL(BaseDumper):
         """ :return:
         :rtype: :class:`list` of :class:`str`
         """
-        command = ['mysqldump', '--user', '%(USER)s', '--password=%(PASSWORD)s']
-        if self.db_options.get('HOST'):
-            command += ['--host', '%(HOST)s']
-        if self.db_options.get('PORT'):
-            command += ['--port', '%(PORT)s']
-        command += ['%(NAME)s']
+        command = ["mysqldump", "--user", "%(USER)s", "--password=%(PASSWORD)s"]
+        if self.db_options.get("HOST"):
+            command += ["--host", "%(HOST)s"]
+        if self.db_options.get("PORT"):
+            command += ["--port", "%(PORT)s"]
+        command += ["%(NAME)s"]
         return command
 
     def get_env(self):
@@ -68,19 +68,19 @@ class PostgreSQL(MySQL):
     """ dump the content of a PostgreSQL database, with `pg_dump`"""
 
     def dump_cmd_list(self):
-        command = ['pg_dump', '--username', '%(USER)s']
-        if self.db_options.get('HOST'):
-            command += ['--host', '%(HOST)s']
-        if self.db_options.get('PORT'):
-            command += ['--port', '%(PORT)s']
+        command = ["pg_dump", "--username", "%(USER)s"]
+        if self.db_options.get("HOST"):
+            command += ["--host", "%(HOST)s"]
+        if self.db_options.get("PORT"):
+            command += ["--port", "%(PORT)s"]
         if settings.FLOOR_BACKUP_SINGLE_TRANSACTION:
-            command += ['--single-transaction']
-        command += ['%(NAME)s']
+            command += ["--single-transaction"]
+        command += ["%(NAME)s"]
         return command
 
     def get_env(self):
         """Extra environment variables to be passed to shell execution"""
-        return {'PGPASSWORD': '%(PASSWORD)s' % self.db_options}
+        return {"PGPASSWORD": "%(PASSWORD)s" % self.db_options}
 
 
 class SQLite(BaseDumper):
@@ -88,10 +88,10 @@ class SQLite(BaseDumper):
 
     def dump(self, filename):
         if filename is None:
-            p = subprocess.Popen(['cat', self.db_options['NAME']])
+            p = subprocess.Popen(["cat", self.db_options["NAME"]])
             p.communicate()
         else:
-            shutil.copy(self.db_options['NAME'], filename)
+            shutil.copy(self.db_options["NAME"], filename)
 
 
 class Command(BaseCommand):
@@ -107,14 +107,21 @@ class Command(BaseCommand):
         the written file will be "backup-default.sql", "backup-other.sql", and so on).
 
     """
-    help = 'Dump the content of one (or more) database'
+
+    help = "Dump the content of one (or more) database"
 
     def add_arguments(self, parser):
-        parser.add_argument('args', nargs='*',
-                            help='Name of the databases to dump. If not given, the default database is dumped.')
-        parser.add_argument('--filename', default=None,
-                            help='Destination file for the dump. '
-                                 'If multiple databases are selected, the written file is named filename-$database.ext')
+        parser.add_argument(
+            "args",
+            nargs="*",
+            help="Name of the databases to dump. If not given, the default database is dumped.",
+        )
+        parser.add_argument(
+            "--filename",
+            default=None,
+            help="Destination file for the dump. "
+            "If multiple databases are selected, the written file is named filename-$database.ext",
+        )
 
     def handle(self, *args, **options):
         """ execute the command"""
@@ -122,16 +129,16 @@ class Command(BaseCommand):
             selected_names = set(args)
         else:
             # noinspection PySetFunctionToLiteral
-            selected_names = set(['default'])
-        filename = options['filename']
+            selected_names = set(["default"])
+        filename = options["filename"]
 
         for name, db_options in settings.DATABASES.items():
             if name not in selected_names:
                 continue
             if filename:
                 if len(options) > 1:
-                    filename, sep, ext = filename.rpartition('.')
-                    filename = '%s-%s.%s' % (filename, name, ext)
+                    filename, sep, ext = filename.rpartition(".")
+                    filename = "%s-%s.%s" % (filename, name, ext)
                 if not os.path.dirname(filename):
                     os.makedirs(os.path.dirname(filename))
             adaptater = self.get_dumper(name, db_options)
@@ -147,11 +154,11 @@ class Command(BaseCommand):
         :type db_options: :class:`dict`
         :rtype: :class:`BaseDumper`
         """
-        engine = db_options['ENGINE'].lower()
-        if 'mysql' in engine:
+        engine = db_options["ENGINE"].lower()
+        if "mysql" in engine:
             return MySQL(name, db_options)
-        elif 'postgresql' in engine:
+        elif "postgresql" in engine:
             return PostgreSQL(name, db_options)
-        elif 'sqlite' in engine:
+        elif "sqlite" in engine:
             return SQLite(name, db_options)
-        raise ValueError(_('Unknown database engine: %(ENGINE)s') % db_options)
+        raise ValueError(_("Unknown database engine: %(ENGINE)s") % db_options)

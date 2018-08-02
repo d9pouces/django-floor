@@ -15,8 +15,8 @@ from django.db.models import Model
 from djangofloor.wsgi.window_info import Session
 
 
-__author__ = 'Matthieu Gallet'
-logger = logging.getLogger('djangofloor.signals')
+__author__ = "Matthieu Gallet"
+logger = logging.getLogger("djangofloor.signals")
 
 
 def serialize_topic(window_info, obj):
@@ -33,24 +33,25 @@ def serialize_topic(window_info, obj):
 
 """
     from djangofloor.tasks import BROADCAST, USER, WINDOW
+
     if obj is BROADCAST:
-        return '-broadcast'
+        return "-broadcast"
     elif obj is WINDOW:
         if window_info is None:
             return None
-        return '-window.%s' % window_info.window_key
+        return "-window.%s" % window_info.window_key
     elif isinstance(obj, type):
-        return '-<%s>' % obj.__name__
+        return "-<%s>" % obj.__name__
     elif isinstance(obj, Model):
         # noinspection PyProtectedMember
         meta = obj._meta
-        return '-%s.%s.%s' % (meta.app_label, meta.model_name, obj.pk or 0)
+        return "-%s.%s.%s" % (meta.app_label, meta.model_name, obj.pk or 0)
     elif obj is USER:
         if window_info is None:
             return None
         # noinspection PyProtectedMember
         meta = get_user_model()._meta
-        return '-%s.%s.%s' % (meta.app_label, meta.model_name, window_info.user_pk)
+        return "-%s.%s.%s" % (meta.app_label, meta.model_name, window_info.user_pk)
     elif isinstance(obj, Session):
-        return '-session.%s' % obj.key
-    return '-%s.%s' % (obj.__class__.__name__, hash(obj))
+        return "-session.%s" % obj.key
+    return "-%s.%s" % (obj.__class__.__name__, hash(obj))

@@ -26,36 +26,39 @@ from django.views.decorators.cache import never_cache
 from django.views.generic import TemplateView
 
 from djangofloor.decorators import REGISTERED_SIGNALS, REGISTERED_FUNCTIONS, everyone
+
 # noinspection PyProtectedMember
 from djangofloor.tasks import import_signals_and_functions
 from djangofloor.utils import RemovedInDjangoFloor200Warning
 from djangofloor.wsgi.window_info import WindowInfo
 
-__author__ = 'Matthieu Gallet'
+__author__ = "Matthieu Gallet"
 
 
 # noinspection PyUnusedLocal
 def favicon(request):
     """Redirect "/favicon.ico" to the favicon in the static files """
-    return HttpResponsePermanentRedirect(static('favicon/favicon.ico'))
+    return HttpResponsePermanentRedirect(static("favicon/favicon.ico"))
 
 
 def robots(request):
     """Basic robots file"""
     current_site = get_current_site(request)
-    base_url = add_domain(current_site.domain, '/', request.is_secure())[:-1]
-    template_values = {'base_url': base_url}
-    return TemplateResponse(request, 'djangofloor/robots.txt', template_values, content_type='text/plain')
+    base_url = add_domain(current_site.domain, "/", request.is_secure())[:-1]
+    template_values = {"base_url": base_url}
+    return TemplateResponse(
+        request, "djangofloor/robots.txt", template_values, content_type="text/plain"
+    )
 
 
 @lru_cache()
 def __get_js_mimetype():
     # noinspection PyTypeChecker
-    if hasattr(settings, 'PIPELINE_MIMETYPES'):
+    if hasattr(settings, "PIPELINE_MIMETYPES"):
         for (mimetype, ext) in settings.PIPELINE_MIMETYPES:
-            if ext == '.js':
+            if ext == ".js":
                 return mimetype
-    return 'text/javascript'
+    return "text/javascript"
 
 
 def read_file_in_chunks(fileobj, chunk_size=32768):
@@ -67,7 +70,7 @@ def read_file_in_chunks(fileobj, chunk_size=32768):
     :param chunk_size: max size of each chunk
     :type chunk_size: `int`
     """
-    for data in iter(lambda: fileobj.read(chunk_size), b''):
+    for data in iter(lambda: fileobj.read(chunk_size), b""):
         yield data
 
 
@@ -83,38 +86,58 @@ def signals(request):
     else:
         valid_signal_names = []
         for signal_name, list_of_connections in REGISTERED_SIGNALS.items():
-            if any(x.is_allowed_to is everyone or x.is_allowed_to(x, signal_request, None)
-                   for x in list_of_connections):
+            if any(
+                x.is_allowed_to is everyone or x.is_allowed_to(x, signal_request, None)
+                for x in list_of_connections
+            ):
                 valid_signal_names.append(signal_name)
         valid_function_names = []
         for function_name, connection in REGISTERED_FUNCTIONS.items():
-            if connection.is_allowed_to is everyone or connection.is_allowed_to(connection, signal_request, None):
+            if connection.is_allowed_to is everyone or connection.is_allowed_to(
+                connection, signal_request, None
+            ):
                 valid_function_names.append(function_name)
 
     function_names_dict = {}
     for name in valid_function_names:
-        function_names_dict[name] = 'function(opts) { return $.df._wsCallFunction("%(name)s", opts); }' % {'name': name}
-        name, sep, right = name.rpartition('.')
-        while sep == '.':
-            function_names_dict.setdefault(name, '{}')
-            name, sep, right = name.rpartition('.')
+        function_names_dict[name] = (
+            'function(opts) { return $.df._wsCallFunction("%(name)s", opts); }'
+            % {"name": name}
+        )
+        name, sep, right = name.rpartition(".")
+        while sep == ".":
+            function_names_dict.setdefault(name, "{}")
+            name, sep, right = name.rpartition(".")
     functions = OrderedDict()
     for key in sorted(function_names_dict):
         functions[key] = function_names_dict[key]
 
-    protocol = 'wss' if settings.USE_SSL else 'ws'
-    site_name = '%s:%s' % (settings.SERVER_NAME, settings.SERVER_PORT)
+    protocol = "wss" if settings.USE_SSL else "ws"
+    site_name = "%s:%s" % (settings.SERVER_NAME, settings.SERVER_PORT)
 
     # noinspection PyTypeChecker
-    csrf_header_name = getattr(settings, 'CSRF_HEADER_NAME', 'HTTP_X_CSRFTOKEN')
-    template_values = {'SIGNALS': valid_signal_names, 'FUNCTIONS': functions,
-                       'WEBSOCKET_HEARTBEAT': settings.WEBSOCKET_HEARTBEAT,
-                       'WEBSOCKET_HEADER': settings.WEBSOCKET_HEADER,
-                       'CSRF_COOKIE_NAME': settings.CSRF_COOKIE_NAME,
-                       'DEBUG': settings.DEBUG, 'CSRF_HEADER_NAME': csrf_header_name[5:].replace('_', '-')}
+    csrf_header_name = getattr(settings, "CSRF_HEADER_NAME", "HTTP_X_CSRFTOKEN")
+    template_values = {
+        "SIGNALS": valid_signal_names,
+        "FUNCTIONS": functions,
+        "WEBSOCKET_HEARTBEAT": settings.WEBSOCKET_HEARTBEAT,
+        "WEBSOCKET_HEADER": settings.WEBSOCKET_HEADER,
+        "CSRF_COOKIE_NAME": settings.CSRF_COOKIE_NAME,
+        "DEBUG": settings.DEBUG,
+        "CSRF_HEADER_NAME": csrf_header_name[5:].replace("_", "-"),
+    }
     if settings.WEBSOCKET_URL:
-        template_values['WEBSOCKET_URL'] = '%s://%s%s' % (protocol, site_name, settings.WEBSOCKET_URL)
-    return TemplateResponse(request, 'djangofloor/signals.html', template_values, content_type=__get_js_mimetype())
+        template_values["WEBSOCKET_URL"] = "%s://%s%s" % (
+            protocol,
+            site_name,
+            settings.WEBSOCKET_URL,
+        )
+    return TemplateResponse(
+        request,
+        "djangofloor/signals.html",
+        template_values,
+        content_type=__get_js_mimetype(),
+    )
 
 
 def send_file(filepath, mimetype=None, force_download=False):
@@ -136,36 +159,45 @@ def send_file(filepath, mimetype=None, force_download=False):
     if mimetype is None:
         (mimetype, encoding) = mimetypes.guess_type(filepath)
         if mimetype is None:
-            mimetype = 'text/plain'
+            mimetype = "text/plain"
     if isinstance(mimetype, bytes):
         # noinspection PyTypeChecker
-        mimetype = mimetype.decode('utf-8')
+        mimetype = mimetype.decode("utf-8")
     filepath = os.path.abspath(filepath)
     response = None
     if settings.USE_X_SEND_FILE:
         response = HttpResponse(content_type=mimetype)
-        response['X-SENDFILE'] = filepath
+        response["X-SENDFILE"] = filepath
     elif settings.X_ACCEL_REDIRECT:
         for dirpath, alias_url in settings.X_ACCEL_REDIRECT:
             if filepath.startswith(dirpath):
                 response = HttpResponse(content_type=mimetype)
-                response['Content-Disposition'] = 'attachment; filename={0}'.format(os.path.basename(filepath))
-                response['X-Accel-Redirect'] = alias_url + filepath
+                response["Content-Disposition"] = "attachment; filename={0}".format(
+                    os.path.basename(filepath)
+                )
+                response["X-Accel-Redirect"] = alias_url + filepath
                 break
     if response is None:
         # noinspection PyTypeChecker
-        fileobj = open(filepath, 'rb')
-        response = StreamingHttpResponse(read_file_in_chunks(fileobj), content_type=mimetype)
-        response['Content-Length'] = os.path.getsize(filepath)
-    if force_download or not (mimetype.startswith('text') or mimetype.startswith('image')):
-        response['Content-Disposition'] = 'attachment; filename={0}'.format(os.path.basename(filepath))
+        fileobj = open(filepath, "rb")
+        response = StreamingHttpResponse(
+            read_file_in_chunks(fileobj), content_type=mimetype
+        )
+        response["Content-Length"] = os.path.getsize(filepath)
+    if force_download or not (
+        mimetype.startswith("text") or mimetype.startswith("image")
+    ):
+        response["Content-Disposition"] = "attachment; filename={0}".format(
+            os.path.basename(filepath)
+        )
     return response
 
 
 class IndexView(TemplateView):
     """index view using the default bootstrap3 view.
 You can only override the default template or populate the context. """
-    template_name = 'djangofloor/bootstrap3/index.html'
+
+    template_name = "djangofloor/bootstrap3/index.html"
 
     def get(self, request, *args, **kwargs):
         """single defined method"""
@@ -180,9 +212,11 @@ You can only override the default template or populate the context. """
 
 def index(request):
     """.. deprecated:: 1.0"""
-    warnings.warn('djangofloor.views.index is deprecated. Use class-based index view instead.',
-                  RemovedInDjangoFloor200Warning)
+    warnings.warn(
+        "djangofloor.views.index is deprecated. Use class-based index view instead.",
+        RemovedInDjangoFloor200Warning,
+    )
     if settings.FLOOR_INDEX is not None:
         return HttpResponseRedirect(reverse(settings.FLOOR_INDEX))
     template_values = {}
-    return TemplateResponse(request, 'djangofloor/index.html', template_values)
+    return TemplateResponse(request, "djangofloor/index.html", template_values)

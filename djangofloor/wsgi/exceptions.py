@@ -3,8 +3,8 @@ from socket import error as socket_error
 
 from django.http import BadHeaderError
 
-__author__ = 'Matthieu Gallet'
-logger = logging.getLogger('django.request')
+__author__ = "Matthieu Gallet"
+logger = logging.getLogger("django.request")
 
 
 # noinspection PyClassHasNoInit

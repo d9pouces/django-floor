@@ -1,12 +1,15 @@
 import asyncio
+
 # noinspection PyProtectedMember
 import concurrent.futures._base as base
 import logging
 
 # noinspection PyPackageRequirements
 import aiohttp
+
 # noinspection PyPackageRequirements
 import asyncio_redis
+
 # noinspection PyPackageRequirements
 from aiohttp import web
 from aiohttp_wsgi import WSGIHandler
@@ -22,7 +25,7 @@ except ImportError:
     from aiohttp.web_request import Request
 from djangofloor.wsgi.wsgi_server import WebsocketWSGIServer
 
-logger = logging.getLogger('django.request')
+logger = logging.getLogger("django.request")
 
 
 def get_http_request(aiohttp_request):
@@ -61,11 +64,11 @@ def handle_ws(window_info, ws):
 
     while window_info.is_active:
         msg = yield from ws.receive(timeout=settings.WEBSOCKET_CONNECTION_EXPIRE)
-    # for msg in ws:
+        # for msg in ws:
         if msg.type == web.WSMsgType.text:
             if msg.data == settings.WEBSOCKET_HEARTBEAT:
                 yield from ws.send_str(settings.WEBSOCKET_HEARTBEAT)
-            elif msg.data == 'close':
+            elif msg.data == "close":
                 window_info.is_active = False
                 break
             else:
@@ -84,8 +87,12 @@ def websocket_handler(request):
         yield from ws.prepare(request)
         django_request = get_http_request(request)
         window_info = WebsocketWSGIServer.process_request(django_request)
-        channels, echo_message = WebsocketWSGIServer.process_subscriptions(django_request)
-        connection = yield from asyncio_redis.Connection.create(**settings.WEBSOCKET_REDIS_CONNECTION)
+        channels, echo_message = WebsocketWSGIServer.process_subscriptions(
+            django_request
+        )
+        connection = yield from asyncio_redis.Connection.create(
+            **settings.WEBSOCKET_REDIS_CONNECTION
+        )
         subscriber = yield from connection.start_subscribe()
     except Exception as e:
         logger.exception(e)
@@ -94,7 +101,9 @@ def websocket_handler(request):
     try:
         yield from subscriber.subscribe(channels)
         window_info.is_active = True
-        yield from asyncio.gather(handle_ws(window_info, ws), handle_redis(window_info, ws, subscriber))
+        yield from asyncio.gather(
+            handle_ws(window_info, ws), handle_redis(window_info, ws, subscriber)
+        )
     except aiohttp.ClientConnectionError:
         pass
     except asyncio.TimeoutError:
@@ -112,11 +121,12 @@ def websocket_handler(request):
 def get_application():
     # noinspection PyUnresolvedReferences
     import djangofloor.celery
+
     http_application = get_wsgi_application()
     if settings.WEBSOCKET_URL:
         app = web.Application()
         wsgi_handler = WSGIHandler(http_application)
-        app.router.add_route('GET', settings.WEBSOCKET_URL, websocket_handler)
+        app.router.add_route("GET", settings.WEBSOCKET_URL, websocket_handler)
         app.router.add_route("*", "/{path_info:.*}", wsgi_handler)
     else:
         app = http_application

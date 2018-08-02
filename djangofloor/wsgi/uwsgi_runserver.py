@@ -1,8 +1,10 @@
 import logging
 
 import redis.connection
+
 # noinspection PyUnresolvedReferences,PyPackageRequirements
 import uwsgi
+
 # noinspection PyPackageRequirements,PyUnresolvedReferences
 import gevent.select
 from django.conf import settings
@@ -10,8 +12,8 @@ from django.core.wsgi import get_wsgi_application
 from djangofloor.wsgi.exceptions import WebSocketError
 from djangofloor.wsgi.wsgi_server import WebsocketWSGIServer
 
-__author__ = 'Matthieu Gallet'
-logger = logging.getLogger('django.request')
+__author__ = "Matthieu Gallet"
+logger = logging.getLogger("django.request")
 
 
 class UWSGIWebsocket:
@@ -34,7 +36,7 @@ class UWSGIWebsocket:
         if self._closed:
             raise WebSocketError("Connection is already closed")
         try:
-            return uwsgi.websocket_recv_nb().decode('utf-8')
+            return uwsgi.websocket_recv_nb().decode("utf-8")
         except IOError as e:
             self.close()
             raise WebSocketError(e)
@@ -54,13 +56,15 @@ class UWSGIWebsocket:
             raise WebSocketError(e)
 
     # noinspection PyUnusedLocal
-    def close(self, code=1000, message=''):
+    def close(self, code=1000, message=""):
         self._closed = True
 
 
 class UWSGIWebsocketServer(WebsocketWSGIServer):
     def upgrade_websocket(self, environ, start_response):
-        uwsgi.websocket_handshake(environ['HTTP_SEC_WEBSOCKET_KEY'], environ.get('HTTP_ORIGIN', ''))
+        uwsgi.websocket_handshake(
+            environ["HTTP_SEC_WEBSOCKET_KEY"], environ.get("HTTP_ORIGIN", "")
+        )
         return UWSGIWebsocket()
 
     def get_ws_file_descriptor(self, websocket):
@@ -90,6 +94,8 @@ def application(environ, start_response):
 
     :return: a HTTP app, or a WS app (depending on the URL path)
     """
-    if settings.WEBSOCKET_URL and environ.get('PATH_INFO', '').startswith(settings.WEBSOCKET_URL):
+    if settings.WEBSOCKET_URL and environ.get("PATH_INFO", "").startswith(
+        settings.WEBSOCKET_URL
+    ):
         return ws_application(environ, start_response)
     return http_application(environ, start_response)

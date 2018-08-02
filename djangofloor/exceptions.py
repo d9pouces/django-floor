@@ -11,18 +11,22 @@ import warnings
 from django.utils.translation import ugettext as _
 from djangofloor.utils import RemovedInDjangoFloor200Warning
 
-__author__ = 'Matthieu Gallet'
-warnings.warn('djangofloor.exceptions module and its functions will be removed', RemovedInDjangoFloor200Warning)
+__author__ = "Matthieu Gallet"
+warnings.warn(
+    "djangofloor.exceptions module and its functions will be removed",
+    RemovedInDjangoFloor200Warning,
+)
 
 
 class ApiException(Exception):
     """ Base exception, corresponding to a bad request from the client.
     """
+
     http_code = 400
 
     @property
     def default_msg(self):
-        return _('An unknown error occurred during the processing of your request.')
+        return _("An unknown error occurred during the processing of your request.")
 
     def __init__(self, msg=None):
         self.msg = msg or self.default_msg
@@ -39,7 +43,7 @@ class NotFoundException(ApiException):
 
     @property
     def default_msg(self):
-        return _('The requested object does not exist on the server.')
+        return _("The requested object does not exist on the server.")
 
 
 class PermissionDenied(ApiException):
@@ -47,7 +51,7 @@ class PermissionDenied(ApiException):
 
     @property
     def default_msg(self):
-        return _('You do not have the permission to do that.')
+        return _("You do not have the permission to do that.")
 
 
 class InvalidRequest(ApiException):
@@ -55,7 +59,7 @@ class InvalidRequest(ApiException):
 
     @property
     def default_msg(self):
-        return _('Invalid request.')
+        return _("Invalid request.")
 
 
 class InvalidOperation(ApiException):
@@ -63,7 +67,7 @@ class InvalidOperation(ApiException):
 
     @property
     def default_msg(self):
-        return _('You cannot execute this command.')
+        return _("You cannot execute this command.")
 
 
 class InternalServerError(ApiException):
@@ -71,7 +75,7 @@ class InternalServerError(ApiException):
 
     @property
     def default_msg(self):
-        return _('An error occured on the server.')
+        return _("An error occured on the server.")
 
 
 class AuthenticationRequired(ApiException):
@@ -79,4 +83,4 @@ class AuthenticationRequired(ApiException):
 
     @property
     def default_msg(self):
-        return _('You must be authenticated to use this method.')
+        return _("You must be authenticated to use this method.")

@@ -10,6 +10,7 @@ class Command(BaseCommand):
     This command is directly handled if the "control" script is setup.
 
     """
+
     help = "Launch the server process"
 
     def run_from_argv(self, argv):
@@ -22,7 +23,7 @@ class Command(BaseCommand):
         """
         if len(sys.argv) > 1:
             del sys.argv[1]
-        os.environ['DF_CONF_SET'] = ''
+        os.environ["DF_CONF_SET"] = ""
         return celery()
 
     def handle(self, *args, **options):

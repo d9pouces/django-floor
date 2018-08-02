@@ -21,11 +21,12 @@ except ImportError:
     # noinspection PyUnresolvedReferences,PyCompatibility
     from ConfigParser import ConfigParser
 
-__author__ = 'Matthieu Gallet'
+__author__ = "Matthieu Gallet"
 
 
 class ConfigProvider:
     """Base class of config provider."""
+
     name = None
 
     def has_value(self, config_field):
@@ -59,7 +60,8 @@ Otherwise returns the current value of the config field."""
 
 class IniConfigProvider(ConfigProvider):
     """Read a config file using the .ini syntax."""
-    name = '.ini file'
+
+    name = ".ini file"
 
     def __init__(self, config_file=None):
         self.parser = ConfigParser()
@@ -72,10 +74,10 @@ class IniConfigProvider(ConfigProvider):
 
     @staticmethod
     def __get_info(config_field: ConfigField):
-        section, sep, option = config_field.name.partition('.')
+        section, sep, option = config_field.name.partition(".")
         return section, option
 
-    def set_value(self, config_field: ConfigField, include_doc: bool=False):
+    def set_value(self, config_field: ConfigField, include_doc: bool = False):
         """update the internal config file """
         section, option = self.__get_info(config_field)
         if not self.parser.has_section(section):
@@ -83,7 +85,7 @@ class IniConfigProvider(ConfigProvider):
         to_str = config_field.to_str(config_field.value)
         if include_doc and config_field.__doc__:
             for line in config_field.__doc__.splitlines():
-                to_str += ' \n# %s' % line
+                to_str += " \n# %s" % line
         self.parser.set(section, option, to_str)
 
     def get_value(self, config_field: ConfigField):
@@ -116,7 +118,8 @@ class IniConfigProvider(ConfigProvider):
 
 class PythonModuleProvider(ConfigProvider):
     """Load a Python module from its dotted name"""
-    name = 'Python module'
+
+    name = "Python module"
 
     def __init__(self, module_name=None):
         self.module_name = module_name
@@ -124,6 +127,7 @@ class PythonModuleProvider(ConfigProvider):
         self.values = OrderedDict()
         if module_name is not None:
             from djangofloor.utils import import_module
+
             try:
                 self.module = import_module(module_name, package=None)
             except ImportError:
@@ -150,7 +154,7 @@ class PythonModuleProvider(ConfigProvider):
         """Return all values that look like a Django setting (i.e. uppercase variables)"""
         if self.module is not None:
             for key, value in self.module.__dict__.items():
-                if key.upper() != key or key.endswith('_HELP') or key == '_':
+                if key.upper() != key or key.endswith("_HELP") or key == "_":
                     continue
                 yield key, value
 
@@ -161,15 +165,16 @@ class PythonModuleProvider(ConfigProvider):
     def to_str(self):
         """Display values as if set in a Python module"""
         fd = StringIO()
-        fd.write('# -*- coding: utf-8 -*-\n')
+        fd.write("# -*- coding: utf-8 -*-\n")
         for k, v in self.values.items():
-            fd.write('%s = %r\n' % (k, v))
+            fd.write("%s = %r\n" % (k, v))
         return fd.getvalue()
 
 
 class PythonFileProvider(PythonModuleProvider):
     """Load a Python module from the filename"""
-    name = 'Python file'
+
+    name = "Python file"
 
     def __init__(self, module_filename):
         self.module_filename = module_filename
@@ -177,20 +182,23 @@ class PythonFileProvider(PythonModuleProvider):
         if not os.path.isfile(module_filename):
             return
         version = tuple(sys.version_info[0:1])
-        md5 = hashlib.md5(module_filename.encode('utf-8')).hexdigest()
+        md5 = hashlib.md5(module_filename.encode("utf-8")).hexdigest()
         module_name = "djangofloor.__private" + md5
         if version >= (3, 5):
             import importlib.util
+
             spec = importlib.util.spec_from_file_location(module_name, module_filename)
             module_ = importlib.util.module_from_spec(spec)
             spec.loader.exec_module(module_)
         elif version >= (3, 2):
             # noinspection PyCompatibility
             from importlib.machinery import SourceFileLoader
+
             module_ = SourceFileLoader(module_name, module_filename).load_module()
         else:
             # noinspection PyDeprecation
             import imp
+
             # noinspection PyDeprecation
             module_ = imp.load_source(module_name, module_filename)
         self.module = module_
@@ -201,7 +209,8 @@ class PythonFileProvider(PythonModuleProvider):
 
 class DictProvider(ConfigProvider):
     """Use a plain Python dict as a setting provider """
-    name = 'dict'
+
+    name = "dict"
 
     def __init__(self, values):
         self.values = values
@@ -225,7 +234,7 @@ class DictProvider(ConfigProvider):
         return config_field.setting_name in self.values
 
     def __str__(self):
-        return '%r' % self.values
+        return "%r" % self.values
 
     def is_valid(self):
         """always `True`"""
@@ -233,13 +242,14 @@ class DictProvider(ConfigProvider):
 
     def to_str(self):
         """display the internal dict"""
-        return '%r' % self.values
+        return "%r" % self.values
 
 
 class ConfigFieldsProvider:
     """Provides a list of :class:`djangofloor.conf.fields.ConfigField`.
 Used for retrieving settings from a config file.
     """
+
     name = None
 
     def get_config_fields(self):
@@ -249,18 +259,20 @@ Used for retrieving settings from a config file.
 
 class PythonConfigFieldsProvider(ConfigFieldsProvider):
     """Provide a list of :class:`djangofloor.conf.fields.ConfigField` from an attribute in a Python module. """
-    name = 'Python attribute'
+
+    name = "Python attribute"
 
     def __init__(self, value=None):
         if value is None:
             module_name, attribute_name = None, None
         else:
-            module_name, sep, attribute_name = value.partition(':')
+            module_name, sep, attribute_name = value.partition(":")
         self.module_name = module_name
         self.attribute_name = attribute_name
         self.module = None
         if module_name is not None:
             from djangofloor.utils import import_module
+
             try:
                 self.module = import_module(module_name, package=None)
             except ImportError:
@@ -273,4 +285,4 @@ class PythonConfigFieldsProvider(ConfigFieldsProvider):
         return []
 
     def __str__(self):
-        return '%s:%s' % (self.module_name, self.attribute_name)
+        return "%s:%s" % (self.module_name, self.attribute_name)

@@ -4,10 +4,12 @@ import warnings
 from djangofloor.conf import fields, mapping
 from djangofloor.utils import RemovedInDjangoFloor200Warning
 
-__author__ = 'Matthieu Gallet'
+__author__ = "Matthieu Gallet"
 
-warnings.warn('djangofloor.iniconf module and its functions are moved to djangofloor.conf.fields',
-              RemovedInDjangoFloor200Warning)
+warnings.warn(
+    "djangofloor.iniconf module and its functions are moved to djangofloor.conf.fields",
+    RemovedInDjangoFloor200Warning,
+)
 
 
 def bool_setting(value):
@@ -34,8 +36,15 @@ MISSING_VALUE = [[]]
 
 
 class OptionParser(fields.ConfigField):
-    def __init__(self, setting_name, option, converter=str, to_str=str_or_blank, help_str=None,
-                 doc_default_value=MISSING_VALUE):
+    def __init__(
+        self,
+        setting_name,
+        option,
+        converter=str,
+        to_str=str_or_blank,
+        help_str=None,
+        doc_default_value=MISSING_VALUE,
+    ):
         """class that maps an option in a .ini file to a setting.
 
         :param setting_name: the name of the setting (like "DATABASE_ENGINE")
@@ -54,8 +63,14 @@ class OptionParser(fields.ConfigField):
         The current setting value will be used if left to `None`.
         :type doc_default_value: `object`
         """
-        super(OptionParser, self).__init__(option, setting_name, from_str=converter,
-                                           to_str=to_str, help_str=help_str, default=doc_default_value)
+        super(OptionParser, self).__init__(
+            option,
+            setting_name,
+            from_str=converter,
+            to_str=to_str,
+            help_str=help_str,
+            default=doc_default_value,
+        )
 
         self.option = option
         self.converter = converter
@@ -65,14 +80,14 @@ class OptionParser(fields.ConfigField):
 
     @property
     def section(self):
-        return self.option.partition('.')[0]
+        return self.option.partition(".")[0]
 
     @property
     def key(self):
-        return self.option.partition('.')[2]
+        return self.option.partition(".")[2]
 
     def has_value(self, parser):
-        section, sep, option = self.option.partition('.')
+        section, sep, option = self.option.partition(".")
         return parser.has_option(section=section, option=option)
 
     def str_value(self):
@@ -95,7 +110,7 @@ class OptionParser(fields.ConfigField):
         :return: `True` if this value is defined in the configuration file, `False` otherwise
         :rtype: :class:`bool`
         """
-        section, sep, option = self.option.partition('.')
+        section, sep, option = self.option.partition(".")
         if not self.has_value(parser):
             return False
         value = parser.get(section=section, option=option)

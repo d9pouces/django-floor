@@ -11,15 +11,15 @@ serve to show the default. """
 import sys
 import os.path
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
 from djangofloor import __version__ as version_orig
 from djangofloor.scripts import set_env
 
-set_env('djangofloor-django')
+set_env("djangofloor-django")
 import django
 
 django.setup()
-__author__ = 'Matthieu Gallet'
+__author__ = "Matthieu Gallet"
 #
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -34,32 +34,37 @@ __author__ = 'Matthieu Gallet'
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
 extensions = [
-    'sphinx.ext.autodoc', 'sphinx.ext.doctest', 'sphinx.ext.todo',
-    'sphinx.ext.coverage', 'sphinx.ext.ifconfig', 'sphinx.ext.viewcode',
-    'sphinx.ext.intersphinx', 'sphinx.ext.graphviz',
-    'sphinxcontrib.autoanysrc',
+    "sphinx.ext.autodoc",
+    "sphinx.ext.doctest",
+    "sphinx.ext.todo",
+    "sphinx.ext.coverage",
+    "sphinx.ext.ifconfig",
+    "sphinx.ext.viewcode",
+    "sphinx.ext.intersphinx",
+    "sphinx.ext.graphviz",
+    "sphinxcontrib.autoanysrc",
 ]
 
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ['_templates']
+templates_path = ["_templates"]
 
 # The suffix of source filenames.
-source_suffix = '.rst'
+source_suffix = ".rst"
 
 # The encoding of source files.
 # source_encoding = 'utf-8-sig'
 
 # The master toctree document.
-master_doc = 'index'
+master_doc = "index"
 
 # General information about the project.
-project = 'DjangoFloor'
-copyright = '2016, Matthieu Gallet'
+project = "DjangoFloor"
+copyright = "2016, Matthieu Gallet"
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
 # built documents.
-# 
+#
 # The short X.Y version.
 version = version_orig
 # The full version, including alpha/beta/rc tags.
@@ -94,7 +99,7 @@ exclude_patterns = []
 # show_authors = False
 
 # The name of the Pygments (syntax highlighting) style to use.
-pygments_style = 'sphinx'
+pygments_style = "sphinx"
 
 # A list of ignored prefixes for module index sorting.
 # modindex_common_prefix = []
@@ -104,7 +109,7 @@ pygments_style = 'sphinx'
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-html_theme = 'sphinx_rtd_theme'
+html_theme = "sphinx_rtd_theme"
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
@@ -123,7 +128,7 @@ html_theme = 'sphinx_rtd_theme'
 
 # The name of an image file (relative to this directory) to place at the top
 # of the sidebar.
-html_logo = '_static/logo.png'
+html_logo = "_static/logo.png"
 
 # The name of an image file (within the static path) to use as favicon of the
 # docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32
@@ -133,7 +138,7 @@ html_logo = '_static/logo.png'
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static']
+html_static_path = ["_static"]
 
 # If not '', a 'Last updated on:' timestamp is inserted at every page bottom,
 # using the given strftime format.
@@ -177,21 +182,26 @@ html_static_path = ['_static']
 # html_file_suffix = None
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'DjangoFloordoc'
+htmlhelp_basename = "DjangoFloordoc"
 
 # -- Options for LaTeX output --------------------------------------------------
 
 # The paper size ('letter' or 'a4').
 # latex_paper_size = 'letter'
-latex_elements = {'papersize': 'A4'}
+latex_elements = {"papersize": "A4"}
 # The font size ('10pt', '11pt' or '12pt').
 # latex_font_size = '10pt'
 
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-    ('index', 'DjangoFloor.tex', 'DjangoFloor Documentation',
-     'Matthieu Gallet', 'manual'),
+    (
+        "index",
+        "DjangoFloor.tex",
+        "DjangoFloor Documentation",
+        "Matthieu Gallet",
+        "manual",
+    )
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -223,17 +233,16 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'DjangoFloor', 'DjangoFloor Documentation',
-     ['Matthieu Gallet'], 1)
+    ("index", "DjangoFloor", "DjangoFloor Documentation", ["Matthieu Gallet"], 1)
 ]
 
 # -- Options for Epub output ---------------------------------------------------
 
 # Bibliographic Dublin Core info.
-epub_title = 'DjangoFloor'
-epub_author = 'Matthieu Gallet'
-epub_publisher = '19pouces.net'
-epub_copyright = '2016, Matthieu Gallet'
+epub_title = "DjangoFloor"
+epub_author = "Matthieu Gallet"
+epub_publisher = "19pouces.net"
+epub_copyright = "2016, Matthieu Gallet"
 
 # The language of the text. It defaults to the language option
 # or en if the language is not set.
@@ -265,8 +274,9 @@ epub_copyright = '2016, Matthieu Gallet'
 
 # Allow duplicate toc entries.
 # epub_tocdup = True
-# 
-intersphinx_mapping = {'python': ('https://docs.python.org/3.5', None),
-                       'django': ('https://django.readthedocs.io/en/latest/', None),
-                       'aiohttp': ('http://aiohttp.readthedocs.io/en/stable/', None),
-                       }
+#
+intersphinx_mapping = {
+    "python": ("https://docs.python.org/3.5", None),
+    "django": ("https://django.readthedocs.io/en/latest/", None),
+    "aiohttp": ("http://aiohttp.readthedocs.io/en/stable/", None),
+}

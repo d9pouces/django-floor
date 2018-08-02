@@ -21,8 +21,8 @@ try:
     from pipeline.storage import PipelineCachedStorage
 except ImportError:
     PipelineCachedStorage = None
-__author__ = 'Matthieu Gallet'
-logger = logging.getLogger('django.request')
+__author__ = "Matthieu Gallet"
+logger = logging.getLogger("django.request")
 
 _CACHED_GROUPS = {}
 
@@ -42,11 +42,16 @@ class DefaultGroupsRemoteUserBackend(RemoteUserBackend):
     def ldap_backend(self):
         # noinspection PyUnresolvedReferences
         from django_auth_ldap.backend import LDAPBackend
+
         return LDAPBackend()
 
     def authenticate(self, *args, **kwargs):
-        remote_user = kwargs.get('remote_user')
-        if remote_user and settings.AUTH_LDAP_SERVER_URI and settings.AUTH_LDAP_ALWAYS_UPDATE_USER:
+        remote_user = kwargs.get("remote_user")
+        if (
+            remote_user
+            and settings.AUTH_LDAP_SERVER_URI
+            and settings.AUTH_LDAP_ALWAYS_UPDATE_USER
+        ):
             user = self.ldap_backend.populate_user(remote_user)
             if user:
                 return user
@@ -60,7 +65,9 @@ class DefaultGroupsRemoteUserBackend(RemoteUserBackend):
         """
         for group_name in settings.DF_DEFAULT_GROUPS:
             if group_name not in _CACHED_GROUPS:
-                _CACHED_GROUPS[group_name] = Group.objects.get_or_create(name=str(group_name))[0]
+                _CACHED_GROUPS[group_name] = Group.objects.get_or_create(
+                    name=str(group_name)
+                )[0]
             user.groups.add(_CACHED_GROUPS[group_name])
         return user
 
@@ -71,6 +78,10 @@ if PipelineCachedStorage:
     class DjangofloorPipelineCachedStorage(PipelineCachedStorage):
         def hashed_name(self, name, content=None, filename=None):
             try:
-                return super(DjangofloorPipelineCachedStorage, self).hashed_name(name, content=content)
+                return super(DjangofloorPipelineCachedStorage, self).hashed_name(
+                    name, content=content
+                )
             except ValueError as e:
-                raise ValueError("%s. Did you run the command 'collectstatic'?" % e.args[0])
+                raise ValueError(
+                    "%s. Did you run the command 'collectstatic'?" % e.args[0]
+                )

@@ -31,7 +31,7 @@ from django.core.checks import Warning
 
 from djangofloor.checks import settings_check_results
 
-__author__ = 'Matthieu Gallet'
+__author__ = "Matthieu Gallet"
 
 
 class ConfigValue:
@@ -133,13 +133,13 @@ class Path(ConfigValue):
             return
         dirname = os.path.abspath(dirname)
         if os.path.exists(dirname):
-            merger.stderr.write('\'%s\' already exists and is not a directory.')
+            merger.stderr.write("'%s' already exists and is not a directory.")
             return
-        merger.stdout.write('Creating directory \'%s\'' % dirname)
+        merger.stdout.write("Creating directory '%s'" % dirname)
         try:
             os.makedirs(dirname)
         except Exception as e:
-            merger.stderr.write('Unable to create directory \'%s\' (%s)' % (dirname, e))
+            merger.stderr.write("Unable to create directory '%s' (%s)" % (dirname, e))
 
     def chmod(self, merger, filename):
         if not filename or not os.path.isfile(filename):
@@ -147,11 +147,11 @@ class Path(ConfigValue):
         filename = os.path.abspath(filename)
         if self.mode is None or (os.stat(filename).st_mode & 0o777) == self.mode:
             return
-        merger.stdout.write('Change mode of \'%s\' to 0o%o' % (filename, self.mode))
+        merger.stdout.write("Change mode of '%s' to 0o%o" % (filename, self.mode))
         try:
             os.chmod(filename, self.mode)
         except Exception as e:
-            merger.stderr.write('Unable to change mode of \'%s\' (%s)' % (filename, e))
+            merger.stderr.write("Unable to change mode of '%s' (%s)" % (filename, e))
 
 
 class Directory(Path):
@@ -168,12 +168,16 @@ class Directory(Path):
         """
         value = merger.analyze_raw_value(self.value, provider_name, setting_name)
         value = os.path.normpath(value)
-        if not value.endswith('/'):
-            value += '/'
+        if not value.endswith("/"):
+            value += "/"
         if not os.path.isdir(value):
             settings_check_results.append(
-                Warning('\'%s\' is not a directory. Run the \'collectstatic\' command to fix this problem.' % value,
-                        obj='configuration'))
+                Warning(
+                    "'%s' is not a directory. Run the 'collectstatic' command to fix this problem."
+                    % value,
+                    obj="configuration",
+                )
+            )
         return value
 
     def pre_collectstatic(self, merger, provider_name, setting_name, value):
@@ -203,7 +207,8 @@ class File(Path):
         value = os.path.normpath(value)
         if not os.path.isfile(value):
             settings_check_results.append(
-                Warning('\'%s\' does not exist.' % value, obj='configuration'))
+                Warning("'%s' does not exist." % value, obj="configuration")
+            )
         return value
 
     def pre_collectstatic(self, merger, provider_name, setting_name, value):
@@ -246,22 +251,26 @@ class AutocreateFileContent(File):
 
     def pre_migrate(self, merger, provider_name, setting_name, value):
         filename = merger.analyze_raw_value(self.value, provider_name, setting_name)
-        if filename is None or os.path.isfile(filename):  # empty filename, or it already exists => nothing to do
+        if filename is None or os.path.isfile(
+            filename
+        ):  # empty filename, or it already exists => nothing to do
             return
         result = self.create_function(True, *self.args, **self.kwargs)
         filename = os.path.abspath(filename)
         if result is not None:
             self.makedirs(merger, os.path.dirname(filename))
-            merger.stdout.write('Writing new value to \'%s\'' % filename)
+            merger.stdout.write("Writing new value to '%s'" % filename)
             try:
                 result_text = self.serialize_value(result)
-                with open(filename, 'w', encoding='utf-8') as fd:
+                with open(filename, "w", encoding="utf-8") as fd:
                     fd.write(result_text)
             except Exception as e:
-                merger.stderr.write('Unable to write content of \'%s\' (%s)' % (filename, e))
+                merger.stderr.write(
+                    "Unable to write content of '%s' (%s)" % (filename, e)
+                )
             self.chmod(merger, filename)
         else:
-            merger.stderr.write('Invalid empty content for \'%s\'' % filename)
+            merger.stderr.write("Invalid empty content for '%s'" % filename)
 
     def pre_collectstatic(self, merger, provider_name, setting_name, value):
         pass
@@ -276,13 +285,17 @@ class AutocreateFileContent(File):
         """
         filename = merger.analyze_raw_value(self.value, provider_name, setting_name)
         if os.path.isfile(filename):
-            with open(filename, 'r', encoding='utf-8') as fd:
+            with open(filename, "r", encoding="utf-8") as fd:
                 result_text = fd.read()
             result = self.unserialize_value(result_text)
         else:
             settings_check_results.append(
-                Warning('\'%s\' does not exist. Run the \'migrate\' command to fix this problem.' % filename,
-                        obj='configuration'))
+                Warning(
+                    "'%s' does not exist. Run the 'migrate' command to fix this problem."
+                    % filename,
+                    obj="configuration",
+                )
+            )
             result = self.create_function(False, *self.args, **self.kwargs)
         return result
 
@@ -310,7 +323,7 @@ class AutocreateFile(AutocreateFileContent):
      """
 
     def __init__(self, value, mode=None, *args, **kwargs):
-        super().__init__(value, lambda x: '', mode=mode, *args, **kwargs)
+        super().__init__(value, lambda x: "", mode=mode, *args, **kwargs)
 
     def get_value(self, merger, provider_name: str, setting_name: str):
         """ Return the value
@@ -323,8 +336,12 @@ class AutocreateFile(AutocreateFileContent):
         filename = merger.analyze_raw_value(self.value, provider_name, setting_name)
         if not os.path.isfile(filename):
             settings_check_results.append(
-                Warning('\'%s\' does not exist. Run the \'migrate\' command to fix this problem.' % filename,
-                        obj='configuration'))
+                Warning(
+                    "'%s' does not exist. Run the 'migrate' command to fix this problem."
+                    % filename,
+                    obj="configuration",
+                )
+            )
         return filename
 
 
@@ -367,7 +384,7 @@ class SettingReference(ConfigValue):
 
 
 class DeprecatedSetting(ConfigValue):
-    def __init__(self, value, default=None, msg=''):
+    def __init__(self, value, default=None, msg=""):
         super(DeprecatedSetting, self).__init__(value)
         self.default = default
         self.msg = msg
@@ -380,10 +397,15 @@ class DeprecatedSetting(ConfigValue):
         :param provider_name: name of the provider containing this value
         :param setting_name: name of the setting containing this value
         """
-        if merger.has_setting_value(self.value) and merger.get_setting_value(self.value):
+        if merger.has_setting_value(self.value) and merger.get_setting_value(
+            self.value
+        ):
             from djangofloor.utils import RemovedInDjangoFloor200Warning
-            warnings.warn('"%s" setting should not be used anymore. %s' % (self.value, self.msg),
-                          RemovedInDjangoFloor200Warning)
+
+            warnings.warn(
+                '"%s" setting should not be used anymore. %s' % (self.value, self.msg),
+                RemovedInDjangoFloor200Warning,
+            )
             return merger.get_setting_value(self.value)
         return merger.analyze_raw_value(self.default, provider_name, setting_name)
 
@@ -426,7 +448,7 @@ class CallableSetting(ConfigValue):
         if isinstance(value, str):
             value = import_string(value)
         super(CallableSetting, self).__init__(value)
-        if hasattr(value, 'required_settings'):
+        if hasattr(value, "required_settings"):
             self.required = list(value.required_settings)
         else:
             self.required = required
@@ -445,9 +467,12 @@ class CallableSetting(ConfigValue):
 
     def __repr__(self):
         fn = repr(self.value)
-        if hasattr(self.value, '__module__') and hasattr(self.value, '__name__'):
-            fn = '%s.%s' % (self.value.__module__, self.value.__name__)
-        return "CallableSetting(%r, %s)" % (fn, ', '.join(['%r' % x for x in self.required]))
+        if hasattr(self.value, "__module__") and hasattr(self.value, "__name__"):
+            fn = "%s.%s" % (self.value.__module__, self.value.__name__)
+        return "CallableSetting(%r, %s)" % (
+            fn,
+            ", ".join(["%r" % x for x in self.required]),
+        )
 
 
 class ExpandIterable(SettingReference):
@@ -473,4 +498,5 @@ class ExpandIterable(SettingReference):
     `settings.DICT_2` is equal to `{1: 1, 2: 2, 3: 3, }`.
 
     """
+
     pass

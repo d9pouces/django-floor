@@ -20,10 +20,20 @@ from django.core.handlers.wsgi import WSGIRequest
 from django.utils.module_loading import import_string
 
 from djangofloor.decorators import REGISTERED_FUNCTIONS
+
 # noinspection PyProtectedMember
-from djangofloor.tasks import _call_signal, SERVER, _server_function_call, import_signals_and_functions, \
-    get_websocket_redis_connection
-from djangofloor.wsgi.exceptions import WebSocketError, HandshakeError, UpgradeRequiredError
+from djangofloor.tasks import (
+    _call_signal,
+    SERVER,
+    _server_function_call,
+    import_signals_and_functions,
+    get_websocket_redis_connection,
+)
+from djangofloor.wsgi.exceptions import (
+    WebSocketError,
+    HandshakeError,
+    UpgradeRequiredError,
+)
 from djangofloor.wsgi.window_info import WindowInfo
 
 try:
@@ -36,14 +46,14 @@ except ImportError:
     from django.utils.importlib import import_module
 
 
-__author__ = 'Matthieu Gallet'
-logger = logging.getLogger('django.request')
+__author__ = "Matthieu Gallet"
+logger = logging.getLogger("django.request")
 topic_serializer = import_string(settings.WEBSOCKET_TOPIC_SERIALIZER)
 signal_decoder = import_string(settings.WEBSOCKET_SIGNAL_DECODER)
 
 
 def get_websocket_topics(request):
-    signed_token = request.GET.get('token', '')
+    signed_token = request.GET.get("token", "")
     session_key = request.COOKIES.get(settings.SESSION_COOKIE_NAME)
     signer = signing.Signer(session_key)
     try:
@@ -51,10 +61,10 @@ def get_websocket_topics(request):
         token = signer.unsign(signed_token)
     except signing.BadSignature:
         return []
-    redis_key = '%s%s' % (settings.WEBSOCKET_REDIS_PREFIX, token)
+    redis_key = "%s%s" % (settings.WEBSOCKET_REDIS_PREFIX, token)
     connection = get_websocket_redis_connection()
     topics = connection.lrange(redis_key, 0, -1)
-    return [x.decode('utf-8') for x in topics]
+    return [x.decode("utf-8") for x in topics]
 
 
 class WebsocketWSGIServer:
@@ -75,14 +85,14 @@ class WebsocketWSGIServer:
 
     # noinspection PyMethodMayBeStatic
     def assure_protocol_requirements(self, environ):
-        if environ.get('REQUEST_METHOD') != 'GET':
-            raise HandshakeError('HTTP method must be a GET')
+        if environ.get("REQUEST_METHOD") != "GET":
+            raise HandshakeError("HTTP method must be a GET")
 
-        if environ.get('SERVER_PROTOCOL') != 'HTTP/1.1':
-            raise HandshakeError('HTTP server protocol must be 1.1')
+        if environ.get("SERVER_PROTOCOL") != "HTTP/1.1":
+            raise HandshakeError("HTTP server protocol must be 1.1")
 
-        if environ.get('HTTP_UPGRADE', '').lower() != 'websocket':
-            raise HandshakeError('Client does not wish to upgrade to a websocket')
+        if environ.get("HTTP_UPGRADE", "").lower() != "websocket":
+            raise HandshakeError("Client does not wish to upgrade to a websocket")
 
     @staticmethod
     def process_request(request):
@@ -94,7 +104,7 @@ class WebsocketWSGIServer:
             request.session = engine.SessionStore(session_key)
             request.user = get_user(request)
         window_info = WindowInfo.from_request(request)
-        signed_token = request.GET.get('token', '')
+        signed_token = request.GET.get("token", "")
         signer = signing.Signer(session_key)
         try:
             window_info.window_key = signer.unsign(signed_token)
@@ -105,44 +115,56 @@ class WebsocketWSGIServer:
     @staticmethod
     def process_subscriptions(request):
         channels = get_websocket_topics(request)
-        echo_message = bool(request.GET.get('echo', ''))
+        echo_message = bool(request.GET.get("echo", ""))
         return channels, echo_message
 
     @staticmethod
     def publish_message(window_info, message):
         if isinstance(message, bytes):
-            message = message.decode('utf-8')
+            message = message.decode("utf-8")
         if not message:
             return
         if message == settings.WEBSOCKET_HEARTBEAT:
             return
         try:
             unserialized_message = json.loads(message)
-            kwargs = unserialized_message['opts']
+            kwargs = unserialized_message["opts"]
             # logger.debug('WS message received "%s"' % message)
-            if 'signal' in unserialized_message:
-                signal_name = unserialized_message['signal']
-                eta = int(unserialized_message.get('eta', 0)) or None
-                expires = int(unserialized_message.get('expires', 0)) or None
-                countdown = int(unserialized_message.get('countdown', 0)) or None
-                _call_signal(window_info, signal_name, to=[SERVER], kwargs=kwargs, from_client=True, eta=eta,
-                             expires=expires, countdown=countdown)
-            elif 'func' in unserialized_message:
-                function_name = unserialized_message['func']
-                result_id = unserialized_message['result_id']
+            if "signal" in unserialized_message:
+                signal_name = unserialized_message["signal"]
+                eta = int(unserialized_message.get("eta", 0)) or None
+                expires = int(unserialized_message.get("expires", 0)) or None
+                countdown = int(unserialized_message.get("countdown", 0)) or None
+                _call_signal(
+                    window_info,
+                    signal_name,
+                    to=[SERVER],
+                    kwargs=kwargs,
+                    from_client=True,
+                    eta=eta,
+                    expires=expires,
+                    countdown=countdown,
+                )
+            elif "func" in unserialized_message:
+                function_name = unserialized_message["func"]
+                result_id = unserialized_message["result_id"]
                 import_signals_and_functions()
                 if function_name in REGISTERED_FUNCTIONS:
                     fn = REGISTERED_FUNCTIONS[function_name]
                     queue = fn.get_queue(window_info, kwargs)
-                    _server_function_call.apply_async([function_name, window_info.to_dict(), result_id, kwargs],
-                                                      queue=queue)
+                    _server_function_call.apply_async(
+                        [function_name, window_info.to_dict(), result_id, kwargs],
+                        queue=queue,
+                    )
                 else:
-                    logger.warning('Unknown function "%s" called by client "%s"' %
-                                   (function_name, window_info.window_key))
+                    logger.warning(
+                        'Unknown function "%s" called by client "%s"'
+                        % (function_name, window_info.window_key)
+                    )
         except TypeError as e:
             logger.exception(e)
         except ValueError:
-            logger.error('Invalid Websocket JSON message %r' % message)
+            logger.error("Invalid Websocket JSON message %r" % message)
             pass
         except KeyError as e:
             logger.exception(e)
@@ -163,39 +185,47 @@ class WebsocketWSGIServer:
             channels, echo_message = self.process_subscriptions(request)
             self.process_websocket(window_info, websocket, channels)
         except WebSocketError as excpt:
-            logger.warning('WebSocketError: {}'.format(excpt), exc_info=sys.exc_info())
-            response = http.HttpResponse(status=1001, content='Websocket Closed')
+            logger.warning("WebSocketError: {}".format(excpt), exc_info=sys.exc_info())
+            response = http.HttpResponse(status=1001, content="Websocket Closed")
         except UpgradeRequiredError as excpt:
-            logger.info('Websocket upgrade required')
+            logger.info("Websocket upgrade required")
             response = http.HttpResponseBadRequest(status=426, content=excpt)
         except HandshakeError as excpt:
-            logger.warning('HandshakeError: {}'.format(excpt), exc_info=sys.exc_info())
+            logger.warning("HandshakeError: {}".format(excpt), exc_info=sys.exc_info())
             response = http.HttpResponseBadRequest(content=excpt)
         except PermissionDenied as excpt:
-            logger.warning('PermissionDenied: {}'.format(excpt), exc_info=sys.exc_info())
+            logger.warning(
+                "PermissionDenied: {}".format(excpt), exc_info=sys.exc_info()
+            )
             response = http.HttpResponseForbidden(content=excpt)
         except Exception as excpt:
-            logger.error('Other Exception: {}'.format(excpt), exc_info=sys.exc_info())
+            logger.error("Other Exception: {}".format(excpt), exc_info=sys.exc_info())
             response = http.HttpResponseServerError(content=excpt)
         else:
             response = http.HttpResponse()
         finally:
             # pubsub.release()
             if websocket:
-                websocket.close(code=1001, message='Websocket Closed')
+                websocket.close(code=1001, message="Websocket Closed")
             else:
-                logger.warning('Starting late response on websocket')
-                status_text = client.responses.get(response.status_code, 'UNKNOWN STATUS CODE')
-                status = '{0} {1}'.format(response.status_code, status_text)
+                logger.warning("Starting late response on websocket")
+                status_text = client.responses.get(
+                    response.status_code, "UNKNOWN STATUS CODE"
+                )
+                status = "{0} {1}".format(response.status_code, status_text)
                 # noinspection PyProtectedMember
                 headers = response._headers.values()
                 headers = list(headers)
                 start_response(str(status), headers)
-                logger.info('Finish non-websocket response with status code: {}'.format(response.status_code))
+                logger.info(
+                    "Finish non-websocket response with status code: {}".format(
+                        response.status_code
+                    )
+                )
         return response
 
     def default_response(self):
-        return http.HttpResponse(status=200, content='Websocket Closed')
+        return http.HttpResponse(status=200, content="Websocket Closed")
 
     def get_ws_file_descriptor(self, websocket):
         raise NotImplementedError
@@ -213,7 +243,9 @@ class WebsocketWSGIServer:
         if channels:
             pubsub = self._redis_connection.pubsub()
             pubsub.subscribe(*channels)
-            logger.debug('Subscribed to channels: {0}'.format(', '.join(map(repr, channels))))
+            logger.debug(
+                "Subscribed to channels: {0}".format(", ".join(map(repr, channels)))
+            )
             # noinspection PyProtectedMember
             redis_fd = pubsub.connection._sock.fileno()
             if redis_fd:
@@ -231,12 +263,14 @@ class WebsocketWSGIServer:
                     self.publish_message(window_info, message)
                 elif fd == redis_fd:
                     kind, topic, message = pubsub.parse_response()
-                    kind = kind.decode('utf-8')
-                    if kind == 'message':
+                    kind = kind.decode("utf-8")
+                    if kind == "message":
                         self.ws_send_bytes(websocket, message)
                 else:
-                    logger.error('Invalid file descriptor: {0}'.format(fd))
+                    logger.error("Invalid file descriptor: {0}".format(fd))
             # Check again that the websocket is closed before sending the heartbeat,
             # because the websocket can closed previously in the loop.
             if settings.WEBSOCKET_HEARTBEAT and not websocket.closed and not ready:
-                self.ws_send_bytes(websocket, settings.WEBSOCKET_HEARTBEAT.encode('utf-8'))
+                self.ws_send_bytes(
+                    websocket, settings.WEBSOCKET_HEARTBEAT.encode("utf-8")
+                )

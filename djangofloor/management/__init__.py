@@ -2,9 +2,16 @@ import os
 
 import sys
 from django.conf import settings
-from django.core.management import ManagementUtility, get_commands, color_style, CommandParser, BaseCommand, base
+from django.core.management import (
+    ManagementUtility,
+    get_commands,
+    color_style,
+    CommandParser,
+    BaseCommand,
+    base,
+)
 
-__author__ = 'Matthieu Gallet'
+__author__ = "Matthieu Gallet"
 
 
 def main_help_text(self, commands_only=False):
@@ -16,7 +23,8 @@ def main_help_text(self, commands_only=False):
     else:
         usage = [
             "",
-            "Type '%s help <subcommand>' for help on a specific subcommand." % self.prog_name,
+            "Type '%s help <subcommand>' for help on a specific subcommand."
+            % self.prog_name,
             "",
             "Available subcommands:",
         ]
@@ -28,12 +36,15 @@ def main_help_text(self, commands_only=False):
             usage.append("    %s" % name)
         # Output an extra note if settings are not properly configured
         if self.settings_exception is not None:
-            usage.append(style.NOTICE(
-                "Note that only Django core commands are listed "
-                "as settings are not properly configured (error: %s)."
-                % self.settings_exception))
+            usage.append(
+                style.NOTICE(
+                    "Note that only Django core commands are listed "
+                    "as settings are not properly configured (error: %s)."
+                    % self.settings_exception
+                )
+            )
 
-    return '\n'.join(usage)
+    return "\n".join(usage)
 
 
 def create_parser(self, prog_name, subcommand):
@@ -42,16 +53,25 @@ def create_parser(self, prog_name, subcommand):
     parse the arguments to this command.
     """
     parser = CommandParser(
-        self, prog="%s %s" % (os.path.basename(prog_name), subcommand),
+        self,
+        prog="%s %s" % (os.path.basename(prog_name), subcommand),
         description=self.help or None,
     )
     parser.add_argument(
-        '-v', '--verbosity', action='store', dest='verbosity', default=1,
-        type=int, choices=[0, 1, 2, 3],
-        help='Verbosity level; 0=minimal output, 1=normal output, 2=verbose output, 3=very verbose output',
+        "-v",
+        "--verbosity",
+        action="store",
+        dest="verbosity",
+        default=1,
+        type=int,
+        choices=[0, 1, 2, 3],
+        help="Verbosity level; 0=minimal output, 1=normal output, 2=verbose output, 3=very verbose output",
     )
     parser.add_argument(
-        '--no-color', action='store_true', dest='no_color', default=False,
+        "--no-color",
+        action="store_true",
+        dest="no_color",
+        default=False,
         help="Don't colorize the command output.",
     )
     self.add_arguments(parser)
@@ -80,4 +100,5 @@ def execute_from_command_line(argv=None):
         ManagementUtility.main_help_text = main_help_text
         base.handle_default_options = handle_default_options
     from django.core import management
+
     management.execute_from_command_line(argv=argv)

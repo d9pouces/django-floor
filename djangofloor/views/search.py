@@ -19,13 +19,14 @@ from django.views.generic import TemplateView
 from djangofloor.tasks import set_websocket_topics
 from djangofloor.forms import SearchForm
 
-__author__ = 'Matthieu Gallet'
-logger = logging.getLogger('django.request')
+__author__ = "Matthieu Gallet"
+logger = logging.getLogger("django.request")
 
 
 class SiteSearchView(TemplateView):
     """Abstract site-wide search view"""
-    template_name = 'djangofloor/bootstrap3/search.html'
+
+    template_name = "djangofloor/bootstrap3/search.html"
     """used template for displaying the results"""
 
     def get(self, request, *args, **kwargs):
@@ -39,9 +40,9 @@ class SiteSearchView(TemplateView):
     def get_or_post(self, request, form):
         """Common result, the same for GET or POST data.
         Takes a bound form."""
-        pattern = form.cleaned_data['q'] if form.is_valid() else None
+        pattern = form.cleaned_data["q"] if form.is_valid() else None
         search_query = self.get_query(request, pattern=pattern)
-        page = request.GET.get('page')
+        page = request.GET.get("page")
         paginator = Paginator(search_query, 25)
         try:
             paginated_results = paginator.page(page)
@@ -51,10 +52,14 @@ class SiteSearchView(TemplateView):
         except EmptyPage:
             # If page is out of range (e.g. 9999), deliver last page of results.
             paginated_results = paginator.page(paginator.num_pages)
-        context = {'form': form, 'paginated_url': '%s?%s' % (reverse('df:site_search'), urlencode({'q': pattern})),
-                   'paginated_results': paginated_results,
-                   'formatted_results': self.formatted_results(paginated_results),
-                   'formatted_header': self.formatted_header(), }
+        context = {
+            "form": form,
+            "paginated_url": "%s?%s"
+            % (reverse("df:site_search"), urlencode({"q": pattern})),
+            "paginated_results": paginated_results,
+            "formatted_results": self.formatted_results(paginated_results),
+            "formatted_header": self.formatted_header(),
+        }
         extra_context = self.get_template_values(request)
         context.update(extra_context)
         set_websocket_topics(request)
@@ -85,6 +90,7 @@ class SiteSearchView(TemplateView):
 
 class ModelSearchView(SiteSearchView):
     """Reusable search view that search through a Django model"""
+
     model = get_user_model()
     """searched model """
     searched_attributes = []
@@ -106,21 +112,24 @@ class ModelSearchView(SiteSearchView):
 
     def format_result(self, obj):
         """basic format for objects """
-        return mark_safe('<td>%s</td>' % obj)
+        return mark_safe("<td>%s</td>" % obj)
 
 
 class UserSearchView(ModelSearchView):
     """Search across all users with username and email """
-    searched_attributes = ['username__icontains', 'email__icontains']
+
+    searched_attributes = ["username__icontains", "email__icontains"]
     """search in usernames and emails """
-    sort_attributes = ['last_name', 'first_name']
+    sort_attributes = ["last_name", "first_name"]
     """order results by last_name and first_name """
 
     def format_result(self, obj):
         """a bit better formatted row """
-        return mark_safe('<td><a href="%s">%s</a></td><td>%s</td><td>%s</td>' %
-                         (obj, obj, obj.last_name, obj.first_name))
+        return mark_safe(
+            '<td><a href="%s">%s</a></td><td>%s</td><td>%s</td>'
+            % (obj, obj, obj.last_name, obj.first_name)
+        )
 
     def formatted_header(self):
         """headers row """
-        return mark_safe('<th>Link</th><th>Name</th><th>First name</th>')
+        return mark_safe("<th>Link</th><th>Name</th><th>First name</th>")

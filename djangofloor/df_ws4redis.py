@@ -8,16 +8,19 @@ from djangofloor.tasks import SESSION, WINDOW, BROADCAST, USER, call
 from djangofloor.utils import RemovedInDjangoFloor200Warning
 from djangofloor.wsgi.window_info import WindowInfo, Session
 
-__author__ = 'Matthieu Gallet'
+__author__ = "Matthieu Gallet"
 
 
 @lru_cache()
 def get_pk(kind, value):
-    if kind == 'user':
+    if kind == "user":
         return get_user_model().objects.get(username=value).pk
 
 
-warnings.warn('djangofloor.df_ws4redis module and its functions will be removed', RemovedInDjangoFloor200Warning)
+warnings.warn(
+    "djangofloor.df_ws4redis module and its functions will be removed",
+    RemovedInDjangoFloor200Warning,
+)
 
 
 def ws_call(signal_name, request, sharing, kwargs):
@@ -42,7 +45,7 @@ def _sharing_to_topics(request, sharing):
         to = [BROADCAST]
     else:
         for username in sharing.get(USER, []):
-            to.append(get_pk('user', username))
+            to.append(get_pk("user", username))
         for session in sharing.get(SESSION, []):
             to.append(Session(session))
     return to

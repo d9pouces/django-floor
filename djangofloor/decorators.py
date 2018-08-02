@@ -69,8 +69,8 @@ except ImportError:
     # noinspection PyUnresolvedReferences,PyPackageRequirements
     from funcsigs import signature
 
-__author__ = 'Matthieu Gallet'
-logger = logging.getLogger('djangofloor.signals')
+__author__ = "Matthieu Gallet"
+logger = logging.getLogger("djangofloor.signals")
 
 REGISTERED_SIGNALS = {}
 REGISTERED_FUNCTIONS = {}
@@ -82,6 +82,7 @@ class DynamicQueueName:
       want to dispatch signals to several workers.
 
     """
+
     def __call__(self, connection, window_info, original_kwargs):
         """called for each signal call to dispatch this connection"""
         raise NotImplementedError
@@ -108,6 +109,7 @@ class RandomDynamicQueueName(DynamicQueueName):
       True
 
     """
+
     def __init__(self, prefix: str, size: int):
         """
 
@@ -118,10 +120,10 @@ class RandomDynamicQueueName(DynamicQueueName):
         self.size = size
 
     def __call__(self, connection, window_info, original_kwargs):
-        return '%s%d' % (self.prefix, random.randint(0, self.size - 1))
+        return "%s%d" % (self.prefix, random.randint(0, self.size - 1))
 
     def get_available_queues(self):
-        return {'%s%d' % (self.prefix, x) for x in range(self.size)}
+        return {"%s%d" % (self.prefix, x) for x in range(self.size)}
 
 
 # noinspection PyUnusedLocal
@@ -199,6 +201,7 @@ class has_perm:
     >>> def my_signal(request, arg1=None):
     >>>     print(request, arg1)
     """
+
     def __init__(self, perm):
         self.perm = perm
 
@@ -210,18 +213,19 @@ class has_perm:
 class Connection:
     """Parent class of a registered signal or remote function.
      Do not use it directly."""
-    required_function_arg = 'window_info'
+
+    required_function_arg = "window_info"
 
     def __init__(self, fn, path=None, is_allowed_to=server_side, queue=None):
         self.function = fn
         if not path:
-            if getattr(fn, '__module__', None) and getattr(fn, '__name__', None):
-                path = '%s.%s' % (fn.__module__, fn.__name__)
-            elif getattr(fn, '__name__', None):
+            if getattr(fn, "__module__", None) and getattr(fn, "__name__", None):
+                path = "%s.%s" % (fn.__module__, fn.__name__)
+            elif getattr(fn, "__name__", None):
                 path = fn.__name__
         self.path = str(path)
-        if not re.match(r'^([_a-zA-Z]\w*)(\.[_a-zA-Z]\w*)*$', self.path):
-            raise ValueError('Invalid identifier: %s' % self.path)
+        if not re.match(r"^([_a-zA-Z]\w*)(\.[_a-zA-Z]\w*)*$", self.path):
+            raise ValueError("Invalid identifier: %s" % self.path)
         self.is_allowed_to = is_allowed_to
         self.queue = queue or settings.CELERY_DEFAULT_QUEUE
         self.accept_kwargs = False
@@ -231,7 +235,7 @@ class Connection:
         self.accepted_argument_names = set()
         self.signature_check(fn)
         # noinspection PyTypeChecker
-        if hasattr(fn, '__name__'):
+        if hasattr(fn, "__name__"):
             self.__name__ = fn.__name__
 
     def signature_check(self, fn):
@@ -248,8 +252,10 @@ class Connection:
             if param.kind == param.VAR_KEYWORD:  # corresponds to "fn(**kwargs)"
                 self.accept_kwargs = True
             elif param.kind == param.VAR_POSITIONAL:  # corresponds to "fn(*args)"
-                raise ValueError('Cannot connect a signal using the *%s syntax' % key)
-            elif param.default == param.empty:  # "fn(foo)" : kind = POSITIONAL_ONLY or POSITIONAL_OR_KEYWORD
+                raise ValueError("Cannot connect a signal using the *%s syntax" % key)
+            elif (
+                param.default == param.empty
+            ):  # "fn(foo)" : kind = POSITIONAL_ONLY or POSITIONAL_OR_KEYWORD
                 self.required_arguments_names.add(key)
                 if param.annotation != param.empty and callable(param.annotation):
                     self.argument_types[key] = param.annotation
@@ -260,8 +266,11 @@ class Connection:
                 if param.annotation != param.empty and callable(param.annotation):
                     self.argument_types[key] = param.annotation
         if self.required_function_arg and not required_arg_is_present:
-            msg = '%s(%s) must takes "%s" as first argument' % \
-                  (self.__class__.__name__, self.path, self.required_function_arg)
+            msg = '%s(%s) must takes "%s" as first argument' % (
+                self.__class__.__name__,
+                self.path,
+                self.required_function_arg,
+            )
             raise ValueError(msg)
 
     def check(self, kwargs):
@@ -274,19 +283,29 @@ class Connection:
                 if k in kwargs:
                     kwargs[k] = v(kwargs[k])
             except ValueError:
-                logger.warning('%s("%s"): Invalid value %r for argument "%s".' % (cls, self.path, kwargs[k], k))
+                logger.warning(
+                    '%s("%s"): Invalid value %r for argument "%s".'
+                    % (cls, self.path, kwargs[k], k)
+                )
                 return None
             except TypeError:
-                logger.warning('%s("%s"): Invalid value %r for argument "%s".' % (cls, self.path, kwargs[k], k))
+                logger.warning(
+                    '%s("%s"): Invalid value %r for argument "%s".'
+                    % (cls, self.path, kwargs[k], k)
+                )
                 return None
         for k in self.required_arguments_names:
             if k not in kwargs:
-                logger.warning('%s("%s"): Missing required argument "%s".' % (cls, self.path, k))
+                logger.warning(
+                    '%s("%s"): Missing required argument "%s".' % (cls, self.path, k)
+                )
                 return None
         if not self.accept_kwargs:
             for k in kwargs:
                 if k not in self.accepted_argument_names:
-                    logger.warning('%s("%s"): Invalid argument "%s".' % (cls, self.path, k))
+                    logger.warning(
+                        '%s("%s"): Invalid argument "%s".' % (cls, self.path, k)
+                    )
                     return None
         return kwargs
 
@@ -307,17 +326,20 @@ class Connection:
 class SignalConnection(Connection):
     """represents a connected signal.
     """
+
     def register(self):
         """register the signal into the `REGISTERED_SIGNALS` dict """
         REGISTERED_SIGNALS.setdefault(self.path, []).append(self)
 
     def call(self, window_info, **kwargs):
         from djangofloor.tasks import call, SERVER
+
         call(window_info, self.path, to=SERVER, kwargs=kwargs)
 
 
 class FunctionConnection(Connection):
     """represent a WS function """
+
     def register(self):
         """register the WS function into the `REGISTERED_FUNCTIONS` dict """
         REGISTERED_FUNCTIONS[self.path] = self
@@ -328,26 +350,37 @@ class FormValidator(FunctionConnection):
 
     However, files cannot be sent in the validation process.
     """
+
     def signature_check(self, fn):
         """override the default method for checking the arguments, since they are independent from the Django Form.
         """
         if not isinstance(fn, type) or not issubclass(fn, forms.BaseForm):
-            raise ValueError('validate_form only apply to Django Forms')
+            raise ValueError("validate_form only apply to Django Forms")
         self.required_arguments_names = set()
-        self.optional_arguments_names = {'data'}
-        self.accepted_argument_names = {'data'}
+        self.optional_arguments_names = {"data"}
+        self.accepted_argument_names = {"data"}
 
     def __call__(self, window_info, data=None):
         form = SerializedForm(self.function)(data)
         valid = form.is_valid()
-        return {'valid': valid, 'errors': {f: e.get_json_data(escape_html=False) for f, e in form.errors.items()},
-                'help_texts': {f: e.help_text for (f, e) in form.fields.items() if e.help_text}}
+        return {
+            "valid": valid,
+            "errors": {
+                f: e.get_json_data(escape_html=False) for f, e in form.errors.items()
+            },
+            "help_texts": {
+                f: e.help_text for (f, e) in form.fields.items() if e.help_text
+            },
+        }
 
 
-def signal(fn=None, path=None, is_allowed_to=server_side, queue=None, cls=SignalConnection):
+def signal(
+    fn=None, path=None, is_allowed_to=server_side, queue=None, cls=SignalConnection
+):
     """Decorator to use for registering a new signal.
     This decorator returns the original callable as-is.
     """
+
     def wrapped(fn_):
         wrapper = cls(fn=fn_, path=path, is_allowed_to=is_allowed_to, queue=queue)
         wrapper.register()
@@ -381,7 +414,13 @@ The this function can be called from your JavaScript code:
 
 
 """
-    return signal(fn=fn, path=path, is_allowed_to=is_allowed_to, queue=queue, cls=FunctionConnection)
+    return signal(
+        fn=fn,
+        path=path,
+        is_allowed_to=is_allowed_to,
+        queue=queue,
+        cls=FunctionConnection,
+    )
 
 
 def validate_form(form_cls=None, path=None, is_allowed_to=server_side, queue=None):
@@ -417,10 +456,14 @@ def validate_form(form_cls=None, path=None, is_allowed_to=server_side, queue=Non
         # @validate_form
         # class MyForm(forms.Form):
         #     ...
-        raise ValueError('is_allowed_to and path are not configured for the validate_form decorator')
+        raise ValueError(
+            "is_allowed_to and path are not configured for the validate_form decorator"
+        )
 
     def wrapped(form_cls_):
-        wrapper = FormValidator(form_cls_, path=path, is_allowed_to=is_allowed_to, queue=queue)
+        wrapper = FormValidator(
+            form_cls_, path=path, is_allowed_to=is_allowed_to, queue=queue
+        )
         wrapper.register()
         return form_cls_
 
@@ -450,6 +493,7 @@ class RE:
     :param flags: regexp flags passed to `re.compile`
     :type flags: `int`
     """
+
     def __init__(self, value, caster=None, flags=0):
         self.caster = caster
         self.regexp = re.compile(value, flags=flags)
@@ -477,6 +521,7 @@ class Choice:
 
     :param caster: callable to convert the provided deserialized JSON data before checking its validity.
     """
+
     def __init__(self, values, caster=None):
         self.values = set(values)
         self.caster = caster
@@ -531,6 +576,7 @@ class SerializedForm:
 
 
     """
+
     def __init__(self, form_cls):
         self.form_cls = form_cls
 
@@ -544,18 +590,26 @@ class SerializedForm:
         if value is None:
             return self.form_cls(*args, **kwargs)
 
-        post_data = QueryDict('', mutable=True)
-        file_data = QueryDict('', mutable=True)
+        post_data = QueryDict("", mutable=True)
+        file_data = QueryDict("", mutable=True)
         for obj in value:
-            name = obj['name']
-            value = obj['value']
-            if name in self.form_cls.base_fields and isinstance(self.form_cls.base_fields[name], FileField):
+            name = obj["name"]
+            value = obj["value"]
+            if name in self.form_cls.base_fields and isinstance(
+                self.form_cls.base_fields[name], FileField
+            ):
                 mimetypes.init()
                 basename = os.path.basename(value)
                 (type_, __) = mimetypes.guess_type(basename)
                 # it's a file => we need to simulate an uploaded one
-                content = InMemoryUploadedFile(io.BytesIO(b'\0'), name, basename,
-                                               type_ or 'application/binary', 1, 'utf-8')
+                content = InMemoryUploadedFile(
+                    io.BytesIO(b"\0"),
+                    name,
+                    basename,
+                    type_ or "application/binary",
+                    1,
+                    "utf-8",
+                )
                 file_data.update({name: content})
             else:
                 post_data.update({name: value})
@@ -564,21 +618,33 @@ class SerializedForm:
 
 class LegacySignalConnection(SignalConnection):
     """.. deprecated:: 1.0  do not use it"""
+
     def __call__(self, window_info, **kwargs):
         result = super(LegacySignalConnection, self).__call__(window_info, **kwargs)
         if result:
             # noinspection PyUnresolvedReferences
             from djangofloor.tasks import df_call
+
             for data in result:
-                df_call(data['signal'], window_info, sharing=data.get('sharing'), from_client=False,
-                        kwargs=data['options'])
+                df_call(
+                    data["signal"],
+                    window_info,
+                    sharing=data.get("sharing"),
+                    from_client=False,
+                    kwargs=data["options"],
+                )
 
 
-def connect(fn=None, path=None, delayed=False, allow_from_client=True, auth_required=True):
+def connect(
+    fn=None, path=None, delayed=False, allow_from_client=True, auth_required=True
+):
     """.. deprecated:: 1.0 do not use it"""
     delayed = delayed
     if not delayed:
-        warnings.warn('The "delayed" argument is deprecated and useless.', RemovedInDjangoFloor200Warning)
+        warnings.warn(
+            'The "delayed" argument is deprecated and useless.',
+            RemovedInDjangoFloor200Warning,
+        )
     if allow_from_client and auth_required:
         is_allowed_to = is_authenticated
     elif allow_from_client:

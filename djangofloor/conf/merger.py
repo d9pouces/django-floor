@@ -30,38 +30,40 @@ except ImportError:
     from ConfigParser import ConfigParser
 import string
 
-__author__ = 'Matthieu Gallet'
+__author__ = "Matthieu Gallet"
 
 _deprecated_settings = {
-    'BIND_ADDRESS': SettingReference('LISTEN_ADDRESS'),
-    'BROKER_DB': SettingReference('CELERY_DB'),
-    'FLOOR_BACKUP_SINGLE_TRANSACTION': None,
-    'FLOOR_EXTRA_CSS': SettingReference('DF_CSS'),
-    'FLOOR_EXTRA_JS': SettingReference('DF_JS'),
-    'FLOOR_FAKE_AUTHENTICATION_USERNAME': SettingReference('DF_FAKE_AUTHENTICATION_USERNAME'),
-    'FLOOR_WS_FACILITY': None,
-    'FLOOR_INDEX': SettingReference('DF_INDEX_VIEW'),
-    'FLOOR_PROJECT_VERSION': SettingReference('DF_PROJECT_VERSION'),
-    'FLOOR_SIGNAL_DECODER': SettingReference('WEBSOCKET_SIGNAL_DECODER'),
-    'FLOOR_SIGNAL_ENCODER': SettingReference('WEBSOCKET_SIGNAL_ENCODER'),
-    'FLOOR_URL_CONF': SettingReference('DF_URL_CONF'),
-    'FLOOR_USE_WS4REDIS': 'ws4redis is not used anymore.',
-    'LOG_PATH': 'Use "LOG_DIRECTORY" instead.',
-    'LOGOUT_URL': None,
-    'MAX_REQUESTS': None,
-    'PROTOCOL': SettingReference('SERVER_PROTOCOL'),
-    'REDIS_HOST': SettingReference('CELERY_HOST'),
-    'REDIS_PORT': SettingReference('CELERY_PORT'),
-    'REVERSE_PROXY_IPS': None,
-    'REVERSE_PROXY_TIMEOUT': None,
-    'REVERSE_PROXY_SSL_KEY_FILE': None,
-    'REVERSE_PROXY_SSL_CRT_FILE': None,
-    'REVERSE_PROXY_PORT': 'Use the port component of "SERVER_BASE_URL" instead.',
-    'THREADS': None,
-    'USE_SCSS': None,
-    'WORKERS': None,
-    'WEBSOCKET_REDIS_EMULATION_INTERVAL': None,
-    'WEBSOCKET_REDIS_SUBSCRIBER': None,
+    "BIND_ADDRESS": SettingReference("LISTEN_ADDRESS"),
+    "BROKER_DB": SettingReference("CELERY_DB"),
+    "FLOOR_BACKUP_SINGLE_TRANSACTION": None,
+    "FLOOR_EXTRA_CSS": SettingReference("DF_CSS"),
+    "FLOOR_EXTRA_JS": SettingReference("DF_JS"),
+    "FLOOR_FAKE_AUTHENTICATION_USERNAME": SettingReference(
+        "DF_FAKE_AUTHENTICATION_USERNAME"
+    ),
+    "FLOOR_WS_FACILITY": None,
+    "FLOOR_INDEX": SettingReference("DF_INDEX_VIEW"),
+    "FLOOR_PROJECT_VERSION": SettingReference("DF_PROJECT_VERSION"),
+    "FLOOR_SIGNAL_DECODER": SettingReference("WEBSOCKET_SIGNAL_DECODER"),
+    "FLOOR_SIGNAL_ENCODER": SettingReference("WEBSOCKET_SIGNAL_ENCODER"),
+    "FLOOR_URL_CONF": SettingReference("DF_URL_CONF"),
+    "FLOOR_USE_WS4REDIS": "ws4redis is not used anymore.",
+    "LOG_PATH": 'Use "LOG_DIRECTORY" instead.',
+    "LOGOUT_URL": None,
+    "MAX_REQUESTS": None,
+    "PROTOCOL": SettingReference("SERVER_PROTOCOL"),
+    "REDIS_HOST": SettingReference("CELERY_HOST"),
+    "REDIS_PORT": SettingReference("CELERY_PORT"),
+    "REVERSE_PROXY_IPS": None,
+    "REVERSE_PROXY_TIMEOUT": None,
+    "REVERSE_PROXY_SSL_KEY_FILE": None,
+    "REVERSE_PROXY_SSL_CRT_FILE": None,
+    "REVERSE_PROXY_PORT": 'Use the port component of "SERVER_BASE_URL" instead.',
+    "THREADS": None,
+    "USE_SCSS": None,
+    "WORKERS": None,
+    "WEBSOCKET_REDIS_EMULATION_INTERVAL": None,
+    "WEBSOCKET_REDIS_SUBSCRIBER": None,
 }
 _warned_settings = set()
 
@@ -71,15 +73,16 @@ def __getattr__(self, name):
         new_content = _deprecated_settings[name]
         if name not in _warned_settings:
             from djangofloor.utils import RemovedInDjangoFloor200Warning
+
             f = traceback.extract_stack()
-            is_debug = any(filename[0].endswith('/debug.py') for filename in f)
+            is_debug = any(filename[0].endswith("/debug.py") for filename in f)
             if not is_debug:
                 msg = 'Setting "%s" is deprecated. ' % name
 
                 if isinstance(new_content, SettingReference):
-                    msg += 'Replaced by %s' % new_content.value
+                    msg += "Replaced by %s" % new_content.value
                 else:
-                    msg += new_content or ''
+                    msg += new_content or ""
                 warnings.warn(msg, RemovedInDjangoFloor200Warning, stacklevel=2)
             _warned_settings.add(name)
         if isinstance(new_content, SettingReference):
@@ -96,7 +99,15 @@ class SettingMerger:
     """Load different settings modules and config files and merge them.
     """
 
-    def __init__(self, fields_provider, providers, extra_values=None, stdout=None, stderr=None, no_color=False):
+    def __init__(
+        self,
+        fields_provider,
+        providers,
+        extra_values=None,
+        stdout=None,
+        stderr=None,
+        no_color=False,
+    ):
         self.fields_provider = fields_provider or PythonConfigFieldsProvider(None)
         extra_values = extra_values or {}
         self.extra_values = extra_values
@@ -163,9 +174,11 @@ class SettingMerger:
         if setting_name in self.settings:
             return self.settings[setting_name]
         elif setting_name in self.__working_stack:
-            raise ValueError('Invalid cyclic dependency between ' + ', '.join(self.__working_stack))
+            raise ValueError(
+                "Invalid cyclic dependency between " + ", ".join(self.__working_stack)
+            )
         elif setting_name not in self.raw_settings:
-            raise ValueError('Invalid setting reference: %s' % setting_name)
+            raise ValueError("Invalid setting reference: %s" % setting_name)
         self.__working_stack.add(setting_name)
         provider_name, raw_value = None, None
         for provider_name, raw_value in self.raw_settings[setting_name].items():
@@ -187,10 +200,16 @@ class SettingMerger:
         """
         for raw_value, provider_name, setting_name, final_value in self.config_values:
             try:
-                getattr(raw_value, method_name)(self, provider_name, setting_name, final_value)
+                getattr(raw_value, method_name)(
+                    self, provider_name, setting_name, final_value
+                )
             except Exception as e:
-                self.stdout.write(self.style.ERROR('Invalid value "%s" in %s for %s (%s)' %
-                                                   (raw_value, provider_name or 'built-in', setting_name, e)))
+                self.stdout.write(
+                    self.style.ERROR(
+                        'Invalid value "%s" in %s for %s (%s)'
+                        % (raw_value, provider_name or "built-in", setting_name, e)
+                    )
+                )
 
     def analyze_raw_value(self, obj, provider_name, setting_name):
         """Parse the object for replacing variables by their values.
@@ -209,7 +228,12 @@ class SettingMerger:
         """
         if isinstance(obj, str):
             values = {}
-            for (literal_text, field_name, format_spec, conversion) in self.__formatter.parse(obj):
+            for (
+                literal_text,
+                field_name,
+                format_spec,
+                conversion,
+            ) in self.__formatter.parse(obj):
                 if field_name is not None:
                     values[field_name] = self.get_setting_value(field_name)
             if values:
@@ -224,7 +248,9 @@ class SettingMerger:
                 if isinstance(sub_obj, ExpandIterable):
                     result += self.get_setting_value(sub_obj.value)
                 else:
-                    result.append(self.analyze_raw_value(sub_obj, provider_name, setting_name))
+                    result.append(
+                        self.analyze_raw_value(sub_obj, provider_name, setting_name)
+                    )
             if isinstance(obj, tuple):
                 return tuple(result)
             return result
@@ -234,7 +260,9 @@ class SettingMerger:
                 if isinstance(sub_obj, ExpandIterable):
                     result |= self.get_setting_value(sub_obj.value)
                 else:
-                    result.add(self.analyze_raw_value(sub_obj, provider_name, setting_name))
+                    result.add(
+                        self.analyze_raw_value(sub_obj, provider_name, setting_name)
+                    )
             return result
         elif isinstance(obj, dict):
             result = OrderedDict()
@@ -254,17 +282,26 @@ class SettingMerger:
             * remove duplicates in `INSTALLED_APPS` (keeps only the first occurrence)
         """
         # remove duplicates in INSTALLED_APPS
-        self.settings['INSTALLED_APPS'] = list(OrderedDict.fromkeys(self.settings['INSTALLED_APPS']))
+        self.settings["INSTALLED_APPS"] = list(
+            OrderedDict.fromkeys(self.settings["INSTALLED_APPS"])
+        )
         django_version = get_version()
         # remove deprecated settings
-        if LooseVersion(django_version) >= LooseVersion('1.8'):
-            if 'TEMPLATES' in self.settings:
-                for key in 'TEMPLATE_DIRS', 'TEMPLATE_CONTEXT_PROCESSORS', 'TEMPLATE_LOADERS', 'TEMPLATE_DEBUG':
+        if LooseVersion(django_version) >= LooseVersion("1.8"):
+            if "TEMPLATES" in self.settings:
+                for key in (
+                    "TEMPLATE_DIRS",
+                    "TEMPLATE_CONTEXT_PROCESSORS",
+                    "TEMPLATE_LOADERS",
+                    "TEMPLATE_DEBUG",
+                ):
                     if key in self.settings:
                         del self.settings[key]
 
     def write_provider(self, provider, include_doc=False):
-        for config_field in sorted(self.fields_provider.get_config_fields(), key=lambda x: x.name):
+        for config_field in sorted(
+            self.fields_provider.get_config_fields(), key=lambda x: x.name
+        ):
             assert isinstance(config_field, ConfigField)
             if config_field.setting_name not in self.settings:
                 continue
