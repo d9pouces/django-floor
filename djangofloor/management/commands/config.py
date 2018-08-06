@@ -2,6 +2,8 @@ from argparse import ArgumentParser
 
 from django.conf import settings
 from django.core.management import BaseCommand
+from django.core.management.base import OutputWrapper
+from django.core.management.color import no_style
 from django.utils.translation import ugettext as _
 
 from djangofloor import __version__ as version
@@ -39,6 +41,9 @@ class Command(BaseCommand):
             choices=self.options,
             help=",\n".join(['"%s": %s' % x for x in self.options.items()]),
         )
+        parser.add_argument("--filename",
+                            default=None,
+                            help="write output to this file")
         remove_arguments_from_help(
             parser, {"--settings", "--traceback", "--pythonpath"}
         )
@@ -52,6 +57,11 @@ class Command(BaseCommand):
     def handle_head(self, **options):
         action = options["action"]
         verbosity = options["verbosity"]
+        filename = options["filename"]
+        if filename:
+            self.stdout = OutputWrapper(open(filename, 'w'))
+            self.style = no_style()
+
         if action == "python":
             self.show_python_config(verbosity)
         elif action == "ini":
@@ -157,6 +167,28 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS("# " + "-" * 80))
         setting_names = list(merger.raw_settings)
         setting_names.sort()
+
+        # first, compute all imports to do
+        imports = {}
+
+        def add_import(val):
+            if not isinstance(val, type):
+                val = val.__class__
+            if val.__module__ != 'builtins':
+                imports.setdefault(val.__module__, set()).add(val.__name__)
+
+        for setting_name in setting_names:
+            if setting_name not in merger.settings:
+                continue
+            value = merger.settings[setting_name]
+            add_import(value)
+        if imports:
+            self.stdout.write("\n")
+            for module_name in sorted(imports):
+                objects = ', '.join(sorted(imports[module_name]))
+                self.stdout.write(self.style.WARNING("from %s import %s" % (module_name, objects)))
+            self.stdout.write("\n")
+
         for setting_name in setting_names:
             if setting_name not in merger.settings:
                 continue
