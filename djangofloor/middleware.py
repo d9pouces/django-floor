@@ -391,7 +391,7 @@ class IEMiddleware(MiddlewareMixin):
     """.. deprecated:: 1.0  replaced by :class:`djangofloor.middleware.DjangoFloorMiddleware`"""
 
     def __init__(self, get_response=None):
-        super(IEMiddleware, self).__init__(get_response=get_response)
+        super().__init__(get_response=get_response)
         warnings.warn(
             "djangofloor.middleware.IEMiddleware has been replaced by "
             "djangofloor.middleware.DjangoFloorMiddleware",
@@ -412,7 +412,7 @@ class RemoteUserMiddleware(BaseRemoteUserMiddleware):
     """Deprecated class, replaced by :class:`djangofloor.middleware.DjangoFloorMiddleware`"""
 
     def __init__(self, get_response=None):
-        super(RemoteUserMiddleware, self).__init__(get_response=get_response)
+        super().__init__(get_response=get_response)
         warnings.warn(
             "djangofloor.middleware.RemoteUserMiddleware has been replaced by "
             "djangofloor.middleware.DjangoFloorMiddleware",
@@ -468,7 +468,7 @@ class FakeAuthenticationMiddleware(MiddlewareMixin):
     """
 
     def __init__(self, get_response=None):
-        super(FakeAuthenticationMiddleware, self).__init__(get_response=get_response)
+        super().__init__(get_response=get_response)
         warnings.warn(
             "djangofloor.middleware.FakeAuthenticationMiddleware has been replaced by "
             "djangofloor.middleware.DjangoFloorMiddleware",
@@ -502,7 +502,7 @@ class BasicAuthMiddleware(MiddlewareMixin):
     """
 
     def __init__(self, get_response=None):
-        super(BasicAuthMiddleware, self).__init__(get_response=get_response)
+        super().__init__(get_response=get_response)
         warnings.warn(
             "djangofloor.middleware.BasicAuthMiddleware has been replaced by "
             "djangofloor.middleware.DjangoFloorMiddleware",

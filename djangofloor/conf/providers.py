@@ -178,7 +178,7 @@ class PythonFileProvider(PythonModuleProvider):
 
     def __init__(self, module_filename):
         self.module_filename = module_filename
-        super(PythonFileProvider, self).__init__()
+        super().__init__()
         if not os.path.isfile(module_filename):
             return
         version = tuple(sys.version_info[0:1])

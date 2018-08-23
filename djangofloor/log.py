@@ -32,7 +32,7 @@ class ColorizedFormatter(logging.Formatter):
         self.style = color_style()
         kwargs.setdefault("fmt", "%(asctime)s [%(name)s] [%(levelname)s] %(message)s")
         kwargs.setdefault("datefmt", "%Y-%m-%d %H:%M:%S")
-        super(ColorizedFormatter, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def format(self, record):
         """apply a log color, corresponding to the log level"""
@@ -47,7 +47,7 @@ class ColorizedFormatter(logging.Formatter):
         else:
             msg = self.style.ERROR(msg)
         record.msg = msg
-        return super(ColorizedFormatter, self).format(record)
+        return super().format(record)
 
     def formatStack(self, stack_info):
         return self.style.ERROR(stack_info)
@@ -56,7 +56,7 @@ class ColorizedFormatter(logging.Formatter):
 class ServerFormatter(logging.Formatter):
     def __init__(self, *args, **kwargs):
         self.style = color_style()
-        super(ServerFormatter, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def format(self, record):
         msg = record.msg
@@ -92,7 +92,7 @@ class ServerFormatter(logging.Formatter):
             record.server_time = self.formatTime(record, self.datefmt)
 
         record.msg = msg
-        return super(ServerFormatter, self).format(record)
+        return super().format(record)
 
     def uses_server_time(self):
         return self._fmt.find("%(server_time)") >= 0
@@ -114,7 +114,7 @@ class AdminEmailHandler(BaseAdminEmailHandler):
 
         if self.can_send_email() and settings.EMAIL_HOST:
             try:
-                super(AdminEmailHandler, self).send_mail(
+                super().send_mail(
                     subject, message, *args, **kwargs
                 )
             except Exception as e:
@@ -141,7 +141,7 @@ class RemoveDuplicateWarnings(logging.Filter):
     """
 
     def __init__(self, name=""):
-        super(RemoveDuplicateWarnings, self).__init__(name=name)
+        super().__init__(name=name)
         self.previous_records = set()
 
     def filter(self, record):

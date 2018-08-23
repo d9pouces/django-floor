@@ -36,7 +36,7 @@ class Command(TemplatedBaseCommand):
     include_folder = "djangofloor/include"
 
     def add_arguments(self, parser):
-        super(Command, self).add_arguments(parser)
+        super().add_arguments(parser)
         assert isinstance(parser, ArgumentParser)
         parser.add_argument(
             "target", default=".", action="store", help='Target folder (probably ".")'
@@ -90,7 +90,7 @@ class Command(TemplatedBaseCommand):
             )
 
     def get_template_context(self, merger, extra_context):
-        context = super(Command, self).get_template_context(merger, extra_context)
+        context = super().get_template_context(merger, extra_context)
         required_celery_queues = list(sorted(get_expected_queues()))
         setup_context = self.get_setup_context()
         if not setup_context:

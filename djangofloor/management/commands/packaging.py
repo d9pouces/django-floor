@@ -260,7 +260,7 @@ class Command(TemplatedBaseCommand):
     processes_section = "processes"
 
     def __init__(self, stdout=None, stderr=None, no_color=False):
-        super(Command, self).__init__(stdout=stdout, stderr=stderr, no_color=no_color)
+        super().__init__(stdout=stdout, stderr=stderr, no_color=no_color)
         self.build_dir = None
         self.dist_dir = None
         self.hooks = {
@@ -295,7 +295,7 @@ class Command(TemplatedBaseCommand):
         self.action = self.BUILD_PACKAGE
 
     def add_arguments(self, parser):
-        super(Command, self).add_arguments(parser)
+        super().add_arguments(parser)
         assert isinstance(parser, ArgumentParser)
         parser.add_argument("--build-dir", default="./build")
         parser.add_argument("--dist-dir", default="./dist")
@@ -673,7 +673,7 @@ class Command(TemplatedBaseCommand):
         self.stdout.write(self.style.SUCCESS(fp.getvalue()))
 
     def get_template_context(self, merger, extra_context):
-        context = super(Command, self).get_template_context(merger, extra_context)
+        context = super().get_template_context(merger, extra_context)
         context["bind_dirs"] = self.bind_dirs
         context["vagrant_distrib"] = self.vagrant_distrib
         context["vagrant_distrib_family"] = self.vagrant_distrib.partition("/")[0]

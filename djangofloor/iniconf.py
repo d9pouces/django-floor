@@ -63,7 +63,7 @@ class OptionParser(fields.ConfigField):
         The current setting value will be used if left to `None`.
         :type doc_default_value: `object`
         """
-        super(OptionParser, self).__init__(
+        super().__init__(
             option,
             setting_name,
             from_str=converter,

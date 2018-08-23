@@ -620,7 +620,7 @@ class LegacySignalConnection(SignalConnection):
     """.. deprecated:: 1.0  do not use it"""
 
     def __call__(self, window_info, **kwargs):
-        result = super(LegacySignalConnection, self).__call__(window_info, **kwargs)
+        result = super().__call__(window_info, **kwargs)
         if result:
             # noinspection PyUnresolvedReferences
             from djangofloor.tasks import df_call

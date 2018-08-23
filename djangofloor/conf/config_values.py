@@ -366,7 +366,7 @@ class SettingReference(ConfigValue):
     """
 
     def __init__(self, value, func=None):
-        super(SettingReference, self).__init__(value)
+        super().__init__(value)
         self.func = func
 
     def get_value(self, merger, provider_name: str, setting_name: str):
@@ -385,7 +385,7 @@ class SettingReference(ConfigValue):
 
 class DeprecatedSetting(ConfigValue):
     def __init__(self, value, default=None, msg=""):
-        super(DeprecatedSetting, self).__init__(value)
+        super().__init__(value)
         self.default = default
         self.msg = msg
 
@@ -447,7 +447,7 @@ class CallableSetting(ConfigValue):
     def __init__(self, value, *required):
         if isinstance(value, str):
             value = import_string(value)
-        super(CallableSetting, self).__init__(value)
+        super().__init__(value)
         if hasattr(value, "required_settings"):
             self.required = list(value.required_settings)
         else:
