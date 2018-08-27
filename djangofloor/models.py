@@ -250,12 +250,20 @@ def apply_pre_migrate_settings(sender, **kwargs):
 
 # noinspection PyUnusedLocal
 @receiver(post_migrate)
-def apply_social_auth_configurations(*args, **kwargs):
-    """create social apps in database"""
-    if not hasattr(apply_social_auth_configurations, "applied"):  # must be called once
+def apply_social_auth_configurations(sender, *args, **kwargs):
+    """create social apps in database, with data from the config file"""
+    migrations = apply_social_auth_configurations.applied_migrations
+    migrations.add(sender.name)
+    required = {'django.contrib.sites', 'allauth.socialaccount', 'allauth.socialaccount.providers.openid'}
+    if required.issubset(migrations) and not apply_social_auth_configurations.applied:
+        # must be called once for migrating SocialApps
         apply_social_auth_configurations.applied = True
-    if settings.ALLAUTH_PROVIDER_APPS:
-        social_migrate(read_only=False)
+        if settings.ALLAUTH_PROVIDER_APPS:
+            social_migrate(read_only=False)
+
+
+apply_social_auth_configurations.applied_migrations = set()
+apply_social_auth_configurations.applied = False
 
 
 # noinspection PyUnusedLocal

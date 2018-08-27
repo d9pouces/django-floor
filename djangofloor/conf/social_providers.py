@@ -131,7 +131,9 @@ def get_available_configurations() -> dict:
 
 
 def get_loaded_configurations() -> OrderedDict:
-    """return a li"""
+    """return a list of configured social authentication backends from a config file
+    given in settings.ALLAUTH_APPLICATIONS_CONFIG
+    """
     from django.conf import settings
 
     parser = RawConfigParser()
@@ -157,14 +159,15 @@ def get_loaded_configurations() -> OrderedDict:
 def migrate(read_only: bool = False) -> bool:
     """
     Create and configure database social apps.
-    Can only
 
+    Configure backends only for the first Site object.
 
     :param read_only:
     :return: True if (read_only and a migrate is required) or (not read_only and modifications were performed)
     """
     # noinspection PyPackageRequirements
     from allauth.socialaccount.models import SocialApp
+    # noinspection PyPackageRequirements
     from django.contrib.sites.models import Site
 
     expected_configurations = {}
