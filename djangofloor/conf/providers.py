@@ -12,6 +12,8 @@ from collections import OrderedDict
 
 from io import StringIO
 
+from django.core.exceptions import ImproperlyConfigured
+
 from djangofloor.conf.fields import ConfigField
 
 try:
@@ -196,11 +198,7 @@ class PythonFileProvider(PythonModuleProvider):
 
             module_ = SourceFileLoader(module_name, module_filename).load_module()
         else:
-            # noinspection PyDeprecation
-            import imp
-
-            # noinspection PyDeprecation
-            module_ = imp.load_source(module_name, module_filename)
+            raise ImproperlyConfigured("Invalid Python version: %s.%s" % version)
         self.module = module_
 
     def __str__(self):
