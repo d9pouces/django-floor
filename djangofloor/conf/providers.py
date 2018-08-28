@@ -183,7 +183,7 @@ class PythonFileProvider(PythonModuleProvider):
         super().__init__()
         if not os.path.isfile(module_filename):
             return
-        version = tuple(sys.version_info[0:1])
+        version = tuple(sys.version_info[0:2])
         md5 = hashlib.md5(module_filename.encode("utf-8")).hexdigest()
         module_name = "djangofloor.__private" + md5
         if version >= (3, 5):
