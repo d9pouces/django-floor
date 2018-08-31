@@ -114,7 +114,10 @@ def websocket_handler(request):
         pass
     except Exception as e:
         logger.exception(e)
-
+    finally:
+        if subscriber:
+            yield from subscriber.unsubscribe(channels)
+        connection.close()
     return ws
 
 

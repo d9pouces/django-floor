@@ -73,4 +73,5 @@ def context_base(request):
         "df_http_request": request,
         "df_user": df_user,
         "df_language_code": df_language_code,
+        "request": request,
     }
