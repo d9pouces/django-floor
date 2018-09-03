@@ -254,7 +254,11 @@ def apply_social_auth_configurations(sender, *args, **kwargs):
     """create social apps in database, with data from the config file"""
     migrations = apply_social_auth_configurations.applied_migrations
     migrations.add(sender.name)
-    required = {'django.contrib.sites', 'allauth.socialaccount', 'allauth.socialaccount.providers.openid'}
+    required = {
+        "django.contrib.sites",
+        "allauth.socialaccount",
+        "allauth.socialaccount.providers.openid",
+    }
     if required.issubset(migrations) and not apply_social_auth_configurations.applied:
         # must be called once for migrating SocialApps
         apply_social_auth_configurations.applied = True

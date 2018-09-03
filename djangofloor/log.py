@@ -114,9 +114,7 @@ class AdminEmailHandler(BaseAdminEmailHandler):
 
         if self.can_send_email() and settings.EMAIL_HOST:
             try:
-                super().send_mail(
-                    subject, message, *args, **kwargs
-                )
+                super().send_mail(subject, message, *args, **kwargs)
             except Exception as e:
                 print(
                     "Unable to send e-mail to admin. Please checks your e-mail settings [%r]."

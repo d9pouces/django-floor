@@ -41,9 +41,9 @@ class Command(BaseCommand):
             choices=self.options,
             help=",\n".join(['"%s": %s' % x for x in self.options.items()]),
         )
-        parser.add_argument("--filename",
-                            default=None,
-                            help="write output to this file")
+        parser.add_argument(
+            "--filename", default=None, help="write output to this file"
+        )
         remove_arguments_from_help(
             parser, {"--settings", "--traceback", "--pythonpath"}
         )
@@ -59,7 +59,7 @@ class Command(BaseCommand):
         verbosity = options["verbosity"]
         filename = options["filename"]
         if filename:
-            self.stdout = OutputWrapper(open(filename, 'w'))
+            self.stdout = OutputWrapper(open(filename, "w"))
             self.style = no_style()
 
         if action == "python":
@@ -174,7 +174,7 @@ class Command(BaseCommand):
         def add_import(val):
             if not isinstance(val, type):
                 val = val.__class__
-            if val.__module__ != 'builtins':
+            if val.__module__ != "builtins":
                 imports.setdefault(val.__module__, set()).add(val.__name__)
 
         for setting_name in setting_names:
@@ -185,8 +185,10 @@ class Command(BaseCommand):
         if imports:
             self.stdout.write("\n")
             for module_name in sorted(imports):
-                objects = ', '.join(sorted(imports[module_name]))
-                self.stdout.write(self.style.WARNING("from %s import %s" % (module_name, objects)))
+                objects = ", ".join(sorted(imports[module_name]))
+                self.stdout.write(
+                    self.style.WARNING("from %s import %s" % (module_name, objects))
+                )
             self.stdout.write("\n")
 
         for setting_name in setting_names:

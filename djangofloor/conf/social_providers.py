@@ -167,6 +167,7 @@ def migrate(read_only: bool = False) -> bool:
     """
     # noinspection PyPackageRequirements
     from allauth.socialaccount.models import SocialApp
+
     # noinspection PyPackageRequirements
     from django.contrib.sites.models import Site
 
