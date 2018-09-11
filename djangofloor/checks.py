@@ -70,6 +70,8 @@ def get_pipeline_requirements():
         "pipeline.compressors.uglifyjs.UglifyJSCompressor": "UGLIFYJS_BINARY",
         "pipeline.compressors.csstidy.CSSTidyCompressor": "CSSTIDY_BINARY",
         "pipeline.compressors.cssmin.CSSMinCompressor": "CSSMIN_BINARY",
+        "djangofloor.templatetags.pipeline.TypescriptCompiler": "TYPESCRIPT_BINARY",
+        "pipeline_typescript.compilers.TypescriptCompiler": "PIPELINE_TYPESCRIPT_BINARY",
     }
     pip_packages = {
         "pipeline.compressors.jsmin.JSMinCompressor": ("jsmin", "jsmin"),
@@ -77,7 +79,7 @@ def get_pipeline_requirements():
         "djangofloor.templatetags.pipeline.RcssCompressor": ("rcssmin", "rcssmin"),
         "djangofloor.templatetags.pipeline.PyScssCompiler": ("scss", "pyScss"),
     }
-    npm_packages = {"lsc"}
+    npm_packages = {"lsc": "lsc", "tsc": "typescript"}
     gem_packages = {}
     result = {"gem": [], "pip": [], "npm": [], "other": [], "all": []}
     for engine in engines:
@@ -85,7 +87,7 @@ def get_pipeline_requirements():
             name = merger.settings.get(binaries[engine], "program")
             result["all"].append(name)
             if name in npm_packages:
-                result["npm"].append(name)
+                result["npm"].append(npm_packages[name])
             elif name in gem_packages:
                 result["gem"].append(name)
             else:

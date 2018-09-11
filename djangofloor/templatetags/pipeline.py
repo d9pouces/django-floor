@@ -6,10 +6,11 @@ If you add `django-pipeline` to your `settings.INSTALLED_APPS`, these versions a
 If you keep the default settings, `django-pipeline` is automatically detected and added, so you have nothing to do.
 
 """
+import os
+import subprocess
 import warnings
 from pathlib import Path
 
-import os
 from django import template
 from django.conf import settings
 from django.utils.safestring import mark_safe
@@ -165,3 +166,42 @@ class PyScssCompiler(CompilerBase):
             fd.write(css_content)
         if self.verbose:
             print(css_content)
+
+
+# noinspection PyClassHasNoInit
+class TypescriptCompiler(CompilerBase):
+    """ TypeScript (.ts) compiler using "tsc".
+    (https://www.typescriptlang.org ).
+
+    """
+
+    output_extension = "js"
+
+    def match_file(self, filename):
+        return filename.endswith(".ts")
+
+    def compile_file(self, infile, outfile, outdated=False, force=False):
+        # noinspection PyPackageRequirements
+        from pipeline.exceptions import CompilerError
+
+        command = (
+            [settings.TYPESCRIPT_BINARY]
+            + settings.TYPESCRIPT_ARGUMENTS
+            + ["-out", outfile, infile]
+        )
+        try:
+            p = subprocess.Popen(
+                command,
+                stdin=subprocess.PIPE,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+            )
+            stdout, __ = p.communicate(b"")
+            if p.returncode != 0:
+                raise CompilerError(
+                    "Unable to execute TypeScript",
+                    command=command,
+                    error_output=stdout.decode(),
+                )
+        except Exception as e:
+            raise CompilerError(e, command=command, error_output=str(e))
