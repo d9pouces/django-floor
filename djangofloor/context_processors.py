@@ -11,9 +11,6 @@ Add some values to the template context, related to:
 """
 import warnings
 
-from django.conf import settings
-from django.contrib.auth.models import AnonymousUser
-from djangofloor.models import Notification
 from djangofloor.utils import RemovedInDjangoFloor200Warning
 
 __author__ = "Matthieu Gallet"
@@ -38,6 +35,11 @@ def context_base(request):
     :return: a dict to update the global template context
     :rtype: :class:`dict`
     """
+    # noinspection PyPackageRequirements
+    from django.conf import settings
+    # noinspection PyPackageRequirements
+    from django.contrib.auth.models import AnonymousUser
+    from djangofloor.models import Notification
 
     def df_language_code():
         warnings.warn(
