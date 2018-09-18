@@ -86,7 +86,7 @@ def javascript(key):
         node = pipe.JavascriptNode(key)
         return node.render({key: key})
     filenames = settings.PIPELINE["JAVASCRIPT"][key]["source_filenames"]
-    context = {"type": "text/javascript", "charset": "utf-8"}
+    context = {}  # The type attribute is unnecessary for JavaScript resources.
     context.update(settings.PIPELINE["JAVASCRIPT"][key].get("extra_context", {}))
     extra = " ".join('%s="%s"' % x for x in context.items())
 
