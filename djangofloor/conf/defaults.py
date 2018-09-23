@@ -496,6 +496,8 @@ DF_INDEX_VIEW = "djangofloor.views.IndexView"
 DF_SITE_SEARCH_VIEW = None  # 'djangofloor.views.search.UserSearchView'
 DF_PROJECT_NAME = CallableSetting(project_name)
 DF_URL_CONF = "{DF_MODULE_NAME}.urls.urlpatterns"
+DF_ADMIN_SITE = "django.contrib.admin.site"
+DF_JS_CATALOG_VIEWS = ["djangofloor", "django.contrib.admin"]
 # noinspection PyUnresolvedReferences
 DF_INSTALLED_APPS = ["{DF_MODULE_NAME}"]  # your django app!
 DF_PIP_NAME = (
