@@ -77,18 +77,18 @@ if settings.USE_REST_FRAMEWORK:
     urlpatterns += [
         url(r"api-auth/", include("rest_framework.urls", namespace="rest_framework"))
     ]
-if settings.DF_INDEX_VIEW:
-    urlpatterns += [
-        url(r"$", get_view_from_string(settings.DF_INDEX_VIEW), name="index")
-    ]
 if settings.DEBUG and settings.USE_DEBUG_TOOLBAR:
     # noinspection PyPackageRequirements,PyUnresolvedReferences
     import debug_toolbar
 
     urlpatterns += [url(r"__debug__/", include(debug_toolbar.urls))]
+if settings.DF_INDEX_VIEW:
+    urlpatterns += [
+        url(r"$", get_view_from_string(settings.DF_INDEX_VIEW), name="index")
+    ]
 
 
-url_prefix = "^" + settings.URL_PREFIX[1:]
+url_prefix = settings.URL_PREFIX[1:]
 
 if url_prefix:
-    urlpatterns = [url(url_prefix, include(urlpatterns))]
+    urlpatterns = [url("^" + url_prefix, include(urlpatterns))]
