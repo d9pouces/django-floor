@@ -94,6 +94,7 @@ def media(path):
 @register.simple_tag
 def fontawesome_icon(
     name,
+    prefix="fa",
     large=False,
     fixed=False,
     spin=False,
@@ -110,7 +111,8 @@ def fontawesome_icon(
     else:
         large = ""
     return mark_safe(
-        '<i class="fa fa-{name}{large}{fixed}{spin}{li}{rotate}{border}"{color}></i>'.format(
+        '<i class="{prefix} fa-{name}{large}{fixed}{spin}{li}{rotate}{border}"{color}></i>'.format(
+            prefix=prefix,
             name=name,
             large=large,
             fixed=" fa-fw" if fixed else "",
