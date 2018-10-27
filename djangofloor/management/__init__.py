@@ -1,15 +1,10 @@
 import os
-
 import sys
-from django.conf import settings
+
 from django.core.management import (
-    ManagementUtility,
     get_commands,
     color_style,
-    CommandParser,
-    BaseCommand,
-    base,
-)
+    CommandParser)
 
 __author__ = "Matthieu Gallet"
 
@@ -52,6 +47,7 @@ def create_parser(self, prog_name, subcommand):
     Create and return the ``ArgumentParser`` which will be used to
     parse the arguments to this command.
     """
+    print(self, "%s %s" % (os.path.basename(prog_name), subcommand), self.help or None)
     parser = CommandParser(
         self,
         prog="%s %s" % (os.path.basename(prog_name), subcommand),
@@ -95,10 +91,10 @@ def execute_from_command_line(argv=None):
     """
     A simple method that runs a ManagementUtility.
     """
-    if not settings.DEVELOPMENT:
-        BaseCommand.create_parser = create_parser
-        ManagementUtility.main_help_text = main_help_text
-        base.handle_default_options = handle_default_options
+    # if not settings.DEVELOPMENT:
+    #     BaseCommand.create_parser = create_parser
+    #     ManagementUtility.main_help_text = main_help_text
+    #     base.handle_default_options = handle_default_options
     from django.core import management
 
     management.execute_from_command_line(argv=argv)
