@@ -15,7 +15,6 @@ from django.contrib.staticfiles import finders
 from django.core.management import (
     BaseCommand as OriginalBaseCommand,
     CommandError,
-    CommandParser,
     handle_default_options,
 )
 from django.core.management.base import SystemCheckError
@@ -35,27 +34,27 @@ __author__ = "Matthieu Gallet"
 # noinspection PyClassHasNoInit
 class BaseCommand(OriginalBaseCommand):
     """Create a Makefile """
-
-    def create_parser(self, prog_name, subcommand):
-        """
-        Create and return the ``ArgumentParser`` which will be used to
-        parse the arguments to this command.
-        """
-        parser = CommandParser(
-            self,
-            prog="%s %s" % (os.path.basename(prog_name), subcommand),
-            description=self.help or None,
-        )
-        self.add_arguments(parser)
-        return parser
-
-    def set_default_options(self, options):
-        options.version = self.get_version()
-        options.verbosity = 0
-        options.settings = None
-        options.pythonpath = None
-        options.traceback = False
-        options.no_color = False
+    #
+    # def create_parser(self, prog_name, subcommand):
+    #     """
+    #     Create and return the ``ArgumentParser`` which will be used to
+    #     parse the arguments to this command.
+    #     """
+    #     parser = CommandParser(
+    #         self,
+    #         prog="%s %s" % (os.path.basename(prog_name), subcommand),
+    #         description=self.help or None,
+    #     )
+    #     self.add_arguments(parser)
+    #     return parser
+    #
+    # def set_default_options(self, options):
+    #     options.version = self.get_version()
+    #     options.verbosity = 0
+    #     options.settings = None
+    #     options.pythonpath = None
+    #     options.traceback = False
+    #     options.no_color = False
 
     def run_from_argv(self, argv):
         """
@@ -69,7 +68,7 @@ class BaseCommand(OriginalBaseCommand):
         parser = self.create_parser(argv[0], argv[1])
 
         options = parser.parse_args(argv[2:])
-        self.set_default_options(options)
+        # self.set_default_options(options)
         cmd_options = vars(options)
         # Move positional args out of options to mimic legacy optparse
         args = cmd_options.pop("args", ())
@@ -259,7 +258,8 @@ class TemplatedBaseCommand(OriginalBaseCommand):
          will be returned as `'myproject/models.py'`.
 
 
-        >>> result = TemplatedBaseCommand.browser_folder('djangofloor', 'djangofloor/test', {'var': 'my_project'})
+        >>> m = TemplatedBaseCommand.browser_folder
+        >>> result = m('djangofloor', 'djangofloor/test', context={'var': 'my_project'})
         >>> for x in sorted(result.items()):
         ...     print(x)
         ('subtest/index.html', 'djangofloor/test/subtest/index.html_tpl')
