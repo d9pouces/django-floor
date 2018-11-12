@@ -55,7 +55,7 @@ from djangofloor.conf.callables import (
     smart_hostname,
     DefaultListenAddress,
     allauth_provider_apps,
-)
+    secure_hsts_seconds)
 from djangofloor.conf.config_values import (
     Path,
     Directory,
@@ -142,7 +142,7 @@ SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
 SECURE_HSTS_INCLUDE_SUBDOMAINS = SettingReference("USE_SSL")
 SECURE_HSTS_PRELOAD = SettingReference("USE_SSL")
-SECURE_HSTS_SECONDS = 0
+SECURE_HSTS_SECONDS = CallableSetting(secure_hsts_seconds)
 SECURE_PROXY_SSL_HEADER = (
     "HTTP_X_FORWARDED_PROTO",
     "https",
@@ -184,6 +184,7 @@ LOGIN_REDIRECT_URL = "{URL_PREFIX}"
 if USE_REDIS_SESSIONS:
     SESSION_ENGINE = "redis_sessions.session"
 SESSION_COOKIE_SECURE = SettingReference("USE_SSL")
+CSRF_COOKIE_SECURE = SettingReference("USE_SSL")
 
 # django.contrib.sites
 SITE_ID = 1

@@ -241,6 +241,15 @@ def allowed_hosts(settings_dict):
 allowed_hosts.required_settings = ["SERVER_NAME", "LISTEN_ADDRESS"]
 
 
+def secure_hsts_seconds(settings_dict):
+    if settings_dict["USE_SSL"]:
+        return 86400
+    return 0
+
+
+secure_hsts_seconds.required_settings = ["USE_SSL"]
+
+
 # noinspection PyUnresolvedReferences
 def cache_setting(settings_dict):
     """Automatically compute cache settings:
