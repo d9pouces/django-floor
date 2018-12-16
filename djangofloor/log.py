@@ -380,6 +380,7 @@ class LogConfiguration:
             "mail_admins": {
                 "class": "djangofloor.log.AdminEmailHandler",
                 "level": "ERROR",
+                "include_html": True,
             }
         }
 
