@@ -434,16 +434,8 @@ AUTH_MAPPING = [
     # CharConfigField('auth.ldap_krb5_principal', 'KRB5_PRINCIPAL',
     #                 help_str='Principal to use for Kerberos authentication on the LDAP server.'),
 ]
-ALLAUTH_MAPPING = [
-    ListConfigField(
-        "auth.social_providers",
-        "ALLAUTH_PROVIDER_APPS",
-        help_str='Comma-separated OAuth2 providers. "django-allauth" package must be installed.'
-        "Please use the `social_authentications` command to add an account provider instead "
-        "of this setting.",
-    )
-]
-
+ALLAUTH_MAPPING = []
+# empty settings (please use the `social_authentications` management command instead)
 INI_MAPPING = (
     BASE_MAPPING + REDIS_MAPPING + CELERY_MAPPING + AUTH_MAPPING + ALLAUTH_MAPPING
 )

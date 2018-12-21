@@ -68,6 +68,7 @@ SOCIAL_PROVIDER_APPS = {
         "xing",
     }
 }
+# Full set of social providers
 
 
 class SocialProviderConfiguration:

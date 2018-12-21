@@ -98,7 +98,7 @@ class Command(BaseCommand):
             self.stdout.write(
                 self.style.SUCCESS(
                     'Do not forget to run the "migrate" command to load '
-                    "this configuration."
+                    "this configuration and to restart all services."
                 )
             )
         except Exception as e:

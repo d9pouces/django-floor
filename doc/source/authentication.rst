@@ -78,23 +78,27 @@ OAuth2 authentication
 
 The package `django-allauth <http://django-allauth.readthedocs.io/en/latest/>`_ perfectly handles OAuth2 authentication from many providers.
 Please check its own documentation.
-Of course, it must be installed separately (it is not a dependency of Djangofloor) and at least one provider must be given in `ALLAUTH_PROVIDER_APPS`.
+Of course, it must be installed separately (it is not a dependency of Djangofloor).
 
+The following things are transparently modified:
 
-  * `INSTALLED_APPS` will contain the list of all required Django apps ,
+  * `INSTALLED_APPS` will contain the list of all required Django apps,
   * :mod:`allauth.urls` is inserted in root urls,
   * :class:`allauth.account.auth_backends.AuthenticationBackend` is added to authentication backends.
 
-Of course, templates must be written.
-You can define OAuth2 providers in a .ini config file:
+However, you still have to write HTML templates, as described in this documentation.
+You can add a new provider or display configured providers with the following commands:
 
-.. code-block:: ini
-  :caption: /etc/yourproject/settings.ini
+.. code-block:: bash
 
-  [auth]
-  oauth2_providers = github,asana,bitbucket,tumblr
+  yourproject-ctl social_authentications show
+  yourproject-ctl social_authentications add
 
-After having added a oauth2 provided, you must the matching social app in the admin view.
+You need to run the `migrate` command again to finalize the creation.
+The first command also displays the used configuration file. If you reinstall your server, just backup this
+file to avoid this manual process.
+
+
 
 PAM authentication
 ------------------
