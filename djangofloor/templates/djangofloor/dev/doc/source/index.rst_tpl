@@ -16,6 +16,7 @@ table of contents
    installation
    hosting
    configuration
+   authentication
    changes
 {% block extra_table_contents %}{% endblock %}
 

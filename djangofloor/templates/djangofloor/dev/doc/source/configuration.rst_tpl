@@ -81,7 +81,7 @@ You can also enable the DEBUG mode which is more verbose (and displays logs to s
 
 .. code-block:: bash
 
-  FILENAME=`easydemo-ctl config ini -v 2 | grep -m 1 ' - .ini file' | cut -d '"' -f 2 | sed  's/.ini$/.py/'`
+  FILENAME=`{{ control_command }} config ini -v 2 | grep -m 1 ' - .ini file' | cut -d '"' -f 2 | sed  's/.ini$/.py/'`
   echo "DEBUG = True" >> $FILENAME
   {{ control_command }} runserver
 {% if USE_CELERY %}  {{ control_command }} worker -Q {{ required_celery_queues|join:',' }}
