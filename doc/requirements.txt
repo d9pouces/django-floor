@@ -19,12 +19,12 @@ Pygments==2.2.0
 pyparsing==2.2.0
 pytz==2017.2
 redis==2.10.6
-requests==2.18.4
+requests>=2.20.0
 six==1.11.0
 snowballstemmer==1.2.1
 Sphinx==1.6.5
 sphinx-rtd-theme==0.2.4
 sphinxcontrib-autoanysrc==0.0.3.post20141120
-urllib3==1.22
+urllib3>=1.23
 vine==1.1.4
 yarl==0.13.0

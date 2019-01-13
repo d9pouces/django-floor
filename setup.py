@@ -44,7 +44,7 @@ except ImportError:
     set_env, django = None, None
 
 install_requires = [
-    "django>=1.11",
+    "django>=1.11.15",
     "celery",
     "django-bootstrap3>=9.0.0",
     "redis",
