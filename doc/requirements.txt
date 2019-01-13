@@ -7,7 +7,7 @@ Babel==2.5.1
 billiard==3.5.0.3
 celery==4.1.0
 chardet==3.0.4
-Django==1.11.6
+django>=1.11.15
 django-bootstrap3==9.0.0
 idna==2.6
 imagesize==0.7.1
