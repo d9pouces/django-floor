@@ -68,7 +68,7 @@ _deprecated_settings = {
 _warned_settings = set()
 
 
-def __getattr__(self, name):
+def __getattr(self, name):
     if name in _deprecated_settings:
         new_content = _deprecated_settings[name]
         if name not in _warned_settings:
@@ -92,7 +92,7 @@ def __getattr__(self, name):
     return getattr(self._wrapped, name)
 
 
-LazySettings.__getattr__ = __getattr__
+LazySettings.__getattr__ = __getattr
 
 
 class SettingMerger:
