@@ -19,7 +19,7 @@ Here is the complete JavaScript API provided by DjangoFloor.
     $.df._closeHTMLNotification = function (id) {
         $("#" + id).fadeOut(400, "swing", function () { $("#" + id).remove()});
         delete $.df._notificationClosers[id];
-    }
+    };
     $.df._systemNotification = function (notificationId, level, content, title, icon, timeout) {
         "use strict";
         var createNotification = function (level, content, title, icon, timeout) {
@@ -31,7 +31,7 @@ Here is the complete JavaScript API provided by DjangoFloor.
             if (timeout > 0) {
                 if (timeout > 0) { setTimeout(function () { $.df._notificationClosers[notificationId](); }, timeout); }
             }
-        }
+        };
         if (!("Notification" in window)) { $.df.notification("notification", level, content, title, icon, timeout); }
         else if (Notification.permission === "granted") { createNotification(level, content, title, icon, timeout); }
         else if (Notification.permission !== 'denied') {
@@ -54,7 +54,7 @@ Here is the complete JavaScript API provided by DjangoFloor.
             $.df._wsBuffer = [];
         };
         connection.onmessage = function(e) {
-            if (e.data == $.df._heartbeatMessage) {
+            if (e.data === $.df._heartbeatMessage) {
                 $.df._wsConnection.send(e.data);
             } else {
                 var msg = JSON.parse(e.data);
@@ -72,7 +72,7 @@ Here is the complete JavaScript API provided by DjangoFloor.
                     $.df._functionCallPromises[msg.result_id][0](msg.result);
                     delete $.df._functionCallPromises[msg.result_id];
                 }
-            };
+            }
         };
         connection.onerror = function(e) {
             console.error("WS error: " + e);
@@ -81,7 +81,7 @@ Here is the complete JavaScript API provided by DjangoFloor.
             $.df._wsConnection = null;
             setTimeout(function () {$.df._wsConnect(url);}, 3000);
         }
-    }
+    };
     $.df._wsSignalConnect = function (signal) {
         "use strict";
         var wrapper = function (opts, id) {
@@ -107,10 +107,9 @@ Here is the complete JavaScript API provided by DjangoFloor.
             opts = {};
         }
         $.df._wsConnection.send(JSON.stringify({func: func, opts: opts, result_id: callId}));
-        var promise = new Promise(function(resolve, reject) {
+        return new Promise(function(resolve, reject) {
             $.df._functionCallPromises[callId] = [resolve, reject];
             });
-        return promise;
     };
     $.df.call = function (signal, opts, id) {
         "use strict";
@@ -600,7 +599,7 @@ Here is the complete JavaScript API provided by DjangoFloor.
         var evt = new MouseEvent('click', {view: window, bubbles: true, cancelable: false});
         save.dispatchEvent(evt);
         (window.URL || window.webkitURL).revokeObjectURL(save.href);
-    })
+    });
     $.df.connect('df.validate.update_csrf', function (opts) {
 /*"""
 .. function:: df.validate.update_csrf(opts)
