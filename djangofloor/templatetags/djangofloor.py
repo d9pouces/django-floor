@@ -42,17 +42,17 @@ def df_init_websocket(context, *topics):
     signed_token = signer.sign(ws_token)
     protocol = "wss" if settings.USE_SSL else "ws"
     site_name = "%s:%s" % (settings.SERVER_NAME, settings.SERVER_PORT)
-    script = '$.df._wsConnect("%s://%s%s?token=%s");' % (
+    script = 'window.df._wsConnect("%s://%s%s?token=%s");' % (
         protocol,
         site_name,
         settings.WEBSOCKET_URL,
         signed_token,
     )
-    script += '$.df._wsToken="%s";' % signed_token
-    script = "$(document).ready(function(){%s});" % script
-    init_value = '<script type="application/javascript">%s</script>' % script
+    script += 'window.df._wsToken="%s";' % signed_token
+    script = "document.addEventListener('DjangoFloorLoaded', function(){%s}, false);" % script
+    init_value = '<script>%s</script>' % script
     init_value += (
-        '<script type="text/javascript" src="%s" charset="utf-8"></script>'
+        '<script src="%s" defer></script>'
         % reverse("df:signals")
     )
     return mark_safe(init_value)
@@ -200,14 +200,14 @@ def df_messages(context, style="banner"):
     result = '<script type="text/javascript">\n'
     for message in context.get("messages", []):
         result += (
-            '$.df.call("df.notify", {style: "%s", level: "%s", content: "%s"});\n'
+            'window.df.call("df.notify", {style: "%s", level: "%s", content: "%s"});\n'
             % (style, message_level(message), str(message).translate(_js_escapes))
         )
     get_notifications = context.get("df_get_notifications", lambda: [])
     values = get_notifications()
     for notification in values:
         result += (
-            '$.df.call("df.notify", {style: "%s", level: "%s", content: "%s", timeout: %s, title: "%s"});\n'
+            'window.df.call("df.notify", {style: "%s", level: "%s", content: "%s", timeout: %s, title: "%s"});\n'
             % (
                 notification.display_mode,
                 notification.level,

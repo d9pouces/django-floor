@@ -5,8 +5,11 @@ Base API for signals and functions
 Here is the complete JavaScript API provided by DjangoFloor.
 */
 (function($) {
-    $.df = {};
-    $.dfws = {};
+    let df = {};
+    window.df = df;
+    window.dfws = {};
+    $.df = df;
+    $.dfws = window.dfws;
     $.df._wsToken = null;  /* contains the signed window key */
     $.df._wsConnection = null;
     $.df._notificationId = 1;

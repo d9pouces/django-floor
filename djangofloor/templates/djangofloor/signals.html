@@ -1,37 +1,27 @@
-function getCookie(name) {
-    /* copied from the Django doc */
-    var cookieValue = null;
-    if (document.cookie && document.cookie != '') {
-        var cookies = document.cookie.split(';');
-        for (var i = 0; i < cookies.length; i++) {
-            var cookie = jQuery.trim(cookies[i]);
-            // Does this cookie string begin with the name we want?
-            if (cookie.substring(0, name.length + 1) == (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
-            }
-        }
-    }
-    return cookieValue;
+function activateDjangoFloor() {
+  function getCookie(name) {
+      /* copied from the Django doc */
+      var cookieValue = null;
+      if (document.cookie && document.cookie != '') {
+          var cookies = document.cookie.split(';');
+          for (var i = 0; i < cookies.length; i++) {
+              var cookie = jQuery.trim(cookies[i]);
+              // Does this cookie string begin with the name we want?
+              if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                  cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                  break;
+              }
+          }
+      }
+      return cookieValue;
+  }
+  window.df._heartbeatMessage = "{{ WEBSOCKET_HEARTBEAT }}";
+  window.df.csrfTokenValue = getCookie("{{ CSRF_COOKIE_NAME }}");
+  window.df.csrfHeaderName = "{{ CSRF_HEADER_NAME }}";
+  window.df.websocketHeaderName = "{{ WEBSOCKET_HEADER }}";
+  window.df.debug = {{ DEBUG|lower }};
+  {% for s in SIGNALS %}window.df._wsSignalConnect("{{ s }}");
+  {% endfor %}{% for f in FUNCTIONS.items %}window.dfws.{{ f.0 }} = {{ f.1|safe }};
+  {% endfor %}
 }
-function csrfSafeMethod(method) {
-    return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
-}
-$.df._heartbeatMessage = "{{ WEBSOCKET_HEARTBEAT }}";
-
-{% for s in SIGNALS %}$.df._wsSignalConnect("{{ s }}");
-{% endfor %}
-{% for f in FUNCTIONS.items %}$.dfws.{{ f.0 }} = {{ f.1|safe }};
-{% endfor %}
-
-$.df.csrfTokenValue = getCookie("{{ CSRF_COOKIE_NAME }}");
-$.ajaxSetup({
-    beforeSend: function(xhr, settings) {
-        if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
-            xhr.setRequestHeader("{{ CSRF_HEADER_NAME }}", $.df.csrfTokenValue);
-            xhr.setRequestHeader("X-CSRFTOKEN", $.df.csrfTokenValue);
-            xhr.setRequestHeader("{{ WEBSOCKET_HEADER }}", $.df._wsToken);
-        }
-    }
-});
-$.df.debug = {{ DEBUG|lower }};
+document.addEventListener('DjangoFloorLoaded', activateDjangoFloor, false);

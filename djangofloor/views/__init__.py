@@ -101,7 +101,7 @@ def signals(request):
     function_names_dict = {}
     for name in valid_function_names:
         function_names_dict[name] = (
-            'function(opts) { return $.df._wsCallFunction("%(name)s", opts); }'
+            'function(opts) { return window.df._wsCallFunction("%(name)s", opts); }'
             % {"name": name}
         )
         name, sep, right = name.rpartition(".")

@@ -30,7 +30,7 @@ def validate_set_password_form(window_info, data=None):
 
     .. code-block:: javascript
 
-        $.dfws.df.validate.set_password({data: $(this).serializeArray()}).then(function (r) {console.log(r); })
+        window.dfws.df.validate.set_password({data: $(this).serializeArray()}).then(function (r) {console.log(r); })
 
     """
     query_dict = QueryDict("", mutable=True)

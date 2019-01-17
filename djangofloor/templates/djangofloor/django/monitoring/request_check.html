@@ -72,7 +72,7 @@
 {% if websockets_required %}
     <script type="application/javascript">
         window.onload = function () {
-            $.df.connect('df.monitoring.checked_ws', function () {
+            window.df.connect('df.monitoring.checked_ws', function () {
                 "use strict";
                 $('#workingwebsockets').html('{% django_icon "check" %}');
                 $('#notworkingwebsockets').remove();

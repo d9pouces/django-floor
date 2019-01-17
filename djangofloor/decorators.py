@@ -410,7 +410,7 @@ The this function can be called from your JavaScript code:
 
 .. code-block:: javascript
 
-  $.dfws.myproject.myfunc({arg: 3123}).then(function(result) { alert(result); });
+  window.dfws.myproject.myfunc({arg: 3123}).then(function(result) { alert(result); });
 
 
 """
@@ -445,7 +445,7 @@ def validate_form(form_cls=None, path=None, is_allowed_to=server_side, queue=Non
 
 .. code-block:: html
 
-    <form onchange="$.df.validateForm(this, 'djangofloor.validate.search');"  action="?" method="post">
+    <form onchange="window.df.validateForm(this, 'djangofloor.validate.search');"  action="?" method="post">
         {% csrf_token %}
         {% bootstrap_form form %}
         <input type="submit" class="btn btn-primary" value="{% trans 'Search' %}">
@@ -570,7 +570,7 @@ class SerializedForm:
 
     .. code-block:: html
 
-        <form onsubmit="return $.df.call('myproject.signals.test', {value: $(this).serializeArray(), other: 42})">
+        <form onsubmit="return window.df.call('myproject.signals.test', {value: $(this).serializeArray(), other: 42})">
             <input name='field' value='test' type='text'>
         </form>
 
