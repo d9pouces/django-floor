@@ -143,7 +143,9 @@ function loadDjangofloor() {
         /*"""
         .. function:: df.CsrfForm(form)
 
-            Add the CSRF token to a form as a hidden input. Always returns True so you can use it as the `onsubmit` attribute. Useful when the form has been generated without any CSRF input.
+            Add the CSRF token to a form as a hidden input. Always returns True so you can use it as the `onsubmit` attribute.
+             Useful when the form has been generated without any CSRF input, for example in a websocket signal that presents
+             a new form to the user.
 
             :param Form form: the form object
             :returns: always `true`
@@ -164,6 +166,49 @@ function loadDjangofloor() {
         form.appendChild(input);
         // noinspection JSConstructorReturnsPrimitive
         return true;
+    };
+    df.serializeArray = function (form) {
+        /*!
+         * Serialize all form data into an array
+         * (c) 2018 Chris Ferdinandi, MIT License, https://gomakethings.com
+         * @param  {Node}   form The form to serialize
+         * @return {String}      The serialized form data
+         */
+
+        // Setup our serialized data
+        const serialized = [];
+        let i, n;
+
+        // Loop through each field in the form
+        for (i = 0; i < form.elements.length; i++) {
+
+            let field = form.elements[i];
+
+            // Don't serialize fields without a name, submits, buttons, file and reset inputs, and disabled fields
+            if (!field.name || field.disabled || field.type === 'file' || field.type === 'reset' || field.type === 'submit' || field.type === 'button') continue;
+
+            // If a multi-select, get all selections
+            if (field.type === 'select-multiple') {
+                for (n = 0; n < field.options.length; n++) {
+                    if (!field.options[n].selected) continue;
+                    serialized.push({
+                        name: field.name,
+                        value: field.options[n].value
+                    });
+                }
+            }
+
+            // Convert field data to a query string
+            else if ((field.type !== 'checkbox' && field.type !== 'radio') || field.checked) {
+                serialized.push({
+                    name: field.name,
+                    value: field.value
+                });
+            }
+        }
+
+        return serialized;
+
     };
     document.dispatchEvent(event);
 }
