@@ -17,7 +17,10 @@ from distutils.spawn import find_executable
 from functools import lru_cache
 from typing import Union
 
-from django.utils.autoreload import python_reloader
+try:
+    from django.utils.autoreload import python_reloader
+except ImportError:
+    from django.utils.autoreload import run_with_reloader as python_reloader
 
 from djangofloor.conf.merger import SettingMerger
 from djangofloor.conf.providers import (
