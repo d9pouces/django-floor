@@ -40,6 +40,7 @@ from django.contrib.auth.middleware import (
 from django.contrib.auth.models import Group, AnonymousUser
 from django.contrib.messages import DEFAULT_LEVELS
 from django.contrib.sessions.backends.base import VALID_KEY_CHARS
+from django.core import signing
 from django.core.exceptions import ImproperlyConfigured
 from django.db.models import Q
 from django.http import HttpRequest
@@ -73,8 +74,8 @@ class DjangoFloorMiddleware(BaseRemoteUserMiddleware):
     def process_request(self, request: HttpRequest):
         request.window_key = get_random_string(32, VALID_KEY_CHARS)
         if request.is_ajax() and self.ajax_header in request.META:
-            from djangofloor.wsgi.wsgi_server import signer
-
+            session_key = request.COOKIES.get(settings.SESSION_COOKIE_NAME)
+            signer = signing.Signer(session_key)
             signed_token = request.META[self.ajax_header]
             request.window_key = signer.unsign(signed_token)
         request.has_websocket_topics = False
