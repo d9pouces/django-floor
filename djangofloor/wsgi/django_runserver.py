@@ -6,6 +6,7 @@ from hashlib import sha1
 from wsgiref import util
 
 from django.conf import settings
+from django.core.handlers.wsgi import LimitedStream
 from django.core.management.commands import runserver
 from django.core.servers.basehttp import WSGIServer, WSGIRequestHandler, ServerHandler
 from django.core.wsgi import get_wsgi_application
@@ -95,6 +96,8 @@ class Stream:
 
     # noinspection PyProtectedMember
     def __init__(self, wsgi_input):
+        if isinstance(wsgi_input, LimitedStream):
+            wsgi_input = wsgi_input.stream
         self.read = wsgi_input.raw._sock.recv
         self.write = wsgi_input.raw._sock.sendall
         self.fileno = wsgi_input.fileno()
