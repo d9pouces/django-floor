@@ -84,7 +84,7 @@ if settings.DEBUG and settings.USE_DEBUG_TOOLBAR:
     urlpatterns += [url(r"__debug__/", include(debug_toolbar.urls))]
 if settings.DF_INDEX_VIEW:
     urlpatterns += [
-        url(r"$", get_view_from_string(settings.DF_INDEX_VIEW), name="index")
+        url(r"^$", get_view_from_string(settings.DF_INDEX_VIEW), name="index")
     ]
 
 
