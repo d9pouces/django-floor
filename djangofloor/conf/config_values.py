@@ -468,7 +468,8 @@ class CallableSetting(ConfigValue):
         """
         for required in self.required:
             merger.get_setting_value(required)
-        return self.value(merger.settings)
+        value = self.value(merger.settings)
+        return merger.analyze_raw_value(value, provider_name, setting_name)
 
     def __repr__(self):
         fn = repr(self.value)
