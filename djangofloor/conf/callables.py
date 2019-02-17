@@ -564,11 +564,11 @@ def required_packages(settings_dict):
                     yield str(required_package)
         except DistributionNotFound:
             settings_check_results.append(
-                missing_package(str(package_name), " required by %s" % parent)
+                missing_package(str(package_name), " by %s" % parent)
             )
         except VersionConflict:
             settings_check_results.append(
-                missing_package(str(package_name), " required by %s" % parent)
+                missing_package(str(package_name), " by %s" % parent)
             )
 
     return list(
