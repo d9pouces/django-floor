@@ -45,7 +45,6 @@ except ImportError:
 
 install_requires = [
     "django>=1.11.15",
-    "django<2.1.5",
     "celery",
     "django-bootstrap3>=9.0.0",
     "redis",
