@@ -72,7 +72,11 @@ SOCIAL_PROVIDER_APPS = {
 
 
 class SocialProviderConfiguration:
-    help = "Please read https://django-allauth.readthedocs.io/en/latest/providers.html#{{ provider_id }}\n" "Contact {{ provider_name }} to get authentication secrets. " "Callback URL should be {{ SERVER_BASE_URL }}accounts/{{ provider_id }}/login/callback/"
+    help = (
+        "Please read https://django-allauth.readthedocs.io/en/latest/providers.html#{{ provider_id }}\n"
+        "Contact {{ provider_name }} to get authentication secrets. "
+        "Callback URL should be {{ SERVER_BASE_URL }}accounts/{{ provider_id }}/login/callback/"
+    )
     attributes = {
         "client_id": "App ID, or consumer key",
         "secret": "API secret, client secret, or consumer secret",

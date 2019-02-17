@@ -98,7 +98,7 @@ class DjangoCommand(ScriptCommand):
 
         if len(sys.argv) >= 2 and sys.argv[1] == "runserver":
             from django.core.management.commands.runserver import (
-                Command as RunserverCommand
+                Command as RunserverCommand,
             )
 
             ip_address, sep, port = settings.LISTEN_ADDRESS.rpartition(":")

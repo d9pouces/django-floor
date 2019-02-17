@@ -35,7 +35,7 @@ from django.contrib import auth
 from django.contrib.auth import get_user_model
 from django.contrib.auth.context_processors import PermWrapper
 from django.contrib.auth.middleware import (
-    RemoteUserMiddleware as BaseRemoteUserMiddleware
+    RemoteUserMiddleware as BaseRemoteUserMiddleware,
 )
 from django.contrib.auth.models import Group, AnonymousUser
 from django.contrib.messages import DEFAULT_LEVELS

@@ -18,7 +18,10 @@ __author__ = "Matthieu Gallet"
 
 
 class Command(BaseCommand):
-    help = "show the current configuration." 'Can display as python file ("config python") or as .ini file ("config ini"). Use -v 2 to display more info.'
+    help = (
+        "show the current configuration."
+        'Can display as python file ("config python") or as .ini file ("config ini"). Use -v 2 to display more info.'
+    )
     requires_system_checks = False
     options = {
         "python": "display the current config as Python module",
@@ -220,7 +223,7 @@ class Command(BaseCommand):
 
     def show_social_auth_config(self):
         from djangofloor.management.commands.social_authentications import (
-            Command as SACommand
+            Command as SACommand,
         )
 
         # noinspection PyCallByClass

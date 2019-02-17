@@ -1,5 +1,5 @@
 from django.contrib.staticfiles.management.commands.collectstatic import (
-    Command as BaseCommand
+    Command as BaseCommand,
 )
 from djangofloor.conf.settings import merger
 

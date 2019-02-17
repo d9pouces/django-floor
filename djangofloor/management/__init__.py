@@ -1,10 +1,7 @@
 import os
 import sys
 
-from django.core.management import (
-    get_commands,
-    color_style,
-    CommandParser)
+from django.core.management import get_commands, color_style, CommandParser
 
 __author__ = "Matthieu Gallet"
 

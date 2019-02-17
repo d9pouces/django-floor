@@ -21,8 +21,7 @@ class TestSettingMerger(TestCase):
             OrderedDict({None: "test"}), merger.raw_settings["DF_MODULE_NAME"]
         )
         self.assertEqual(
-            OrderedDict([("{'X': 1}", 1), ("{'X': 2}", 2)]),
-            merger.raw_settings["X"],
+            OrderedDict([("{'X': 1}", 1), ("{'X': 2}", 2)]), merger.raw_settings["X"]
         )
 
     def test_parse(self):

@@ -5,12 +5,12 @@ Define several helpers classes and internal functions for the DjangoFloor settin
 settings from different sources. This file must be importable while Django is not loaded yet.
 """
 
+import sys
 import traceback
 import warnings
 from collections import OrderedDict
 from distutils.version import LooseVersion
 
-import sys
 from django import get_version
 from django.conf import LazySettings
 from django.core.management import color_style
@@ -114,7 +114,9 @@ class SettingMerger:
         self.providers = providers or []
         self.__formatter = string.Formatter()
         self.settings = {}
-        self.config_values = []  # list of (ConfigValue, provider_name, setting_name, final_value)
+        self.config_values = (
+            []
+        )  # list of (ConfigValue, provider_name, setting_name, final_value)
         self.raw_settings = OrderedDict()
         for key, value in extra_values.items():
             self.raw_settings[key] = OrderedDict()
@@ -236,12 +238,11 @@ class SettingMerger:
             ) in self.__formatter.parse(obj):
                 if field_name is not None:
                     values[field_name] = self.get_setting_value(field_name)
-            if values:
-                return self.__formatter.format(obj, **values)
+            return self.__formatter.format(obj, **values)
         elif isinstance(obj, ConfigValue):
             final_value = obj.get_value(self, provider_name, setting_name)
             self.config_values.append((obj, provider_name, setting_name, final_value))
-            return self.analyze_raw_value(final_value, provider_name, setting_name)
+            return final_value
         elif isinstance(obj, list) or isinstance(obj, tuple):
             result = []
             for sub_obj in obj:
@@ -265,7 +266,7 @@ class SettingMerger:
                     )
             return result
         elif isinstance(obj, dict):
-            result = OrderedDict()
+            result = obj.__class__()  # OrderedDict or plain dict
             for sub_key, sub_obj in obj.items():
                 if isinstance(sub_obj, ExpandIterable):
                     result.update(self.get_setting_value(sub_obj.value))

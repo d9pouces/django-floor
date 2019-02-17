@@ -55,7 +55,8 @@ from djangofloor.conf.callables import (
     smart_hostname,
     DefaultListenAddress,
     allauth_provider_apps,
-    secure_hsts_seconds)
+    secure_hsts_seconds,
+)
 from djangofloor.conf.config_values import (
     Path,
     Directory,

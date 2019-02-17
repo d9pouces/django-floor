@@ -37,6 +37,7 @@ def context_base(request):
     """
     # noinspection PyPackageRequirements
     from django.conf import settings
+
     # noinspection PyPackageRequirements
     from django.contrib.auth.models import AnonymousUser
     from djangofloor.models import Notification

@@ -21,7 +21,7 @@ class WebSocket:
     OPCODE_BINARY = 0x02
     OPCODE_CLOSE = 0x08
     OPCODE_PING = 0x09
-    OPCODE_PONG = 0x0a
+    OPCODE_PONG = 0x0A
 
     def __init__(self, stream):
         self._closed = False
@@ -283,9 +283,9 @@ class Header:
     __slots__ = ("fin", "mask", "opcode", "flags", "length")
 
     FIN_MASK = 0x80
-    OPCODE_MASK = 0x0f
+    OPCODE_MASK = 0x0F
     MASK_MASK = 0x80
-    LENGTH_MASK = 0x7f
+    LENGTH_MASK = 0x7F
     RSV0_MASK = 0x40
     RSV1_MASK = 0x20
     RSV2_MASK = 0x10
@@ -391,10 +391,10 @@ class Header:
         # now deal with length complexities
         if length < 126:
             second_byte += length
-        elif length <= 0xffff:
+        elif length <= 0xFFFF:
             second_byte += 126
             extra = struct.pack("!H", length)
-        elif length <= 0xffffffffffffffff:
+        elif length <= 0xFFFFFFFFFFFFFFFF:
             second_byte += 127
             extra = struct.pack("!Q", length)
         else:

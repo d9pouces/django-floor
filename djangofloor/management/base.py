@@ -283,8 +283,8 @@ class TemplatedBaseCommand(OriginalBaseCommand):
                     src_path = os.path.join(root, filename)[template_root_len:]
                     if src_path.endswith(cls.transparent_suffix):
                         dst_path = src_path[
-                                   filename_root_len: -len(cls.transparent_suffix)
-                                   ]
+                            filename_root_len : -len(cls.transparent_suffix)
+                        ]
                     else:
                         dst_path = src_path[filename_root_len:]
                     if context and "{" in dst_path:

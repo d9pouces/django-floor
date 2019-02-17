@@ -118,7 +118,9 @@ class Packages(MonitoringCheck):
 
         """
         if raw_requirements:
-            requirements = {}  # requirements[key] = [key, state="danger/warning/success", [specs_str], [parsed_req]]
+            requirements = (
+                {}
+            )  # requirements[key] = [key, state="danger/warning/success", [specs_str], [parsed_req]]
             for r in raw_requirements:
                 for p in parse_requirements(r):
                     requirements.setdefault(
@@ -165,7 +167,7 @@ class System(MonitoringCheck):
             }
         y = psutil.cpu_times()
         cpu_average_usage = int(
-            (y.user + y.system) / (y.idle + y.user + y.system) * 100.
+            (y.user + y.system) / (y.idle + y.user + y.system) * 100.0
         )
         cpu_current_usage = int(psutil.cpu_percent(interval=0.1))
         cpu_count = psutil.cpu_count(logical=True), psutil.cpu_count(logical=False)

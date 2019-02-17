@@ -269,7 +269,7 @@ except ImportError:
             2,
             2,
             2,  # c0..df
-            0xa,
+            0xA,
             0x3,
             0x3,
             0x3,
@@ -285,7 +285,7 @@ except ImportError:
             0x4,
             0x3,
             0x3,  # e0..ef
-            0xb,
+            0xB,
             0x6,
             0x6,
             0x6,
@@ -471,9 +471,9 @@ except ImportError:
             type = Utf8Validator.UTF8VALIDATOR_DFA[b]
 
             if self.state != Utf8Validator.UTF8_ACCEPT:
-                self.codepoint = (b & 0x3f) | (self.codepoint << 6)
+                self.codepoint = (b & 0x3F) | (self.codepoint << 6)
             else:
-                self.codepoint = (0xff >> type) & b
+                self.codepoint = (0xFF >> type) & b
 
             self.state = Utf8Validator.UTF8VALIDATOR_DFA[256 + self.state * 16 + type]
 

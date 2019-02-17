@@ -26,7 +26,10 @@ Since the second file overrides the first one, `TEMPLATE_DEBUG` always has the s
 import os
 import warnings
 
+# noinspection PyPackageRequirements
 from django.utils.module_loading import import_string
+
+# noinspection PyPackageRequirements
 from django.core.checks import Warning
 
 from djangofloor.checks import settings_check_results
@@ -419,6 +422,7 @@ class CallableSetting(ConfigValue):
 
     >>> SETTING_1 = True
     >>> def inverse_value(values):
+    >>>     # noinspection PyUnresolvedReferences
     >>>     return not values['SETTING_1']
     >>> SETTING_2 = CallableSetting(inverse_value, 'SETTING_1')
 
@@ -438,6 +442,7 @@ class CallableSetting(ConfigValue):
     `required_settings`.
 
     >>> def inverse_value(values):
+    >>>     # noinspection PyUnresolvedReferences
     >>>     return not values['SETTING_1']
     >>> inverse_value.required_settings = ['SETTING_1']
     >>> SETTING_2 = CallableSetting(inverse_value)
