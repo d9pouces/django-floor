@@ -17,6 +17,7 @@ import uuid
 import warnings
 
 from celery import shared_task
+from django.apps import apps
 from django.conf import settings
 from django.utils.lru_cache import lru_cache
 from django.utils.module_loading import import_string
@@ -29,6 +30,7 @@ from djangofloor.decorators import (
     FunctionConnection,
     DynamicQueueName,
 )
+from djangofloor.scripts import load_celery
 from djangofloor.utils import import_module, RemovedInDjangoFloor200Warning
 from djangofloor.wsgi.exceptions import NoWindowKeyException
 from djangofloor.wsgi.window_info import WindowInfo
@@ -295,15 +297,10 @@ def import_signals_and_functions():
     """Import all `signals.py`, 'forms.py' and `functions.py` files to register signals and WS functions
 (tries these files for all Django apps).
     """
-    for app in settings.INSTALLED_APPS:
-        package_dir = None
-        try:
-            mod = import_module(app)
-            package_dir = os.path.dirname(mod.__file__)
-        except ImportError:
-            pass
-        except Exception as e:
-            logger.exception(e)
+    load_celery()
+    for app_config in apps.app_configs.values():
+        app = app_config.name
+        package_dir = app_config.path
         for module_name in ("signals", "forms", "functions"):
             try:
                 import_module("%s.%s" % (app, module_name))
