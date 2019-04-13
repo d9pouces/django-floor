@@ -321,8 +321,9 @@ def import_signals_and_functions():
     )
 
 
-@shared_task(serializer="json")
+@shared_task(serializer="json", bind=True)
 def _server_signal_call(
+    self,
     signal_name,
     window_info_dict,
     kwargs=None,
@@ -344,6 +345,7 @@ def _server_signal_call(
                 _call_ws_signal(signal_name, signal_id, topic, kwargs)
         window_info = WindowInfo.from_dict(window_info_dict)
         import_signals_and_functions()
+        window_info.celery_request = self.request
         if not to_server or signal_name not in REGISTERED_SIGNALS:
             return
         for connection in REGISTERED_SIGNALS[signal_name]:
@@ -374,8 +376,8 @@ def _server_signal_call(
         logger.exception(e)
 
 
-@shared_task(serializer="json")
-def _server_function_call(function_name, window_info_dict, result_id, kwargs=None):
+@shared_task(serializer="json", bind=True)
+def _server_function_call(self, function_name, window_info_dict, result_id, kwargs=None):
     logger.info("Function %s called from client." % function_name)
     e, result, window_info = None, None, None
     try:
@@ -383,6 +385,7 @@ def _server_function_call(function_name, window_info_dict, result_id, kwargs=Non
             kwargs = {}
         window_info = WindowInfo.from_dict(window_info_dict)
         import_signals_and_functions()
+        window_info.celery_request = self.request
         connection = REGISTERED_FUNCTIONS[function_name]
         assert isinstance(connection, FunctionConnection)
         if not connection.is_allowed_to(connection, window_info, kwargs):
