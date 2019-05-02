@@ -189,9 +189,8 @@ class CeleryCommand(ScriptCommand):
     def run_script(self):
         from django.conf import settings
         from celery.bin.celery import main as celery_main
-
-        if settings.DEBUG and "worker" in sys.argv and "-h" not in sys.argv:
-            python_reloader(celery_main, (sys.argv,), {})
+        if settings.DEBUG and 'worker' in sys.argv and '-h' not in sys.argv:
+            python_reloader(celery_main, sys.argv)
         else:
             celery_main(sys.argv)
 
