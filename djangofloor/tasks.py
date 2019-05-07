@@ -243,7 +243,7 @@ def _call_signal(
                     queue,
                 ],
                 queue=queue,
-                **celery_kwargs
+                **celery_kwargs,
             )
     else:
         if to_server:
@@ -297,21 +297,28 @@ def import_signals_and_functions():
     """Import all `signals.py`, 'forms.py' and `functions.py` files to register signals and WS functions
 (tries these files for all Django apps).
     """
+
+    def try_import(module):
+        try:
+            import_module(module)
+        except ImportError as e:
+            if package_dir and os.path.isfile(
+                os.path.join(package_dir, "%s.py" % module_name)
+            ):
+                logger.exception(e)
+        except Exception as e:
+            logger.exception(e)
+
     load_celery()
     for app_config in apps.app_configs.values():
         app = app_config.name
         package_dir = app_config.path
         for module_name in ("signals", "forms", "functions"):
-            try:
-                import_module("%s.%s" % (app, module_name))
-            except ImportError as e:
-                if package_dir and os.path.isfile(
-                    os.path.join(package_dir, "%s.py" % module_name)
-                ):
-                    logger.exception(e)
-            except Exception as e:
-                logger.exception(e)
-
+            if os.path.isfile(os.path.join(package_dir, "%s.py" % module_name)):
+                try_import(f"{app}.{module_name}")
+            elif os.path.isdir(os.path.join(package_dir, module_name)):
+                for f in os.listdir(package_dir):
+                    try_import(f"{app}.{module_name}.{f}")
     logger.debug(
         "Found signals: %s"
         % ", ".join(["%s (%d)" % (k, len(v)) for (k, v) in REGISTERED_SIGNALS.items()])
@@ -377,7 +384,9 @@ def _server_signal_call(
 
 
 @shared_task(serializer="json", bind=True)
-def _server_function_call(self, function_name, window_info_dict, result_id, kwargs=None):
+def _server_function_call(
+    self, function_name, window_info_dict, result_id, kwargs=None
+):
     logger.info("Function %s called from client." % function_name)
     e, result, window_info = None, None, None
     try:
