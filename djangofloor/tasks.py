@@ -315,10 +315,10 @@ def import_signals_and_functions():
         package_dir = app_config.path
         for module_name in ("signals", "forms", "functions"):
             if os.path.isfile(os.path.join(package_dir, "%s.py" % module_name)):
-                try_import(f"{app}.{module_name}")
+                try_import("%s.%s" % (app, module_name))
             elif os.path.isdir(os.path.join(package_dir, module_name)):
                 for f in os.listdir(package_dir):
-                    try_import(f"{app}.{module_name}.{f}")
+                    try_import("%s.%s.%s" % (app, module_name, f))
     logger.debug(
         "Found signals: %s"
         % ", ".join(["%s (%d)" % (k, len(v)) for (k, v) in REGISTERED_SIGNALS.items()])
