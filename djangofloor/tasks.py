@@ -377,7 +377,9 @@ def _server_signal_call(
 
 
 @shared_task(serializer="json", bind=True)
-def _server_function_call(self, function_name, window_info_dict, result_id, kwargs=None):
+def _server_function_call(
+    self, function_name, window_info_dict, result_id, kwargs=None
+):
     logger.info("Function %s called from client." % function_name)
     e, result, window_info = None, None, None
     try:

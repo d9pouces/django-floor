@@ -19,8 +19,11 @@ from typing import Union
 
 try:
     from django.utils.autoreload import python_reloader
+
+    run_with_reloader = None
 except ImportError:
-    from django.utils.autoreload import run_with_reloader as python_reloader
+    python_reloader = None
+    from django.utils.autoreload import run_with_reloader
 
 from djangofloor.conf.merger import SettingMerger
 from djangofloor.conf.providers import (
@@ -191,7 +194,10 @@ class CeleryCommand(ScriptCommand):
         from celery.bin.celery import main as celery_main
 
         if settings.DEBUG and "worker" in sys.argv and "-h" not in sys.argv:
-            python_reloader(celery_main, (sys.argv,), {})
+            if callable(run_with_reloader):
+                run_with_reloader(celery_main, sys.argv)
+            elif callable(python_reloader):
+                python_reloader(celery_main, (sys.argv,), {})
         else:
             celery_main(sys.argv)
 
