@@ -7,7 +7,7 @@ a.button.button-lg {
 }
 
 ul.messagelist li.success {
-    background: #ffefef url(../admin/img/icon-yes.svg) 40px 12px no-repeat;
+    background: #dfd url(../admin/img/icon-yes.svg) 40px 12px no-repeat;
 }
 ul.messagelist li.danger {
     background: #ffefef url(../admin/img/icon-no.svg) 40px 12px no-repeat;
@@ -16,7 +16,7 @@ ul.messagelist li.default {
     background: #f3f3f3;
 }
 ul.messagelist li.info {
-    background: #C7E0E9 url(../admin/img/icon-info.svg) 40px 12px no-repeat;
+    background: #c7e0e9 url(../admin/img/icon-info.svg) 40px 12px no-repeat;
     background-size: 16px auto;
 }
 

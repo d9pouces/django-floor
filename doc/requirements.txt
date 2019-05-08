@@ -11,7 +11,7 @@ django>=1.11.15
 django-bootstrap3==9.0.0
 idna==2.6
 imagesize==0.7.1
-Jinja2==2.10
+Jinja2>=2.10.1
 kombu==4.1.0
 MarkupSafe==1.0
 multidict==3.3.0
