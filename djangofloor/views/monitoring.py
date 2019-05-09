@@ -39,6 +39,7 @@ from djangofloor.tasks import (
     import_signals_and_functions,
     get_expected_queues,
 )
+from djangofloor.utils import ensure_dir
 from djangofloor.views.admin import admin_context
 
 try:
@@ -498,6 +499,7 @@ class LogLastLines(MonitoringCheck):
         handlers = [x for x in handlers if isinstance(x, logging.FileHandler)]
         filenames = {x.baseFilename for x in handlers}
         if settings.LOG_DIRECTORY:
+            ensure_dir(settings.LOG_DIRECTORY)
             filenames |= {
                 os.path.join(settings.LOG_DIRECTORY, x)
                 for x in os.listdir(settings.LOG_DIRECTORY)
