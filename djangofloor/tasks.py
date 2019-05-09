@@ -317,7 +317,7 @@ def import_signals_and_functions():
             if os.path.isfile(os.path.join(package_dir, "%s.py" % module_name)):
                 try_import("%s.%s" % (app, module_name))
             elif os.path.isdir(os.path.join(package_dir, module_name)):
-                for f in os.listdir(package_dir):
+                for f in os.listdir(os.path.join(package_dir, module_name)):
                     try_import("%s.%s.%s" % (app, module_name, f))
     logger.debug(
         "Found signals: %s"
