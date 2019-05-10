@@ -301,6 +301,7 @@ def import_signals_and_functions():
     def try_import(module):
         try:
             import_module(module)
+            print(module)
         except ImportError as e:
             if package_dir and os.path.isfile(
                 os.path.join(package_dir, "%s.py" % module_name)
@@ -318,6 +319,7 @@ def import_signals_and_functions():
                 try_import("%s.%s" % (app, module_name))
             elif os.path.isdir(os.path.join(package_dir, module_name)):
                 for f in os.listdir(os.path.join(package_dir, module_name)):
+                    f = os.path.splitext(f)[0]
                     try_import("%s.%s.%s" % (app, module_name, f))
     logger.debug(
         "Found signals: %s"
