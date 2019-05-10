@@ -301,7 +301,6 @@ def import_signals_and_functions():
     def try_import(module):
         try:
             import_module(module)
-            print(module)
         except ImportError as e:
             if package_dir and os.path.isfile(
                 os.path.join(package_dir, "%s.py" % module_name)
