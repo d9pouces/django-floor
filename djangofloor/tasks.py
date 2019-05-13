@@ -243,7 +243,7 @@ def _call_signal(
                     queue,
                 ],
                 queue=queue,
-                **celery_kwargs
+                **celery_kwargs,
             )
     else:
         if to_server:
@@ -297,21 +297,29 @@ def import_signals_and_functions():
     """Import all `signals.py`, 'forms.py' and `functions.py` files to register signals and WS functions
 (tries these files for all Django apps).
     """
+
+    def try_import(module):
+        try:
+            import_module(module)
+        except ImportError as e:
+            if package_dir and os.path.isfile(
+                os.path.join(package_dir, "%s.py" % module_name)
+            ):
+                logger.exception(e)
+        except Exception as e:
+            logger.exception(e)
+
     load_celery()
     for app_config in apps.app_configs.values():
         app = app_config.name
         package_dir = app_config.path
         for module_name in ("signals", "forms", "functions"):
-            try:
-                import_module("%s.%s" % (app, module_name))
-            except ImportError as e:
-                if package_dir and os.path.isfile(
-                    os.path.join(package_dir, "%s.py" % module_name)
-                ):
-                    logger.exception(e)
-            except Exception as e:
-                logger.exception(e)
-
+            if os.path.isfile(os.path.join(package_dir, "%s.py" % module_name)):
+                try_import("%s.%s" % (app, module_name))
+            elif os.path.isdir(os.path.join(package_dir, module_name)):
+                for f in os.listdir(os.path.join(package_dir, module_name)):
+                    f = os.path.splitext(f)[0]
+                    try_import("%s.%s.%s" % (app, module_name, f))
     logger.debug(
         "Found signals: %s"
         % ", ".join(["%s (%d)" % (k, len(v)) for (k, v) in REGISTERED_SIGNALS.items()])
