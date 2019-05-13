@@ -1,5 +1,5 @@
 Djangofloor
-==========
+===========
 
 Djangofloor helps you to quickly create Django applications that are also easy to deploy. To reach these goals, Djangofloor provides:
 

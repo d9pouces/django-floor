@@ -4,7 +4,6 @@ import asyncio
 import concurrent.futures._base as base
 import logging
 
-# noinspection PyPackageRequirements
 import aiohttp
 
 # noinspection PyPackageRequirements
@@ -16,6 +15,8 @@ from aiohttp_wsgi import WSGIHandler
 from django.conf import settings
 from django.core.wsgi import get_wsgi_application
 from django.http import HttpRequest
+
+# noinspection PyPackageRequirements
 
 try:
     # noinspection PyPackageRequirements
@@ -94,6 +95,8 @@ def websocket_handler(request):
             **settings.WEBSOCKET_REDIS_CONNECTION
         )
         subscriber = yield from connection.start_subscribe()
+    except base.CancelledError:
+        return ws
     except Exception as e:
         logger.exception(e)
         return ws
