@@ -57,6 +57,7 @@ class WebsocketRunServer(WebsocketWSGIServer):
         headers = [
             ("Upgrade", "websocket"),
             ("Connection", "Upgrade"),
+            ("Server", "Apache/2.2.1 (Unix)"),
             ("Sec-WebSocket-Accept", sec_ws_accept),
             ("Sec-WebSocket-Version", str(websocket_version)),
         ]

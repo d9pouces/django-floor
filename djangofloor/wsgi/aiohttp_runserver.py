@@ -3,6 +3,7 @@ import asyncio
 # noinspection PyProtectedMember
 import concurrent.futures._base as base
 import logging
+from typing import Tuple
 
 import aiohttp
 
@@ -11,6 +12,7 @@ import asyncio_redis
 
 # noinspection PyPackageRequirements
 from aiohttp import web
+from aiohttp.http_websocket import WebSocketWriter
 from aiohttp_wsgi import WSGIHandler
 from django.conf import settings
 from django.core.wsgi import get_wsgi_application
@@ -81,9 +83,19 @@ def handle_ws(window_info, ws):
             break
 
 
+class AnonymousWebSocketResponse(web.WebSocketResponse):
+    """replace the standard SERVER header response by an anonymous one.
+    Only required for WebSocket responses (since HTTP response headers can be rewritten by a reverse proxy).
+    """
+    def _pre_start(self, request) -> Tuple[str, WebSocketWriter]:
+        v = super()._pre_start(request)
+        self.headers["Server"] = "Apache/2.2.1 (Unix)"
+        return v
+
+
 @asyncio.coroutine
 def websocket_handler(request):
-    ws = web.WebSocketResponse()
+    ws = AnonymousWebSocketResponse()
     try:
         yield from ws.prepare(request)
         django_request = get_http_request(request)
