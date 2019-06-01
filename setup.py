@@ -51,6 +51,7 @@ install_requires = [
     "pip",
     "asyncio_redis",
     "gunicorn",
+    "vine<5.0.0a1,>=1.1.3",
 ]
 if sys.version_info >= (3, 5, 3):
     install_requires += [
