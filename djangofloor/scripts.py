@@ -178,16 +178,26 @@ class CeleryCommand(ScriptCommand):
         self.add_argument(parser, "-A", "--app", action="store", default="djangofloor")
         is_worker = len(sys.argv) > 1 and sys.argv[1] == "worker"
         if is_worker:
-            self.add_argument(
-                parser,
-                "-c",
-                "--concurrency",
-                action="store",
-                default=settings.CELERY_PROCESSES,
-                help="Number of child processes processing the queue. The"
-                "default is the number of CPUs available on your"
-                "system.",
-            )
+            if settings.DEBUG:
+                self.add_argument(
+                    parser,
+                    "-P",
+                    "--pool",
+                    action="store",
+                    default="solo",
+                    help="Pool implementation: prefork (default), eventlet, gevent or solo.",
+                )
+            else:
+                self.add_argument(
+                    parser,
+                    "-c",
+                    "--concurrency",
+                    action="store",
+                    default=settings.CELERY_PROCESSES,
+                    help="Number of child processes processing the queue. The"
+                    "default is the number of CPUs available on your"
+                    "system.",
+                )
 
     def run_script(self):
         from django.conf import settings
