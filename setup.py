@@ -53,7 +53,7 @@ install_requires = [
     "gunicorn",
     "vine<5.0.0a1,>=1.1.3",
 ]
-if sys.version_info >= (3, 5, 3):
+if sys.version_info >= (3, 6, 0):
     install_requires += [
         "aiohttp>=3.1.3,<4.0",
         "attrs>=17.3.0",
@@ -61,6 +61,16 @@ if sys.version_info >= (3, 5, 3):
         "multidict>=4.0,<5.0",
         "async_timeout>=1.2.0",
         "yarl>=1.0,<2.0",
+        "aiohttp-wsgi>=0.8.0,<0.9.0",
+    ]
+elif sys.version_info >= (3, 5, 3):
+    install_requires += [
+        "aiohttp>=3.1.3,<4.0",
+        "attrs>=17.3.0",
+        "chardet>=2.0,<4.0",
+        "multidict>=4.0,<5.0",
+        "async_timeout>=1.2.0",
+        "yarl>=1.0,<1.4",
         "aiohttp-wsgi>=0.8.0,<0.9.0",
     ]
 else:
