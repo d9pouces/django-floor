@@ -10,6 +10,7 @@ import mimetypes
 import os
 import warnings
 from collections import OrderedDict
+from functools import lru_cache
 
 from django.conf import settings
 from django.contrib.sites.shortcuts import get_current_site
@@ -21,7 +22,6 @@ from django.http import StreamingHttpResponse
 from django.template.response import TemplateResponse
 from django.templatetags.static import static
 from django.urls import reverse
-from django.utils.lru_cache import lru_cache
 from django.views.decorators.cache import never_cache
 from django.views.generic import TemplateView
 

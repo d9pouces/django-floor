@@ -15,11 +15,11 @@ import logging
 import os
 import uuid
 import warnings
+from functools import lru_cache
 
 from celery import shared_task
 from django.apps import apps
 from django.conf import settings
-from django.utils.lru_cache import lru_cache
 from django.utils.module_loading import import_string
 from redis import StrictRedis, ConnectionPool
 

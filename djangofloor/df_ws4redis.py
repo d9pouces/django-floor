@@ -1,8 +1,8 @@
 """.. deprecated:: 1.0"""
 import warnings
+from functools import lru_cache
 
 from django.contrib.auth import get_user_model
-from django.utils.lru_cache import lru_cache
 
 from djangofloor.tasks import SESSION, WINDOW, BROADCAST, USER, call
 from djangofloor.utils import RemovedInDjangoFloor200Warning
