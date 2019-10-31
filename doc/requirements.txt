@@ -8,6 +8,7 @@ billiard==3.5.0.3
 celery==4.1.0
 chardet==3.0.4
 django>=1.11.15
+django<3.0
 django-bootstrap3==9.0.0
 idna==2.6
 imagesize==0.7.1
@@ -20,7 +21,6 @@ pyparsing==2.2.0
 pytz==2017.2
 redis==2.10.6
 requests>=2.20.0
-six==1.11.0
 snowballstemmer==1.2.1
 Sphinx==1.6.5
 sphinx-rtd-theme==0.2.4
