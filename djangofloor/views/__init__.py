@@ -185,7 +185,7 @@ def send_file(filepath, mimetype=None, force_download=False):
         )
         response["Content-Length"] = os.path.getsize(filepath)
     if force_download or not (
-        mimetype.startswith("text") or mimetype.startswith("image")
+        mimetype.startswith("text") or mimetype.startswith("image") or "charset=" in mimetype
     ):
         response["Content-Disposition"] = "attachment; filename={0}".format(
             os.path.basename(filepath)
