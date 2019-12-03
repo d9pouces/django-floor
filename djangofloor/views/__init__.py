@@ -140,7 +140,7 @@ def signals(request):
     )
 
 
-def send_file(filepath, mimetype=None, force_download=False):
+def send_file(filepath, mimetype=None, force_download=False, attachment_filename=None):
     """Send a local file. This is not a Django view, but a function that is called at the end of a view.
 
     If `settings.USE_X_SEND_FILE` (mod_xsendfile is a mod of Apache), then return an empty HttpResponse with the
@@ -154,6 +154,7 @@ def send_file(filepath, mimetype=None, force_download=False):
     :param filepath: absolute path of the file to send to the client.
     :param mimetype: MIME type of the file (returned in the response header)
     :param force_download: always force the client to download the file.
+    :param attachment_filename: filename used in the "Content-Disposition" header (when used)
     :rtype: :class:`django.http.response.StreamingHttpResponse` or :class:`django.http.response.HttpResponse`
     """
     if mimetype is None:
@@ -173,7 +174,7 @@ def send_file(filepath, mimetype=None, force_download=False):
             if filepath.startswith(dirpath):
                 response = HttpResponse(content_type=mimetype)
                 response["Content-Disposition"] = "attachment; filename={0}".format(
-                    os.path.basename(filepath)
+                    attachment_filename or os.path.basename(filepath)
                 )
                 response["X-Accel-Redirect"] = alias_url + filepath
                 break
@@ -188,7 +189,7 @@ def send_file(filepath, mimetype=None, force_download=False):
         mimetype.startswith("text") or mimetype.startswith("image") or "charset=" in mimetype
     ):
         response["Content-Disposition"] = "attachment; filename={0}".format(
-            os.path.basename(filepath)
+            attachment_filename or os.path.basename(filepath)
         )
     return response
 
