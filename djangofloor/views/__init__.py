@@ -166,6 +166,7 @@ def send_file(filepath, mimetype=None, force_download=False, attachment_filename
         mimetype = mimetype.decode("utf-8")
     filepath = os.path.abspath(filepath)
     response = None
+    attachment_filename = attachment_filename or os.path.basename(filepath)
     if settings.USE_X_SEND_FILE:
         response = HttpResponse(content_type=mimetype)
         response["X-SENDFILE"] = filepath
@@ -173,9 +174,6 @@ def send_file(filepath, mimetype=None, force_download=False, attachment_filename
         for dirpath, alias_url in settings.X_ACCEL_REDIRECT:
             if filepath.startswith(dirpath):
                 response = HttpResponse(content_type=mimetype)
-                response["Content-Disposition"] = "attachment; filename={0}".format(
-                    attachment_filename or os.path.basename(filepath)
-                )
                 response["X-Accel-Redirect"] = alias_url + filepath
                 break
     if response is None:
@@ -185,12 +183,12 @@ def send_file(filepath, mimetype=None, force_download=False, attachment_filename
             read_file_in_chunks(fileobj), content_type=mimetype
         )
         response["Content-Length"] = os.path.getsize(filepath)
-    if force_download or not (
-        mimetype.startswith("text") or mimetype.startswith("image") or "charset=" in mimetype
-    ):
+    if force_download:
         response["Content-Disposition"] = "attachment; filename={0}".format(
-            attachment_filename or os.path.basename(filepath)
+            attachment_filename
         )
+    else:
+        response["Content-Disposition"] = "filename={0}".format(attachment_filename)
     return response
 
 
