@@ -44,7 +44,7 @@ except ImportError:
     set_env, django = None, None
 
 install_requires = [
-    "django>=1.11.15,<3.0",
+    "django>=1.11.15,<3.2",
     "celery",
     "django-bootstrap3>=9.0.0",
     "redis",
@@ -106,6 +106,8 @@ setup(
         "Framework :: Django :: 2.0",
         "Framework :: Django :: 2.1",
         "Framework :: Django :: 2.2",
+        "Framework :: Django :: 3.0",
+        "Framework :: Django :: 3.1",
         "Natural Language :: English",
         "Natural Language :: French",
         "Operating System :: MacOS :: MacOS X",
