@@ -44,7 +44,6 @@ except ImportError:
     set_env, django = None, None
 
 install_requires = [
-    "django>=1.11.15,<3.2",
     "celery",
     "django-bootstrap3>=9.0.0",
     "redis",
@@ -55,6 +54,7 @@ install_requires = [
 ]
 if sys.version_info >= (3, 6, 0):
     install_requires += [
+        "django>=1.11.15,<3.2",
         "aiohttp>=3.1.3,<4.0",
         "attrs>=17.3.0",
         "chardet>=2.0,<4.0",
@@ -65,6 +65,7 @@ if sys.version_info >= (3, 6, 0):
     ]
 elif sys.version_info >= (3, 5, 3):
     install_requires += [
+        "django>=1.11.15,<3.0",
         "aiohttp>=3.1.3,<4.0",
         "attrs>=17.3.0",
         "chardet>=2.0,<4.0",
@@ -75,6 +76,7 @@ elif sys.version_info >= (3, 5, 3):
     ]
 else:
     install_requires += [
+        "django>=1.11.15,<3.0",
         "aiohttp>=2.3.1,<3",
         "multidict>=4.0,<5.0",
         "async_timeout>=1.2.0,<3.0",
