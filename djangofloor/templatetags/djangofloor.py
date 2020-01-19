@@ -10,11 +10,10 @@ from urllib.parse import urljoin
 
 from django import template
 from django.conf import settings
-from django.core import signing
+from django.contrib.auth import BACKEND_SESSION_KEY
 from django.template import Context
 from django.templatetags.static import PrefixNode, StaticNode
 from django.urls import reverse
-
 # noinspection PyProtectedMember
 from django.utils.html import _js_escapes, escape
 from django.utils.safestring import mark_safe
@@ -23,6 +22,9 @@ from djangofloor.tasks import set_websocket_topics
 from djangofloor.utils import RemovedInDjangoFloor200Warning
 
 __author__ = "Matthieu Gallet"
+
+from djangofloor.middleware import sign_token
+
 register = template.Library()
 logger = logging.getLogger("django.request")
 
@@ -38,8 +40,15 @@ def df_init_websocket(context, *topics):
         set_websocket_topics(context["df_http_request"], *topics)
     ws_token = context["df_window_key"]
     session_id = context["df_session_id"]
-    signer = signing.Signer(session_id)
-    signed_token = signer.sign(ws_token)
+    user = context.get("user")  # from django.contrib.auth context processors
+    user_pk = None
+    if user and user.is_authenticated:
+        user_pk = user.pk
+    try:
+        backend_path = context["df_http_request"].session[BACKEND_SESSION_KEY]
+    except KeyError:
+        backend_path = None
+    signed_token = sign_token(session_id, ws_token, user_pk=user_pk, backend_path=backend_path)
     protocol = "wss" if settings.USE_SSL else "ws"
     site_name = "%s:%s" % (settings.SERVER_NAME, settings.SERVER_PORT)
     script = '$.df._wsConnect("%s://%s%s?token=%s");' % (

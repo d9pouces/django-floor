@@ -10,41 +10,22 @@ import json
 import logging
 import sys
 from http import client
+from importlib import import_module
 
 from django import http
 from django.conf import settings
-from django.contrib.auth import get_user
 from django.core import signing
 from django.core.exceptions import PermissionDenied
 from django.core.handlers.wsgi import WSGIRequest
 from django.utils.module_loading import import_string
 
 from djangofloor.decorators import REGISTERED_FUNCTIONS
-
 # noinspection PyProtectedMember
-from djangofloor.tasks import (
-    _call_signal,
-    SERVER,
-    _server_function_call,
-    import_signals_and_functions,
-    get_websocket_redis_connection,
-)
-from djangofloor.wsgi.exceptions import (
-    WebSocketError,
-    HandshakeError,
-    UpgradeRequiredError,
-)
+from djangofloor.tasks import (SERVER, _call_signal, _server_function_call, get_websocket_redis_connection,
+                               import_signals_and_functions)
+from djangofloor.wsgi.exceptions import (HandshakeError, UpgradeRequiredError, WebSocketError)
 from djangofloor.wsgi.window_info import WindowInfo
-
-try:
-    # django >= 1.8 && python >= 2.7
-    # https://docs.djangoproject.com/en/1.8/releases/1.7/#django-utils-dictconfig-django-utils-importlib
-    from importlib import import_module
-except ImportError:
-    # RemovedInDjango19Warning: django.utils.importlib will be removed in Django 1.9.
-    # noinspection PyUnresolvedReferences
-    from django.utils.importlib import import_module
-
+from djangofloor.middleware import unsign_token
 
 __author__ = "Matthieu Gallet"
 logger = logging.getLogger("django.request")
@@ -55,13 +36,11 @@ signal_decoder = import_string(settings.WEBSOCKET_SIGNAL_DECODER)
 def get_websocket_topics(request):
     signed_token = request.GET.get("token", "")
     session_key = request.COOKIES.get(settings.SESSION_COOKIE_NAME)
-    signer = signing.Signer(session_key)
     try:
-
-        token = signer.unsign(signed_token)
+        window_key, __, __ = unsign_token(session_key, signed_token)
     except signing.BadSignature:
         return []
-    redis_key = "%s%s" % (settings.WEBSOCKET_REDIS_PREFIX, token)
+    redis_key = "%s%s" % (settings.WEBSOCKET_REDIS_PREFIX, window_key)
     connection = get_websocket_redis_connection()
     topics = connection.lrange(redis_key, 0, -1)
     return [x.decode("utf-8") for x in topics]
@@ -102,12 +81,13 @@ class WebsocketWSGIServer:
         if session_key is not None:
             engine = import_module(settings.SESSION_ENGINE)
             request.session = engine.SessionStore(session_key)
-            request.user = get_user(request)
+            # request.user = get_user(request)  # avoid a sync call
         window_info = WindowInfo.from_request(request)
         signed_token = request.GET.get("token", "")
-        signer = signing.Signer(session_key)
         try:
-            window_info.window_key = signer.unsign(signed_token)
+            window_key, user_pk, __ = unsign_token(session_key, signed_token)
+            window_info.window_key = window_key
+            window_info.user_pk = user_pk
         except signing.BadSignature:
             pass
         return window_info

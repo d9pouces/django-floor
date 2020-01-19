@@ -32,12 +32,12 @@ import warnings
 
 from django.conf import settings
 from django.contrib import auth
-from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user_model, get_user, load_backend, BACKEND_SESSION_KEY, _get_user_session_key
 from django.contrib.auth.context_processors import PermWrapper
 from django.contrib.auth.middleware import (
     RemoteUserMiddleware as BaseRemoteUserMiddleware,
 )
-from django.contrib.auth.models import Group, AnonymousUser
+from django.contrib.auth.models import AnonymousUser, Group
 from django.contrib.messages import DEFAULT_LEVELS
 from django.contrib.sessions.backends.base import VALID_KEY_CHARS
 from django.core import signing
@@ -52,7 +52,34 @@ from django.utils.translation import get_language_from_request
 from djangofloor.utils import RemovedInDjangoFloor200Warning
 
 __author__ = "Matthieu Gallet"
+
 logger = logging.getLogger("django.request")
+
+
+def sign_token(session_id, ws_token, user_pk=None, backend_path=None):
+    signer = signing.Signer(session_id)
+    data = "%s:%s" % (ws_token, user_pk)
+    signed_token = signer.sign(data)
+    return signed_token
+
+
+def unsign_token(session_id, signed_token):
+    signer = signing.Signer(session_id)
+    data = signer.unsign(signed_token)
+    window_key, __, user_pk = data.partition(":")
+    return window_key, user_pk, None
+
+
+def get_user_from_backend(user_id, backend_path):
+    """
+    Return the user model instance associated with the given request session.
+    If no user is retrieved, return an instance of `AnonymousUser`.
+    """
+    user = None
+    if backend_path in settings.AUTHENTICATION_BACKENDS:
+        backend = load_backend(backend_path)
+        user = backend.get_user(user_id)
+    return user or AnonymousUser()
 
 
 # noinspection PyClassHasNoInit
@@ -75,9 +102,9 @@ class DjangoFloorMiddleware(BaseRemoteUserMiddleware):
         request.window_key = get_random_string(32, VALID_KEY_CHARS)
         if request.is_ajax() and self.ajax_header in request.META:
             session_key = request.COOKIES.get(settings.SESSION_COOKIE_NAME)
-            signer = signing.Signer(session_key)
             signed_token = request.META[self.ajax_header]
-            request.window_key = signer.unsign(signed_token)
+            window_key, __, __ = unsign_token(session_key, signed_token)
+            request.window_key = window_key
         request.has_websocket_topics = False
         request.remote_username = None
 
@@ -223,12 +250,14 @@ class DjangoAuthMiddleware(WindowInfoMiddleware):
             window_info.is_superuser = user.is_superuser
             window_info.is_staff = user.is_staff
             window_info.is_active = user.is_active
+            window_info.user_set = True
         else:
             window_info.user_pk = None
             window_info.username = None
             window_info.is_superuser = False
             window_info.is_staff = False
             window_info.is_active = False
+            window_info.user_set = False
 
     def new_window_info(self, window_info):
         window_info._user = None
@@ -239,6 +268,7 @@ class DjangoAuthMiddleware(WindowInfoMiddleware):
         window_info.username = None
         window_info.is_superuser = False
         window_info.is_staff = False
+        window_info.user_set = False
         window_info.is_active = False
         window_info.csrf_cookie = ""
 
@@ -255,16 +285,25 @@ class DjangoAuthMiddleware(WindowInfoMiddleware):
             if isinstance(window_info._perms, set)
             else None,
             "user_agent": window_info.user_agent,
+            "user_set": window_info.user_set,
         }
 
     def from_dict(self, window_info, values):
         window_info._user = None
         window_info.csrf_cookie = values.get("csrf_cookie")
         window_info.user_pk = values.get("user_pk")
-        window_info.username = values.get("username")
-        window_info.is_superuser = values.get("is_superuser")
-        window_info.is_staff = values.get("is_staff")
-        window_info.is_active = values.get("is_active")
+        window_info.user_set = values.get("user_set")
+        if window_info.user_pk and not window_info.user_set:
+            user = get_user_model().objects.filter(pk=window_info.user_pk).first()
+            window_info.username = user.username
+            window_info.is_superuser = user.is_superuser
+            window_info.is_staff = user.is_staff
+            window_info.is_active = user.is_active
+        else:
+            window_info.username = values.get("username")
+            window_info.is_superuser = values.get("is_superuser")
+            window_info.is_staff = values.get("is_staff")
+            window_info.is_active = values.get("is_active")
         window_info.is_authenticated = bool(window_info.user_pk)
         window_info.is_anonymous = not bool(window_info.user_pk)
         window_info._perms = (
@@ -289,9 +328,9 @@ class DjangoAuthMiddleware(WindowInfoMiddleware):
             if req._user or req.user_pk is None:
                 # noinspection PyProtectedMember
                 return req._user
-            users = list(get_user_model().objects.filter(pk=req.user_pk)[0:1])
-            if users:
-                req._user = users[0]
+            user = get_user_model().objects.filter(pk=req.user_pk).first()
+            if user:
+                req._user = user
                 return req._user
             return None
 
