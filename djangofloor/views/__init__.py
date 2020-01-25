@@ -173,9 +173,10 @@ def send_file(filepath, mimetype=None, force_download=False, attachment_filename
         response["X-SENDFILE"] = filepath
     elif settings.X_ACCEL_REDIRECT:
         for dirpath, alias_url in settings.X_ACCEL_REDIRECT:
+            dirpath = os.path.abspath(dirpath)
             if filepath.startswith(dirpath):
                 response = HttpResponse(content_type=mimetype)
-                response["X-Accel-Redirect"] = alias_url + filepath
+                response["X-Accel-Redirect"] = os.path.join(alias_url, os.path.relpath(filepath, dirpath))
                 break
     if response is None:
         # noinspection PyTypeChecker
