@@ -234,7 +234,9 @@ class LogConfiguration:
         self.server_port = None
         self.excluded_commands = {}
 
-    def __call__(self, settings_dict):
+    def __call__(self, settings_dict,argv=None):
+        if argv is None:
+            argv = sys.argv
         self.module_name = settings_dict["DF_MODULE_NAME"]
         self.server_name = settings_dict["SERVER_NAME"]
         self.server_port = settings_dict["SERVER_PORT"]
@@ -250,11 +252,10 @@ class LogConfiguration:
         self.loggers = self.get_default_loggers()
         self.handlers = self.get_default_handlers()
         self.root = self.get_default_root()
-        print(sys.argv)
         self.log_suffix = self.get_smart_command_name(
             self.module_name,
             settings_dict["SCRIPT_NAME"],
-            sys.argv,
+            argv,
             self.excluded_commands,
         )
         self.log_directory = settings_dict["LOG_DIRECTORY"]

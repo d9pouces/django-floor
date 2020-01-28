@@ -43,6 +43,8 @@ excluded_commands = {
 
 
 class TestLogConfig(TestCase):
+    maxDiff = None
+
     def test_dev_syslog(self):
         config = LogConfiguration()
         r = config(
@@ -58,7 +60,7 @@ class TestLogConfig(TestCase):
                 "LOG_EXCLUDED_COMMANDS": excluded_commands,
                 "RAVEN_DSN": None,
                 "LOG_LEVEL": None,
-            }
+            },argv=['manage.py', 'test']
         )
         if platform.system() == "Darwin":
             address = "/var/run/syslog"
@@ -178,7 +180,7 @@ class TestLogConfig(TestCase):
                 "LOG_EXCLUDED_COMMANDS": excluded_commands,
                 "RAVEN_DSN": None,
                 "LOG_LEVEL": None,
-            }
+            },argv=['manage.py', 'test']
         )
         self.assertEqual(
             {
@@ -291,7 +293,7 @@ class TestLogConfig(TestCase):
                 "LOG_EXCLUDED_COMMANDS": excluded_commands,
                 "RAVEN_DSN": None,
                 "LOG_LEVEL": "DEBUG",
-            }
+            },argv=['manage.py', 'test']
         )
         self.assertEqual(
             {
@@ -405,7 +407,7 @@ class TestLogConfig(TestCase):
                     "LOG_EXCLUDED_COMMANDS": excluded_commands,
                     "RAVEN_DSN": None,
                     "LOG_LEVEL": None,
-                }
+                },argv=['manage.py', 'test']
             )
             self.assertEqual(
                 {
@@ -546,7 +548,7 @@ class TestLogConfig(TestCase):
                 "LOG_EXCLUDED_COMMANDS": excluded_commands,
                 "RAVEN_DSN": None,
                 "LOG_LEVEL": None,
-            }
+            },argv=['manage.py', 'test']
         )
         self.assertEqual(
             {
