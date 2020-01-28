@@ -14,8 +14,11 @@ import warnings
 from traceback import extract_stack
 from urllib.parse import urlparse
 
+# noinspection PyPackageRequirements
 from django.core.checks.messages import Warning
+# noinspection PyPackageRequirements
 from django.core.management import color_style
+# noinspection PyPackageRequirements
 from django.utils.log import AdminEmailHandler as BaseAdminEmailHandler
 
 from djangofloor.checks import settings_check_results
@@ -110,6 +113,7 @@ class AdminEmailHandler(BaseAdminEmailHandler):
 
     def send_mail(self, subject, message, *args, **kwargs):
         """just check if email can be sent before applying the original method."""
+        # noinspection PyPackageRequirements
         from django.conf import settings
 
         if self.can_send_email() and settings.EMAIL_HOST:
@@ -246,6 +250,7 @@ class LogConfiguration:
         self.loggers = self.get_default_loggers()
         self.handlers = self.get_default_handlers()
         self.root = self.get_default_root()
+        print(sys.argv)
         self.log_suffix = self.get_smart_command_name(
             self.module_name,
             settings_dict["SCRIPT_NAME"],
