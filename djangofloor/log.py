@@ -220,7 +220,7 @@ class LogConfiguration:
     # all loggers that will be defined
     # values are dict to map chosen log level (by the admin) to the log level
 
-    def __init__(self):
+    def __init__(self, stdout=None, stderr=None):
         self.formatters = {}
         self.filters = {}
         self.loggers = {}
@@ -233,6 +233,8 @@ class LogConfiguration:
         self.log_level = None
         self.server_port = None
         self.excluded_commands = {}
+        self.stdout = stdout or sys.stdout
+        self.stderr = stderr or sys.stderr
 
     def __call__(self, settings_dict,argv=None):
         if argv is None:
@@ -379,11 +381,11 @@ class LogConfiguration:
 
     @property
     def fmt_stderr(self):
-        return "colorized" if sys.stderr.isatty() else None
+        return "colorized" if self.stderr.isatty() else None
 
     @property
     def fmt_stdout(self):
-        return "colorized" if sys.stdout.isatty() else None
+        return "colorized" if self.stdout.isatty() else None
 
     def get_default_formatters(self):
         name = "%s:%s" % (self.server_name, self.server_port)
@@ -439,7 +441,7 @@ class LogConfiguration:
         """
         if filename == "stderr":
             handler_name = "%s.%s" % (filename, level.lower())
-            if formatter in ("django.server", "colorized") and not sys.stderr.isatty():
+            if formatter in ("django.server", "colorized") and not self.stderr.isatty():
                 formatter = None
             elif formatter:
                 handler_name += ".%s" % formatter
@@ -451,7 +453,7 @@ class LogConfiguration:
             }
         elif filename == "stdout":
             handler_name = "%s.%s" % (filename, level.lower())
-            if formatter in ("django.server", "colorized") and not sys.stdout.isatty():
+            if formatter in ("django.server", "colorized") and not self.stdout.isatty():
                 formatter = None
             elif formatter:
                 handler_name += ".%s" % formatter

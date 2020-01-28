@@ -2,6 +2,7 @@ import os
 import platform
 import socket
 import tempfile
+from io import StringIO
 from unittest import TestCase
 
 from djangofloor.log import LogConfiguration
@@ -45,9 +46,12 @@ excluded_commands = {
 class TestLogConfig(TestCase):
     maxDiff = None
 
+    def setUp(self) -> None:
+        self.config = LogConfiguration(stdout=StringIO(), stderr=StringIO())
+
     def test_dev_syslog(self):
-        config = LogConfiguration()
-        r = config(
+
+        r = self.config(
             {
                 "DEBUG": False,
                 "DF_MODULE_NAME": "djangofloor",
@@ -60,7 +64,8 @@ class TestLogConfig(TestCase):
                 "LOG_EXCLUDED_COMMANDS": excluded_commands,
                 "RAVEN_DSN": None,
                 "LOG_LEVEL": None,
-            },argv=['manage.py', 'test']
+            },
+            argv=["manage.py", "test"],
         )
         if platform.system() == "Darwin":
             address = "/var/run/syslog"
@@ -166,8 +171,8 @@ class TestLogConfig(TestCase):
         )
 
     def test_syslog(self):
-        config = LogConfiguration()
-        r = config(
+
+        r = self.config(
             {
                 "DEBUG": False,
                 "DF_MODULE_NAME": "djangofloor",
@@ -180,7 +185,8 @@ class TestLogConfig(TestCase):
                 "LOG_EXCLUDED_COMMANDS": excluded_commands,
                 "RAVEN_DSN": None,
                 "LOG_LEVEL": None,
-            },argv=['manage.py', 'test']
+            },
+            argv=["manage.py", "test"],
         )
         self.assertEqual(
             {
@@ -279,8 +285,8 @@ class TestLogConfig(TestCase):
         )
 
     def test_syslog_debug(self):
-        config = LogConfiguration()
-        r = config(
+
+        r = self.config(
             {
                 "DEBUG": False,
                 "DF_MODULE_NAME": "djangofloor",
@@ -293,7 +299,8 @@ class TestLogConfig(TestCase):
                 "LOG_EXCLUDED_COMMANDS": excluded_commands,
                 "RAVEN_DSN": None,
                 "LOG_LEVEL": "DEBUG",
-            },argv=['manage.py', 'test']
+            },
+            argv=["manage.py", "test"],
         )
         self.assertEqual(
             {
@@ -393,8 +400,7 @@ class TestLogConfig(TestCase):
 
     def test_not_debug_config(self):
         with tempfile.TemporaryDirectory() as tmp_dir:
-            config = LogConfiguration()
-            r = config(
+            r = self.config(
                 {
                     "DEBUG": False,
                     "DF_MODULE_NAME": "djangofloor",
@@ -407,7 +413,8 @@ class TestLogConfig(TestCase):
                     "LOG_EXCLUDED_COMMANDS": excluded_commands,
                     "RAVEN_DSN": None,
                     "LOG_LEVEL": None,
-                },argv=['manage.py', 'test']
+                },
+                argv=["manage.py", "test"],
             )
             self.assertEqual(
                 {
@@ -534,8 +541,8 @@ class TestLogConfig(TestCase):
             )
 
     def test_debug_config(self):
-        config = LogConfiguration()
-        r = config(
+
+        r = self.config(
             {
                 "DEBUG": True,
                 "DF_MODULE_NAME": "djangofloor",
@@ -548,7 +555,8 @@ class TestLogConfig(TestCase):
                 "LOG_EXCLUDED_COMMANDS": excluded_commands,
                 "RAVEN_DSN": None,
                 "LOG_LEVEL": None,
-            },argv=['manage.py', 'test']
+            },
+            argv=["manage.py", "test"],
         )
         self.assertEqual(
             {
@@ -597,7 +605,7 @@ class TestLogConfig(TestCase):
                         "propagate": False,
                     },
                     "django": {"handlers": [], "level": "INFO", "propagate": True},
-                    "django.db": {"handlers": [], "level": "INFO", "propagate": True,},
+                    "django.db": {"handlers": [], "level": "INFO", "propagate": True},
                     "django.db.backends": {
                         "handlers": [],
                         "level": "INFO",
@@ -652,8 +660,8 @@ class TestLogConfig(TestCase):
         )
 
     def test_debug_config_error(self):
-        config = LogConfiguration()
-        r = config(
+
+        r = self.config(
             {
                 "DEBUG": True,
                 "DF_MODULE_NAME": "djangofloor",
@@ -714,7 +722,7 @@ class TestLogConfig(TestCase):
                         "level": "INFO",
                         "propagate": False,
                     },
-                    "django": {"handlers": [], "level": "CRITICAL", "propagate": True,},
+                    "django": {"handlers": [], "level": "CRITICAL", "propagate": True},
                     "django.db": {
                         "handlers": [],
                         "level": "CRITICAL",
