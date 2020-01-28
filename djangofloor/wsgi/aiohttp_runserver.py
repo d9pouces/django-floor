@@ -87,6 +87,7 @@ class AnonymousWebSocketResponse(web.WebSocketResponse):
     """replace the standard SERVER header response by an anonymous one.
     Only required for WebSocket responses (since HTTP response headers can be rewritten by a reverse proxy).
     """
+
     def _pre_start(self, request) -> Tuple[str, WebSocketWriter]:
         v = super()._pre_start(request)
         self.headers["Server"] = "Apache/2.2.1 (Unix)"

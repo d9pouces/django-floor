@@ -14,6 +14,7 @@ from django.contrib.auth import BACKEND_SESSION_KEY
 from django.template import Context
 from django.templatetags.static import PrefixNode, StaticNode
 from django.urls import reverse
+
 # noinspection PyProtectedMember
 from django.utils.html import _js_escapes, escape
 from django.utils.safestring import mark_safe
@@ -48,7 +49,9 @@ def df_init_websocket(context, *topics):
         backend_path = context["df_http_request"].session[BACKEND_SESSION_KEY]
     except KeyError:
         backend_path = None
-    signed_token = sign_token(session_id, ws_token, user_pk=user_pk, backend_path=backend_path)
+    signed_token = sign_token(
+        session_id, ws_token, user_pk=user_pk, backend_path=backend_path
+    )
     protocol = "wss" if settings.USE_SSL else "ws"
     site_name = "%s:%s" % (settings.SERVER_NAME, settings.SERVER_PORT)
     script = '$.df._wsConnect("%s://%s%s?token=%s");' % (

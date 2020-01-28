@@ -176,7 +176,9 @@ def send_file(filepath, mimetype=None, force_download=False, attachment_filename
             dirpath = os.path.abspath(dirpath)
             if filepath.startswith(dirpath):
                 response = HttpResponse(content_type=mimetype)
-                response["X-Accel-Redirect"] = os.path.join(alias_url, os.path.relpath(filepath, dirpath))
+                response["X-Accel-Redirect"] = os.path.join(
+                    alias_url, os.path.relpath(filepath, dirpath)
+                )
                 break
     if response is None:
         # noinspection PyTypeChecker
@@ -185,15 +187,17 @@ def send_file(filepath, mimetype=None, force_download=False, attachment_filename
             read_file_in_chunks(fileobj), content_type=mimetype
         )
         response["Content-Length"] = os.path.getsize(filepath)
-    encoded_filename = urllib.parse.quote(attachment_filename, encoding='utf-8')
+    encoded_filename = urllib.parse.quote(attachment_filename, encoding="utf-8")
     header = "attachment" if force_download else "inline"
 
     if encoded_filename == attachment_filename:
-        response["Content-Disposition"] = "{1}; filename=\"{0}\"".format(
+        response["Content-Disposition"] = '{1}; filename="{0}"'.format(
             encoded_filename, header
         )
     else:
-        response["Content-Disposition"] = "{1};filename*=UTF-8''\"{0}\"".format(encoded_filename, header)
+        response["Content-Disposition"] = "{1};filename*=UTF-8''\"{0}\"".format(
+            encoded_filename, header
+        )
     return response
 
 

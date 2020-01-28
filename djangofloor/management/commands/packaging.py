@@ -430,7 +430,7 @@ class Command(TemplatedBaseCommand):
 
     @cached_property
     def host_fpm_project_config_filename(
-        self
+        self,
     ):  # written by 'get_project_info.py' from the Vagrant box
         return os.path.join(self.host_tmp_dir, "fpm-project.ini")
 

@@ -185,13 +185,36 @@ class LogConfiguration:
         "SERVER_PORT",
         "LOG_EXCLUDED_COMMANDS",
         "RAVEN_DSN",
+        "LOG_LEVEL",
     ]
-    request_loggers = [
-        "aiohttp.access",
-        "gunicorn.access",
-        "django.server",
-        "geventwebsocket.handler",
-    ]
+    # set of always INFO loggers that are not propagated to root
+    _level_up = {"DEBUG": "INFO", "INFO": "WARN", "WARN": "ERROR", "ERROR": "CRITICAL"}
+    _level_access = {
+        "DEBUG": "INFO",
+        "WARN": "INFO",
+        "ERROR": "INFO",
+        "CRITICAL": "INFO",
+    }
+    access_loggers = {
+        "aiohttp.access": _level_access,
+        "django.server": _level_access,
+        "geventwebsocket.handler": _level_access,
+        "gunicorn.access": _level_access,
+    }
+    problem_loggers = {
+        "django": _level_up,
+        "django.db": _level_up,
+        "django.db.backends": _level_up,
+        "django.request": {},
+        "django.security": _level_up,
+        "djangofloor.signals": {},
+        "gunicorn.error": {},
+        "pip.vcs": _level_up,
+        "py.warnings": _level_up,
+    }
+
+    # all loggers that will be defined
+    # values are dict to map chosen log level (by the admin) to the log level
 
     def __init__(self):
         self.formatters = {}
@@ -203,6 +226,7 @@ class LogConfiguration:
         self.module_name = None
         self.log_directory = None
         self.server_name = None
+        self.log_level = None
         self.server_port = None
         self.excluded_commands = {}
 
@@ -211,6 +235,12 @@ class LogConfiguration:
         self.server_name = settings_dict["SERVER_NAME"]
         self.server_port = settings_dict["SERVER_PORT"]
         self.excluded_commands = settings_dict["LOG_EXCLUDED_COMMANDS"]
+        if settings_dict["LOG_LEVEL"]:
+            log_level = settings_dict["LOG_LEVEL"].upper()
+        elif settings_dict["DEBUG"]:
+            log_level = "DEBUG"
+        else:
+            log_level = "WARN"
         self.formatters = self.get_default_formatters()
         self.filters = self.get_default_filters()
         self.loggers = self.get_default_loggers()
@@ -232,20 +262,24 @@ class LogConfiguration:
             "loggers": self.loggers,
             "root": self.root,
         }
+        self.root["level"] = log_level
+        for logger, levels in self.problem_loggers.items():
+            self.loggers[logger]["level"] = levels.get(log_level, log_level)
+        for logger, levels in self.access_loggers.items():
+            self.loggers[logger]["level"] = levels.get(log_level, log_level)
 
         if settings_dict["DEBUG"]:
             warnings.simplefilter("always", DeprecationWarning)
             logging.captureWarnings(True)
-            self.loggers["django.request"]["level"] = "DEBUG"
-            self.loggers["py.warnings"]["level"] = "DEBUG"
-            self.loggers["djangofloor.signals"]["level"] = "DEBUG"
-            self.root["level"] = "DEBUG"
             self.add_handler("ROOT", "stdout", level="INFO", formatter="colorized")
-            for logger in self.request_loggers:
+            for logger in self.access_loggers:
                 self.add_handler(
-                    logger, "stderr", level="INFO", formatter="django.server"
+                    logger, "stderr", level="DEBUG", formatter="django.server"
                 )
             return config
+
+        has_handler = False
+
         if settings_dict["RAVEN_DSN"] and is_package_present("raven"):
             self.handlers["sentry"] = {
                 "level": "ERROR",
@@ -253,21 +287,24 @@ class LogConfiguration:
                 "tags": {"application": self.log_suffix},
             }
             self.root["handlers"].append("sentry")
-        has_handler = False
-        if self.log_directory and self.log_suffix:
-            self.add_handler("ROOT", "warning", level="WARN")
-            self.add_handler("ROOT", "error", level="ERROR")
-            for logger in self.request_loggers:
-                self.add_handler(logger, "access", level="INFO", formatter="nocolor")
             has_handler = True
+
+        if self.log_directory and self.log_suffix:
+            self.add_handler("ROOT", "root", level=log_level)
+            for logger in self.access_loggers:
+                self.add_handler(logger, "access", level="DEBUG", formatter="nocolor")
+            has_handler = True
+
         has_handler = has_handler or self.add_remote_collector(
             settings_dict["LOG_REMOTE_URL"], settings_dict["LOG_REMOTE_ACCESS"]
         )
         if not has_handler or not self.log_suffix:
             # (no file or interactive command) and no logd/syslog => we print to the console (like the debug mode)
-            self.add_handler("ROOT", "stdout", level="WARN", formatter="colorized")
-            for logger in self.request_loggers:
-                self.add_handler(logger, "stderr", formatter="django.server")
+            self.add_handler("ROOT", "stdout", level=log_level, formatter="colorized")
+            for logger in self.access_loggers:
+                self.add_handler(
+                    logger, "stderr", formatter="django.server", level=log_level
+                )
         self.root["handlers"].append("mail_admins")
         return config
 
@@ -295,33 +332,14 @@ class LogConfiguration:
                 formatter="nocolor",
             )
             if log_remote_access:
-                for logger in self.request_loggers:
+                for logger in self.access_loggers:
                     self.add_handler(
                         logger,
                         "syslog",
-                        level="INFO",
+                        level="DEBUG",
                         address=address,
                         facility=facility,
                         socktype=socktype,
-                        formatter="nocolor",
-                    )
-            has_handler = True
-        elif scheme == "logd":
-            identifier = facility_name or self.module_name
-            self.add_handler(
-                "ROOT",
-                "syslog",
-                level="WARN",
-                SYSLOG_IDENTIFIER=identifier,
-                formatter="nocolor",
-            )
-            if log_remote_access:
-                for logger in self.request_loggers:
-                    self.add_handler(
-                        logger,
-                        "syslog",
-                        level="INFO",
-                        SYSLOG_IDENTIFIER=identifier,
                         formatter="nocolor",
                     )
             has_handler = True
@@ -335,7 +353,7 @@ class LogConfiguration:
         if (
             parsed_log_url.hostname
             and parsed_log_url.port
-            and re.match(r"^\d+$", parsed_log_url.port)
+            and re.match(r"^\d+$", str(parsed_log_url.port))
         ):
             address = (parsed_log_url.hostname, int(parsed_log_url.port))
         elif device:
@@ -347,6 +365,7 @@ class LogConfiguration:
         else:
             address = ("localhost", 514)
         socktype = socket.SOCK_DGRAM if scheme == "syslog" else socket.SOCK_STREAM
+        # noinspection PyUnresolvedReferences
         facility = logging.handlers.SysLogHandler.facility_names.get(
             facility_name, syslog.LOG_USER
         )
@@ -395,23 +414,11 @@ class LogConfiguration:
         return {"handlers": [], "level": "WARN"}
 
     def get_default_loggers(self):
-        loggers = {
-            "py.warnings": {
-                "handlers": [],
-                "level": "ERROR",
-                "propagate": True,
-                "filters": ["remove_duplicate_warnings"],
-            },
-            "pip.vcs": {"handlers": [], "level": "ERROR", "propagate": True},
-            "django": {"handlers": [], "level": "WARN", "propagate": True},
-            "django.db": {"handlers": [], "level": "WARN", "propagate": True},
-            "django.db.backends": {"handlers": [], "level": "WARN", "propagate": True},
-            "django.request": {"handlers": [], "level": "INFO", "propagate": True},
-            "django.security": {"handlers": [], "level": "WARN", "propagate": True},
-            "djangofloor.signals": {"handlers": [], "level": "WARN", "propagate": True},
-            "gunicorn.error": {"handlers": [], "level": "WARN", "propagate": True},
-        }
-        for logger in self.request_loggers:
+        loggers = {}
+        for logger in self.problem_loggers:
+            loggers[logger] = {"handlers": [], "level": "DEBUG", "propagate": True}
+        loggers["py.warnings"]["filters"] = ["remove_duplicate_warnings"]
+        for logger in self.access_loggers:
             loggers[logger] = {"handlers": [], "level": "DEBUG", "propagate": False}
         return loggers
 

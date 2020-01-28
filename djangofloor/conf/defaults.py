@@ -273,9 +273,7 @@ WEBSOCKET_REDIS_PREFIX = "ws"
 WEBSOCKET_REDIS_EXPIRE = 36000
 WEBSOCKET_CONNECTION_EXPIRE = 3600  # by default, close a connection after one hour
 # (but the client transparently reopen it
-WEBSOCKET_HEADER = (
-    "WINDOW_KEY"
-)  # header used in AJAX requests (thus they have the same window identifier)
+WEBSOCKET_HEADER = "WINDOW_KEY"  # header used in AJAX requests (thus they have the same window identifier)
 
 # django-pipeline
 PIPELINE = {
@@ -502,9 +500,7 @@ DF_ADMIN_SITE = "django.contrib.admin.site"
 DF_JS_CATALOG_VIEWS = ["djangofloor", "django.contrib.admin"]
 # noinspection PyUnresolvedReferences
 DF_INSTALLED_APPS = ["{DF_MODULE_NAME}"]  # your django app!
-DF_PIP_NAME = (
-    "{DF_MODULE_NAME}"
-)  # anything such that "pip install {DF_PIP_NAME}" installs your project
+DF_PIP_NAME = "{DF_MODULE_NAME}"  # anything such that "pip install {DF_PIP_NAME}" installs your project
 # only used in docs
 DF_MIDDLEWARE = []
 DF_REMOTE_USER_HEADER = None  # HTTP_REMOTE_USER
@@ -587,6 +583,7 @@ EMAIL_SSL_KEYFILE = None
 LANGUAGE_CODE = "fr"  # aliased in settings.ini as "[global]language_code"
 TIME_ZONE = "Europe/Paris"  # aliased in settings.ini as "[global]time_zone"
 LOG_REMOTE_URL = None  # aliased in settings.ini as "[global]log_remote_url"
+LOG_LEVEL = None
 SERVER_BASE_URL = CallableSetting(
     smart_hostname
 )  # aliased in settings.ini as "[global]server_url"

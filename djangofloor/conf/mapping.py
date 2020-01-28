@@ -7,15 +7,14 @@ the corresponding Django setting value and how to convert from one format to the
 """
 
 from djangofloor.conf.fields import (
-    CharConfigField,
-    IntegerConfigField,
     BooleanConfigField,
-    ConfigField,
-    bool_setting,
-    ListConfigField,
+    CharConfigField,
     ChoiceConfigFile,
+    ConfigField,
+    IntegerConfigField,
+    ListConfigField,
+    bool_setting,
 )
-from djangofloor.conf.social_providers import SOCIAL_PROVIDER_APPS
 
 __author__ = "Matthieu Gallet"
 
@@ -187,14 +186,26 @@ BASE_MAPPING = [
     CharConfigField(
         "global.log_remote_url",
         "LOG_REMOTE_URL",
-        help_str="Send logs to a syslog or systemd log daemon. \n"
-        "Examples: syslog+tcp://localhost:514/user, syslog:///local7, "
-        "syslog:///dev/log/daemon, logd:///project_name",
+        help_str="Send logs to a syslog service. \n"
+        "Examples: syslog+tcp://localhost:514/user, syslog:///local7 "
+        "or syslog:///dev/log/daemon.",
     ),
     CharConfigField(
         "global.log_directory",
         "LOG_DIRECTORY",
         help_str="Write all local logs to this directory.",
+    ),
+    ChoiceConfigFile(
+        "global.log_level",
+        "LOG_LEVEL",
+        help_str="Log level (one of 'debug', 'info', 'warn', 'error' or 'critical').",
+        choices={
+            "debug": "DEBUG",
+            "info": "INFO",
+            "warn": "WARN",
+            "error": "ERROR",
+            "critical": "CRITICAL",
+        },
     ),
     CharConfigField(
         "global.log_raven_dsn",

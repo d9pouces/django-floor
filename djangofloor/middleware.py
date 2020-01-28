@@ -32,7 +32,13 @@ import warnings
 
 from django.conf import settings
 from django.contrib import auth
-from django.contrib.auth import get_user_model, get_user, load_backend, BACKEND_SESSION_KEY, _get_user_session_key
+from django.contrib.auth import (
+    get_user_model,
+    get_user,
+    load_backend,
+    BACKEND_SESSION_KEY,
+    _get_user_session_key,
+)
 from django.contrib.auth.context_processors import PermWrapper
 from django.contrib.auth.middleware import (
     RemoteUserMiddleware as BaseRemoteUserMiddleware,

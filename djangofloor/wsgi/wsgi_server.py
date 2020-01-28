@@ -20,10 +20,20 @@ from django.core.handlers.wsgi import WSGIRequest
 from django.utils.module_loading import import_string
 
 from djangofloor.decorators import REGISTERED_FUNCTIONS
+
 # noinspection PyProtectedMember
-from djangofloor.tasks import (SERVER, _call_signal, _server_function_call, get_websocket_redis_connection,
-                               import_signals_and_functions)
-from djangofloor.wsgi.exceptions import (HandshakeError, UpgradeRequiredError, WebSocketError)
+from djangofloor.tasks import (
+    SERVER,
+    _call_signal,
+    _server_function_call,
+    get_websocket_redis_connection,
+    import_signals_and_functions,
+)
+from djangofloor.wsgi.exceptions import (
+    HandshakeError,
+    UpgradeRequiredError,
+    WebSocketError,
+)
 from djangofloor.wsgi.window_info import WindowInfo
 from djangofloor.middleware import unsign_token
 
