@@ -7,7 +7,7 @@ If you want to write your signals into other modules, be sure that `app.signals`
 """
 import logging
 
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 
 from djangofloor.decorators import signal, is_staff, is_superuser, SerializedForm
 from djangofloor.forms import LogNameForm

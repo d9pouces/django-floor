@@ -16,8 +16,10 @@ from urllib.parse import urlparse
 
 # noinspection PyPackageRequirements
 from django.core.checks.messages import Warning
+
 # noinspection PyPackageRequirements
 from django.core.management import color_style
+
 # noinspection PyPackageRequirements
 from django.utils.log import AdminEmailHandler as BaseAdminEmailHandler
 
@@ -191,8 +193,9 @@ class LogConfiguration:
         "RAVEN_DSN",
         "LOG_LEVEL",
     ]
-    # set of always INFO loggers that are not propagated to root
+    # for loggers that only show INFO in debug mode, or WARN in INFO, and so on:
     _level_up = {"DEBUG": "INFO", "INFO": "WARN", "WARN": "ERROR", "ERROR": "CRITICAL"}
+    # set of always INFO loggers that are not propagated to root
     _level_access = {
         "DEBUG": "INFO",
         "WARN": "INFO",
@@ -236,7 +239,7 @@ class LogConfiguration:
         self.stdout = stdout or sys.stdout
         self.stderr = stderr or sys.stderr
 
-    def __call__(self, settings_dict,argv=None):
+    def __call__(self, settings_dict, argv=None):
         if argv is None:
             argv = sys.argv
         self.module_name = settings_dict["DF_MODULE_NAME"]

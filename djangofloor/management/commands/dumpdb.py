@@ -8,7 +8,7 @@ import shutil
 import subprocess
 from django.conf import settings
 from django.core.management import BaseCommand
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 
 __author__ = "Matthieu Gallet"
 

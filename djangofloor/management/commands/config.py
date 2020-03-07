@@ -4,7 +4,7 @@ from django.conf import settings
 from django.core.management import BaseCommand
 from django.core.management.base import OutputWrapper
 from django.core.management.color import no_style
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 
 from djangofloor import __version__ as version
 from djangofloor import decorators

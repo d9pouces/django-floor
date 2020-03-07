@@ -9,7 +9,7 @@ from django.contrib import admin
 from django.contrib import messages
 from django.contrib.admin import site
 from django.template.defaultfilters import truncatewords
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 __author__ = "Matthieu Gallet"
 

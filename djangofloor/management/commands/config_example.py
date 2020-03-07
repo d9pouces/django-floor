@@ -2,7 +2,7 @@ from argparse import ArgumentParser
 
 from django.core.management import BaseCommand
 from django.template.loader import render_to_string
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 from djangofloor.conf.settings import merger
 
 

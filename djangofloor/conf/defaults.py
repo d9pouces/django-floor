@@ -22,19 +22,50 @@ written in .ini files. The mapping between the Python setting and the [section/o
 
 import os
 
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
-from djangofloor.conf.auth import (authentication_backends, ldap_attribute_map, ldap_boolean_attribute_map,
-                                   ldap_group_class, ldap_group_search, ldap_user_search)
-from djangofloor.conf.callables import (DefaultListenAddress, allauth_provider_apps, allowed_hosts, cache_redis_url,
-                                        cache_setting, celery_redis_url, databases, excluded_django_commands,
-                                        generate_secret_key, installed_apps, project_name,
-                                        required_packages, secure_hsts_seconds, session_redis_dict, smart_hostname,
-                                        template_setting, url_parse_prefix, url_parse_server_name,
-                                        url_parse_server_port, url_parse_server_protocol, url_parse_ssl,
-                                        use_x_forwarded_for, websocket_redis_dict)
-from djangofloor.conf.config_values import (AutocreateFile, AutocreateFileContent, CallableSetting, Directory,
-                                            ExpandIterable, Path, SettingReference)
+from djangofloor.conf.auth import (
+    authentication_backends,
+    ldap_attribute_map,
+    ldap_boolean_attribute_map,
+    ldap_group_class,
+    ldap_group_search,
+    ldap_user_search,
+)
+from djangofloor.conf.callables import (
+    DefaultListenAddress,
+    allauth_provider_apps,
+    allowed_hosts,
+    cache_redis_url,
+    cache_setting,
+    celery_redis_url,
+    databases,
+    excluded_django_commands,
+    generate_secret_key,
+    installed_apps,
+    project_name,
+    required_packages,
+    secure_hsts_seconds,
+    session_redis_dict,
+    smart_hostname,
+    template_setting,
+    url_parse_prefix,
+    url_parse_server_name,
+    url_parse_server_port,
+    url_parse_server_protocol,
+    url_parse_ssl,
+    use_x_forwarded_for,
+    websocket_redis_dict,
+)
+from djangofloor.conf.config_values import (
+    AutocreateFile,
+    AutocreateFileContent,
+    CallableSetting,
+    Directory,
+    ExpandIterable,
+    Path,
+    SettingReference,
+)
 from djangofloor.conf.pipeline import pipeline_enabled, static_storage
 from djangofloor.log import log_configuration
 from djangofloor.utils import guess_version, is_package_present

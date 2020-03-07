@@ -21,7 +21,7 @@ from django.db.models.signals import pre_migrate, post_migrate
 from django.dispatch import receiver
 from django.template.defaultfilters import truncatewords
 from django.utils.timezone import utc
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 from djangofloor.conf.settings import merger
 from djangofloor.conf.social_providers import migrate as social_migrate

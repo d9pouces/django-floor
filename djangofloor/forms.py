@@ -5,7 +5,7 @@ Currently, only a SearchForm is provided.
 """
 from django import forms
 from django.conf import settings
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 from djangofloor.decorators import validate_form, everyone, is_superuser
 
