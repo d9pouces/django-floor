@@ -34,10 +34,7 @@ from django.conf import settings
 from django.contrib import auth
 from django.contrib.auth import (
     get_user_model,
-    get_user,
     load_backend,
-    BACKEND_SESSION_KEY,
-    _get_user_session_key,
 )
 from django.contrib.auth.context_processors import PermWrapper
 from django.contrib.auth.middleware import (
@@ -124,11 +121,12 @@ class DjangoFloorMiddleware(BaseRemoteUserMiddleware):
             authmeth, sep, auth_data = authentication.partition(" ")
             if sep == " " and authmeth.lower() == "basic":
                 auth_data = base64.b64decode(auth_data.strip()).decode("utf-8")
-                username, password = auth_data.split(":", 1)
-                user = auth.authenticate(username=username, password=password)
-                if user:
-                    request.user = user
-                    auth.login(request, user)
+                username, sep, password = auth_data.partition(":")
+                if sep == ":":
+                    user = auth.authenticate(username=username, password=password)
+                    if user:
+                        request.user = user
+                        auth.login(request, user)
         # noinspection PyTypeChecker
         username = getattr(settings, "DF_FAKE_AUTHENTICATION_USERNAME", None)
         if username and settings.DEBUG:
