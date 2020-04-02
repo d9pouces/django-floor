@@ -1,6 +1,10 @@
 Djangofloor
 ===========
 
+[![Build Status](https://travis-ci.org/d9pouces/django-floor.svg?branch=master)](https://travis-ci.org/d9pouces/django-floor)
+[![Documentation Status](https://readthedocs.org/projects/django-floor/badge/?version=latest)](https://django-floor.readthedocs.io/en/latest/?badge=latest)
+[![PyPI version](https://badge.fury.io/py/djangofloor.svg)](https://pypi.org/project/djangofloor/)
+
 Djangofloor helps you to quickly create Django applications that are also easy to deploy. To reach these goals, Djangofloor provides:
 
   * an extension to the base Django's setting, allowing to split your configuration into several files (default values provided by Djangofloor, constants values for your project, deployement parameters, local values for development),
