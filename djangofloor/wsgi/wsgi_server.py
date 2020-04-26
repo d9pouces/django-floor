@@ -20,7 +20,7 @@ from django.core.handlers.wsgi import WSGIRequest
 from django.utils.module_loading import import_string
 
 from djangofloor.decorators import REGISTERED_FUNCTIONS
-
+from djangofloor.middleware import unsign_token
 # noinspection PyProtectedMember
 from djangofloor.tasks import (
     SERVER,
@@ -35,7 +35,6 @@ from djangofloor.wsgi.exceptions import (
     WebSocketError,
 )
 from djangofloor.wsgi.window_info import WindowInfo
-from djangofloor.middleware import unsign_token
 
 __author__ = "Matthieu Gallet"
 logger = logging.getLogger("django.request")
@@ -44,13 +43,7 @@ signal_decoder = import_string(settings.WEBSOCKET_SIGNAL_DECODER)
 
 
 def get_websocket_topics(request):
-    signed_token = request.GET.get("token", "")
-    session_key = request.COOKIES.get(settings.SESSION_COOKIE_NAME)
-    try:
-        window_key, __, __ = unsign_token(session_key, signed_token)
-    except signing.BadSignature:
-        return []
-    redis_key = "%s%s" % (settings.WEBSOCKET_REDIS_PREFIX, window_key)
+    redis_key = "%s%s" % (settings.WEBSOCKET_REDIS_PREFIX, request.window_key)
     connection = get_websocket_redis_connection()
     topics = connection.lrange(redis_key, 0, -1)
     return [x.decode("utf-8") for x in topics]

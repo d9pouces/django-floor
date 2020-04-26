@@ -230,7 +230,7 @@ def get_merger_from_env() -> SettingMerger:
 
     """
     # required if set_env is not called
-    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "djangofloor.conf.settings")
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "df_config.base")
     if "PYCHARM_DJANGO_MANAGE_MODULE" in os.environ:
         # noinspection EmptyAlternationBranch
         pycharm_matcher = re.match(
@@ -265,12 +265,12 @@ def get_merger_from_env() -> SettingMerger:
     local_conf_filename = os.path.abspath("local_settings.ini")
     # global_conf_filename = '%s/etc/%s/settings.ini' % (prefix, module_name)
 
-    config_providers = [PythonModuleProvider("djangofloor.conf.defaults")]
-    if module_name != "djangofloor":
+    config_providers = [PythonModuleProvider("df_config.defaults")]
+    if module_name != "df_config":
         config_providers.append(PythonModuleProvider("%s.defaults" % module_name))
         mapping = "%s.iniconf:INI_MAPPING" % module_name
     else:
-        mapping = "djangofloor.conf.mapping:INI_MAPPING"
+        mapping = "df_config.mapping:INI_MAPPING"
     config_providers += search_providers("settings", "ini", IniConfigProvider)
     config_providers += search_providers("settings", "py", PythonFileProvider)
     if script:
@@ -301,7 +301,7 @@ def set_env(
     """
 
     # django settings
-    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "djangofloor.conf.settings")
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "df_config.base")
     if command_name is None:
         command_name = os.path.basename(sys.argv[0])
     # project name

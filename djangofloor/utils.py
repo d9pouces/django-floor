@@ -31,7 +31,7 @@ class RemovedInDjangoFloor200Warning(DeprecationWarning):
     pass
 
 
-def is_package_present(package_name):
+def is_package_present(package_name):  # TODO: replace
     """Return True is the `package_name` package is presend in your current Python environment."""
     try:
         import_module(package_name)

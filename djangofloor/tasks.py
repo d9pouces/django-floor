@@ -21,17 +21,12 @@ from celery import shared_task
 from django.apps import apps
 from django.conf import settings
 from django.utils.module_loading import import_string
-from redis import StrictRedis, ConnectionPool
+from redis import ConnectionPool, StrictRedis
 
-from djangofloor.decorators import (
-    REGISTERED_SIGNALS,
-    SignalConnection,
-    REGISTERED_FUNCTIONS,
-    FunctionConnection,
-    DynamicQueueName,
-)
+from djangofloor.decorators import (DynamicQueueName, FunctionConnection, REGISTERED_FUNCTIONS, REGISTERED_SIGNALS,
+                                    SignalConnection)
 from djangofloor.scripts import load_celery
-from djangofloor.utils import import_module, RemovedInDjangoFloor200Warning
+from djangofloor.utils import RemovedInDjangoFloor200Warning, import_module
 from djangofloor.wsgi.exceptions import NoWindowKeyException
 from djangofloor.wsgi.window_info import WindowInfo
 
@@ -267,14 +262,26 @@ def _call_signal(
 
 
 def _call_ws_signal(signal_name, signal_id, serialized_topic, kwargs):
-    connection = get_websocket_redis_connection()
     serialized_message = json.dumps(
         {"signal": signal_name, "opts": kwargs, "signal_id": signal_id},
         cls=_signal_encoder,
     )
+    # connection = get_websocket_redis_connection()
+    # topic = settings.WEBSOCKET_REDIS_PREFIX + serialized_topic
+    # logger.debug("send message to topic %r" % topic)
+    # connection.publish(topic, serialized_message.encode("utf-8"))
+
     topic = settings.WEBSOCKET_REDIS_PREFIX + serialized_topic
+    from channels import DEFAULT_CHANNEL_LAYER
+    from channels.layers import get_channel_layer
+    from asgiref.sync import async_to_sync
+
+    channel_layer = get_channel_layer(DEFAULT_CHANNEL_LAYER)
     logger.debug("send message to topic %r" % topic)
-    connection.publish(topic, serialized_message.encode("utf-8"))
+    print("send message to topic %r" % topic)
+    async_to_sync(channel_layer.group_send)(
+        "ws-broadcast", {"type": "ws_message", "message": serialized_message},
+    )
 
 
 def _return_ws_function_result(window_info, result_id, result, exception=None):

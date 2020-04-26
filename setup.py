@@ -3,9 +3,9 @@
 
 import os
 import re
-
 import sys
-from setuptools import setup, find_packages
+
+from setuptools import find_packages, setup
 
 # avoid a from djangofloor import __version__ as version (that compiles djangofloor.__init__
 #   and is not compatible with bdist_deb)
@@ -51,6 +51,7 @@ install_requires = [
     "asyncio_redis",
     "gunicorn",
     "vine<5.0.0a1,>=1.1.3",
+    "channels>=2.0",
 ]
 if sys.version_info >= (3, 6, 0):
     install_requires += [
@@ -104,9 +105,6 @@ setup(
     setup_requires=[],
     classifiers=[
         "Development Status :: 5 - Production/Stable",
-        "Framework :: Django :: 1.11",
-        "Framework :: Django :: 2.0",
-        "Framework :: Django :: 2.1",
         "Framework :: Django :: 2.2",
         "Framework :: Django :: 3.0",
         "Natural Language :: English",

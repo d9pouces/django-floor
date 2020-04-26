@@ -7,21 +7,18 @@ also trigger some :class:`django.core.checks.Warning` during the setting loading
 Just append them to the `settings_check_results` list to delay them and display them just after the Django setup.
 
 """
-import sys
-
 import os
+import sys
 from distutils.spawn import find_executable
 
-from django.core.checks import register, Error
+from django.core.checks import Error, register
 
 from djangofloor.utils import is_package_present
-
-__author__ = "Matthieu Gallet"
 
 settings_check_results = []
 
 
-def missing_package(package_name, desc=""):
+def missing_package(package_name, desc=""):  # FIXME: remove
     if hasattr(sys, "real_prefix"):  # inside a virtualenv
         cmd = "Try 'pip install %s' to install it." % package_name
     elif __file__.startswith(os.environ.get("HOME", "/home")):

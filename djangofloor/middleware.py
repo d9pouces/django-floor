@@ -45,6 +45,7 @@ from django.contrib.messages import DEFAULT_LEVELS
 from django.contrib.sessions.backends.base import VALID_KEY_CHARS
 from django.core import signing
 from django.core.exceptions import ImproperlyConfigured
+from django.core.signing import BadSignature
 from django.db.models import Q
 from django.http import HttpRequest
 from django.utils import translation
@@ -95,6 +96,10 @@ class DjangoFloorMiddleware(BaseRemoteUserMiddleware):
     * set response header for Internet Explorer (to use its most recent render engine)
     """
 
+    ws_url_cookie_name = "df_ws_url"
+    ws_windowkey_cookie_name = "df_ws_key"
+    ws_heartbeat_cookie_name = "df_heartbeat"
+
     header = settings.DF_REMOTE_USER_HEADER
     ajax_header = "HTTP_%s" % settings.WEBSOCKET_HEADER
     if header:
@@ -102,12 +107,16 @@ class DjangoFloorMiddleware(BaseRemoteUserMiddleware):
 
     # noinspection PyMethodMayBeStatic
     def process_request(self, request: HttpRequest):
-        request.window_key = get_random_string(32, VALID_KEY_CHARS)
-        if request.is_ajax() and self.ajax_header in request.META:
+        if request.is_ajax() and self.ws_windowkey_cookie_name in request.COOKIES:
             session_key = request.COOKIES.get(settings.SESSION_COOKIE_NAME)
-            signed_token = request.META[self.ajax_header]
-            window_key, __, __ = unsign_token(session_key, signed_token)
-            request.window_key = window_key
+            signed_token = request.COOKIES[self.ws_windowkey_cookie_name]
+            try:
+                window_key, __, __ = unsign_token(session_key, signed_token)
+                request.window_key = window_key
+            except BadSignature:
+                pass
+        else:
+            request.window_key = get_random_string(32, VALID_KEY_CHARS)
         request.has_websocket_topics = False
         request.remote_username = None
 
@@ -153,6 +162,22 @@ class DjangoFloorMiddleware(BaseRemoteUserMiddleware):
     # noinspection PyUnusedLocal,PyMethodMayBeStatic
     def process_response(self, request, response):
         response["X-UA-Compatible"] = "IE=edge,chrome=1"
+        if not request.is_ajax() and settings.WEBSOCKET_URL:
+            protocol = "wss" if settings.USE_SSL else "ws"
+            site_name = "%s:%s" % (settings.SERVER_NAME, settings.SERVER_PORT)
+            ws_url = "%s://%s%s" % (protocol, site_name, settings.WEBSOCKET_URL,)
+            session_key = request.COOKIES.get(settings.SESSION_COOKIE_NAME)
+            signed_token = sign_token(session_key, request.window_key)
+            response.set_cookie(self.ws_windowkey_cookie_name, signed_token)
+            response.set_cookie(
+                self.ws_heartbeat_cookie_name, settings.WEBSOCKET_HEARTBEAT
+            )
+            response.set_cookie(
+                self.ws_url_cookie_name, base64.b64encode(ws_url.encode()).decode()
+            )
+        else:
+            response.set_cookie(self.ws_url_cookie_name, "")
+
         return response
 
     def remote_user_authentication(self, request, username):
@@ -239,6 +264,7 @@ class DjangoAuthMiddleware(WindowInfoMiddleware):
     """handle attributes related to the :mod:`django.contrib.auth` framework"""
 
     def from_request(self, request, window_info):
+        self.new_window_info(window_info)
         assert isinstance(request, HttpRequest)
         # auth and perms part
         # noinspection PyTypeChecker
