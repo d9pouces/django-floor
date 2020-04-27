@@ -12,10 +12,10 @@ from urllib.parse import urlparse
 
 from django.core.checks import Error
 from django.utils.crypto import get_random_string
-from pkg_resources import get_distribution, DistributionNotFound, VersionConflict
+from pkg_resources import DistributionNotFound, VersionConflict, get_distribution
 
-from djangofloor.checks import settings_check_results, missing_package
-from djangofloor.conf.config_values import ExpandIterable, ConfigValue
+from djangofloor.checks import missing_package, settings_check_results
+from djangofloor.conf.config_values import ConfigValue, ExpandIterable
 from djangofloor.conf.social_providers import SOCIAL_PROVIDER_APPS
 from djangofloor.utils import is_package_present
 
@@ -465,7 +465,6 @@ class InstalledApps:
         [
             ("USE_DEBUG_TOOLBAR", "debug_toolbar"),
             ("USE_PIPELINE", "pipeline"),
-            ("USE_REST_FRAMEWORK", "rest_framework"),
             ("USE_PAM_AUTHENTICATION", "django_pam"),
             ("RAVEN_DSN", "raven.contrib.django.raven_compat"),
         ]
