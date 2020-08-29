@@ -521,7 +521,6 @@ class InstalledApps:
             "allauth",
             "allauth.account",
             "allauth.socialaccount",
-            "allauth.socialaccount.providers.openid",
         ]
         if settings_dict["ALLAUTH_PROVIDER_APPS"]:
             result += [

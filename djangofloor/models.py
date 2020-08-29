@@ -257,7 +257,6 @@ def apply_social_auth_configurations(sender, *args, **kwargs):
     required = {
         "django.contrib.sites",
         "allauth.socialaccount",
-        "allauth.socialaccount.providers.openid",
     }
     if required.issubset(migrations) and not apply_social_auth_configurations.applied:
         # must be called once for migrating SocialApps
