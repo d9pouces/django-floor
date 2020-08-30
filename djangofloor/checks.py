@@ -21,14 +21,14 @@ __author__ = "Matthieu Gallet"
 settings_check_results = []
 
 
-def missing_package(package_name, desc=""):
+def missing_package(package_name, desc="", cls=Error):
     if hasattr(sys, "real_prefix"):  # inside a virtualenv
         cmd = "Try 'pip install %s' to install it." % package_name
     elif __file__.startswith(os.environ.get("HOME", "/home")):
         cmd = "Try 'pip3 install --user %s' to install it." % package_name
     else:
         cmd = "Try 'sudo pip3 install %s' to install it." % package_name
-    return Error(
+    return cls(
         "Python package '%s' is required%s. %s" % (package_name, desc, cmd),
         obj="configuration",
     )

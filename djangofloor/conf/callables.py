@@ -10,7 +10,7 @@ from collections import OrderedDict
 from configparser import RawConfigParser
 from urllib.parse import urlparse
 
-from django.core.checks import Error
+from django.core.checks import Error, Warning
 from django.utils.crypto import get_random_string
 from pkg_resources import get_distribution, DistributionNotFound, VersionConflict
 
@@ -567,7 +567,8 @@ def required_packages(settings_dict):
             )
         except VersionConflict:
             settings_check_results.append(
-                missing_package(str(package_name), " by %s (a conflicting version is provided)" % parent)
+                missing_package(str(package_name), " by %s (a conflicting version is provided)" % parent,
+                                cls=Warning)
             )
 
     return list(
