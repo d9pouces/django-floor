@@ -63,19 +63,6 @@ if sys.version_info >= (3, 8, 0):
         "yarl>=1.0,<2.0",
         "aiohttp-wsgi>=0.8.0,<0.9.0",
     ]
-elif sys.version_info >= (3, 8, 0):
-    install_requires += [
-        "celery",
-        "django>=1.11.15,<3.2",
-        "aiohttp>=3.1.3,<4.0",
-        "attrs>=17.3.0",
-        "chardet>=2.0,<4.0",
-        "multidict>=4.0,<5.0",
-        "async_timeout>=1.2.0,<4.0",
-        'importlib-metadata<2.0.0,>=1.5.0',
-        "yarl>=1.0,<2.0",
-        "aiohttp-wsgi>=0.8.0,<0.9.0",
-    ]
 elif sys.version_info >= (3, 6, 0):
     install_requires += [
         "celery<5",
@@ -85,7 +72,6 @@ elif sys.version_info >= (3, 6, 0):
         "chardet>=2.0,<4.0",
         "multidict>=4.0,<5.0",
         "async_timeout>=1.2.0,<4.0",
-        'importlib-metadata<2.0.0,>=1.5.0',
         "yarl>=1.0,<2.0",
         "aiohttp-wsgi>=0.8.0,<0.9.0",
     ]

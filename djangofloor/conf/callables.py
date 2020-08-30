@@ -567,7 +567,7 @@ def required_packages(settings_dict):
             )
         except VersionConflict:
             settings_check_results.append(
-                missing_package(str(package_name), " by %s" % parent)
+                missing_package(str(package_name), " by %s (a conflicting version is provided)" % parent)
             )
 
     return list(

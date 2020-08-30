@@ -164,6 +164,7 @@ TEMPLATE_CONTEXT_PROCESSORS = [
     "django.template.context_processors.tz",
     "django.contrib.messages.context_processors.messages",
     "djangofloor.context_processors.context_base",
+    "django.template.context_processors.request",
     ExpandIterable("DF_TEMPLATE_CONTEXT_PROCESSORS"),
 ]
 TEST_RUNNER = "django.test.runner.DiscoverRunner"
