@@ -505,4 +505,5 @@ class ExpandIterable(SettingReference):
 
     """
 
-    pass
+    def __eq__(self, other):
+        return other.__class__ == self.__class__ and other.value == self.value

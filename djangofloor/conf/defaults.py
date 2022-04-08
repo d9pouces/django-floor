@@ -39,7 +39,7 @@ from djangofloor.conf.callables import (
     cache_redis_url,
     cache_setting,
     celery_redis_url,
-    databases,
+    csrf_trusted_origins, databases,
     excluded_django_commands,
     generate_secret_key,
     installed_apps,
@@ -102,7 +102,7 @@ ALLOWED_HOSTS = CallableSetting(allowed_hosts)
 CACHE_URL = CallableSetting(cache_redis_url)
 CACHES = CallableSetting(cache_setting)
 CSRF_COOKIE_DOMAIN = "{SERVER_NAME}"
-CSRF_TRUSTED_ORIGINS = ["{SERVER_NAME}", "{SERVER_NAME}:{SERVER_PORT}"]
+CSRF_TRUSTED_ORIGINS = CallableSetting(csrf_trusted_origins)
 DATABASES = CallableSetting(databases)
 
 DEBUG = False

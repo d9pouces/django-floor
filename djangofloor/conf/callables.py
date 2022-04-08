@@ -457,7 +457,7 @@ class InstalledApps:
         "django.contrib.sites",
         ExpandIterable("DF_INSTALLED_APPS"),
         "bootstrap3",
-        "djangofloor",
+        "djangofloor.apps.DjangoFloorAppconfig",
         "django.contrib.staticfiles",
         "django.contrib.admin",
     ]
@@ -470,7 +470,7 @@ class InstalledApps:
             ("RAVEN_DSN", "raven.contrib.django.raven_compat"),
         ]
     )
-    required_settings = ["ALLAUTH_PROVIDER_APPS", "USE_ALL_AUTH"] + list(
+    required_settings = ["ALLAUTH_PROVIDER_APPS", "USE_ALL_AUTH", "DF_INSTALLED_APPS", "DF_MODULE_NAME"] + list(
         common_third_parties
     )
     social_apps = SOCIAL_PROVIDER_APPS
@@ -479,6 +479,7 @@ class InstalledApps:
         apps = self.default_apps
         apps += self.process_django_allauth(settings_dict)
         apps += self.process_third_parties(settings_dict)
+        settings_dict["DF_INSTALLED_APPS"] = [x for x in settings_dict["DF_INSTALLED_APPS"] if x != "djangofloor"]
         return apps
 
     def process_third_parties(self, settings_dict):
@@ -535,6 +536,25 @@ class InstalledApps:
 
 
 installed_apps = InstalledApps()
+
+
+def csrf_trusted_origins(settings_dict):
+    # noinspection PyPackageRequirements
+    from django.utils.version import get_complete_version
+    base_url = settings_dict["SERVER_NAME"]
+    proto = "http"
+    if settings_dict["USE_SSL"]:
+        proto = "https"
+        if settings_dict["SERVER_PORT"] != 443:
+            base_url += ":%(SERVER_PORT)s" % settings_dict
+    elif settings_dict["SERVER_PORT"] != 80:
+        base_url += ":%(SERVER_PORT)s" % settings_dict
+    if get_complete_version()[0] >= 4:
+        return ["%s://%s" % (proto, base_url)]
+    return [base_url]
+
+
+csrf_trusted_origins.required_settings = ["DF_MODULE_NAME", "SERVER_NAME", "USE_SSL"]
 
 
 def generate_secret_key(django_ready, length=60):

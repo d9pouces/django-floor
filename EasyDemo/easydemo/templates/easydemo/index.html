@@ -60,7 +60,7 @@
 <div class="module">
   <h2>{% trans 'File upload through Ajax, with a progress bar' %}</h2>
   <div>
-    <form id="uploadForm" onchange="$.df.uploadFile('{% url "upload_file" %}', this, 'progress');" action="?" method="post" enctype="multipart/form-data">
+    <form id="uploadForm2" onchange="$.df.uploadFile('{% url "upload_file" %}', this, 'progress');" action="?" method="post" enctype="multipart/form-data">
       {% csrf_token %}<fieldset class="module aligned wide">
       {% django_form simple_upload_form %}
     <div class="form-row">
